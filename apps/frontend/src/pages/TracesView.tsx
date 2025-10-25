@@ -102,9 +102,9 @@ function TracesView() {
       {traces.length === 0 ? (
         <div className="empty-state">
           <h3>No traces found</h3>
-          <p>Send a request to the Gateway to generate traces</p>
+          <p>Send a request to the Backend to generate traces</p>
           <code style={{ display: 'block', marginTop: '1rem', padding: '1rem', background: '#161b22', borderRadius: '6px' }}>
-            curl http://localhost:3000/api/data
+            curl http://localhost:3001/api/data
           </code>
         </div>
       ) : (
@@ -121,8 +121,8 @@ function TracesView() {
               </tr>
             </thead>
             <tbody>
-              {traces.map((trace) => (
-                <tr key={`${trace.TraceId}-${trace.SpanId}`} onClick={() => handleRowClick(trace.TraceId)}>
+              {traces.map((trace, idx) => (
+                <tr key={`${trace.TraceId}-${idx}`} onClick={() => handleRowClick(trace.TraceId)}>
                   <td><code>{trace.TraceId.substring(0, 16)}...</code></td>
                   <td>{trace.SpanName}</td>
                   <td>{trace.ServiceName}</td>

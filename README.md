@@ -1,120 +1,203 @@
 # Local Observability Platform
 
-A complete local observability platform using OpenTelemetry, ClickHouse, and Kubernetes Kind.
+A complete local observability platform using **NestJS**, **React (Vite)**, **OpenTelemetry**, **ClickHouse**, and **Kubernetes Kind**.
 
-## Architecture
+## 🏗 Architecture
 
-- **Gateway Service** (NestJS): Instrumented service generating traces and logs
-- **Backend API** (NestJS): Query layer with ClickHouse integration and SSE streaming
-- **OpenTelemetry Collector**: Central telemetry pipeline
-- **ClickHouse**: Time-series storage for traces and logs
-- **React UI**: Real-time dashboard with trace visualization (runs locally)
+```
+React (Vite Frontend)
+   ↓ (port-forward)
+Backend API (NestJS, OTel SDK) [in Kind]
+   ↓ (OTLP)
+OTel Collector [in Kind]
+   ↓
+ClickHouse [in Kind]
+```
 
-## Prerequisites
+## 📁 Project Structure
+
+```
+apps/
+  backend/          → NestJS API with OpenTelemetry instrumentation
+  frontend/         → React + Vite UI
+infra/
+  charts/           → Helm charts for backend, collector, clickhouse
+  kind/             → Kind cluster configuration
+```
+
+## 🚀 Quick Start
+
+### Prerequisites
 
 - Docker Desktop running
-- Kind CLI installed
-- Helm CLI installed
+- Kind CLI installed (`brew install kind` or https://kind.sigs.k8s.io/docs/user/quick-start/)
+- Helm CLI installed (`brew install helm` or https://helm.sh/docs/intro/install/)
 - kubectl CLI installed
 - Node.js 18+ and Yarn installed
 
-## Quick Start
-
-### 1. Create Kind Cluster
+### 1. Start the Cluster
 
 ```bash
-yarn kind:create
-```
-
-### 2. Build and Deploy Backend Services
-
-```bash
-yarn deploy
+yarn cluster:up
 ```
 
 This will:
-- Build Docker images for Gateway and Backend
-- Load images into Kind cluster
-- Install Helm chart with all components
+- Create a Kind cluster named "observability"
+- Build and load the backend Docker image
+- Update Helm dependencies (OTel Collector + ClickHouse)
+- Deploy everything to Kubernetes
 
-### 3. Check Status
+### 2. Set Up Port Forwarding
 
+Open two terminals:
+
+**Terminal 1 - Backend API:**
 ```bash
-yarn status
+yarn port:backend
 ```
 
-Wait until all pods are Running.
-
-### 4. Set Up Port Forwarding
-
-Open three terminals and run:
-
+**Terminal 2 (Optional) - ClickHouse:**
 ```bash
-# Terminal 1: Gateway
-yarn forward:gateway
-
-# Terminal 2: Backend API
-yarn forward:backend
-
-# Terminal 3 (optional): ClickHouse
-yarn forward:clickhouse
+yarn port:clickhouse
 ```
 
-### 5. Start React UI
+### 3. Start the Frontend
 
 ```bash
-yarn ui
+yarn dev:frontend
 ```
 
-Access the dashboard at http://localhost:4000
+Access the dashboard at **http://localhost:5173**
 
-## Usage
+## 📊 Usage
 
 ### Generate Traces
 
-Send requests to the Gateway:
+Send requests to the backend to generate telemetry:
 
 ```bash
-curl http://localhost:3000/api/data
+curl http://localhost:3001/api/data
 ```
 
-### View Logs
+The backend will automatically:
+- Create distributed traces with multiple spans
+- Send logs correlated to traces
+- Export everything via OTLP to the collector
+
+### View Observability Data
+
+Open the dashboard at http://localhost:5173 to see:
+
+- **Traces View**: Real-time distributed tracing with waterfall visualization
+- **Logs View**: Live log streaming with severity filtering
+- **Services View**: Service metrics and health status
+
+### Monitor Status
 
 ```bash
-# Gateway logs
-yarn logs:gateway
+# Check pod status
+yarn status
 
-# Backend logs
+# View backend logs
 yarn logs:backend
 
-# Collector logs
+# View collector logs
 yarn logs:collector
 ```
 
-### Rebuild and Update
+## 🔧 Development Workflow
+
+### Backend Development
 
 ```bash
-yarn redeploy
+# Make changes to apps/backend
+yarn kind:load:backend
+yarn helm:deploy
 ```
 
-## Cleanup
+### Frontend Development
 
 ```bash
-yarn helm:uninstall
-yarn kind:delete
+# Make changes to apps/frontend
+# Hot-reload happens automatically
+yarn dev:frontend
 ```
 
-## Troubleshooting
+## 🧹 Cleanup
 
-### Pods not starting
+```bash
+yarn cluster:down
+```
 
-Check pod status: `yarn status`
-Check logs: `yarn logs:gateway` or `yarn logs:backend`
+This will:
+- Uninstall the Helm release
+- Delete the Kind cluster
 
-### Port-forward connection refused
+## 🐛 Troubleshooting
 
-Ensure pods are Running before port-forwarding.
+### Pods Not Starting
 
-### ClickHouse connection issues
+Check pod status and logs:
+```bash
+kubectl get pods -n observability
+kubectl describe pod <pod-name> -n observability
+kubectl logs <pod-name> -n observability
+```
 
-Check ClickHouse pod logs: `kubectl logs -n observability -l app.kubernetes.io/name=clickhouse`
+### ClickHouse Connection Issues
+
+Ensure ClickHouse pod is running:
+```bash
+kubectl get pods -n observability -l app.kubernetes.io/name=clickhouse
+```
+
+### Frontend Can't Connect to Backend
+
+Verify port-forwarding is active:
+```bash
+# Should show: Forwarding from 127.0.0.1:3001 -> 3001
+ps aux | grep "port-forward"
+```
+
+Restart if needed:
+```bash
+yarn port:backend
+```
+
+## 📚 Key Features
+
+- ✅ **Full OpenTelemetry Integration**: Auto-instrumentation for NestJS with traces and logs
+- ✅ **Real-time Updates**: Server-Sent Events (SSE) for live trace/log streaming
+- ✅ **Waterfall Visualization**: Interactive trace timeline with span hierarchy
+- ✅ **ClickHouse Storage**: High-performance time-series database for telemetry
+- ✅ **Kubernetes Native**: Production-like infrastructure running locally
+- ✅ **One-Command Deploy**: Automated cluster setup with Yarn scripts
+- ✅ **Fast Frontend Development**: Vite hot-reload with no containerization
+
+## 🛠 Tech Stack
+
+**Backend:**
+- NestJS
+- OpenTelemetry SDK (auto-instrumentations)
+- ClickHouse Client
+
+**Frontend:**
+- React 18
+- Vite
+- React Router
+- Recharts
+- Axios
+
+**Infrastructure:**
+- Kubernetes Kind
+- Helm
+- OpenTelemetry Collector
+- ClickHouse
+- Docker
+
+## 📖 Next Steps
+
+- Add more instrumented services to demonstrate distributed tracing
+- Implement custom metrics collection
+- Add alerting based on error rates or latency thresholds
+- Create custom dashboards for specific use cases

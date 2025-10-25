@@ -2,11 +2,11 @@ import { Injectable, Logger } from '@nestjs/common';
 import { trace, context } from '@opentelemetry/api';
 
 @Injectable()
-export class AppService {
-  private readonly logger = new Logger(AppService.name);
+export class DataService {
+  private readonly logger = new Logger(DataService.name);
 
   async fetchData(): Promise<any[]> {
-    const tracer = trace.getTracer('gateway-service');
+    const tracer = trace.getTracer('backend-service');
     const span = tracer.startSpan('fetchData', {
       attributes: { 'operation.type': 'database' },
     });
@@ -34,7 +34,7 @@ export class AppService {
   }
 
   async processData(data: any[]): Promise<any> {
-    const tracer = trace.getTracer('gateway-service');
+    const tracer = trace.getTracer('backend-service');
     const span = tracer.startSpan('processData', {
       attributes: { 'operation.type': 'transformation' },
     });
@@ -65,7 +65,7 @@ export class AppService {
   }
 
   private async enrichData(data: any[]): Promise<any[]> {
-    const tracer = trace.getTracer('gateway-service');
+    const tracer = trace.getTracer('backend-service');
     const span = tracer.startSpan('enrichData');
 
     try {

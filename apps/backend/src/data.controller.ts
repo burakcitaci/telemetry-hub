@@ -1,16 +1,16 @@
 import { Controller, Get, Logger } from '@nestjs/common';
-import { AppService } from './app.service';
+import { DataService } from './data.service';
 import { trace, context } from '@opentelemetry/api';
 
 @Controller('api')
-export class AppController {
-  private readonly logger = new Logger(AppController.name);
+export class DataController {
+  private readonly logger = new Logger(DataController.name);
 
-  constructor(private readonly appService: AppService) {}
+  constructor(private readonly dataService: DataService) {}
 
   @Get('data')
   async getData() {
-    const tracer = trace.getTracer('gateway-service');
+    const tracer = trace.getTracer('backend-service');
     const span = tracer.startSpan('getData');
 
     try {
@@ -19,8 +19,8 @@ export class AppController {
       const activeContext = trace.setSpan(context.active(), span);
       
       return await context.with(activeContext, async () => {
-        const data = await this.appService.fetchData();
-        const processed = await this.appService.processData(data);
+        const data = await this.dataService.fetchData();
+        const processed = await this.dataService.processData(data);
         
         span.addEvent('Data processed successfully', {
           recordCount: processed.items.length,
@@ -42,6 +42,6 @@ export class AppController {
 
   @Get('health')
   getHealth() {
-    return { status: 'ok', service: 'gateway' };
+    return { status: 'ok', service: 'backend' };
   }
 }

@@ -8,14 +8,13 @@ export class ClickhouseService implements OnModuleInit {
 
   async onModuleInit() {
     const host = process.env.CLICKHOUSE_HOST || 'clickhouse';
-    const port = process.env.CLICKHOUSE_PORT || '9000';
     
     this.client = createClient({
       host: `http://${host}:8123`,
       database: 'default',
     });
 
-    this.logger.log(`ClickHouse client initialized: ${host}:${port}`);
+    this.logger.log(`ClickHouse client initialized: ${host}:8123`);
     await this.ensureTables();
   }
 

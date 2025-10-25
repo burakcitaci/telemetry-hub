@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { getLogs, createEventSource } from '../api';
-import { formatDistance } from 'date-fns';
 
 interface Log {
   Timestamp: string;

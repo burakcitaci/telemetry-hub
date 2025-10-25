@@ -8,7 +8,7 @@ const otlpEndpoint = process.env.OTEL_EXPORTER_OTLP_ENDPOINT || 'http://opentele
 
 const sdk = new NodeSDK({
   resource: new Resource({
-    [SemanticResourceAttributes.SERVICE_NAME]: 'gateway-service',
+    [SemanticResourceAttributes.SERVICE_NAME]: 'backend-service',
     [SemanticResourceAttributes.SERVICE_VERSION]: '1.0.0',
   }),
   traceExporter: new OTLPTraceExporter({

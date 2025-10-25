@@ -81,7 +81,7 @@ function TraceDetailView() {
       }
     });
 
-    const renderSpan = (span: Span, depth: number = 0) => {
+    const renderSpan = (span: Span, depth: number = 0): JSX.Element => {
       const position = getSpanPosition(span);
       const children = childMap.get(span.SpanId) || [];
       
