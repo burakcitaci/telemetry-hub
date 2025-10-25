@@ -1,0 +1,38 @@
+{
+  "name": "observability-platform",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Local observability platform with OpenTelemetry, ClickHouse, and Kubernetes",
+  "scripts": {
+    "kind:create": "kind create cluster --name observability --config kind-config.yaml",
+    "kind:delete": "kind delete cluster --name observability",
+    "build:gateway": "cd gateway && docker build -t gateway:local .",
+    "build:backend": "cd backend && docker build -t backend:local .",
+    "build:all": "yarn build:gateway && yarn build:backend",
+    "load:gateway": "kind load docker-image gateway:local --name observability",
+    "load:backend": "kind load docker-image backend:local --name observability",
+    "load:all": "yarn load:gateway && yarn load:backend",
+    "helm:deps": "cd helm && helm dependency update",
+    "helm:install": "helm install observability ./helm -n observability --create-namespace",
+    "helm:upgrade": "helm upgrade observability ./helm -n observability",
+    "helm:uninstall": "helm uninstall observability -n observability",
+    "forward:gateway": "kubectl port-forward -n observability svc/gateway 3000:3000",
+    "forward:backend": "kubectl port-forward -n observability svc/backend 3001:3001",
+    "forward:clickhouse": "kubectl port-forward -n observability svc/clickhouse 8123:8123",
+    "deploy": "yarn build:all && yarn load:all && yarn helm:install",
+    "redeploy": "yarn build:all && yarn load:all && yarn helm:upgrade",
+    "ui": "cd ui && yarn start",
+    "logs:gateway": "kubectl logs -n observability -l app=gateway --tail=100 -f",
+    "logs:backend": "kubectl logs -n observability -l app=backend --tail=100 -f",
+    "logs:collector": "kubectl logs -n observability -l app.kubernetes.io/name=opentelemetry-collector --tail=100 -f",
+    "status": "kubectl get pods -n observability"
+  },
+  "workspaces": [
+    "gateway",
+    "backend",
+    "ui"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
