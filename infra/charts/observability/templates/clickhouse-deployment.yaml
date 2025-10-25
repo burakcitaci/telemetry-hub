@@ -1,0 +1,104 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: clickhouse
+  namespace: telemetry-hub
+  labels:
+    app: clickhouse
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: clickhouse
+  template:
+    metadata:
+      labels:
+        app: clickhouse
+    spec:
+      containers:
+        - name: clickhouse
+          image: clickhouse/clickhouse-server:latest
+          command:
+            - /bin/bash
+            - -c
+            - |
+              # Fix ClickHouse to listen on all interfaces
+              sed -i 's/<http_port>8123<\/http_port>/<http_port>8123<\/http_port>\n<listen_host>0.0.0.0<\/listen_host>/g' /etc/clickhouse-server/config.xml
+              sed -i 's/<native_port>9000<\/native_port>/<native_port>9000<\/native_port>\n<listen_host>0.0.0.0<\/listen_host>/g' /etc/clickhouse-server/config.xml
+              # Start ClickHouse
+              exec /entrypoint.sh
+          ports:
+            - containerPort: 8123
+              name: http
+            - containerPort: 9000
+              name: tcp
+          env:
+            - name: CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT
+              value: "1"
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "100m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
+          volumeMounts:
+            - name: clickhouse-data
+              mountPath: /var/lib/clickhouse
+            - name: clickhouse-config
+              mountPath: /etc/clickhouse-server/config.d
+      volumes:
+        - name: clickhouse-data
+          emptyDir: {}
+        - name: clickhouse-config
+          configMap:
+            name: clickhouse-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: clickhouse
+  namespace: telemetry-hub
+  labels:
+    app: clickhouse
+spec:
+  selector:
+    app: clickhouse
+  ports:
+    - name: http
+      port: 8123
+      targetPort: 8123
+    - name: tcp
+      port: 9000
+      targetPort: 9000
+  type: ClusterIP
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: clickhouse-config
+  namespace: telemetry-hub
+data:
+  no-auth.xml: |
+    <clickhouse>
+      <users>
+        <default>
+          <password></password>
+          <networks>
+            <ip>::/0</ip>
+          </networks>
+          <profile>default</profile>
+          <quota>default</quota>
+        </default>
+      </users>
+      <settings>
+        <default_password_type>plaintext</default_password_type>
+      </settings>
+    </clickhouse>
+  http-server.xml: |
+    <clickhouse>
+      <http_port>8123</http_port>
+      <http_server>
+        <listen_host>0.0.0.0</listen_host>
+      </http_server>
+    </clickhouse>

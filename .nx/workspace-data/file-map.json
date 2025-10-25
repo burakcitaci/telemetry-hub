@@ -1,0 +1,223 @@
+{
+  "version": "6.0",
+  "nxVersion": "21.6.5",
+  "pathMappings": {},
+  "nxJsonPlugins": [],
+  "fileMap": {
+    "projectFileMap": {
+      "frontend": [
+        {
+          "file": "apps/frontend/index.html",
+          "hash": "6084667306962934276"
+        },
+        {
+          "file": "apps/frontend/package.json",
+          "hash": "11804823859398242405",
+          "deps": [
+            "npm:@types/react",
+            "npm:@types/react-dom",
+            "npm:@vitejs/plugin-react",
+            "npm:typescript",
+            "npm:vite",
+            "npm:react",
+            "npm:react-dom",
+            "npm:react-router-dom",
+            "npm:recharts",
+            "npm:axios",
+            "npm:date-fns"
+          ]
+        },
+        {
+          "file": "apps/frontend/src/App.css",
+          "hash": "6076965375307191829"
+        },
+        {
+          "file": "apps/frontend/src/App.tsx",
+          "hash": "10506056711448846766"
+        },
+        {
+          "file": "apps/frontend/src/api.ts",
+          "hash": "14650694857369877225"
+        },
+        {
+          "file": "apps/frontend/src/index.css",
+          "hash": "10086093244736073598"
+        },
+        {
+          "file": "apps/frontend/src/main.tsx",
+          "hash": "13257795601521251413"
+        },
+        {
+          "file": "apps/frontend/src/pages/LogsView.tsx",
+          "hash": "15726944159243466886"
+        },
+        {
+          "file": "apps/frontend/src/pages/ServicesView.tsx",
+          "hash": "1921462220459507602"
+        },
+        {
+          "file": "apps/frontend/src/pages/TraceDetailView.tsx",
+          "hash": "504456417027489484"
+        },
+        {
+          "file": "apps/frontend/src/pages/TracesView.tsx",
+          "hash": "4578030198710589674"
+        },
+        {
+          "file": "apps/frontend/src/vite-env.d.ts",
+          "hash": "8760657219905661274"
+        },
+        {
+          "file": "apps/frontend/tsconfig.json",
+          "hash": "746105625540072805"
+        },
+        {
+          "file": "apps/frontend/tsconfig.node.json",
+          "hash": "8586866767247417612"
+        },
+        {
+          "file": "apps/frontend/vite.config.ts",
+          "hash": "8035086493011076863"
+        }
+      ],
+      "backend": [
+        {
+          "file": "apps/backend/Dockerfile",
+          "hash": "16123298596156967181"
+        },
+        {
+          "file": "apps/backend/package.json",
+          "hash": "9083803097284351977",
+          "deps": [
+            "npm:@types/node@20.19.23",
+            "npm:ts-node@10.9.2",
+            "npm:typescript",
+            "npm:@nestjs/common",
+            "npm:@nestjs/core",
+            "npm:@nestjs/platform-express",
+            "npm:@clickhouse/client",
+            "npm:@opentelemetry/api",
+            "npm:@opentelemetry/sdk-node",
+            "npm:@opentelemetry/auto-instrumentations-node",
+            "npm:@opentelemetry/exporter-trace-otlp-grpc",
+            "npm:@opentelemetry/resources@1.30.1",
+            "npm:@opentelemetry/semantic-conventions",
+            "npm:reflect-metadata",
+            "npm:rxjs"
+          ]
+        },
+        {
+          "file": "apps/backend/src/app.module.ts",
+          "hash": "18153265714263781479"
+        },
+        {
+          "file": "apps/backend/src/clickhouse.service.ts",
+          "hash": "17701758277985662540"
+        },
+        {
+          "file": "apps/backend/src/data.controller.ts",
+          "hash": "13488082866669359823"
+        },
+        {
+          "file": "apps/backend/src/data.service.ts",
+          "hash": "1181106896986200471"
+        },
+        {
+          "file": "apps/backend/src/events.controller.ts",
+          "hash": "12986920072216798319"
+        },
+        {
+          "file": "apps/backend/src/logs.controller.ts",
+          "hash": "14126985346383159299"
+        },
+        {
+          "file": "apps/backend/src/main.ts",
+          "hash": "3359191103936793886"
+        },
+        {
+          "file": "apps/backend/src/services.controller.ts",
+          "hash": "17482324477365353167"
+        },
+        {
+          "file": "apps/backend/src/traces.controller.ts",
+          "hash": "16580338333396197813"
+        },
+        {
+          "file": "apps/backend/src/tracing.ts",
+          "hash": "9848081385886643750"
+        },
+        {
+          "file": "apps/backend/tsconfig.json",
+          "hash": "1876265833229380624"
+        }
+      ]
+    },
+    "nonProjectFiles": [
+      {
+        "file": ".gitignore",
+        "hash": "917497450063337008"
+      },
+      {
+        "file": ".replit",
+        "hash": "17280406137497808361"
+      },
+      {
+        "file": "DEPLOYMENT.md",
+        "hash": "873387688743824352"
+      },
+      {
+        "file": "README.md",
+        "hash": "9733744240940167537"
+      },
+      {
+        "file": "attached_assets/Pasted--ChatGPT-Erinnerungsspeicher-ist-voll-Du-can-you-refine-it-only-for-local-environment-Full-Stack-1761402001101_1761402001106.txt",
+        "hash": "11006516598568267978"
+      },
+      {
+        "file": "attached_assets/Pasted-Local-Observability-Platform-Full-Stack-NestJS-React-OTel-ClickHouse-Overview-A-local--1761402290501_1761402290505.txt",
+        "hash": "11129687874033356478"
+      },
+      {
+        "file": "infra/charts/observability/.helmignore",
+        "hash": "4149484917590541800"
+      },
+      {
+        "file": "infra/charts/observability/Chart.yaml",
+        "hash": "14129927063053838178"
+      },
+      {
+        "file": "infra/charts/observability/templates/backend-deployment.yaml",
+        "hash": "10648027286097853319"
+      },
+      {
+        "file": "infra/charts/observability/templates/backend-service.yaml",
+        "hash": "17059514499391597853"
+      },
+      {
+        "file": "infra/charts/observability/templates/namespace.yaml",
+        "hash": "14389000622164188816"
+      },
+      {
+        "file": "infra/charts/observability/values.yaml",
+        "hash": "6262870801944280733"
+      },
+      {
+        "file": "infra/kind/kind-config.yaml",
+        "hash": "18095577998118114686"
+      },
+      {
+        "file": "package.json",
+        "hash": "15066678337600519838"
+      },
+      {
+        "file": "replit.md",
+        "hash": "10751151350257423692"
+      },
+      {
+        "file": "yarn.lock",
+        "hash": "16116349774279843470"
+      }
+    ]
+  },
+  "externalNodesHash": "6808239927732820188"
+}

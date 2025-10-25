@@ -20,7 +20,7 @@ opentelemetry-collector:
   mode: deployment
   image:
     repository: otel/opentelemetry-collector-contrib
-    tag: 0.91.0
+    tag: latest
   config:
     receivers:
       otlp:
@@ -31,62 +31,29 @@ opentelemetry-collector:
             endpoint: 0.0.0.0:4318
     processors:
       batch:
-        timeout: 10s
+        timeout: 1s
         send_batch_size: 1024
-      memory_limiter:
-        check_interval: 1s
-        limit_mib: 512
     exporters:
-      clickhouse:
-        endpoint: tcp://clickhouse:9000
-        database: default
-        ttl_days: 7
-        traces_table_name: otel_traces
-        logs_table_name: otel_logs
-        timeout: 10s
-        retry_on_failure:
-          enabled: true
-          initial_interval: 5s
-          max_interval: 30s
-          max_elapsed_time: 300s
-      logging:
-        loglevel: debug
+      debug:
+        verbosity: normal
     service:
       pipelines:
         traces:
           receivers: [otlp]
-          processors: [memory_limiter, batch]
-          exporters: [clickhouse, logging]
+          processors: [batch]
+          exporters: [debug]
         logs:
           receivers: [otlp]
-          processors: [memory_limiter, batch]
-          exporters: [clickhouse, logging]
+          processors: [batch]
+          exporters: [debug]
   ports:
     otlp:
       enabled: true
       containerPort: 4317
       servicePort: 4317
-      hostPort: 4317
       protocol: TCP
     otlp-http:
       enabled: true
       containerPort: 4318
       servicePort: 4318
       protocol: TCP
-
-clickhouse:
-  auth:
-    username: default
-    password: ""
-  persistence:
-    enabled: true
-    size: 8Gi
-  resources:
-    requests:
-      memory: "512Mi"
-      cpu: "250m"
-    limits:
-      memory: "1Gi"
-      cpu: "1000m"
-  shards: 1
-  replicaCount: 1

@@ -1,0 +1,110 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: clickhouse-init
+  namespace: telemetry-hub
+data:
+  init.sql: |
+    -- Create database for OpenTelemetry data
+    CREATE DATABASE IF NOT EXISTS default;
+
+    -- Create traces table for OpenTelemetry
+    CREATE TABLE IF NOT EXISTS default.otel_traces (
+      Timestamp DateTime64(9) CODEC(DoubleDelta, LZ4),
+      TraceId String CODEC(LZ4),
+      SpanId String CODEC(LZ4),
+      ParentSpanId String CODEC(LZ4),
+      TraceState String CODEC(LZ4),
+      SpanName LowCardinality(String) CODEC(LZ4),
+      SpanKind LowCardinality(String) CODEC(LZ4),
+      ServiceName LowCardinality(String) CODEC(LZ4),
+      ResourceAttributes Map(LowCardinality(String), String) CODEC(LZ4),
+      SpanAttributes Map(LowCardinality(String), String) CODEC(LZ4),
+      StatusCode LowCardinality(String) CODEC(LZ4),
+      StatusMessage String CODEC(LZ4),
+      EndTimestamp DateTime64(9) CODEC(DoubleDelta, LZ4),
+      Duration UInt64 CODEC(DoubleDelta, LZ4),
+      Events Nested (
+        Timestamp DateTime64(9),
+        Name LowCardinality(String),
+        Attributes Map(LowCardinality(String), String)
+      ) CODEC(LZ4),
+      Links Nested (
+        TraceId String,
+        SpanId String,
+        TraceState String,
+        Attributes Map(LowCardinality(String), String)
+      ) CODEC(LZ4),
+      INDEX idx_trace_id TraceId TYPE minmax GRANULARITY 1,
+      INDEX idx_service_name ServiceName TYPE minmax GRANULARITY 1,
+      INDEX idx_span_name SpanName TYPE minmax GRANULARITY 1
+    ) ENGINE = MergeTree()
+    PARTITION BY toYYYYMM(Timestamp)
+    ORDER BY (ServiceName, SpanName, Timestamp, TraceId, SpanId)
+    TTL toDateTime(Timestamp) + INTERVAL 7 DAY
+    SETTINGS index_granularity = 8192, merge_with_ttl_timeout = 86400;
+
+    -- Create logs table for OpenTelemetry
+    CREATE TABLE IF NOT EXISTS default.otel_logs (
+      Timestamp DateTime64(9) CODEC(DoubleDelta, LZ4),
+      TraceId String CODEC(LZ4),
+      SpanId String CODEC(LZ4),
+      SeverityText LowCardinality(String) CODEC(LZ4),
+      SeverityNumber UInt32 CODEC(DoubleDelta, LZ4),
+      Body String CODEC(LZ4),
+      ResourceAttributes Map(LowCardinality(String), String) CODEC(LZ4),
+      LogAttributes Map(LowCardinality(String), String) CODEC(LZ4),
+      ServiceName LowCardinality(String) CODEC(LZ4),
+      INDEX idx_timestamp Timestamp TYPE minmax GRANULARITY 1,
+      INDEX idx_service_name ServiceName TYPE minmax GRANULARITY 1,
+      INDEX idx_severity SeverityText TYPE minmax GRANULARITY 1
+    ) ENGINE = MergeTree()
+    PARTITION BY toYYYYMM(Timestamp)
+    ORDER BY (ServiceName, SeverityText, Timestamp)
+    TTL toDateTime(Timestamp) + INTERVAL 7 DAY
+    SETTINGS index_granularity = 8192, merge_with_ttl_timeout = 86400;
+
+    -- Create metrics table for OpenTelemetry
+    CREATE TABLE IF NOT EXISTS default.otel_metrics (
+      Timestamp DateTime64(9) CODEC(DoubleDelta, LZ4),
+      ResourceAttributes Map(LowCardinality(String), String) CODEC(LZ4),
+      ResourceMetrics Array(String) CODEC(LZ4),
+      ScopeName String CODEC(LZ4),
+      ScopeVersion String CODEC(LZ4),
+      SchemaUrl String CODEC(LZ4),
+      INDEX idx_timestamp Timestamp TYPE minmax GRANULARITY 1
+    ) ENGINE = MergeTree()
+    PARTITION BY toYYYYMM(Timestamp)
+    ORDER BY (ScopeName, Timestamp)
+    TTL toDateTime(Timestamp) + INTERVAL 7 DAY
+    SETTINGS index_granularity = 8192, merge_with_ttl_timeout = 86400;
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: clickhouse-init
+  namespace: telemetry-hub
+spec:
+  restartPolicy: Never
+  containers:
+    - name: clickhouse-init
+      image: clickhouse/clickhouse-server:latest
+      command:
+        - sh
+        - -c
+        - |
+          echo "Waiting for ClickHouse to be ready..."
+          until clickhouse-client --host clickhouse --port 9000 --query "SELECT 1" 2>/dev/null; do
+            echo "ClickHouse not ready, waiting..."
+            sleep 2
+          done
+          echo "ClickHouse is ready, running initialization..."
+          clickhouse-client --host clickhouse --port 9000 < /init/init.sql
+          echo "ClickHouse tables created successfully!"
+      volumeMounts:
+        - name: init-script
+          mountPath: /init
+  volumes:
+    - name: init-script
+      configMap:
+        name: clickhouse-init
