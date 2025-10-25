@@ -67,7 +67,7 @@ yarn port:clickhouse
 yarn dev:frontend
 ```
 
-Access the dashboard at **http://localhost:5173**
+Access the dashboard at **http://localhost:5000**
 
 ## 📊 Usage
 
@@ -86,7 +86,7 @@ The backend will automatically:
 
 ### View Observability Data
 
-Open the dashboard at http://localhost:5173 to see:
+Open the dashboard at http://localhost:5000 to see:
 
 - **Traces View**: Real-time distributed tracing with waterfall visualization
 - **Logs View**: Live log streaming with severity filtering
