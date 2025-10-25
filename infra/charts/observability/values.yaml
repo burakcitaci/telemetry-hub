@@ -1,3 +1,9 @@
+# Global settings
+global:
+  namespace: telemetry-hub
+  environment: development
+
+# Backend Service Configuration
 backend:
   name: backend
   replicaCount: 1
@@ -5,22 +11,105 @@ backend:
     repository: local/backend
     tag: latest
     pullPolicy: IfNotPresent
+
   service:
     type: ClusterIP
     port: 3001
+    annotations: {}
+
+  # Health checks
+  livenessProbe:
+    httpGet:
+      path: /api/health
+      port: 3001
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+
+  readinessProbe:
+    httpGet:
+      path: /api/health
+      port: 3001
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 2
+
+  # Environment variables
   env:
     - name: PORT
       value: "3001"
+    - name: NODE_ENV
+      value: "production"
     - name: CLICKHOUSE_HOST
-      value: "clickhouse"
+      value: "clickhouse.telemetry-hub.svc.cluster.local"
     - name: OTEL_EXPORTER_OTLP_ENDPOINT
-      value: "http://opentelemetry-collector:4317"
+      value: "http://opentelemetry-collector.telemetry-hub.svc.cluster.local:4317"
+    - name: OTEL_SERVICE_NAME
+      value: "backend-service"
 
+  # Resource management
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "256Mi"
+      cpu: "500m"
+
+  # Pod security and network
+  securityContext:
+    runAsNonRoot: false
+    fsReadOnlyRootFilesystem: false
+
+  affinity: {}
+  nodeSelector: {}
+  tolerations: []
+
+  # Pod annotations
+  podAnnotations: {}
+
+# OpenTelemetry Collector Configuration
 opentelemetry-collector:
   mode: deployment
+  replicaCount: 1
+
   image:
     repository: otel/opentelemetry-collector-contrib
-    tag: latest
+    tag: 0.138.0 # Pin version for stability
+    pullPolicy: IfNotPresent
+
+  # Service configuration
+  service:
+    type: ClusterIP
+    annotations: {}
+
+  # Health checks
+  livenessProbe:
+    httpGet:
+      path: /
+      port: 13133
+    initialDelaySeconds: 1
+    periodSeconds: 10
+
+  readinessProbe:
+    httpGet:
+      path: /
+      port: 13133
+    initialDelaySeconds: 1
+    periodSeconds: 5
+
+  # Resource management
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "256Mi"
+      cpu: "500m"
+
+  # Collector configuration
   config:
     receivers:
       otlp:
@@ -29,25 +118,59 @@ opentelemetry-collector:
             endpoint: 0.0.0.0:4317
           http:
             endpoint: 0.0.0.0:4318
+
     processors:
       batch:
         timeout: 1s
         send_batch_size: 1024
+        send_batch_max_size: 2048
+
+      memory_limiter:
+        check_interval: 1s
+        limit_mib: 512
+        spike_limit_mib: 128
+
     exporters:
+      clickhouse:
+        endpoint: http://clickhouse.telemetry-hub.svc.cluster.local:8123
+        database: default
+        timeout: 10s
+        create_schema: true
+        traces_table_name: otel_traces
+        logs_table_name: otel_logs
+        metrics_table_name: otel_metrics
+        sending_queue:
+          queue_size: 1000
+          num_consumers: 10
+        retry_on_failure:
+          enabled: true
+          initial_interval: 5s
+          max_interval: 30s
+          max_elapsed_time: 120s
+
       debug:
         verbosity: normal
+        sampling_initial: 5
+        sampling_thereafter: 200
+
     service:
       pipelines:
         traces:
           receivers: [otlp]
-          processors: [batch]
-          exporters: [debug]
+          processors: [memory_limiter, batch]
+          exporters: [clickhouse, debug]
         logs:
           receivers: [otlp]
-          processors: [batch]
-          exporters: [debug]
+          processors: [memory_limiter, batch]
+          exporters: [clickhouse, debug]
+
+      telemetry:
+        logs:
+          level: info
+
+  # Port configuration
   ports:
-    otlp:
+    otlp-grpc:
       enabled: true
       containerPort: 4317
       servicePort: 4317
@@ -57,3 +180,110 @@ opentelemetry-collector:
       containerPort: 4318
       servicePort: 4318
       protocol: TCP
+    metrics:
+      enabled: true
+      containerPort: 8888
+      servicePort: 8888
+      protocol: TCP
+    healthcheck:
+      enabled: true
+      containerPort: 13133
+      servicePort: 13133
+      protocol: TCP
+
+  # Pod security and network
+  securityContext:
+    runAsNonRoot: false
+    fsReadOnlyRootFilesystem: false
+
+  affinity: {}
+  nodeSelector: {}
+  tolerations: []
+
+  # Pod annotations
+  podAnnotations: {}
+
+# ClickHouse Configuration
+clickhouse:
+  name: clickhouse
+  replicaCount: 1
+
+  image:
+    repository: clickhouse/clickhouse-server
+    tag: "25.9" # Pin version for stability
+    pullPolicy: IfNotPresent
+
+  service:
+    type: ClusterIP
+    http:
+      port: 8123
+    native:
+      port: 9000
+    annotations: {}
+
+  # Health checks
+  livenessProbe:
+    httpGet:
+      path: /ping
+      port: 8123
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+
+  readinessProbe:
+    httpGet:
+      path: /ping
+      port: 8123
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 2
+
+  # Resource management
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "250m"
+    limits:
+      memory: "1Gi"
+      cpu: "1000m"
+
+  # Storage
+  persistence:
+    enabled: false # Set to true for production with PVC
+    size: 10Gi
+    storageClassName: ""
+
+  # Pod security and network
+  securityContext:
+    runAsNonRoot: false
+    fsReadOnlyRootFilesystem: false
+
+  affinity: {}
+  nodeSelector: {}
+  tolerations: []
+
+  # Pod annotations
+  podAnnotations: {}
+
+# Namespace configuration
+namespace:
+  create: true
+  name: telemetry-hub
+
+# Ingress (optional)
+ingress:
+  enabled: false
+  className: "nginx"
+  annotations: {}
+  hosts:
+    - host: observability.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+# Service Monitor (for Prometheus, optional)
+serviceMonitor:
+  enabled: false

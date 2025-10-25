@@ -1,38 +1,75 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: backend
-  namespace: telemetry-hub
+  name: {{ .Values.backend.name }}
+  namespace: {{ .Values.global.namespace }}
   labels:
-    app: backend
+    app: {{ .Values.backend.name }}
+    version: v1
+    managed-by: helm
 spec:
-  replicas: 1
+  replicas: {{ .Values.backend.replicaCount }}
   selector:
     matchLabels:
-      app: backend
+      app: {{ .Values.backend.name }}
   template:
     metadata:
       labels:
-        app: backend
+        app: {{ .Values.backend.name }}
+        version: v1
+      annotations:
+        prometheus.io/scrape: "false"
+        {{- with .Values.backend.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
     spec:
+      {{- with .Values.backend.securityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      
       containers:
-        - name: backend
-          image: local/backend:latest
-          imagePullPolicy: Never
+        - name: {{ .Values.backend.name }}
+          image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag }}"
+          imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
+          
           ports:
-            - containerPort: 3001
-              name: http
+            - name: http
+              containerPort: 3001
+              protocol: TCP
+          
           env:
-            - name: PORT
-              value: "3001"
-            - name: CLICKHOUSE_HOST
-              value: "clickhouse"
-            - name: OTEL_EXPORTER_OTLP_ENDPOINT
-              value: "http://opentelemetry-collector:4317"
+            {{- range .Values.backend.env }}
+            - name: {{ .name }}
+              value: {{ .value | quote }}
+            {{- end }}
+          
+          {{- with .Values.backend.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          
+          {{- with .Values.backend.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          
+          {{- with .Values.backend.resources }}
           resources:
-            requests:
-              memory: "128Mi"
-              cpu: "100m"
-            limits:
-              memory: "256Mi"
-              cpu: "500m"
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      
+      {{- with .Values.backend.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      
+      {{- with .Values.backend.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      
+      {{- with .Values.backend.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

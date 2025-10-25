@@ -4,5 +4,16 @@ description: Local Observability Platform with OpenTelemetry and ClickHouse
 type: application
 version: 1.0.0
 appVersion: "1.0.0"
-
+keywords:
+  - observability
+  - tracing
+  - clickhouse
+  - opentelemetry
+home: https://opentelemetry.io
+sources:
+  - https://github.com/open-telemetry/opentelemetry-collector
+  - https://github.com/ClickHouse/ClickHouse
+maintainers:
+  - name: Observability Team
+icon: https://opentelemetry.io/docs/img/logos/otel-horizontal-color.png
 dependencies: []

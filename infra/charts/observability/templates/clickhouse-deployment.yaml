@@ -1,23 +1,37 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: clickhouse
-  namespace: telemetry-hub
+  name: {{ .Values.clickhouse.name }}
+  namespace: {{ .Values.global.namespace }}
   labels:
-    app: clickhouse
+    app: {{ .Values.clickhouse.name }}
+    version: v1
+    managed-by: helm
 spec:
-  replicas: 1
+  replicas: {{ .Values.clickhouse.replicaCount }}
   selector:
     matchLabels:
-      app: clickhouse
+      app: {{ .Values.clickhouse.name }}
   template:
     metadata:
       labels:
-        app: clickhouse
+        app: {{ .Values.clickhouse.name }}
+        version: v1
+      {{- with .Values.clickhouse.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
     spec:
+      {{- with .Values.clickhouse.securityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      
       containers:
-        - name: clickhouse
-          image: clickhouse/clickhouse-server:latest
+        - name: {{ .Values.clickhouse.name }}
+          image: "{{ .Values.clickhouse.image.repository }}:{{ .Values.clickhouse.image.tag }}"
+          imagePullPolicy: {{ .Values.clickhouse.image.pullPolicy }}
+          
           command:
             - /bin/bash
             - -c
@@ -27,57 +41,94 @@ spec:
               sed -i 's/<native_port>9000<\/native_port>/<native_port>9000<\/native_port>\n<listen_host>0.0.0.0<\/listen_host>/g' /etc/clickhouse-server/config.xml
               # Start ClickHouse
               exec /entrypoint.sh
+          
           ports:
-            - containerPort: 8123
-              name: http
-            - containerPort: 9000
-              name: tcp
-          env:
-            - name: CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT
-              value: "1"
+            - name: http
+              containerPort: {{ .Values.clickhouse.service.http.port }}
+              protocol: TCP
+            - name: native
+              containerPort: {{ .Values.clickhouse.service.native.port }}
+              protocol: TCP
+          
+          {{- with .Values.clickhouse.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          
+          {{- with .Values.clickhouse.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          
+          {{- with .Values.clickhouse.resources }}
           resources:
-            requests:
-              memory: "512Mi"
-              cpu: "100m"
-            limits:
-              memory: "1Gi"
-              cpu: "500m"
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          
           volumeMounts:
             - name: clickhouse-data
               mountPath: /var/lib/clickhouse
             - name: clickhouse-config
               mountPath: /etc/clickhouse-server/config.d
+      
       volumes:
         - name: clickhouse-data
           emptyDir: {}
         - name: clickhouse-config
           configMap:
             name: clickhouse-config
+      
+      {{- with .Values.clickhouse.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      
+      {{- with .Values.clickhouse.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      
+      {{- with .Values.clickhouse.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: clickhouse
-  namespace: telemetry-hub
+  name: {{ .Values.clickhouse.name }}
+  namespace: {{ .Values.global.namespace }}
   labels:
-    app: clickhouse
+    app: {{ .Values.clickhouse.name }}
+    managed-by: helm
+  {{- with .Values.clickhouse.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
+  type: {{ .Values.clickhouse.service.type }}
   selector:
-    app: clickhouse
+    app: {{ .Values.clickhouse.name }}
   ports:
     - name: http
-      port: 8123
-      targetPort: 8123
-    - name: tcp
-      port: 9000
-      targetPort: 9000
-  type: ClusterIP
+      port: {{ .Values.clickhouse.service.http.port }}
+      targetPort: http
+      protocol: TCP
+    - name: native
+      port: {{ .Values.clickhouse.service.native.port }}
+      targetPort: native
+      protocol: TCP
+
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: clickhouse-config
-  namespace: telemetry-hub
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: {{ .Values.clickhouse.name }}
+    managed-by: helm
 data:
   no-auth.xml: |
     <clickhouse>
@@ -94,11 +145,4 @@ data:
       <settings>
         <default_password_type>plaintext</default_password_type>
       </settings>
-    </clickhouse>
-  http-server.xml: |
-    <clickhouse>
-      <http_port>8123</http_port>
-      <http_server>
-        <listen_host>0.0.0.0</listen_host>
-      </http_server>
     </clickhouse>
