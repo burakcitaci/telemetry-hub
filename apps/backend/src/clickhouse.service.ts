@@ -20,68 +20,29 @@ export class ClickhouseService implements OnModuleInit {
 
   private async ensureTables() {
     try {
-      // Drop existing table to ensure correct schema
-      await this.client.exec({
-        query: `DROP TABLE IF EXISTS otel_traces`,
-      });
+      // Check if tables exist and have the correct schema
+      const tracesTableExists = await this.tableExists('otel_traces');
+      const logsTableExists = await this.tableExists('otel_logs');
 
-      await this.client.exec({
-        query: `
-          CREATE TABLE otel_traces (
-            Timestamp DateTime64(9),
-            TraceId String,
-            SpanId String,
-            ParentSpanId String,
-            TraceState String,
-            SpanName LowCardinality(String),
-            SpanKind LowCardinality(String),
-            ServiceName LowCardinality(String),
-            ResourceAttributes Map(LowCardinality(String), String),
-            ScopeName String,
-            ScopeVersion String,
-            SpanAttributes Map(LowCardinality(String), String),
-            Duration UInt64,
-            StatusCode LowCardinality(String),
-            StatusMessage String,
-            Events Nested(
-              Timestamp DateTime64(9),
-              Name String,
-              Attributes Map(String, String)
-            ),
-            Links Nested(
-              TraceId String,
-              SpanId String,
-              TraceState String,
-              Attributes Map(String, String)
-            )
-          ) ENGINE = MergeTree()
-          ORDER BY (ServiceName, Timestamp)
-          TTL Timestamp + INTERVAL 7 DAY
-        `,
-      });
-
-      await this.client.exec({
-        query: `
-          CREATE TABLE IF NOT EXISTS otel_logs (
-            Timestamp DateTime64(9),
-            TraceId String,
-            SpanId String,
-            TraceFlags UInt32,
-            SeverityText String,
-            SeverityNumber UInt8,
-            ServiceName String,
-            Body String,
-            ResourceAttributes Map(String, String),
-            LogAttributes Map(String, String)
-          ) ENGINE = MergeTree()
-          ORDER BY (ServiceName, Timestamp)
-          TTL Timestamp + INTERVAL 7 DAY
-        `,
-      });
-
-      this.logger.log('Tables ensured');
+      if (!tracesTableExists) {
+        this.logger.log('Tables will be created automatically by OpenTelemetry collector');
+        this.logger.log('Make sure collector has create_schema: true configured');
+      } else {
+        this.logger.log('Tables already exist');
+      }
     } catch (error) {
-      this.logger.error('Error ensuring tables', error);
+      this.logger.error('Error checking tables', error);
+    }
+  }
+
+  private async tableExists(tableName: string): Promise<boolean> {
+    try {
+      await this.client.exec({
+        query: `SELECT 1 FROM ${tableName} LIMIT 1`,
+      });
+      return true;
+    } catch (error) {
+      return false;
     }
   }
 
