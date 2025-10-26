@@ -20,23 +20,28 @@ export class ClickhouseService implements OnModuleInit {
 
   private async ensureTables() {
     try {
+      // Drop existing table to ensure correct schema
+      await this.client.exec({
+        query: `DROP TABLE IF EXISTS otel_traces`,
+      });
+
       await this.client.exec({
         query: `
-          CREATE TABLE IF NOT EXISTS otel_traces (
+          CREATE TABLE otel_traces (
             Timestamp DateTime64(9),
             TraceId String,
             SpanId String,
             ParentSpanId String,
             TraceState String,
-            SpanName String,
-            SpanKind String,
-            ServiceName String,
-            ResourceAttributes Map(String, String),
+            SpanName LowCardinality(String),
+            SpanKind LowCardinality(String),
+            ServiceName LowCardinality(String),
+            ResourceAttributes Map(LowCardinality(String), String),
             ScopeName String,
             ScopeVersion String,
-            SpanAttributes Map(String, String),
+            SpanAttributes Map(LowCardinality(String), String),
             Duration UInt64,
-            StatusCode String,
+            StatusCode LowCardinality(String),
             StatusMessage String,
             Events Nested(
               Timestamp DateTime64(9),
