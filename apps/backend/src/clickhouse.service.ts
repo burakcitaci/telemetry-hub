@@ -62,15 +62,14 @@ export class ClickhouseService implements OnModuleInit {
 
   async getTraces(limit: number = 100, service?: string) {
     let query = `
-      SELECT 
+      SELECT
         TraceId,
         SpanId,
         SpanName,
         ServiceName,
         Timestamp,
         Duration,
-        StatusCode,
-        SpanAttributes
+        StatusCode
       FROM otel_traces
     `;
 
@@ -85,7 +84,15 @@ export class ClickhouseService implements OnModuleInit {
 
   async getTraceById(traceId: string) {
     const query = `
-      SELECT *
+      SELECT
+        TraceId,
+        SpanId,
+        ParentSpanId,
+        SpanName,
+        ServiceName,
+        Timestamp,
+        Duration,
+        StatusCode
       FROM otel_traces
       WHERE TraceId = '${traceId}'
       ORDER BY Timestamp ASC
@@ -137,7 +144,7 @@ export class ClickhouseService implements OnModuleInit {
         countIf(StatusCode = 'ERROR') as error_count
       FROM otel_traces
       WHERE ServiceName = '${service}'
-        AND Timestamp > now() - INTERVAL 1 HOUR
+        AND Timestamp > now() - toIntervalHour(1)
     `;
 
     const result = await this.query(query);
@@ -145,9 +152,10 @@ export class ClickhouseService implements OnModuleInit {
   }
 
   async getRecentTraces(since: Date) {
-    const timestamp = since.toISOString();
+    // Format timestamp for ClickHouse DateTime64 compatibility
+    const timestamp = since.toISOString().replace('T', ' ').slice(0, -1);
     const query = `
-      SELECT 
+      SELECT
         TraceId,
         SpanId,
         SpanName,
@@ -156,7 +164,7 @@ export class ClickhouseService implements OnModuleInit {
         Duration,
         StatusCode
       FROM otel_traces
-      WHERE Timestamp > '${timestamp}'
+      WHERE Timestamp > toDateTime64('${timestamp}', 9)
       ORDER BY Timestamp DESC
     `;
 
@@ -164,16 +172,17 @@ export class ClickhouseService implements OnModuleInit {
   }
 
   async getRecentLogs(since: Date) {
-    const timestamp = since.toISOString();
+    // Format timestamp for ClickHouse DateTime64 compatibility
+    const timestamp = since.toISOString().replace('T', ' ').slice(0, -1);
     const query = `
-      SELECT 
+      SELECT
         Timestamp,
         TraceId,
         SeverityText,
         ServiceName,
         Body
       FROM otel_logs
-      WHERE Timestamp > '${timestamp}'
+      WHERE Timestamp > toDateTime64('${timestamp}', 9)
       ORDER BY Timestamp DESC
     `;
 

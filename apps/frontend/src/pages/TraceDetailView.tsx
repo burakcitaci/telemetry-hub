@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState, ReactElement } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getTraceById } from '../api';
 
@@ -81,7 +81,7 @@ function TraceDetailView() {
       }
     });
 
-    const renderSpan = (span: Span, depth: number = 0): JSX.Element => {
+    const renderSpan = (span: Span, depth: number = 0): ReactElement => {
       const position = getSpanPosition(span);
       const children = childMap.get(span.SpanId) || [];
       

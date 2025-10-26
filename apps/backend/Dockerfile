@@ -1,4 +1,4 @@
-FROM node:18-alpine AS builder
+FROM node:20-alpine AS builder
 
 WORKDIR /app
 
@@ -17,7 +17,7 @@ COPY apps/backend/ ./backend/
 # Install backend-specific dependencies and build
 RUN cd backend && yarn install --frozen-lockfile && npx tsc --skipLibCheck
 
-FROM node:18-alpine AS runtime
+FROM node:20-alpine AS runtime
 
 WORKDIR /app
 
