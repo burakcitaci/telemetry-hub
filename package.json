@@ -4,6 +4,22 @@
   "private": true,
   "description": "Local observability platform with NestJS, React, OpenTelemetry, and ClickHouse",
   "scripts": {
+    "nx": "nx",
+    "graph": "nx graph",
+    "graph:deps": "nx graph --view=projects",
+    "graph:tasks": "nx graph --view=tasks",
+    "build:all": "nx run-many -t build",
+    "dev:all": "nx run-many -t dev --parallel",
+    "build:frontend": "nx build frontend",
+    "build:backend": "nx build backend",
+    "dev:frontend": "nx dev frontend",
+    "dev:backend": "nx dev backend",
+    "lint:all": "nx run-many -t lint",
+    "test:all": "nx run-many -t test",
+    "clean": "nx reset && nx clear-cache",
+    "affected": "nx affected",
+    "affected:build": "nx affected -t build",
+    "affected:test": "nx affected -t test",
     "kind:create": "kind create cluster --name observability --config infra/kind/kind-config.yaml",
     "kind:delete": "kind delete cluster --name observability",
     "kind:load:backend": "docker build -f apps/backend/Dockerfile -t local/backend:latest . && kind load docker-image local/backend:latest --name observability",
@@ -18,8 +34,6 @@
     "cluster:down": "yarn helm:delete && yarn kind:delete",
     "port:backend": "kubectl port-forward svc/backend 3001:3001 -n telemetry-hub",
     "port:clickhouse": "kubectl port-forward svc/clickhouse 8123:8123 -n telemetry-hub",
-    "dev:frontend": "cd apps/frontend && yarn dev",
-    "dev:backend": "cd apps/backend && yarn dev",
     "up": "yarn cluster:up",
     "down": "yarn cluster:down",
     "logs:backend": "kubectl logs -n telemetry-hub -l app=backend --tail=100 -f",
@@ -32,5 +46,7 @@
   "engines": {
     "node": ">=20.0.0"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "nx": "21.6.5"
+  }
 }

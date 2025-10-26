@@ -54,7 +54,7 @@ export class ClickhouseService implements OnModuleInit {
       });
       
       return await result.json() as T[];
-    } catch (error) {
+    } catch (error:any) {
       this.logger.error(`Query error: ${error.message}`);
       throw error;
     }
