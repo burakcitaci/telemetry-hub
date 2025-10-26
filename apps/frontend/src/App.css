@@ -1,145 +1,13 @@
-.app {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
+/* Legacy styles for backward compatibility - most styles now handled by Tailwind CSS and shadcn/ui */
 
-.navbar {
-  background: #161b22;
-  padding: 1rem 2rem;
-  border-bottom: 1px solid #30363d;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.nav-brand h1 {
-  font-size: 1.5rem;
-  color: #58a6ff;
-}
-
-.nav-links {
-  display: flex;
-  gap: 2rem;
-}
-
-.nav-links a {
-  color: #e6edf3;
-  text-decoration: none;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  transition: background 0.2s;
-}
-
-.nav-links a:hover {
-  background: #30363d;
-}
-
-.main-content {
-  flex: 1;
-  padding: 2rem;
-}
-
-.page-header {
-  margin-bottom: 2rem;
-}
-
-.page-header h2 {
-  font-size: 2rem;
-  margin-bottom: 0.5rem;
-}
-
-.page-header p {
-  color: #8b949e;
-}
-
-.card {
-  background: #161b22;
-  border: 1px solid #30363d;
-  border-radius: 6px;
-  padding: 1.5rem;
-  margin-bottom: 1rem;
-}
-
-.table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.table thead {
-  background: #0d1117;
-  border-bottom: 1px solid #30363d;
-}
-
-.table th {
-  text-align: left;
-  padding: 0.75rem;
-  font-weight: 600;
-  color: #8b949e;
-  text-transform: uppercase;
-  font-size: 0.75rem;
-}
-
-.table td {
-  padding: 0.75rem;
-  border-bottom: 1px solid #21262d;
-}
-
-.table tbody tr:hover {
-  background: #21262d;
-  cursor: pointer;
-}
-
-.status-badge {
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-}
-
-.status-ok {
-  background: #238636;
-  color: #fff;
-}
-
-.status-error {
-  background: #da3633;
-  color: #fff;
-}
-
-.status-unset {
-  background: #6e7681;
-  color: #fff;
-}
-
-.loading {
-  text-align: center;
-  padding: 3rem;
-  color: #8b949e;
-}
-
-.error {
-  background: #da3633;
-  color: #fff;
-  padding: 1rem;
-  border-radius: 6px;
-  margin-bottom: 1rem;
-}
-
-.empty-state {
-  text-align: center;
-  padding: 3rem;
-  color: #8b949e;
-}
-
+/* Connection status styling for real-time indicators */
 .connection-status {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem 1rem;
-  background: #161b22;
-  border: 1px solid #30363d;
+  background: hsl(var(--muted));
+  border: 1px solid hsl(var(--border));
   border-radius: 6px;
   font-size: 0.875rem;
 }
@@ -160,30 +28,4 @@
 @keyframes pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.5; }
-}
-
-.metric-card {
-  background: #161b22;
-  border: 1px solid #30363d;
-  border-radius: 6px;
-  padding: 1.5rem;
-}
-
-.metric-value {
-  font-size: 2rem;
-  font-weight: 600;
-  color: #58a6ff;
-  margin-bottom: 0.5rem;
-}
-
-.metric-label {
-  color: #8b949e;
-  font-size: 0.875rem;
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1rem;
-  margin-bottom: 2rem;
 }

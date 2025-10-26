@@ -1,6 +1,13 @@
 import { useEffect, useState, ReactElement } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getTraceById } from '../api';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Skeleton } from '@/components/ui/skeleton';
+import { ArrowLeft, Clock, Activity, Server, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 
 interface Span {
   TraceId: string;
@@ -42,7 +49,8 @@ function TraceDetailView() {
 
   const formatDuration = (nanoseconds: number) => {
     const ms = nanoseconds / 1000000;
-    return `${ms.toFixed(2)}ms`;
+    if (ms < 1000) return `${ms.toFixed(2)}ms`;
+    return `${(ms / 1000).toFixed(2)}s`;
   };
 
   const calculateTotalDuration = () => {
@@ -56,16 +64,38 @@ function TraceDetailView() {
 
   const getSpanPosition = (span: Span) => {
     if (spans.length === 0) return { left: 0, width: 100 };
-    
+
     const totalDuration = calculateTotalDuration();
     const spanStart = new Date(span.Timestamp).getTime();
     const rootStart = Math.min(...spans.map(s => new Date(s.Timestamp).getTime()));
     const spanDuration = span.Duration / 1000000;
-    
+
     const left = ((spanStart - rootStart) / totalDuration) * 100;
     const width = (spanDuration / totalDuration) * 100;
-    
+
     return { left, width: Math.max(width, 1) };
+  };
+
+  const getStatusIcon = (status: string) => {
+    switch (status?.toUpperCase()) {
+      case 'ERROR':
+        return <XCircle className="h-4 w-4 text-red-500" />;
+      case 'OK':
+        return <CheckCircle className="h-4 w-4 text-green-500" />;
+      default:
+        return <AlertCircle className="h-4 w-4 text-yellow-500" />;
+    }
+  };
+
+  const getStatusBadge = (status: string) => {
+    const variant = status === 'ERROR' ? 'destructive' :
+                   status === 'OK' ? 'success' : 'secondary';
+    return (
+      <Badge variant={variant} className="flex items-center gap-1">
+        {getStatusIcon(status)}
+        {status || 'UNSET'}
+      </Badge>
+    );
   };
 
   const buildSpanTree = () => {
@@ -84,33 +114,36 @@ function TraceDetailView() {
     const renderSpan = (span: Span, depth: number = 0): ReactElement => {
       const position = getSpanPosition(span);
       const children = childMap.get(span.SpanId) || [];
-      
+
       return (
-        <div key={span.SpanId} style={{ marginLeft: `${depth * 20}px` }}>
-          <div style={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            padding: '0.5rem', 
-            borderBottom: '1px solid #30363d',
-            cursor: 'pointer'
-          }}>
-            <div style={{ flex: '0 0 250px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              {span.SpanName}
+        <div key={span.SpanId} className="mb-1">
+          <div className="flex items-center p-3 hover:bg-muted/50 rounded-md transition-colors group">
+            <div className="flex items-center gap-2 min-w-0 flex-1">
+              <div style={{ marginLeft: `${depth * 16}px` }} className="flex-shrink-0">
+                {depth > 0 && <div className="w-4 h-px bg-muted-foreground/30" />}
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="font-medium text-sm truncate">{span.SpanName}</div>
+                <div className="text-xs text-muted-foreground">
+                  {span.ServiceName}
+                </div>
+              </div>
             </div>
-            <div style={{ flex: 1, position: 'relative', height: '24px', background: '#0d1117', borderRadius: '4px', margin: '0 1rem' }}>
+
+            <div className="relative h-6 bg-muted rounded-sm mx-4 flex-1 min-w-32">
               <div
+                className={`absolute top-0 h-full rounded-sm transition-all duration-200 ${
+                  span.StatusCode === 'ERROR' ? 'bg-red-500' : 'bg-blue-500'
+                }`}
                 style={{
-                  position: 'absolute',
                   left: `${position.left}%`,
                   width: `${position.width}%`,
-                  height: '100%',
-                  background: span.StatusCode === 'ERROR' ? '#da3633' : '#58a6ff',
-                  borderRadius: '4px',
                 }}
                 title={`${span.SpanName}: ${formatDuration(span.Duration)}`}
               />
             </div>
-            <div style={{ flex: '0 0 100px', textAlign: 'right' }}>
+
+            <div className="text-sm text-muted-foreground font-mono min-w-20 text-right">
               {formatDuration(span.Duration)}
             </div>
           </div>
@@ -123,82 +156,155 @@ function TraceDetailView() {
   };
 
   if (loading) {
-    return <div className="loading">Loading trace details...</div>;
+    return (
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-3">
+              <Skeleton className="h-8 w-8" />
+              <div className="space-y-2">
+                <Skeleton className="h-8 w-48" />
+                <Skeleton className="h-4 w-32" />
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <Skeleton key={i} className="h-20 w-full" />
+              ))}
+            </div>
+            <div className="space-y-3">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Skeleton key={i} className="h-16 w-full" />
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="error">Error: {error}</div>;
+    return (
+      <Alert variant="destructive">
+        <AlertDescription>Error: {error}</AlertDescription>
+      </Alert>
+    );
   }
 
   if (spans.length === 0) {
-    return <div className="empty-state">No spans found for this trace</div>;
+    return (
+      <Card>
+        <CardContent className="text-center py-12">
+          <div className="text-muted-foreground">No spans found for this trace</div>
+        </CardContent>
+      </Card>
+    );
   }
 
   return (
-    <div>
-      <div className="page-header">
-        <button onClick={() => navigate(-1)} style={{ 
-          background: '#21262d', 
-          border: '1px solid #30363d', 
-          color: '#e6edf3', 
-          padding: '0.5rem 1rem', 
-          borderRadius: '6px',
-          cursor: 'pointer',
-          marginBottom: '1rem'
-        }}>
-          ← Back
-        </button>
-        <h2>Trace Details</h2>
-        <p><code>{traceId}</code></p>
-      </div>
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <ArrowLeft
+                  className="h-5 w-5 cursor-pointer hover:text-primary"
+                  onClick={() => navigate(-1)}
+                />
+                Trace Details
+              </CardTitle>
+              <CardDescription className="font-mono">{traceId}</CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <Card className="p-4">
+              <div className="flex items-center gap-2">
+                <Activity className="h-5 w-5 text-blue-500" />
+                <div>
+                  <div className="text-2xl font-bold">{spans.length}</div>
+                  <div className="text-sm text-muted-foreground">Total Spans</div>
+                </div>
+              </div>
+            </Card>
 
-      <div className="grid">
-        <div className="metric-card">
-          <div className="metric-value">{spans.length}</div>
-          <div className="metric-label">Total Spans</div>
-        </div>
-        <div className="metric-card">
-          <div className="metric-value">{formatDuration(calculateTotalDuration() * 1000000)}</div>
-          <div className="metric-label">Total Duration</div>
-        </div>
-        <div className="metric-card">
-          <div className="metric-value">{spans[0]?.ServiceName || 'Unknown'}</div>
-          <div className="metric-label">Service</div>
-        </div>
-      </div>
+            <Card className="p-4">
+              <div className="flex items-center gap-2">
+                <Clock className="h-5 w-5 text-green-500" />
+                <div>
+                  <div className="text-2xl font-bold font-mono">
+                    {formatDuration(calculateTotalDuration() * 1000000)}
+                  </div>
+                  <div className="text-sm text-muted-foreground">Total Duration</div>
+                </div>
+              </div>
+            </Card>
 
-      <div className="card">
-        <h3 style={{ marginBottom: '1rem' }}>Span Waterfall</h3>
-        {buildSpanTree()}
-      </div>
+            <Card className="p-4">
+              <div className="flex items-center gap-2">
+                <Server className="h-5 w-5 text-purple-500" />
+                <div>
+                  <div className="text-2xl font-bold">{spans[0]?.ServiceName || 'Unknown'}</div>
+                  <div className="text-sm text-muted-foreground">Service</div>
+                </div>
+              </div>
+            </Card>
+          </div>
 
-      <div className="card">
-        <h3 style={{ marginBottom: '1rem' }}>Span Details</h3>
-        <table className="table">
-          <thead>
-            <tr>
-              <th>Span Name</th>
-              <th>Service</th>
-              <th>Duration</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {spans.map(span => (
-              <tr key={span.SpanId}>
-                <td>{span.SpanName}</td>
-                <td>{span.ServiceName}</td>
-                <td>{formatDuration(span.Duration)}</td>
-                <td>
-                  <span className={`status-badge ${span.StatusCode === 'ERROR' ? 'status-error' : 'status-ok'}`}>
-                    {span.StatusCode || 'UNSET'}
-                  </span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle>Span Waterfall</CardTitle>
+              <CardDescription>
+                Visual representation of span execution timeline
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-1">
+                {buildSpanTree()}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Span Details</CardTitle>
+              <CardDescription>
+                Detailed information about each span in the trace
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Span Name</TableHead>
+                      <TableHead>Service</TableHead>
+                      <TableHead>Duration</TableHead>
+                      <TableHead>Status</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {spans.map(span => (
+                      <TableRow key={span.SpanId}>
+                        <TableCell className="font-medium">{span.SpanName}</TableCell>
+                        <TableCell>{span.ServiceName}</TableCell>
+                        <TableCell className="font-mono">
+                          {formatDuration(span.Duration)}
+                        </TableCell>
+                        <TableCell>{getStatusBadge(span.StatusCode)}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
+        </CardContent>
+      </Card>
     </div>
   );
 }
