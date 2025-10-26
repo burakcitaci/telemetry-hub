@@ -6,32 +6,88 @@
   "fileMap": {
     "nonProjectFiles": [
       {
-        "file": "infra/charts/observability/.helmignore",
-        "hash": "4149484917590541800"
+        "file": ".nx/workspace-data/project-graph.json",
+        "hash": "13900789565888989235"
       },
       {
-        "file": "infra/charts/observability/templates/clickhouse-init.yaml",
-        "hash": "10277958834211263100"
+        "file": "README.md",
+        "hash": "9733744240940167537"
+      },
+      {
+        "file": "infra/charts/observability/templates/backend-deployment.yaml",
+        "hash": "14494783099473265143"
+      },
+      {
+        "file": ".gitignore",
+        "hash": "12681850839093570034"
+      },
+      {
+        "file": "infra/charts/observability/.helmignore",
+        "hash": "4149484917590541800"
       },
       {
         "file": ".nx/workspace-data/source-maps.json",
         "hash": "6472604257830709712"
       },
       {
+        "file": "infra/charts/observability/templates/clickhouse-deployment.yaml",
+        "hash": "13628650198393052628"
+      },
+      {
         "file": "infra/charts/observability/values.yaml",
         "hash": "183368880880002649"
       },
       {
-        "file": "infra/charts/observability/templates/collector-deployment.yaml",
-        "hash": "9581220931571859502"
+        "file": "infra/charts/observability/Chart.lock",
+        "hash": "10143180285352225487"
       },
       {
-        "file": "DEPLOYMENT.md",
-        "hash": "873387688743824352"
+        "file": ".replit",
+        "hash": "17280406137497808361"
+      },
+      {
+        "file": "infra/charts/observability/templates/backend-service.yaml",
+        "hash": "6281343088245106875"
       },
       {
         "file": "yarn.lock",
         "hash": "9683360140064035833"
+      },
+      {
+        "file": ".nx/workspace-data/d/server-process.json",
+        "hash": "14410989852730163665"
+      },
+      {
+        "file": "infra/kind/kind-config.yaml",
+        "hash": "18095577998118114686"
+      },
+      {
+        "file": "nx.json",
+        "hash": "12596173846533887470"
+      },
+      {
+        "file": ".nx/workspace-data/nx_files.nxt",
+        "hash": "12171748411258795310"
+      },
+      {
+        "file": ".nx/workspace-data/file-map.json",
+        "hash": "2576757749264896538"
+      },
+      {
+        "file": "package.json",
+        "hash": "1449941736186802596"
+      },
+      {
+        "file": "infra/charts/observability/Chart.yaml",
+        "hash": "8071729306529322462"
+      },
+      {
+        "file": "infra/charts/observability/templates/clickhouse-init.yaml",
+        "hash": "10277958834211263100"
+      },
+      {
+        "file": "infra/charts/observability/templates/collector-deployment.yaml",
+        "hash": "9581220931571859502"
       },
       {
         "file": "replit.md",
@@ -42,68 +98,12 @@
         "hash": "17085127507586473771"
       },
       {
-        "file": "README.md",
-        "hash": "9733744240940167537"
-      },
-      {
-        "file": ".gitignore",
-        "hash": "12681850839093570034"
-      },
-      {
         "file": "tsconfig.base.json",
         "hash": "681649519678415554"
       },
       {
-        "file": "infra/charts/observability/Chart.yaml",
-        "hash": "8071729306529322462"
-      },
-      {
-        "file": "infra/charts/observability/templates/backend-service.yaml",
-        "hash": "6281343088245106875"
-      },
-      {
-        "file": ".nx/workspace-data/project-graph.json",
-        "hash": "14763879544764229108"
-      },
-      {
-        "file": "infra/charts/observability/Chart.lock",
-        "hash": "10143180285352225487"
-      },
-      {
-        "file": "infra/kind/kind-config.yaml",
-        "hash": "18095577998118114686"
-      },
-      {
-        "file": ".replit",
-        "hash": "17280406137497808361"
-      },
-      {
-        "file": "nx.json",
-        "hash": "12596173846533887470"
-      },
-      {
-        "file": "infra/charts/observability/templates/clickhouse-deployment.yaml",
-        "hash": "13628650198393052628"
-      },
-      {
-        "file": ".nx/workspace-data/file-map.json",
-        "hash": "2720086835523602816"
-      },
-      {
-        "file": ".nx/workspace-data/d/server-process.json",
-        "hash": "14410989852730163665"
-      },
-      {
-        "file": ".nx/workspace-data/nx_files.nxt",
-        "hash": "12171748411258795310"
-      },
-      {
-        "file": "infra/charts/observability/templates/backend-deployment.yaml",
-        "hash": "14494783099473265143"
-      },
-      {
-        "file": "package.json",
-        "hash": "1449941736186802596"
+        "file": "DEPLOYMENT.md",
+        "hash": "873387688743824352"
       }
     ],
     "projectFileMap": {
