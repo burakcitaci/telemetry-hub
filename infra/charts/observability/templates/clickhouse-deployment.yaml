@@ -39,8 +39,16 @@ spec:
               # Fix ClickHouse to listen on all interfaces
               sed -i 's/<http_port>8123<\/http_port>/<http_port>8123<\/http_port>\n<listen_host>0.0.0.0<\/listen_host>/g' /etc/clickhouse-server/config.xml
               sed -i 's/<native_port>9000<\/native_port>/<native_port>9000<\/native_port>\n<listen_host>0.0.0.0<\/listen_host>/g' /etc/clickhouse-server/config.xml
-              # Start ClickHouse
-              exec /entrypoint.sh
+              # Start ClickHouse in background
+              /entrypoint.sh &
+              # Wait for user config to be created and modify it
+              while [ ! -f /etc/clickhouse-server/users.d/default-user.xml ]; do sleep 1; done
+              sed -i 's|<ip>::1</ip>|<ip>::/0</ip>|g' /etc/clickhouse-server/users.d/default-user.xml
+              sed -i 's|<ip>127.0.0.1</ip>|<ip>0.0.0.0/0</ip>|g' /etc/clickhouse-server/users.d/default-user.xml
+              # Send SIGHUP to reload configuration
+              pkill -HUP clickhouse-server
+              # Wait for background process
+              wait
           
           ports:
             - name: http
@@ -137,12 +145,10 @@ data:
           <password></password>
           <networks>
             <ip>::/0</ip>
+            <ip>0.0.0.0/0</ip>
           </networks>
           <profile>default</profile>
           <quota>default</quota>
         </default>
       </users>
-      <settings>
-        <default_password_type>plaintext</default_password_type>
-      </settings>
     </clickhouse>
