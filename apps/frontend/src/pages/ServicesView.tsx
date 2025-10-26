@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { getServices, getServiceMetrics } from '../api';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { Button } from '@/components/ui/button';
 
 interface Service {
   ServiceName: string;
@@ -100,54 +101,46 @@ function ServicesView() {
 
   return (
     <div>
-      <div className="page-header">
-        <h2>Services</h2>
-        <p>Monitor service health and performance metrics</p>
+      <div className="mb-8">
+        <h2 className="text-2xl font-bold mb-2">Services</h2>
+        <p className="text-muted-foreground">Monitor service health and performance metrics</p>
       </div>
 
-      <div className="card" style={{ marginBottom: '2rem' }}>
-        <h3 style={{ marginBottom: '1rem' }}>Services</h3>
-        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+      <div className="bg-card border rounded-lg p-6 mb-8">
+        <h3 className="text-lg font-semibold mb-4">Services</h3>
+        <div className="flex gap-4 flex-wrap">
           {services.map((service) => (
-            <button
+            <Button
               key={service.ServiceName}
               onClick={() => setSelectedService(service.ServiceName)}
-              style={{
-                padding: '0.75rem 1.5rem',
-                background: selectedService === service.ServiceName ? '#58a6ff' : '#21262d',
-                color: '#fff',
-                border: '1px solid #30363d',
-                borderRadius: '6px',
-                cursor: 'pointer',
-                fontSize: '0.9rem',
-                fontWeight: 500,
-              }}
+              variant={selectedService === service.ServiceName ? "default" : "outline"}
+              size="sm"
             >
               {service.ServiceName}
-            </button>
+            </Button>
           ))}
         </div>
       </div>
 
       {selectedService && metrics && (
         <>
-          <div className="grid">
-            <div className="metric-card">
-              <div className="metric-value">{metrics.request_count}</div>
-              <div className="metric-label">Total Requests (1h)</div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            <div className="bg-card border rounded-lg p-4">
+              <div className="text-2xl font-bold text-primary">{metrics.request_count}</div>
+              <div className="text-sm text-muted-foreground">Total Requests (1h)</div>
             </div>
-            <div className="metric-card">
-              <div className="metric-value">{calculateErrorRate()}%</div>
-              <div className="metric-label">Error Rate</div>
+            <div className="bg-card border rounded-lg p-4">
+              <div className="text-2xl font-bold text-destructive">{calculateErrorRate()}%</div>
+              <div className="text-sm text-muted-foreground">Error Rate</div>
             </div>
-            <div className="metric-card">
-              <div className="metric-value">{formatDuration(metrics.avg_duration)}</div>
-              <div className="metric-label">Average Duration</div>
+            <div className="bg-card border rounded-lg p-4">
+              <div className="text-2xl font-bold text-primary">{formatDuration(metrics.avg_duration)}</div>
+              <div className="text-sm text-muted-foreground">Average Duration</div>
             </div>
           </div>
 
-          <div className="card">
-            <h3 style={{ marginBottom: '1rem' }}>Latency Percentiles</h3>
+          <div className="bg-card border rounded-lg p-6">
+            <h3 className="text-lg font-semibold mb-4">Latency Percentiles</h3>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={getLatencyChartData()}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#30363d" />
@@ -162,34 +155,36 @@ function ServicesView() {
             </ResponsiveContainer>
           </div>
 
-          <div className="card">
-            <h3 style={{ marginBottom: '1rem' }}>Detailed Metrics</h3>
-            <table className="table">
-              <thead>
-                <tr>
-                  <th>Metric</th>
-                  <th>Value</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>P50 Latency</td>
-                  <td>{formatDuration(metrics.p50_duration)}</td>
-                </tr>
-                <tr>
-                  <td>P95 Latency</td>
-                  <td>{formatDuration(metrics.p95_duration)}</td>
-                </tr>
-                <tr>
-                  <td>P99 Latency</td>
-                  <td>{formatDuration(metrics.p99_duration)}</td>
-                </tr>
-                <tr>
-                  <td>Error Count</td>
-                  <td>{metrics.error_count}</td>
-                </tr>
-              </tbody>
-            </table>
+          <div className="bg-card border rounded-lg p-6">
+            <h3 className="text-lg font-semibold mb-4">Detailed Metrics</h3>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b">
+                    <th className="text-left py-2 px-4 font-semibold">Metric</th>
+                    <th className="text-left py-2 px-4 font-semibold">Value</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td className="py-2 px-4 border-b">P50 Latency</td>
+                    <td className="py-2 px-4 border-b">{formatDuration(metrics.p50_duration)}</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 px-4 border-b">P95 Latency</td>
+                    <td className="py-2 px-4 border-b">{formatDuration(metrics.p95_duration)}</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 px-4 border-b">P99 Latency</td>
+                    <td className="py-2 px-4 border-b">{formatDuration(metrics.p99_duration)}</td>
+                  </tr>
+                  <tr>
+                    <td className="py-2 px-4">Error Count</td>
+                    <td className="py-2 px-4">{metrics.error_count}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </>
       )}

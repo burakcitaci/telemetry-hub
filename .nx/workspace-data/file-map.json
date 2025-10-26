@@ -1,81 +1,25 @@
 {
   "version": "6.0",
   "nxVersion": "21.6.5",
-  "pathMappings": {},
+  "pathMappings": {
+    "@/*": [
+      "./src/*"
+    ]
+  },
   "nxJsonPlugins": [],
   "fileMap": {
     "nonProjectFiles": [
-      {
-        "file": ".nx/workspace-data/project-graph.json",
-        "hash": "13900789565888989235"
-      },
-      {
-        "file": "README.md",
-        "hash": "9733744240940167537"
-      },
-      {
-        "file": "infra/charts/observability/templates/backend-deployment.yaml",
-        "hash": "14494783099473265143"
-      },
-      {
-        "file": ".gitignore",
-        "hash": "12681850839093570034"
-      },
-      {
-        "file": "infra/charts/observability/.helmignore",
-        "hash": "4149484917590541800"
-      },
-      {
-        "file": ".nx/workspace-data/source-maps.json",
-        "hash": "6472604257830709712"
-      },
-      {
-        "file": "infra/charts/observability/templates/clickhouse-deployment.yaml",
-        "hash": "13628650198393052628"
-      },
-      {
-        "file": "infra/charts/observability/values.yaml",
-        "hash": "183368880880002649"
-      },
-      {
-        "file": "infra/charts/observability/Chart.lock",
-        "hash": "10143180285352225487"
-      },
       {
         "file": ".replit",
         "hash": "17280406137497808361"
       },
       {
-        "file": "infra/charts/observability/templates/backend-service.yaml",
-        "hash": "6281343088245106875"
-      },
-      {
-        "file": "yarn.lock",
-        "hash": "9683360140064035833"
-      },
-      {
-        "file": ".nx/workspace-data/d/server-process.json",
-        "hash": "14410989852730163665"
-      },
-      {
-        "file": "infra/kind/kind-config.yaml",
-        "hash": "18095577998118114686"
-      },
-      {
-        "file": "nx.json",
-        "hash": "12596173846533887470"
-      },
-      {
         "file": ".nx/workspace-data/nx_files.nxt",
-        "hash": "12171748411258795310"
+        "hash": "11639327456351055506"
       },
       {
-        "file": ".nx/workspace-data/file-map.json",
-        "hash": "2576757749264896538"
-      },
-      {
-        "file": "package.json",
-        "hash": "1449941736186802596"
+        "file": "tsconfig.base.json",
+        "hash": "1064123073758507753"
       },
       {
         "file": "infra/charts/observability/Chart.yaml",
@@ -86,24 +30,128 @@
         "hash": "10277958834211263100"
       },
       {
+        "file": "replit.md",
+        "hash": "10751151350257423692"
+      },
+      {
+        "file": "infra/charts/observability/.helmignore",
+        "hash": "4149484917590541800"
+      },
+      {
+        "file": "nx.json",
+        "hash": "12596173846533887470"
+      },
+      {
+        "file": "infra/kind/kind-config.yaml",
+        "hash": "18095577998118114686"
+      },
+      {
+        "file": ".nx/workspace-data/85F72FB5-4480-567D-B036-356E9CB20AA4.db-wal",
+        "hash": "5150348626817610416"
+      },
+      {
         "file": "infra/charts/observability/templates/collector-deployment.yaml",
         "hash": "9581220931571859502"
       },
       {
-        "file": "replit.md",
-        "hash": "10751151350257423692"
+        "file": "README.md",
+        "hash": "9733744240940167537"
+      },
+      {
+        "file": "DEPLOYMENT.md",
+        "hash": "873387688743824352"
+      },
+      {
+        "file": ".gitignore",
+        "hash": "12681850839093570034"
+      },
+      {
+        "file": ".nx/cache/14599820096017988662-logs.tar.gz",
+        "hash": "11912904182892750032"
+      },
+      {
+        "file": ".nx/workspace-data/lockfile.hash",
+        "hash": "10293007817954680078"
+      },
+      {
+        "file": ".nx/cache/11731796331512910167.tar.gz",
+        "hash": "9889317165567040370"
+      },
+      {
+        "file": ".nx/workspace-data/d/server-process.json",
+        "hash": "9308989523352768848"
+      },
+      {
+        "file": ".nx/workspace-data/project-graph.json",
+        "hash": "9009045323451912110"
+      },
+      {
+        "file": "package.json",
+        "hash": "1449941736186802596"
+      },
+      {
+        "file": ".nx/cache/run.json",
+        "hash": "8671116406249884261"
+      },
+      {
+        "file": ".nx/cache/terminalOutputs/11731796331512910167",
+        "hash": "294671688771449586"
+      },
+      {
+        "file": ".nx/cache/terminalOutputs/8448633418658740966",
+        "hash": "16820864108307144036"
+      },
+      {
+        "file": "infra/charts/observability/Chart.lock",
+        "hash": "10143180285352225487"
+      },
+      {
+        "file": "infra/charts/observability/templates/backend-deployment.yaml",
+        "hash": "14494783099473265143"
+      },
+      {
+        "file": "infra/charts/observability/templates/clickhouse-deployment.yaml",
+        "hash": "13628650198393052628"
+      },
+      {
+        "file": "infra/charts/observability/templates/backend-service.yaml",
+        "hash": "6281343088245106875"
+      },
+      {
+        "file": ".nx/workspace-data/source-maps.json",
+        "hash": "6472604257830709712"
       },
       {
         "file": "infra/charts/observability/templates/_helpers.tpl",
         "hash": "17085127507586473771"
       },
       {
-        "file": "tsconfig.base.json",
-        "hash": "681649519678415554"
+        "file": ".nx/cache/8448633418658740966-logs.tar.gz",
+        "hash": "1890837990118217265"
       },
       {
-        "file": "DEPLOYMENT.md",
-        "hash": "873387688743824352"
+        "file": ".nx/workspace-data/file-map.json",
+        "hash": "477919273043023266"
+      },
+      {
+        "file": ".nx/workspace-data/parsed-lock-file.json",
+        "hash": "9470082756759691842"
+      },
+      {
+        "file": ".nx/cache/terminalOutputs/14599820096017988662",
+        "hash": "17209400829421059452"
+      },
+      {
+        "file": "yarn.lock",
+        "hash": "9573924505267146933"
+      },
+      {
+        "file": ".nx/cache/11731796331512910167-logs.tar.gz",
+        "hash": "17272083939164916708"
+      },
+      {
+        "file": "infra/charts/observability/values.yaml",
+        "hash": "183368880880002649"
       }
     ],
     "projectFileMap": {
@@ -184,25 +232,37 @@
       ],
       "frontend": [
         {
+          "file": "apps/frontend/components.json",
+          "hash": "13998612914604495624"
+        },
+        {
           "file": "apps/frontend/index.html",
           "hash": "6084667306962934276"
         },
         {
           "file": "apps/frontend/package.json",
-          "hash": "4528962308929587007",
+          "hash": "17754099536922522235",
           "deps": [
+            "npm:@types/node",
             "npm:@types/react",
             "npm:@types/react-dom",
             "npm:@vitejs/plugin-react",
+            "npm:tailwindcss-animate",
             "npm:typescript",
             "npm:vite",
+            "npm:@radix-ui/react-slot",
+            "npm:@tailwindcss/vite",
             "npm:axios",
+            "npm:class-variance-authority",
+            "npm:clsx",
             "npm:date-fns",
             "npm:react",
             "npm:react-dom",
             "npm:react-is",
             "npm:react-router-dom",
-            "npm:recharts"
+            "npm:recharts",
+            "npm:tailwind-merge",
+            "npm:tailwindcss"
           ]
         },
         {
@@ -218,8 +278,20 @@
           "hash": "14650694857369877225"
         },
         {
+          "file": "apps/frontend/src/components/ui/button.tsx",
+          "hash": "15867611193771364424"
+        },
+        {
+          "file": "apps/frontend/src/components/ui/card.tsx",
+          "hash": "9572552624677261021"
+        },
+        {
           "file": "apps/frontend/src/index.css",
-          "hash": "10086093244736073598"
+          "hash": "16148253591254594983"
+        },
+        {
+          "file": "apps/frontend/src/lib/utils.ts",
+          "hash": "7693891966047857635"
         },
         {
           "file": "apps/frontend/src/main.tsx",
@@ -231,7 +303,7 @@
         },
         {
           "file": "apps/frontend/src/pages/ServicesView.tsx",
-          "hash": "1291870594212357042"
+          "hash": "16810386347746318237"
         },
         {
           "file": "apps/frontend/src/pages/TraceDetailView.tsx",
@@ -246,19 +318,23 @@
           "hash": "8760657219905661274"
         },
         {
+          "file": "apps/frontend/tailwind.config.js",
+          "hash": "10048359364834966245"
+        },
+        {
           "file": "apps/frontend/tsconfig.json",
-          "hash": "1183374341850110354"
+          "hash": "11935774207566048036"
         },
         {
           "file": "apps/frontend/tsconfig.node.json",
-          "hash": "7464164372899490545"
+          "hash": "10446164680358271708"
         },
         {
           "file": "apps/frontend/vite.config.ts",
-          "hash": "8035086493011076863"
+          "hash": "4499553727286899179"
         }
       ]
     }
   },
-  "externalNodesHash": "5728560718881237340"
+  "externalNodesHash": "10185537822838514533"
 }
