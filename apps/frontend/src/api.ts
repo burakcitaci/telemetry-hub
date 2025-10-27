@@ -40,7 +40,20 @@ export const createEventSource = () => {
 };
 
 // Mock data generator for development/demo purposes
-export const generateMockTraces = (count: number = 50): any[] => {
+interface MockTrace {
+  TraceId: string;
+  SpanId: string;
+  SpanName: string;
+  ServiceName: string;
+  Timestamp: string;
+  Duration: number;
+  StatusCode: string;
+  SpanAttributes?: Record<string, string>;
+  Resource?: string;
+  Method?: string;
+}
+
+export const generateMockTraces = (count: number = 50): MockTrace[] => {
   const services = [
     'customer-app-gtw',
     'shadow-ingestion-engine',
@@ -76,7 +89,7 @@ export const generateMockTraces = (count: number = 50): any[] => {
   ];
   const statuses = ['OK', 'OK', 'OK', 'ERROR', 'OK'];
 
-  const traces = [];
+  const traces: MockTrace[] = [];
   const now = Date.now();
 
   for (let i = 0; i < count; i++) {
@@ -101,16 +114,28 @@ export const generateMockTraces = (count: number = 50): any[] => {
         'http.status_code': status === 'ERROR' ? '500' : '200',
         'user.id': Math.floor(Math.random() * 1000).toString(),
         'region': ['us-east-1', 'us-west-2', 'eu-west-1'][Math.floor(Math.random() * 3)]
-      },
-      Method: operation.startsWith('GET') ? 'GET' : 'POST',
-      Resource: operation
+      }
     });
   }
 
   return traces;
 };
 
-export const generateMockTraceDetail = (traceId: string): any[] => {
+interface MockSpan {
+  TraceId: string;
+  SpanId: string;
+  ParentSpanId: string;
+  SpanName: string;
+  ServiceName: string;
+  Timestamp: string;
+  Duration: number;
+  StatusCode: string;
+  SpanAttributes?: Record<string, string>;
+  Resource?: string;
+  Method?: string;
+}
+
+export const generateMockTraceDetail = (traceId: string): MockSpan[] => {
   const services = [
     'customer-app-gtw',
     'shadow-ingestion-engine',
@@ -140,7 +165,7 @@ export const generateMockTraceDetail = (traceId: string): any[] => {
   ];
   const baseTime = Date.now() - Math.random() * 1000000;
 
-  const spans = [];
+  const spans: MockSpan[] = [];
   const traceServices = services.slice(0, Math.floor(Math.random() * 4) + 2);
 
   traceServices.forEach((service, index) => {
@@ -148,7 +173,7 @@ export const generateMockTraceDetail = (traceId: string): any[] => {
     const duration = Math.random() * 500000 + 50000; // 50μs to 550μs
 
     // Create parent-child relationships
-    const parentSpanId = index === 0 ? null : spans[index - 1]?.SpanId;
+    const parentSpanId = index === 0 ? '' : spans[index - 1]?.SpanId;
 
     const operation = operations[Math.floor(Math.random() * operations.length)];
 
@@ -170,9 +195,9 @@ export const generateMockTraceDetail = (traceId: string): any[] => {
         'http.method': index === 0 ? 'GET' : 'POST',
         'http.url': `https://${service}.example.com/api/v1/operation`,
         'http.status_code': Math.random() > 0.9 ? '500' : '200',
-        'db.system': service.includes('service') ? 'postgresql' : undefined,
-        'db.name': service.includes('service') ? 'orders_db' : undefined,
-        'db.operation': service.includes('service') ? 'SELECT' : undefined
+        'db.system': service.includes('service') ? 'postgresql' : '',
+        'db.name': service.includes('service') ? 'orders_db' : '',
+        'db.operation': service.includes('service') ? 'SELECT' : ''
       }
     });
   });

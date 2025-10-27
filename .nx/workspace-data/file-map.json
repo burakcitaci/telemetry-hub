@@ -10,112 +10,84 @@
   "fileMap": {
     "nonProjectFiles": [
       {
-        "file": "infra/charts/observability/templates/backend-deployment.yaml",
-        "hash": "14494783099473265143"
-      },
-      {
-        "file": ".nx/workspace-data/source-maps.json",
-        "hash": "6472604257830709712"
+        "file": "infra/charts/observability/values.yaml",
+        "hash": "7842259058162041082"
       },
       {
         "file": "infra/charts/observability/Chart.lock",
         "hash": "10143180285352225487"
       },
       {
-        "file": ".replit",
-        "hash": "17280406137497808361"
-      },
-      {
         "file": ".gitignore",
         "hash": "12681850839093570034"
-      },
-      {
-        "file": ".nx/workspace-data/project-graph.json",
-        "hash": "2486987614830746192"
-      },
-      {
-        "file": "infra/charts/observability/.helmignore",
-        "hash": "4149484917590541800"
-      },
-      {
-        "file": ".nx/workspace-data/file-map.json",
-        "hash": "13614153392357146794"
-      },
-      {
-        "file": "tsconfig.base.json",
-        "hash": "1064123073758507753"
-      },
-      {
-        "file": "README.md",
-        "hash": "9733744240940167537"
-      },
-      {
-        "file": "package.json",
-        "hash": "1449941736186802596"
-      },
-      {
-        "file": ".nx/cache/5697794255022747742.tar.gz",
-        "hash": "15406347010109902122"
-      },
-      {
-        "file": "nx.json",
-        "hash": "12596173846533887470"
-      },
-      {
-        "file": ".nx/cache/5697794255022747742-logs.tar.gz",
-        "hash": "17724892018858812337"
-      },
-      {
-        "file": "DEPLOYMENT.md",
-        "hash": "873387688743824352"
-      },
-      {
-        "file": "infra/charts/observability/templates/collector-deployment.yaml",
-        "hash": "8121025755005634940"
-      },
-      {
-        "file": "infra/charts/observability/templates/_helpers.tpl",
-        "hash": "17085127507586473771"
-      },
-      {
-        "file": "infra/charts/observability/templates/backend-service.yaml",
-        "hash": "6281343088245106875"
       },
       {
         "file": "replit.md",
         "hash": "10751151350257423692"
       },
       {
-        "file": "infra/kind/kind-config.yaml",
-        "hash": "18095577998118114686"
+        "file": "yarn.lock",
+        "hash": "3100793946315904975"
       },
       {
-        "file": ".nx/cache/terminalOutputs/5697794255022747742",
-        "hash": "2210566023005777998"
+        "file": "infra/charts/observability/templates/_helpers.tpl",
+        "hash": "17085127507586473771"
       },
       {
-        "file": ".nx/workspace-data/85F72FB5-4480-567D-B036-356E9CB20AA4.db-shm",
-        "hash": "12585258541410930744"
+        "file": "tsconfig.base.json",
+        "hash": "1064123073758507753"
       },
       {
-        "file": ".nx/cache/run.json",
-        "hash": "11703970039478065573"
+        "file": "DEPLOYMENT.md",
+        "hash": "873387688743824352"
       },
       {
-        "file": ".nx/cache/cloud/verify.lock",
-        "hash": "6653813841626738008"
+        "file": ".nx/cache/1309253307699654183-logs.tar.gz",
+        "hash": "4839187941947830722"
+      },
+      {
+        "file": "package.json",
+        "hash": "1449941736186802596"
       },
       {
         "file": "infra/charts/observability/templates/clickhouse-init.yaml",
         "hash": "10277958834211263100"
       },
       {
-        "file": "infra/charts/observability/Chart.yaml",
-        "hash": "8071729306529322462"
+        "file": ".nx/workspace-data/85F72FB5-4480-567D-B036-356E9CB20AA4.db",
+        "hash": "6240709564311096908"
       },
       {
-        "file": "infra/charts/observability/values.yaml",
-        "hash": "7842259058162041082"
+        "file": ".nx/workspace-data/nx_files.nxt",
+        "hash": "2839447918651894667"
+      },
+      {
+        "file": "README.md",
+        "hash": "9733744240940167537"
+      },
+      {
+        "file": ".nx/cache/11589564498590287496-logs.tar.gz",
+        "hash": "4749055181049193640"
+      },
+      {
+        "file": "nx.json",
+        "hash": "12596173846533887470"
+      },
+      {
+        "file": ".nx/cache/1309253307699654183.tar.gz",
+        "hash": "2521027511462448211"
+      },
+      {
+        "file": ".replit",
+        "hash": "17280406137497808361"
+      },
+      {
+        "file": ".nx/workspace-data/85F72FB5-4480-567D-B036-356E9CB20AA4.db-shm",
+        "hash": "4841343851576575880"
+      },
+      {
+        "file": "infra/charts/observability/Chart.yaml",
+        "hash": "8071729306529322462"
       },
       {
         "file": "infra/charts/observability/templates/clickhouse-deployment.yaml",
@@ -123,170 +95,70 @@
       },
       {
         "file": ".nx/workspace-data/85F72FB5-4480-567D-B036-356E9CB20AA4.db-wal",
-        "hash": "12648399085732932028"
+        "hash": "16159199085276861493"
       },
       {
-        "file": "yarn.lock",
-        "hash": "3100793946315904975"
+        "file": ".nx/workspace-data/project-graph.json",
+        "hash": "15893002346341978111"
+      },
+      {
+        "file": ".nx/workspace-data/file-map.json",
+        "hash": "2728867676579492001"
+      },
+      {
+        "file": ".nx/workspace-data/d/server-process.json",
+        "hash": "3546638848208249801"
+      },
+      {
+        "file": ".nx/workspace-data/parsed-lock-file.json",
+        "hash": "1483047553081581203"
+      },
+      {
+        "file": "infra/charts/observability/templates/collector-deployment.yaml",
+        "hash": "8121025755005634940"
+      },
+      {
+        "file": ".nx/cache/8967374279439726349-logs.tar.gz",
+        "hash": "14382116525150514139"
+      },
+      {
+        "file": ".nx/cache/cloud/verify.lock",
+        "hash": "880152057786104005"
+      },
+      {
+        "file": ".nx/cache/run.json",
+        "hash": "1384055237742095578"
+      },
+      {
+        "file": "infra/charts/observability/templates/backend-deployment.yaml",
+        "hash": "14494783099473265143"
+      },
+      {
+        "file": "infra/kind/kind-config.yaml",
+        "hash": "18095577998118114686"
+      },
+      {
+        "file": ".nx/cache/terminalOutputs/8967374279439726349",
+        "hash": "2831105041858296254"
+      },
+      {
+        "file": ".nx/workspace-data/source-maps.json",
+        "hash": "6472604257830709712"
+      },
+      {
+        "file": "infra/charts/observability/.helmignore",
+        "hash": "4149484917590541800"
+      },
+      {
+        "file": "infra/charts/observability/templates/backend-service.yaml",
+        "hash": "6281343088245106875"
+      },
+      {
+        "file": ".nx/workspace-data/lockfile.hash",
+        "hash": "6466776999747759789"
       }
     ],
     "projectFileMap": {
-      "frontend": [
-        {
-          "file": "apps/frontend/components.json",
-          "hash": "13998612914604495624"
-        },
-        {
-          "file": "apps/frontend/index.html",
-          "hash": "6084667306962934276"
-        },
-        {
-          "file": "apps/frontend/package.json",
-          "hash": "9427305628669183081",
-          "deps": [
-            "npm:@types/node",
-            "npm:@types/react",
-            "npm:@types/react-dom",
-            "npm:@vitejs/plugin-react",
-            "npm:tailwindcss-animate",
-            "npm:typescript",
-            "npm:vite",
-            "npm:@radix-ui/react-scroll-area",
-            "npm:@radix-ui/react-select",
-            "npm:@radix-ui/react-slot",
-            "npm:@radix-ui/react-tabs",
-            "npm:@tailwindcss/vite",
-            "npm:axios",
-            "npm:class-variance-authority",
-            "npm:clsx",
-            "npm:date-fns",
-            "npm:lucide-react",
-            "npm:react",
-            "npm:react-dom",
-            "npm:react-is",
-            "npm:react-router-dom",
-            "npm:recharts",
-            "npm:tailwind-merge",
-            "npm:tailwindcss"
-          ]
-        },
-        {
-          "file": "apps/frontend/src/App.css",
-          "hash": "13363118550183323775"
-        },
-        {
-          "file": "apps/frontend/src/App.tsx",
-          "hash": "4620985554134128385"
-        },
-        {
-          "file": "apps/frontend/src/api.ts",
-          "hash": "1224008239240855959"
-        },
-        {
-          "file": "apps/frontend/src/components/ui/alert.tsx",
-          "hash": "5785944754622712748"
-        },
-        {
-          "file": "apps/frontend/src/components/ui/badge.tsx",
-          "hash": "16314367736052956058"
-        },
-        {
-          "file": "apps/frontend/src/components/ui/button.tsx",
-          "hash": "2945097904554756583"
-        },
-        {
-          "file": "apps/frontend/src/components/ui/card.tsx",
-          "hash": "9572552624677261021"
-        },
-        {
-          "file": "apps/frontend/src/components/ui/checkbox.tsx",
-          "hash": "16674885031576187279"
-        },
-        {
-          "file": "apps/frontend/src/components/ui/dropdown-menu.tsx",
-          "hash": "171502028778230976"
-        },
-        {
-          "file": "apps/frontend/src/components/ui/flame-graph.tsx",
-          "hash": "16220899979522969483"
-        },
-        {
-          "file": "apps/frontend/src/components/ui/input.tsx",
-          "hash": "14940231740915735472"
-        },
-        {
-          "file": "apps/frontend/src/components/ui/scroll-area.tsx",
-          "hash": "15547745753518898656"
-        },
-        {
-          "file": "apps/frontend/src/components/ui/select.tsx",
-          "hash": "751155003483465908"
-        },
-        {
-          "file": "apps/frontend/src/components/ui/skeleton.tsx",
-          "hash": "12882748662736114657"
-        },
-        {
-          "file": "apps/frontend/src/components/ui/table.tsx",
-          "hash": "13619349392936582427"
-        },
-        {
-          "file": "apps/frontend/src/components/ui/tabs.tsx",
-          "hash": "12341967443133771718"
-        },
-        {
-          "file": "apps/frontend/src/index.css",
-          "hash": "12015632496539792336"
-        },
-        {
-          "file": "apps/frontend/src/lib/utils.ts",
-          "hash": "7693891966047857635"
-        },
-        {
-          "file": "apps/frontend/src/main.tsx",
-          "hash": "13257795601521251413"
-        },
-        {
-          "file": "apps/frontend/src/pages/LogsView.tsx",
-          "hash": "7387195150481415548"
-        },
-        {
-          "file": "apps/frontend/src/pages/ServicesView.tsx",
-          "hash": "12915868260573971282"
-        },
-        {
-          "file": "apps/frontend/src/pages/TasksView.tsx",
-          "hash": "14039693081160951722"
-        },
-        {
-          "file": "apps/frontend/src/pages/TraceDetailView.tsx",
-          "hash": "4854415681279567448"
-        },
-        {
-          "file": "apps/frontend/src/pages/TracesView.tsx",
-          "hash": "7123038212687947483"
-        },
-        {
-          "file": "apps/frontend/src/vite-env.d.ts",
-          "hash": "8760657219905661274"
-        },
-        {
-          "file": "apps/frontend/tailwind.config.js",
-          "hash": "12495553002327652993"
-        },
-        {
-          "file": "apps/frontend/tsconfig.json",
-          "hash": "11935774207566048036"
-        },
-        {
-          "file": "apps/frontend/tsconfig.node.json",
-          "hash": "10446164680358271708"
-        },
-        {
-          "file": "apps/frontend/vite.config.ts",
-          "hash": "4499553727286899179"
-        }
-      ],
       "backend": [
         {
           "file": "apps/backend/Dockerfile",
@@ -360,6 +232,158 @@
         {
           "file": "apps/backend/tsconfig.json",
           "hash": "3663292065411897990"
+        }
+      ],
+      "frontend": [
+        {
+          "file": "apps/frontend/components.json",
+          "hash": "13998612914604495624"
+        },
+        {
+          "file": "apps/frontend/index.html",
+          "hash": "6084667306962934276"
+        },
+        {
+          "file": "apps/frontend/package.json",
+          "hash": "9427305628669183081",
+          "deps": [
+            "npm:@types/node",
+            "npm:@types/react",
+            "npm:@types/react-dom",
+            "npm:@vitejs/plugin-react",
+            "npm:tailwindcss-animate",
+            "npm:typescript",
+            "npm:vite",
+            "npm:@radix-ui/react-scroll-area",
+            "npm:@radix-ui/react-select",
+            "npm:@radix-ui/react-slot",
+            "npm:@radix-ui/react-tabs",
+            "npm:@tailwindcss/vite",
+            "npm:axios",
+            "npm:class-variance-authority",
+            "npm:clsx",
+            "npm:date-fns",
+            "npm:lucide-react",
+            "npm:react",
+            "npm:react-dom",
+            "npm:react-is",
+            "npm:react-router-dom",
+            "npm:recharts",
+            "npm:tailwind-merge",
+            "npm:tailwindcss"
+          ]
+        },
+        {
+          "file": "apps/frontend/src/App.css",
+          "hash": "13363118550183323775"
+        },
+        {
+          "file": "apps/frontend/src/App.tsx",
+          "hash": "4620985554134128385"
+        },
+        {
+          "file": "apps/frontend/src/api.ts",
+          "hash": "15283991028127532865"
+        },
+        {
+          "file": "apps/frontend/src/components/ui/alert.tsx",
+          "hash": "5785944754622712748"
+        },
+        {
+          "file": "apps/frontend/src/components/ui/badge.tsx",
+          "hash": "16314367736052956058"
+        },
+        {
+          "file": "apps/frontend/src/components/ui/button.tsx",
+          "hash": "2945097904554756583"
+        },
+        {
+          "file": "apps/frontend/src/components/ui/card.tsx",
+          "hash": "9572552624677261021"
+        },
+        {
+          "file": "apps/frontend/src/components/ui/checkbox.tsx",
+          "hash": "16674885031576187279"
+        },
+        {
+          "file": "apps/frontend/src/components/ui/flame-graph.tsx",
+          "hash": "16220899979522969483"
+        },
+        {
+          "file": "apps/frontend/src/components/ui/input.tsx",
+          "hash": "14940231740915735472"
+        },
+        {
+          "file": "apps/frontend/src/components/ui/scroll-area.tsx",
+          "hash": "15547745753518898656"
+        },
+        {
+          "file": "apps/frontend/src/components/ui/select.tsx",
+          "hash": "751155003483465908"
+        },
+        {
+          "file": "apps/frontend/src/components/ui/skeleton.tsx",
+          "hash": "12882748662736114657"
+        },
+        {
+          "file": "apps/frontend/src/components/ui/table.tsx",
+          "hash": "13036881809966057586"
+        },
+        {
+          "file": "apps/frontend/src/components/ui/tabs.tsx",
+          "hash": "12341967443133771718"
+        },
+        {
+          "file": "apps/frontend/src/index.css",
+          "hash": "1564879414998136151"
+        },
+        {
+          "file": "apps/frontend/src/lib/utils.ts",
+          "hash": "7693891966047857635"
+        },
+        {
+          "file": "apps/frontend/src/main.tsx",
+          "hash": "13257795601521251413"
+        },
+        {
+          "file": "apps/frontend/src/pages/LogsView.tsx",
+          "hash": "7387195150481415548"
+        },
+        {
+          "file": "apps/frontend/src/pages/ServicesView.tsx",
+          "hash": "12915868260573971282"
+        },
+        {
+          "file": "apps/frontend/src/pages/TasksView.tsx",
+          "hash": "14039693081160951722"
+        },
+        {
+          "file": "apps/frontend/src/pages/TraceDetailView.tsx",
+          "hash": "9712389115343338157"
+        },
+        {
+          "file": "apps/frontend/src/pages/TracesView.tsx",
+          "hash": "7123038212687947483"
+        },
+        {
+          "file": "apps/frontend/src/vite-env.d.ts",
+          "hash": "8760657219905661274"
+        },
+        {
+          "file": "apps/frontend/tailwind.config.js",
+          "hash": "12495553002327652993"
+        },
+        {
+          "file": "apps/frontend/tsconfig.json",
+          "hash": "11935774207566048036"
+        },
+        {
+          "file": "apps/frontend/tsconfig.node.json",
+          "hash": "10446164680358271708"
+        },
+        {
+          "file": "apps/frontend/vite.config.ts",
+          "hash": "4499553727286899179"
         }
       ]
     }

@@ -5,10 +5,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+// Tabs removed - using cleaner single view design
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
-import { FlameGraph } from '@/components/ui/flame-graph';
 import { ArrowLeft, Clock, Activity, Server, CheckCircle, XCircle, AlertCircle, Network, Database, Globe, X } from 'lucide-react';
 
 interface Span {
@@ -215,29 +214,33 @@ function TraceDetailView() {
   if (loading) {
     return (
       <div className="space-y-6">
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-3">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <div className="flex items-center gap-3 mb-2">
               <Skeleton className="h-8 w-8" />
               <div className="space-y-2">
                 <Skeleton className="h-8 w-48" />
                 <Skeleton className="h-4 w-32" />
               </div>
             </div>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <Skeleton key={i} className="h-20 w-full" />
-              ))}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="bg-white border border-gray-200 rounded-lg p-4">
+              <Skeleton className="h-16 w-full" />
             </div>
-            <div className="space-y-3">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <Skeleton key={i} className="h-16 w-full" />
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+          ))}
+        </div>
+
+        <div className="bg-white border border-gray-200 rounded-lg p-4">
+          <div className="space-y-3">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Skeleton key={i} className="h-12 w-full" />
+            ))}
+          </div>
+        </div>
       </div>
     );
   }
@@ -252,11 +255,11 @@ function TraceDetailView() {
 
   if (spans.length === 0) {
     return (
-      <Card>
-        <CardContent className="text-center py-12">
-          <div className="text-muted-foreground">No spans found for this trace</div>
-        </CardContent>
-      </Card>
+      <div className="bg-white border border-gray-200 rounded-lg p-8">
+        <div className="text-center">
+          <div className="text-gray-600">No spans found for this trace</div>
+        </div>
+      </div>
     );
   }
 
@@ -280,200 +283,176 @@ function TraceDetailView() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <Card className="p-4">
-              <div className="flex items-center gap-2">
-                <Activity className="h-5 w-5 text-blue-500" />
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div className="bg-white border border-gray-200 rounded-lg p-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
+                  <Activity className="h-5 w-5 text-blue-600" />
+                </div>
                 <div>
-                  <div className="text-2xl font-bold">{spans.length}</div>
-                  <div className="text-sm text-muted-foreground">Total Spans</div>
+                  <div className="text-2xl font-bold text-gray-900">{spans.length}</div>
+                  <div className="text-sm text-gray-600">Total Spans</div>
                 </div>
               </div>
-            </Card>
+            </div>
 
-            <Card className="p-4">
-              <div className="flex items-center gap-2">
-                <Clock className="h-5 w-5 text-green-500" />
+            <div className="bg-white border border-gray-200 rounded-lg p-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center">
+                  <Clock className="h-5 w-5 text-green-600" />
+                </div>
                 <div>
-                  <div className="text-2xl font-bold">
+                  <div className="text-2xl font-bold text-gray-900">
                     {formatDuration(calculateTotalDuration() * 1000000)}
                   </div>
-                  <div className="text-sm text-muted-foreground">Total Duration</div>
+                  <div className="text-sm text-gray-600">Total Duration</div>
                 </div>
               </div>
-            </Card>
+            </div>
 
-            <Card className="p-4">
-              <div className="flex items-center gap-2">
-                <Server className="h-5 w-5 text-purple-500" />
+            <div className="bg-white border border-gray-200 rounded-lg p-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center">
+                  <Server className="h-5 w-5 text-purple-600" />
+                </div>
                 <div>
-                  <div className="text-2xl font-bold">{new Set(spans.map(s => s.ServiceName)).size}</div>
-                  <div className="text-sm text-muted-foreground">Services</div>
+                  <div className="text-2xl font-bold text-gray-900">{new Set(spans.map(s => s.ServiceName)).size}</div>
+                  <div className="text-sm text-gray-600">Services</div>
                 </div>
               </div>
-            </Card>
+            </div>
 
-            <Card className="p-4">
-              <div className="flex items-center gap-2">
-                <CheckCircle className="h-5 w-5 text-green-500" />
+            <div className="bg-white border border-gray-200 rounded-lg p-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center">
+                  <CheckCircle className="h-5 w-5 text-green-600" />
+                </div>
                 <div>
-                  <div className="text-2xl font-bold">{spans.filter(s => s.StatusCode === 'OK').length}</div>
-                  <div className="text-sm text-muted-foreground">Successful</div>
+                  <div className="text-2xl font-bold text-gray-900">{spans.filter(s => s.StatusCode === 'OK').length}</div>
+                  <div className="text-sm text-gray-600">Successful</div>
                 </div>
-
               </div>
-            </Card>
+            </div>
           </div>
 
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle>Trace Timeline</CardTitle>
-              <CardDescription>
-                Visual representation of span execution and hierarchy
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Tabs defaultValue="waterfall" className="w-full">
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="waterfall">Waterfall</TabsTrigger>
-                  <TabsTrigger value="flamegraph">Flame Graph</TabsTrigger>
-                </TabsList>
-                <TabsContent value="waterfall" className="mt-4">
-                  <div className="border rounded-lg p-4 bg-muted/20">
-                    <div className="flex items-center justify-between mb-4 text-sm text-muted-foreground">
-                      <span>Timeline</span>
-                      <span>Duration</span>
+          <div className="mb-6">
+            <div className="bg-white border border-gray-200 rounded-lg p-4">
+              <div className="flex items-center justify-between mb-4 text-sm text-gray-600">
+                <span>Timeline</span>
+                <span>Duration</span>
+              </div>
+              <div className="space-y-1">
+                {buildSpanTree()}
+              </div>
+              <div className="mt-4 pt-4 border-t border-gray-100">
+                <div className="flex items-center justify-between text-xs text-gray-500">
+                  <span>Legend:</span>
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-1">
+                      <div className="w-2 h-2 rounded-full bg-red-500"></div>
+                      <span>Error</span>
                     </div>
-                    <div className="space-y-1">
-                      {buildSpanTree()}
-                    </div>
-                    <div className="mt-4 pt-4 border-t">
-                      <div className="flex items-center justify-between text-xs text-muted-foreground">
-                        <span>Legend:</span>
-                        <div className="flex items-center gap-4">
-                          <div className="flex items-center gap-1">
-                            <div className="w-2 h-2 rounded-full bg-red-500"></div>
-                            <span>Error</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                            <span>Success</span>
-                          </div>
-                        </div>
-                      </div>
+                    <div className="flex items-center gap-1">
+                      <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                      <span>Success</span>
                     </div>
                   </div>
-                </TabsContent>
-                <TabsContent value="flamegraph" className="mt-4">
-                  <FlameGraph
-                    spans={spans}
-                    height={400}
-                    onSpanClick={(span) => {
-                      // Scroll to span in details table
-                      const element = document.getElementById(`span-${span.SpanId}`);
-                      if (element) {
-                        element.scrollIntoView({ behavior: 'smooth' });
-                      }
-                    }}
-                  />
-                </TabsContent>
-              </Tabs>
-            </CardContent>
-          </Card>
+                </div>
+              </div>
+            </div>
+          </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Span Details</CardTitle>
-                  <CardDescription>
+              <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                <div className="px-6 py-4 border-b border-gray-100">
+                  <h3 className="text-lg font-semibold text-gray-900">Span Details</h3>
+                  <p className="text-sm text-gray-600 mt-1">
                     Detailed information about each span in the trace
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="rounded-md border">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className="w-16">Status</TableHead>
-                          <TableHead className="min-w-32">Service</TableHead>
-                          <TableHead className="min-w-48">Operation</TableHead>
-                          <TableHead className="w-20">Method</TableHead>
-                          <TableHead className="w-24">Duration</TableHead>
-                          <TableHead className="w-32">Start Time</TableHead>
+                  </p>
+                </div>
+                <div className="p-0">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-16">Status</TableHead>
+                        <TableHead className="min-w-32">Service</TableHead>
+                        <TableHead className="min-w-48">Operation</TableHead>
+                        <TableHead className="w-20">Method</TableHead>
+                        <TableHead className="w-24">Duration</TableHead>
+                        <TableHead className="w-32">Start Time</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {spans.map(span => (
+                        <TableRow
+                          key={span.SpanId}
+                          id={`span-${span.SpanId}`}
+                          className={`cursor-pointer ${
+                            selectedSpan?.SpanId === span.SpanId ? 'bg-blue-50 border-l-4 border-l-blue-500' : ''
+                          }`}
+                          onClick={() => setSelectedSpan(span)}
+                        >
+                          <TableCell>{getStatusBadge(span.StatusCode)}</TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <div className={`w-2 h-2 rounded-full ${getServiceColor(span.ServiceName)}`} />
+                              <span className="font-medium">{span.ServiceName}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="space-y-1">
+                              <div className="font-medium">{span.SpanName}</div>
+                              {span.Resource && (
+                                <div className="text-xs text-gray-600">
+                                  {span.Resource}
+                                </div>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="text-xs">
+                              {span.Method || span.SpanAttributes?.['http.method'] || 'N/A'}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-sm">
+                            {formatDuration(span.Duration)}
+                          </TableCell>
+                          <TableCell className="text-xs text-gray-600">
+                            {new Date(span.Timestamp).toLocaleTimeString()}
+                          </TableCell>
                         </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {spans.map(span => (
-                          <TableRow
-                            key={span.SpanId}
-                            id={`span-${span.SpanId}`}
-                            className={`hover:bg-muted/50 cursor-pointer ${
-                              selectedSpan?.SpanId === span.SpanId ? 'bg-muted border-l-4 border-l-primary' : ''
-                            }`}
-                            onClick={() => setSelectedSpan(span)}
-                          >
-                            <TableCell>{getStatusBadge(span.StatusCode)}</TableCell>
-                            <TableCell>
-                              <div className="flex items-center gap-2">
-                                <div className={`w-2 h-2 rounded-full ${getServiceColor(span.ServiceName)}`} />
-                                <span className="font-medium">{span.ServiceName}</span>
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <div className="space-y-1">
-                                <div className="font-medium">{span.SpanName}</div>
-                                {span.Resource && (
-                                  <div className="text-xs text-muted-foreground">
-                                    {span.Resource}
-                                  </div>
-                                )}
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <Badge variant="outline" className="text-xs">
-                                {span.Method || span.SpanAttributes?.['http.method'] || 'N/A'}
-                              </Badge>
-                            </TableCell>
-                            <TableCell className="text-sm">
-                              {formatDuration(span.Duration)}
-                            </TableCell>
-                            <TableCell className="text-xs text-muted-foreground">
-                              {new Date(span.Timestamp).toLocaleTimeString()}
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
-                </CardContent>
-              </Card>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
             </div>
 
             {/* Span Details Panel */}
             <div className="lg:col-span-1">
               {selectedSpan ? (
-                <Card className="sticky top-6">
-                  <CardHeader className="pb-3">
+                <div className="sticky top-6 bg-white border border-gray-200 rounded-lg overflow-hidden">
+                  <div className="px-6 py-4 border-b border-gray-100">
                     <div className="flex items-center justify-between">
-                      <CardTitle className="text-lg">Span Details</CardTitle>
+                      <h3 className="text-lg font-semibold text-gray-900">Span Details</h3>
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => setSelectedSpan(null)}
-                        className="h-6 w-6 p-0"
+                        className="h-6 w-6 p-0 hover:bg-gray-100"
                       >
                         <X className="h-4 w-4" />
                       </Button>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 mt-2">
                       <div className={`w-3 h-3 rounded-full ${getServiceColor(selectedSpan.ServiceName)}`} />
-                      <CardDescription className="text-xs">
+                      <span className="text-xs text-gray-600">
                         {selectedSpan.SpanId}
-                      </CardDescription>
+                      </span>
                     </div>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
+                  </div>
+                  <div className="p-6 space-y-4">
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div>
                         <div className="text-muted-foreground">Service</div>
@@ -532,25 +511,25 @@ function TraceDetailView() {
                       </div>
                     )}
 
-                    <div className="pt-2 border-t">
-                      <div className="text-xs text-muted-foreground">
+                    <div className="pt-4 border-t border-gray-100">
+                      <div className="text-xs text-gray-600">
                         Trace ID: {selectedSpan.TraceId.substring(0, 8)}...
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
               ) : (
-                <Card className="sticky top-6">
-                  <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-                    <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-4">
-                      <Activity className="h-6 w-6 text-muted-foreground" />
+                <div className="sticky top-6 bg-white border border-gray-200 rounded-lg p-8">
+                  <div className="flex flex-col items-center justify-center text-center">
+                    <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+                      <Activity className="h-6 w-6 text-gray-400" />
                     </div>
-                    <div className="text-sm font-medium mb-2">No Span Selected</div>
-                    <div className="text-xs text-muted-foreground">
+                    <div className="text-sm font-medium mb-2 text-gray-900">No Span Selected</div>
+                    <div className="text-xs text-gray-600">
                       Click on a span to view detailed information
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
               )}
             </div>
           </div>
