@@ -38,3 +38,84 @@ export const getServiceMetrics = async (service: string) => {
 export const createEventSource = () => {
   return new EventSource(`${API_URL}/api/events/stream`);
 };
+
+// Mock data generator for development/demo purposes
+export const generateMockTraces = (count: number = 50): any[] => {
+  const services = ['api-gateway', 'user-service', 'order-service', 'payment-service', 'inventory-service', 'shipping-service'];
+  const operations = ['GET /api/users', 'POST /api/orders', 'GET /api/products', 'POST /api/payments', 'GET /api/inventory', 'POST /api/shipping'];
+  const statuses = ['OK', 'OK', 'OK', 'ERROR', 'OK'];
+
+  const traces = [];
+  const now = Date.now();
+
+  for (let i = 0; i < count; i++) {
+    const service = services[Math.floor(Math.random() * services.length)];
+    const operation = operations[Math.floor(Math.random() * operations.length)];
+    const status = statuses[Math.floor(Math.random() * statuses.length)];
+    const duration = Math.random() * 5000000 + 100000; // 0.1ms to 5.1ms in nanoseconds
+    const traceId = `trace-${(now - i * 1000).toString(36)}-${Math.random().toString(36).substr(2, 9)}`;
+
+    traces.push({
+      TraceId: traceId,
+      SpanId: `span-${Math.random().toString(36).substr(2, 9)}`,
+      SpanName: operation,
+      ServiceName: service,
+      Timestamp: new Date(now - i * 1000).toISOString(),
+      Duration: Math.floor(duration),
+      StatusCode: status,
+      SpanAttributes: {
+        'http.method': operation.startsWith('GET') ? 'GET' : 'POST',
+        'http.status_code': status === 'ERROR' ? '500' : '200',
+        'user.id': Math.floor(Math.random() * 1000).toString(),
+        'region': ['us-east-1', 'us-west-2', 'eu-west-1'][Math.floor(Math.random() * 3)]
+      }
+    });
+  }
+
+  return traces;
+};
+
+export const generateMockTraceDetail = (traceId: string): any[] => {
+  const services = ['api-gateway', 'user-service', 'order-service', 'payment-service', 'inventory-service', 'shipping-service'];
+  const baseTime = Date.now() - Math.random() * 1000000;
+
+  const spans = [];
+  const traceServices = services.slice(0, Math.floor(Math.random() * 4) + 2);
+
+  traceServices.forEach((service, index) => {
+    const startTime = baseTime + index * 100000; // Stagger start times
+    const duration = Math.random() * 2000000 + 50000; // 0.05ms to 2.05ms
+
+    // Create parent-child relationships
+    const parentSpanId = index === 0 ? null : spans[index - 1]?.SpanId;
+
+    spans.push({
+      TraceId: traceId,
+      SpanId: `span-${service}-${Math.random().toString(36).substr(2, 5)}`,
+      ParentSpanId: parentSpanId,
+      SpanName: service === 'api-gateway' ? 'GET /api/orders/{id}' :
+                service === 'user-service' ? 'validateUser' :
+                service === 'order-service' ? 'getOrderDetails' :
+                service === 'payment-service' ? 'processPayment' :
+                service === 'inventory-service' ? 'checkInventory' :
+                'calculateShipping',
+      ServiceName: service,
+      Timestamp: new Date(startTime).toISOString(),
+      Duration: Math.floor(duration),
+      StatusCode: Math.random() > 0.9 ? 'ERROR' : 'OK',
+      SpanAttributes: {
+        'operation': 'http_request',
+        'component': 'net/http',
+        'span.kind': 'server',
+        'http.method': index === 0 ? 'GET' : 'POST',
+        'http.url': `https://${service}.example.com/api/v1/operation`,
+        'http.status_code': Math.random() > 0.9 ? '500' : '200',
+        'db.system': service.includes('service') ? 'postgresql' : undefined,
+        'db.name': service.includes('service') ? 'orders_db' : undefined,
+        'db.operation': service.includes('service') ? 'SELECT' : undefined
+      }
+    });
+  });
+
+  return spans;
+};

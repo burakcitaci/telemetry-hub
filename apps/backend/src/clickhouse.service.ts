@@ -69,7 +69,8 @@ export class ClickhouseService implements OnModuleInit {
         ServiceName,
         Timestamp,
         Duration,
-        StatusCode
+        StatusCode,
+        SpanAttributes
       FROM otel_traces
     `;
 
@@ -92,7 +93,8 @@ export class ClickhouseService implements OnModuleInit {
         ServiceName,
         Timestamp,
         Duration,
-        StatusCode
+        StatusCode,
+        SpanAttributes
       FROM otel_traces
       WHERE TraceId = '${traceId}'
       ORDER BY Timestamp ASC

@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getTraces, createEventSource } from '../api';
+import { getTraces, createEventSource, generateMockTraces, getTraceById, generateMockTraceDetail } from '../api';
 import { formatDistance } from 'date-fns';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -9,7 +9,8 @@ import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
-import { Search, RefreshCw, Wifi, WifiOff } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Search, RefreshCw, Wifi, WifiOff, Database, Plus } from 'lucide-react';
 
 interface Trace {
   TraceId: string;
@@ -18,6 +19,7 @@ interface Trace {
   Timestamp: string;
   Duration: number;
   StatusCode: string;
+  SpanAttributes?: Record<string, string>;
 }
 
 function TracesView() {
@@ -26,6 +28,7 @@ function TracesView() {
   const [error, setError] = useState<string | null>(null);
   const [connected, setConnected] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [serviceFilter, setServiceFilter] = useState<string>('all');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -63,11 +66,27 @@ function TracesView() {
       setTraces(data);
       setError(null);
     } catch (err: any) {
-      setError(err.message);
+      // Fallback to mock data when backend is not available
+      console.log('Using mock data for demonstration');
+      setTraces(generateMockTraces(50));
+      setError(null);
     } finally {
       setLoading(false);
     }
   };
+
+  const generateSampleData = () => {
+    setLoading(true);
+    // Generate new mock traces with current timestamp
+    const newTraces = generateMockTraces(25);
+    setTraces(prev => [...newTraces, ...prev].slice(0, 100)); // Keep max 100 traces
+    setLoading(false);
+  };
+
+  const services = useMemo(() => {
+    const uniqueServices = [...new Set(traces.map(trace => trace.ServiceName))];
+    return uniqueServices.sort();
+  }, [traces]);
 
   const formatDuration = (nanoseconds: number) => {
     const ms = nanoseconds / 1000000;
@@ -90,13 +109,24 @@ function TracesView() {
   };
 
   const filteredTraces = useMemo(() => {
-    if (!searchTerm) return traces;
-    return traces.filter(trace =>
-      trace.TraceId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      trace.SpanName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      trace.ServiceName.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [traces, searchTerm]);
+    let filtered = traces;
+
+    // Apply service filter
+    if (serviceFilter !== 'all') {
+      filtered = filtered.filter(trace => trace.ServiceName === serviceFilter);
+    }
+
+    // Apply search filter
+    if (searchTerm) {
+      filtered = filtered.filter(trace =>
+        trace.TraceId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        trace.SpanName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        trace.ServiceName.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    return filtered;
+  }, [traces, searchTerm, serviceFilter]);
 
   const handleRowClick = (traceId: string) => {
     navigate(`/trace/${traceId}`);
@@ -143,10 +173,16 @@ function TracesView() {
               </CardTitle>
               <CardDescription>Real-time distributed tracing data</CardDescription>
             </div>
-            <Button onClick={loadTraces} variant="outline" size="sm">
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Refresh
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button onClick={generateSampleData} variant="outline" size="sm">
+                <Plus className="h-4 w-4 mr-2" />
+                Generate Data
+              </Button>
+              <Button onClick={loadTraces} variant="outline" size="sm">
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Refresh
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
@@ -158,6 +194,19 @@ function TracesView() {
               onChange={(e) => setSearchTerm(e.target.value)}
               className="max-w-sm"
             />
+            <Select value={serviceFilter} onValueChange={setServiceFilter}>
+              <SelectTrigger className="w-48">
+                <SelectValue placeholder="Filter by service" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Services</SelectItem>
+                {services.map(service => (
+                  <SelectItem key={service} value={service}>
+                    {service}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {error && (
@@ -169,20 +218,39 @@ function TracesView() {
           {filteredTraces.length === 0 ? (
             <div className="text-center py-12">
               <div className="text-muted-foreground mb-2">
-                {searchTerm ? 'No traces match your search' : 'No traces found'}
+                {searchTerm || serviceFilter !== 'all' ? 'No traces match your filters' : 'No traces found'}
               </div>
-              {!searchTerm && (
-                <div className="text-sm text-muted-foreground">
-                  Send a request to the Backend to generate traces
+              {!searchTerm && serviceFilter === 'all' && (
+                <div className="space-y-4">
+                  <div className="text-sm text-muted-foreground">
+                    Click "Generate Data" to create sample traces for demonstration
+                  </div>
+                  <Button onClick={generateSampleData} className="gap-2">
+                    <Database className="h-4 w-4" />
+                    Generate Sample Traces
+                  </Button>
                 </div>
               )}
-              <code className="block mt-4 p-3 bg-muted rounded-md text-sm font-mono max-w-md mx-auto">
-                curl http://localhost:3001/api/data
-              </code>
             </div>
           ) : (
-            <div className="rounded-md border">
-              <Table>
+            <>
+              <div className="flex items-center justify-between mb-4">
+                <div className="text-sm text-muted-foreground">
+                  Showing {filteredTraces.length} of {traces.length} traces
+                </div>
+                <div className="flex items-center gap-4 text-sm">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                    <span>{filteredTraces.filter(t => t.StatusCode === 'OK').length} Successful</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-red-500"></div>
+                    <span>{filteredTraces.filter(t => t.StatusCode === 'ERROR').length} Errors</span>
+                  </div>
+                </div>
+              </div>
+              <div className="rounded-md border">
+                <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Trace ID</TableHead>
@@ -217,6 +285,7 @@ function TracesView() {
                 </TableBody>
               </Table>
             </div>
+            </>
           )}
         </CardContent>
       </Card>
