@@ -10,96 +10,124 @@
   "fileMap": {
     "nonProjectFiles": [
       {
-        "file": "infra/charts/observability/templates/backend-service.yaml",
-        "hash": "6281343088245106875"
-      },
-      {
-        "file": "DEPLOYMENT.md",
-        "hash": "873387688743824352"
-      },
-      {
-        "file": ".nx/workspace-data/file-map.json",
-        "hash": "15718491013744013510"
-      },
-      {
-        "file": "infra/charts/observability/.helmignore",
-        "hash": "4149484917590541800"
-      },
-      {
-        "file": "replit.md",
-        "hash": "10751151350257423692"
+        "file": "infra/charts/observability/templates/backend-deployment.yaml",
+        "hash": "14494783099473265143"
       },
       {
         "file": ".nx/workspace-data/source-maps.json",
         "hash": "6472604257830709712"
       },
       {
-        "file": ".nx/workspace-data/project-graph.json",
-        "hash": "7639373001893972996"
-      },
-      {
-        "file": "infra/charts/observability/Chart.yaml",
-        "hash": "8071729306529322462"
-      },
-      {
-        "file": "package.json",
-        "hash": "1449941736186802596"
-      },
-      {
-        "file": "tsconfig.base.json",
-        "hash": "1064123073758507753"
-      },
-      {
         "file": "infra/charts/observability/Chart.lock",
         "hash": "10143180285352225487"
-      },
-      {
-        "file": "README.md",
-        "hash": "9733744240940167537"
-      },
-      {
-        "file": ".gitignore",
-        "hash": "12681850839093570034"
-      },
-      {
-        "file": "infra/charts/observability/templates/clickhouse-init.yaml",
-        "hash": "10277958834211263100"
-      },
-      {
-        "file": "infra/kind/kind-config.yaml",
-        "hash": "18095577998118114686"
-      },
-      {
-        "file": "infra/charts/observability/values.yaml",
-        "hash": "183368880880002649"
       },
       {
         "file": ".replit",
         "hash": "17280406137497808361"
       },
       {
-        "file": "infra/charts/observability/templates/backend-deployment.yaml",
-        "hash": "14494783099473265143"
+        "file": ".gitignore",
+        "hash": "12681850839093570034"
       },
       {
-        "file": "infra/charts/observability/templates/collector-deployment.yaml",
-        "hash": "9581220931571859502"
+        "file": ".nx/workspace-data/project-graph.json",
+        "hash": "2486987614830746192"
       },
       {
-        "file": "yarn.lock",
-        "hash": "3100793946315904975"
+        "file": "infra/charts/observability/.helmignore",
+        "hash": "4149484917590541800"
       },
       {
-        "file": "infra/charts/observability/templates/clickhouse-deployment.yaml",
-        "hash": "13628650198393052628"
+        "file": ".nx/workspace-data/file-map.json",
+        "hash": "13614153392357146794"
+      },
+      {
+        "file": "tsconfig.base.json",
+        "hash": "1064123073758507753"
+      },
+      {
+        "file": "README.md",
+        "hash": "9733744240940167537"
+      },
+      {
+        "file": "package.json",
+        "hash": "1449941736186802596"
+      },
+      {
+        "file": ".nx/cache/5697794255022747742.tar.gz",
+        "hash": "15406347010109902122"
       },
       {
         "file": "nx.json",
         "hash": "12596173846533887470"
       },
       {
+        "file": ".nx/cache/5697794255022747742-logs.tar.gz",
+        "hash": "17724892018858812337"
+      },
+      {
+        "file": "DEPLOYMENT.md",
+        "hash": "873387688743824352"
+      },
+      {
+        "file": "infra/charts/observability/templates/collector-deployment.yaml",
+        "hash": "8121025755005634940"
+      },
+      {
         "file": "infra/charts/observability/templates/_helpers.tpl",
         "hash": "17085127507586473771"
+      },
+      {
+        "file": "infra/charts/observability/templates/backend-service.yaml",
+        "hash": "6281343088245106875"
+      },
+      {
+        "file": "replit.md",
+        "hash": "10751151350257423692"
+      },
+      {
+        "file": "infra/kind/kind-config.yaml",
+        "hash": "18095577998118114686"
+      },
+      {
+        "file": ".nx/cache/terminalOutputs/5697794255022747742",
+        "hash": "2210566023005777998"
+      },
+      {
+        "file": ".nx/workspace-data/85F72FB5-4480-567D-B036-356E9CB20AA4.db-shm",
+        "hash": "12585258541410930744"
+      },
+      {
+        "file": ".nx/cache/run.json",
+        "hash": "11703970039478065573"
+      },
+      {
+        "file": ".nx/cache/cloud/verify.lock",
+        "hash": "6653813841626738008"
+      },
+      {
+        "file": "infra/charts/observability/templates/clickhouse-init.yaml",
+        "hash": "10277958834211263100"
+      },
+      {
+        "file": "infra/charts/observability/Chart.yaml",
+        "hash": "8071729306529322462"
+      },
+      {
+        "file": "infra/charts/observability/values.yaml",
+        "hash": "7842259058162041082"
+      },
+      {
+        "file": "infra/charts/observability/templates/clickhouse-deployment.yaml",
+        "hash": "13628650198393052628"
+      },
+      {
+        "file": ".nx/workspace-data/85F72FB5-4480-567D-B036-356E9CB20AA4.db-wal",
+        "hash": "12648399085732932028"
+      },
+      {
+        "file": "yarn.lock",
+        "hash": "3100793946315904975"
       }
     ],
     "projectFileMap": {
@@ -148,11 +176,11 @@
         },
         {
           "file": "apps/frontend/src/App.tsx",
-          "hash": "17055957861053084293"
+          "hash": "4620985554134128385"
         },
         {
           "file": "apps/frontend/src/api.ts",
-          "hash": "6821224474208076719"
+          "hash": "1224008239240855959"
         },
         {
           "file": "apps/frontend/src/components/ui/alert.tsx",
@@ -164,11 +192,19 @@
         },
         {
           "file": "apps/frontend/src/components/ui/button.tsx",
-          "hash": "15867611193771364424"
+          "hash": "2945097904554756583"
         },
         {
           "file": "apps/frontend/src/components/ui/card.tsx",
           "hash": "9572552624677261021"
+        },
+        {
+          "file": "apps/frontend/src/components/ui/checkbox.tsx",
+          "hash": "16674885031576187279"
+        },
+        {
+          "file": "apps/frontend/src/components/ui/dropdown-menu.tsx",
+          "hash": "171502028778230976"
         },
         {
           "file": "apps/frontend/src/components/ui/flame-graph.tsx",
@@ -176,7 +212,7 @@
         },
         {
           "file": "apps/frontend/src/components/ui/input.tsx",
-          "hash": "2935414922804155320"
+          "hash": "14940231740915735472"
         },
         {
           "file": "apps/frontend/src/components/ui/scroll-area.tsx",
@@ -184,7 +220,7 @@
         },
         {
           "file": "apps/frontend/src/components/ui/select.tsx",
-          "hash": "1487511510285399956"
+          "hash": "751155003483465908"
         },
         {
           "file": "apps/frontend/src/components/ui/skeleton.tsx",
@@ -192,7 +228,7 @@
         },
         {
           "file": "apps/frontend/src/components/ui/table.tsx",
-          "hash": "17028952961138543311"
+          "hash": "13619349392936582427"
         },
         {
           "file": "apps/frontend/src/components/ui/tabs.tsx",
@@ -200,7 +236,7 @@
         },
         {
           "file": "apps/frontend/src/index.css",
-          "hash": "16148253591254594983"
+          "hash": "12015632496539792336"
         },
         {
           "file": "apps/frontend/src/lib/utils.ts",
@@ -212,19 +248,23 @@
         },
         {
           "file": "apps/frontend/src/pages/LogsView.tsx",
-          "hash": "12080562105295349166"
+          "hash": "7387195150481415548"
         },
         {
           "file": "apps/frontend/src/pages/ServicesView.tsx",
-          "hash": "17838871157737809675"
+          "hash": "12915868260573971282"
+        },
+        {
+          "file": "apps/frontend/src/pages/TasksView.tsx",
+          "hash": "14039693081160951722"
         },
         {
           "file": "apps/frontend/src/pages/TraceDetailView.tsx",
-          "hash": "2880759021538135710"
+          "hash": "4854415681279567448"
         },
         {
           "file": "apps/frontend/src/pages/TracesView.tsx",
-          "hash": "15899229651827356021"
+          "hash": "7123038212687947483"
         },
         {
           "file": "apps/frontend/src/vite-env.d.ts",
@@ -232,7 +272,7 @@
         },
         {
           "file": "apps/frontend/tailwind.config.js",
-          "hash": "10048359364834966245"
+          "hash": "12495553002327652993"
         },
         {
           "file": "apps/frontend/tsconfig.json",
@@ -250,7 +290,7 @@
       "backend": [
         {
           "file": "apps/backend/Dockerfile",
-          "hash": "3464840284903395504"
+          "hash": "6815054182362026604"
         },
         {
           "file": "apps/backend/package.json",
@@ -307,7 +347,7 @@
         },
         {
           "file": "apps/backend/src/services.controller.ts",
-          "hash": "17482324477365353167"
+          "hash": "8936321204253818374"
         },
         {
           "file": "apps/backend/src/traces.controller.ts",
@@ -315,11 +355,11 @@
         },
         {
           "file": "apps/backend/src/tracing.ts",
-          "hash": "14343687600576664231"
+          "hash": "5256642893167189208"
         },
         {
           "file": "apps/backend/tsconfig.json",
-          "hash": "5371802175799064451"
+          "hash": "3663292065411897990"
         }
       ]
     }

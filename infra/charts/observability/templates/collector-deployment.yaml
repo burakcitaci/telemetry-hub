@@ -80,10 +80,7 @@ data:
         send_batch_size: 1024
     exporters:
       clickhouse:
-        endpoint: clickhouse.telemetry-hub.svc.cluster.local:9000
-        database: default
-        username: default
-        password: ""
+        endpoint: "tcp://clickhouse.telemetry-hub.svc.cluster.local:9000?database=default&username=default&password="
         timeout: 10s
         create_schema: true
         sending_queue:

@@ -12,7 +12,9 @@
     "noImplicitAny": false,
     "strictNullChecks": false,
     "strictBindCallApply": false,
-    "types": ["node"]
+    "types": ["node"],
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "**/*.spec.ts", "**/*.test.ts"]

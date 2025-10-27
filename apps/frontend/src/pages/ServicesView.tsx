@@ -204,7 +204,7 @@ function ServicesView() {
                   <div className="flex items-center gap-3">
                     <Clock className="h-5 w-5 text-green-500" />
                     <div>
-                      <div className="text-2xl font-bold font-mono">{formatDuration(metrics.avg_duration)}</div>
+                      <div className="text-2xl font-bold">{formatDuration(metrics.avg_duration)}</div>
                       <div className="text-sm text-muted-foreground">Average Duration</div>
                     </div>
                   </div>
@@ -266,25 +266,25 @@ function ServicesView() {
                       <TableBody>
                         <TableRow>
                           <TableCell className="font-medium">P50 Latency</TableCell>
-                          <TableCell className="text-right font-mono">
+                          <TableCell className="text-right">
                             {formatDuration(metrics.p50_duration)}
                           </TableCell>
                         </TableRow>
                         <TableRow>
                           <TableCell className="font-medium">P95 Latency</TableCell>
-                          <TableCell className="text-right font-mono">
+                          <TableCell className="text-right">
                             {formatDuration(metrics.p95_duration)}
                           </TableCell>
                         </TableRow>
                         <TableRow>
                           <TableCell className="font-medium">P99 Latency</TableCell>
-                          <TableCell className="text-right font-mono">
+                          <TableCell className="text-right">
                             {formatDuration(metrics.p99_duration)}
                           </TableCell>
                         </TableRow>
                         <TableRow>
                           <TableCell className="font-medium">Error Count</TableCell>
-                          <TableCell className="text-right font-mono">
+                          <TableCell className="text-right">
                             {metrics.error_count}
                           </TableCell>
                         </TableRow>

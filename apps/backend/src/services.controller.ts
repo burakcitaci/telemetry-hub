@@ -16,7 +16,7 @@ export class ServicesController {
   }
 
   @Get('health')
-  getHealth() {
+  async getHealth() {
     return { status: 'ok', service: 'backend-api' };
   }
 }

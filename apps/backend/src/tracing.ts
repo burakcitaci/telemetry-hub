@@ -14,7 +14,7 @@ import * as os from 'os';
 // Get OTEL collector endpoint from environment variables
 // Use HTTP port 4318 for HTTP exporters
 const OTEL_EXPORTER_OTLP_ENDPOINT =
-  process.env.OTEL_EXPORTER_OTLP_ENDPOINT || 'http://opentelemetry-collector.telemetry-hub.svc.cluster.local:4318';
+  process.env.OTEL_EXPORTER_OTLP_ENDPOINT || 'http://localhost:4318';
 const otlpTracesUrl = `${OTEL_EXPORTER_OTLP_ENDPOINT}/v1/traces`;
 const otlpLogsUrl = `${OTEL_EXPORTER_OTLP_ENDPOINT}/v1/logs`;
 const serviceName = process.env.OTEL_SERVICE_NAME || 'backend-service';

@@ -221,7 +221,7 @@ function LogsView() {
                     >
                       <div className="flex items-center gap-2 min-w-0 flex-shrink-0">
                         <Clock className="h-3 w-3 text-muted-foreground" />
-                        <span className="text-xs text-muted-foreground font-mono">
+                        <span className="text-xs text-muted-foreground">
                           {new Date(log.Timestamp).toLocaleTimeString()}
                         </span>
                       </div>
@@ -237,7 +237,7 @@ function LogsView() {
                       </div>
 
                       <div className="flex-1 min-w-0">
-                        <div className="text-sm font-mono break-all">
+                        <div className="text-sm break-all">
                           {log.Body}
                         </div>
                       </div>

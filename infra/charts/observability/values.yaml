@@ -45,7 +45,7 @@ backend:
     - name: CLICKHOUSE_HOST
       value: "clickhouse.telemetry-hub.svc.cluster.local"
     - name: OTEL_EXPORTER_OTLP_ENDPOINT
-      value: "http://opentelemetry-collector.telemetry-hub.svc.cluster.local:4317"
+      value: "http://opentelemetry-collector.telemetry-hub.svc.cluster.local:4318"
     - name: OTEL_SERVICE_NAME
       value: "backend-service"
 
