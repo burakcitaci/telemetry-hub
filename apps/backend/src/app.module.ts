@@ -1,15 +1,37 @@
-import { Module } from '@nestjs/common';
-import { DataController } from './data.controller';
-import { TracesController } from './traces.controller';
-import { LogsController } from './logs.controller';
-import { ServicesController } from './services.controller';
-import { EventsController } from './events.controller';
-import { DataService } from './data.service';
-import { ClickhouseService } from './clickhouse.service';
+import { Module } from "@nestjs/common";
+import { ConfigModule, ConfigService } from "@nestjs/config";
+import appConfig from "./config/app.config";
+import corsConfig from "./config/cors.config";
+import clickhouseConfig from "./config/clickhouse.config";
+import otelConfig from "./config/otel.config";
+import validationConfig from "./config/validation.config";
+import loggerConfig from "./config/logger.config";
+import healthConfig from "./config/health.config";
+import { TelemetryModule } from "./modules/telemetry/telemetry.module";
+import { HealthModule } from "./modules/health/health.module";
 
 @Module({
-  imports: [],
-  controllers: [DataController, TracesController, LogsController, ServicesController, EventsController],
-  providers: [DataService, ClickhouseService],
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      load: [
+        appConfig,
+        corsConfig,
+        clickhouseConfig,
+        otelConfig,
+        validationConfig,
+        loggerConfig,
+        healthConfig,
+      ],
+      envFilePath: [
+        `.env.${process.env.NODE_ENV || "development"}.local`,
+        `.env.${process.env.NODE_ENV || "development"}`,
+        ".env.local",
+        ".env",
+      ],
+    }),
+    TelemetryModule,
+    HealthModule,
+  ],
 })
 export class AppModule {}

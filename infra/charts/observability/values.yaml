@@ -20,7 +20,7 @@ backend:
   # Health checks
   livenessProbe:
     httpGet:
-      path: /api/health
+      path: /health
       port: 3001
     initialDelaySeconds: 10
     periodSeconds: 10
@@ -29,7 +29,7 @@ backend:
 
   readinessProbe:
     httpGet:
-      path: /api/health
+      path: /health
       port: 3001
     initialDelaySeconds: 5
     periodSeconds: 5
@@ -40,14 +40,22 @@ backend:
   env:
     - name: PORT
       value: "3001"
+    - name: HOST
+      value: "0.0.0.0"
     - name: NODE_ENV
       value: "production"
     - name: CLICKHOUSE_HOST
       value: "clickhouse.telemetry-hub.svc.cluster.local"
+    - name: CLICKHOUSE_PORT
+      value: "8123"
+    - name: CLICKHOUSE_DATABASE
+      value: "default"
     - name: OTEL_EXPORTER_OTLP_ENDPOINT
       value: "http://opentelemetry-collector.telemetry-hub.svc.cluster.local:4318"
     - name: OTEL_SERVICE_NAME
       value: "backend-service"
+    - name: OTEL_SERVICE_VERSION
+      value: "1.0.0"
 
   # Resource management
   resources:
@@ -113,7 +121,7 @@ clickhouse:
       memory: "512Mi"
       cpu: "250m"
     limits:
-      memory: "1Gi"
+      memory: "2Gi"
       cpu: "1000m"
 
   # Storage

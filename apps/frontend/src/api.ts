@@ -10,29 +10,30 @@ export const getTraces = async (limit: number = 100, service?: string) => {
   const params: any = { limit };
   if (service) params.service = service;
   const response = await api.get('/traces', { params });
-  return response.data;
+  // Extract data array from transformed response wrapper
+  return Array.isArray(response.data) ? response.data : (response.data.data || []);
 };
 
 export const getTraceById = async (traceId: string) => {
   const response = await api.get(`/traces/${traceId}`);
-  return response.data;
+  return Array.isArray(response.data) ? response.data : (response.data.data || []);
 };
 
 export const getLogs = async (limit: number = 100, service?: string) => {
   const params: any = { limit };
   if (service) params.service = service;
   const response = await api.get('/logs', { params });
-  return response.data;
+  return Array.isArray(response.data) ? response.data : (response.data.data || []);
 };
 
 export const getServices = async () => {
   const response = await api.get('/services');
-  return response.data;
+  return Array.isArray(response.data) ? response.data : (response.data.data || []);
 };
 
 export const getServiceMetrics = async (service: string) => {
   const response = await api.get(`/services/${service}/metrics`);
-  return response.data;
+  return response.data.data || response.data;
 };
 
 export const createEventSource = () => {

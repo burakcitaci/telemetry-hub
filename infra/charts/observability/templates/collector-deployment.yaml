@@ -74,34 +74,43 @@ data:
             endpoint: 0.0.0.0:4317
           http:
             endpoint: 0.0.0.0:4318
+
     processors:
       batch:
-        timeout: 1s
-        send_batch_size: 1024
+        timeout: 10s
+        send_batch_size: 512
+      memory_limiter:
+        check_interval: 1s
+        limit_mib: 256
+        spike_limit_mib: 64
+
     exporters:
       clickhouse:
-        endpoint: "tcp://clickhouse.telemetry-hub.svc.cluster.local:9000?database=default&username=default&password="
-        timeout: 10s
+        endpoint: "tcp://clickhouse.telemetry-hub.svc.cluster.local:9000?database=default"
+        timeout: 30s
         create_schema: true
+        traces_table_name: otel_traces
+        logs_table_name: otel_logs
+        metrics_table_name: otel_metrics
         sending_queue:
-          queue_size: 1000
+          queue_size: 5000
+          num_consumers: 10
         retry_on_failure:
           enabled: true
           initial_interval: 5s
           max_interval: 30s
-          max_elapsed_time: 120s
-        traces_table_name: otel_traces
-        logs_table_name: otel_logs
-        metrics_table_name: otel_metrics
+          max_elapsed_time: 300s
+      
       debug:
-        verbosity: normal
+        verbosity: detailed
+
     service:
       pipelines:
         traces:
           receivers: [otlp]
-          processors: [batch]
+          processors: [memory_limiter, batch]
           exporters: [clickhouse, debug]
         logs:
           receivers: [otlp]
-          processors: [batch]
+          processors: [memory_limiter, batch]
           exporters: [clickhouse, debug]

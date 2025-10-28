@@ -7,15 +7,29 @@
     "target": "ES2022",
     "outDir": "./dist",
     "baseUrl": "./",
-    "incremental": true,
+    "moduleResolution": "node",
+    "incremental": false,
+    "skipLibCheck": true,
+    "noEmit": false,
+    "skipDefaultLibCheck": true,
+    "allowJs": true,
     "strict": false,
     "noImplicitAny": false,
     "strictNullChecks": false,
     "strictBindCallApply": false,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
     "types": ["node"],
     "experimentalDecorators": true,
-    "emitDecoratorMetadata": true
+    "emitDecoratorMetadata": true,
+    "noImplicitReturns": false,
+    "noFallthroughCasesInSwitch": false,
+    "lib": ["ES2022", "dom"]
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "**/*.spec.ts", "**/*.test.ts"]
+  "exclude": ["node_modules", "dist", "**/*.spec.ts", "**/*.test.ts"],
+  "ts-node": {
+    "transpileOnly": true,
+    "files": true
+  }
 }

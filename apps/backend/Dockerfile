@@ -29,9 +29,14 @@ WORKDIR /app
 # Copy node_modules from builder stage (which has all dependencies)
 COPY --from=builder /app/node_modules ./node_modules
 
-# Copy built backend from builder stage (Nx builds to apps/backend/dist/)
-COPY --from=builder /app/apps/backend/dist ./dist
+# Copy built backend from builder stage
+# Note: TypeScript build outputs to apps/backend/dist/apps/backend/src/
+COPY --from=builder /app/apps/backend/dist/apps/backend/src ./dist
 
 EXPOSE 3001
+
+ENV PORT=3001
+ENV HOST=0.0.0.0
+ENV NODE_ENV=production
 
 CMD ["node", "dist/main.js"]

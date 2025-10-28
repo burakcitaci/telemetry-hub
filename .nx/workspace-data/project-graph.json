@@ -769,6 +769,15 @@
         "hash": "sha512-Z7C/xXCiGWsg0KuKsHTKJxbWhpI3Vs5GwLfOean7MGyVFGqdRgBbAjOCh6u4bbjPc/8MJ2pZmK/0DLdCbivLDA=="
       }
     },
+    "npm:@microsoft/tsdoc": {
+      "type": "npm",
+      "name": "npm:@microsoft/tsdoc",
+      "data": {
+        "version": "0.15.1",
+        "packageName": "@microsoft/tsdoc",
+        "hash": "sha512-4aErSrCR/On/e5G2hDP0wjooqDdauzEbIq8hIkIe5pXV0rtWJZvdCEKL0ykZxex+IxIwBp0eGeV48hQN07dXtw=="
+      }
+    },
     "npm:@napi-rs/wasm-runtime": {
       "type": "npm",
       "name": "npm:@napi-rs/wasm-runtime",
@@ -796,6 +805,15 @@
         "hash": "sha512-lwlObwGgIlpXSXYOTpfzdCepUyWomz6bv9qzGzzvpgspUxkj0Uz0fUJcvD44V8Ps7QhKW3lZBoYbXrH25UZrbA=="
       }
     },
+    "npm:@nestjs/config": {
+      "type": "npm",
+      "name": "npm:@nestjs/config",
+      "data": {
+        "version": "4.0.2",
+        "packageName": "@nestjs/config",
+        "hash": "sha512-McMW6EXtpc8+CwTUwFdg6h7dYcBUpH5iUILCclAsa+MbCEvC9ZKu4dCHRlJqALuhjLw97pbQu62l4+wRwGeZqA=="
+      }
+    },
     "npm:@nestjs/core": {
       "type": "npm",
       "name": "npm:@nestjs/core",
@@ -805,6 +823,15 @@
         "hash": "sha512-TyXFOwjhHv/goSgJ8i20K78jwTM0iSpk9GBcC2h3mf4MxNy+znI8m7nWjfoACjTkb89cTwDQetfTHtSfGLLaiA=="
       }
     },
+    "npm:@nestjs/mapped-types": {
+      "type": "npm",
+      "name": "npm:@nestjs/mapped-types",
+      "data": {
+        "version": "2.1.0",
+        "packageName": "@nestjs/mapped-types",
+        "hash": "sha512-W+n+rM69XsFdwORF11UqJahn4J3xi4g/ZEOlJNL6KoW5ygWSmBB2p0S2BZ4FQeS/NDH72e6xIcu35SfJnE8bXw=="
+      }
+    },
     "npm:@nestjs/platform-express": {
       "type": "npm",
       "name": "npm:@nestjs/platform-express",
@@ -812,6 +839,15 @@
         "version": "11.1.7",
         "packageName": "@nestjs/platform-express",
         "hash": "sha512-5T+GLdvTiGPKB4/P4PM9ftKUKNHJy8ThEFhZA3vQnXVL7Vf0rDr07TfVTySVu+XTh85m1lpFVuyFM6u6wLNsRA=="
+      }
+    },
+    "npm:@nestjs/swagger": {
+      "type": "npm",
+      "name": "npm:@nestjs/swagger",
+      "data": {
+        "version": "11.2.1",
+        "packageName": "@nestjs/swagger",
+        "hash": "sha512-1MS7xf0pzc1mofG53xrrtrurnziafPUHkqzRm4YUVPA/egeiMaSerQBD/feiAeQ2BnX0WiLsTX4HQFO0icvOjQ=="
       }
     },
     "npm:@nuxt/opencollective": {
@@ -2182,6 +2218,15 @@
         "hash": "sha512-TAcgQh2sSkykPRWLrdyy2AiceMckNf5loITqXxFI5VuQjS5tSuw3WlwdN8qv8vzjLAUTvYaH/mVjSFpbkFbpTg=="
       }
     },
+    "npm:@scarf/scarf": {
+      "type": "npm",
+      "name": "npm:@scarf/scarf",
+      "data": {
+        "version": "1.4.0",
+        "packageName": "@scarf/scarf",
+        "hash": "sha512-xxeapPiUXdZAE3che6f3xogoJPeZgig6omHEy1rIY5WVsB3H2BHNnZH+gHG6x91SCWyQCzWGsuL2Hh3ClO5/qQ=="
+      }
+    },
     "npm:@sinclair/typebox": {
       "type": "npm",
       "name": "npm:@sinclair/typebox",
@@ -2749,6 +2794,15 @@
         "hash": "sha512-zFDAD+tlpf2r4asuHEj0XH6pY6i0g5NeAHPn+15wk3BV6JA69eERFXC1gyGThDkVa1zCyKr5jox1+2LbV/AMLg=="
       }
     },
+    "npm:@types/validator": {
+      "type": "npm",
+      "name": "npm:@types/validator",
+      "data": {
+        "version": "13.15.4",
+        "packageName": "@types/validator",
+        "hash": "sha512-LSFfpSnJJY9wbC0LQxgvfb+ynbHftFo0tMsFOl/J4wexLnYMmDSPaj2ZyDv3TkfL1UePxPrxOWJfbiRS8mQv7A=="
+      }
+    },
     "npm:@vitejs/plugin-react": {
       "type": "npm",
       "name": "npm:@vitejs/plugin-react",
@@ -3080,6 +3134,24 @@
         "version": "1.4.3",
         "packageName": "cjs-module-lexer",
         "hash": "sha512-9z8TZaGM1pfswYeXrUpzPrkx8UnWYdhJclsiYMm6x/w5+nN+8Tf/LnAgfLGQCm59qAOxU8WwHEq2vNwF6i4j+Q=="
+      }
+    },
+    "npm:class-transformer": {
+      "type": "npm",
+      "name": "npm:class-transformer",
+      "data": {
+        "version": "0.5.1",
+        "packageName": "class-transformer",
+        "hash": "sha512-SQa1Ws6hUbfC98vKGxZH3KFY0Y1lm5Zm0SY8XX9zbK7FJCyVEac3ATW0RIpwzW+oOfmHE5PMPufDG9hCfoEOMw=="
+      }
+    },
+    "npm:class-validator": {
+      "type": "npm",
+      "name": "npm:class-validator",
+      "data": {
+        "version": "0.14.2",
+        "packageName": "class-validator",
+        "hash": "sha512-3kMVRF2io8N8pY1IFIXlho9r8IPUUIfHe2hYVtiebvAzU2XeQFXTv+XI4WX+TnXmtwXMDcjngcpkiPM0O9PvLw=="
       }
     },
     "npm:class-variance-authority": {
@@ -3464,18 +3536,18 @@
       "type": "npm",
       "name": "npm:dotenv-expand",
       "data": {
+        "version": "12.0.1",
+        "packageName": "dotenv-expand",
+        "hash": "sha512-LaKRbou8gt0RNID/9RoI+J2rvXsBRPMV7p+ElHlPhcSARbCPDYcYG2s1TIzAfWv4YSgyY5taidWzzs31lNV3yQ=="
+      }
+    },
+    "npm:dotenv-expand@11.0.7": {
+      "type": "npm",
+      "name": "npm:dotenv-expand@11.0.7",
+      "data": {
         "version": "11.0.7",
         "packageName": "dotenv-expand",
         "hash": "sha512-zIHwmZPRshsCdpMDyVsqGmgyP0yT8GAgXUnkdAoJisxvf33k7yO6OuoKmcTGuXPWSsm8Oh88nZicRLA9Y0rUeA=="
-      }
-    },
-    "npm:dotenv@16.6.1": {
-      "type": "npm",
-      "name": "npm:dotenv@16.6.1",
-      "data": {
-        "version": "16.6.1",
-        "packageName": "dotenv",
-        "hash": "sha512-uBq4egWHTcTt33a72vpSG0z3HnPuIl6NqYcTrKEg2azoEyl2hpW0zqlxysq2pK9HlDIHyHyakeYaYnSAwd8bow=="
       }
     },
     "npm:dotenv": {
@@ -3485,6 +3557,15 @@
         "version": "16.4.7",
         "packageName": "dotenv",
         "hash": "sha512-47qPchRCykZC03FhkYAhrvwU4xDBFIj1QPqaarj6mdM/hgUzfPHcpkHJOn3mJAufFeeAxAzeGsr5X0M4k6fLZQ=="
+      }
+    },
+    "npm:dotenv@16.6.1": {
+      "type": "npm",
+      "name": "npm:dotenv@16.6.1",
+      "data": {
+        "version": "16.6.1",
+        "packageName": "dotenv",
+        "hash": "sha512-uBq4egWHTcTt33a72vpSG0z3HnPuIl6NqYcTrKEg2azoEyl2hpW0zqlxysq2pK9HlDIHyHyakeYaYnSAwd8bow=="
       }
     },
     "npm:dunder-proto": {
@@ -4153,6 +4234,15 @@
         "hash": "sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ=="
       }
     },
+    "npm:js-yaml@4.1.0": {
+      "type": "npm",
+      "name": "npm:js-yaml@4.1.0",
+      "data": {
+        "version": "4.1.0",
+        "packageName": "js-yaml",
+        "hash": "sha512-wpxZs9NoxZaJESJGIZTyDEaYpl0FKSA+FB9aJiyemKhMwkxQg63h4T1KJgUGHpTqPDNRcmmYLugrRjJlBtWvRA=="
+      }
+    },
     "npm:js-yaml": {
       "type": "npm",
       "name": "npm:js-yaml",
@@ -4196,6 +4286,15 @@
         "version": "3.2.0",
         "packageName": "jsonc-parser",
         "hash": "sha512-gfFQZrcTc8CnKXp6Y4/CBT3fTc0OVuDofpre4aEeEpSBPV5X5v4+Vmx+8snU7RLPrNHPKSgLxGo9YuQzz20o+w=="
+      }
+    },
+    "npm:libphonenumber-js": {
+      "type": "npm",
+      "name": "npm:libphonenumber-js",
+      "data": {
+        "version": "1.12.25",
+        "packageName": "libphonenumber-js",
+        "hash": "sha512-u90tUu/SEF8b+RaDKCoW7ZNFDakyBtFlX1ex3J+VH+ElWes/UaitJLt/w4jGu8uAE41lltV/s+kMVtywcMEg7g=="
       }
     },
     "npm:lightningcss-android-arm64@1.30.2": {
@@ -4331,6 +4430,15 @@
         "version": "4.3.0",
         "packageName": "lodash.camelcase",
         "hash": "sha512-TwuEnCnxbc3rAvhf/LbG7tJUDzhqXyFnv3dtzLOPgCG/hODL7WFnsbwktkD7yUV0RrreP/l1PALq/YSg6VvjlA=="
+      }
+    },
+    "npm:lodash": {
+      "type": "npm",
+      "name": "npm:lodash",
+      "data": {
+        "version": "4.17.21",
+        "packageName": "lodash",
+        "hash": "sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg=="
       }
     },
     "npm:log-symbols": {
@@ -5269,6 +5377,15 @@
         "hash": "sha512-qpCAvRl9stuOHveKsn7HncJRvv501qIacKzQlO/+Lwxc9+0q2wLyv4Dfvt80/DPn2pqOBsJdDiogXGR9+OvwRw=="
       }
     },
+    "npm:swagger-ui-dist": {
+      "type": "npm",
+      "name": "npm:swagger-ui-dist",
+      "data": {
+        "version": "5.29.4",
+        "packageName": "swagger-ui-dist",
+        "hash": "sha512-gJFDz/gyLOCQtWwAgqs6Rk78z9ONnqTnlW11gimG9nLap8drKa3AJBKpzIQMIjl5PD2Ix+Tn+mc/tfoT2tgsng=="
+      }
+    },
     "npm:tailwind-merge": {
       "type": "npm",
       "name": "npm:tailwind-merge",
@@ -5537,6 +5654,15 @@
         "version": "3.0.1",
         "packageName": "v8-compile-cache-lib",
         "hash": "sha512-wa7YjyUGfNZngI/vtK0UHAN+lgDCxBPCylVXGp0zu59Fz5aiGtNXaq3DhIov063MorB+VfufLh3JlF2KdTK3xg=="
+      }
+    },
+    "npm:validator": {
+      "type": "npm",
+      "name": "npm:validator",
+      "data": {
+        "version": "13.15.20",
+        "packageName": "validator",
+        "hash": "sha512-KxPOq3V2LmfQPP4eqf3Mq/zrT0Dqp2Vmx2Bn285LwVahLc+CsxOM0crBHczm8ijlcjZ0Q5Xd6LW3z3odTPnlrw=="
       }
     },
     "npm:vary": {
@@ -5831,12 +5957,22 @@
       },
       {
         "source": "backend",
+        "target": "npm:@nestjs/config",
+        "type": "static"
+      },
+      {
+        "source": "backend",
         "target": "npm:@nestjs/core",
         "type": "static"
       },
       {
         "source": "backend",
         "target": "npm:@nestjs/platform-express",
+        "type": "static"
+      },
+      {
+        "source": "backend",
+        "target": "npm:@nestjs/swagger",
         "type": "static"
       },
       {
@@ -5882,6 +6018,16 @@
       {
         "source": "backend",
         "target": "npm:@opentelemetry/semantic-conventions",
+        "type": "static"
+      },
+      {
+        "source": "backend",
+        "target": "npm:class-transformer",
+        "type": "static"
+      },
+      {
+        "source": "backend",
+        "target": "npm:class-validator",
         "type": "static"
       },
       {
@@ -6387,6 +6533,23 @@
         "type": "static"
       }
     ],
+    "npm:@nestjs/config": [
+      {
+        "source": "npm:@nestjs/config",
+        "target": "npm:dotenv",
+        "type": "static"
+      },
+      {
+        "source": "npm:@nestjs/config",
+        "target": "npm:dotenv-expand",
+        "type": "static"
+      },
+      {
+        "source": "npm:@nestjs/config",
+        "target": "npm:lodash",
+        "type": "static"
+      }
+    ],
     "npm:@nestjs/core": [
       {
         "source": "npm:@nestjs/core",
@@ -6443,6 +6606,38 @@
       {
         "source": "npm:@nestjs/platform-express",
         "target": "npm:tslib",
+        "type": "static"
+      }
+    ],
+    "npm:@nestjs/swagger": [
+      {
+        "source": "npm:@nestjs/swagger",
+        "target": "npm:@microsoft/tsdoc",
+        "type": "static"
+      },
+      {
+        "source": "npm:@nestjs/swagger",
+        "target": "npm:@nestjs/mapped-types",
+        "type": "static"
+      },
+      {
+        "source": "npm:@nestjs/swagger",
+        "target": "npm:js-yaml@4.1.0",
+        "type": "static"
+      },
+      {
+        "source": "npm:@nestjs/swagger",
+        "target": "npm:lodash",
+        "type": "static"
+      },
+      {
+        "source": "npm:@nestjs/swagger",
+        "target": "npm:path-to-regexp",
+        "type": "static"
+      },
+      {
+        "source": "npm:@nestjs/swagger",
+        "target": "npm:swagger-ui-dist",
         "type": "static"
       }
     ],
@@ -9149,6 +9344,23 @@
         "type": "static"
       }
     ],
+    "npm:class-validator": [
+      {
+        "source": "npm:class-validator",
+        "target": "npm:@types/validator",
+        "type": "static"
+      },
+      {
+        "source": "npm:class-validator",
+        "target": "npm:libphonenumber-js",
+        "type": "static"
+      },
+      {
+        "source": "npm:class-validator",
+        "target": "npm:validator",
+        "type": "static"
+      }
+    ],
     "npm:class-variance-authority": [
       {
         "source": "npm:class-variance-authority",
@@ -9314,6 +9526,13 @@
     "npm:dotenv-expand": [
       {
         "source": "npm:dotenv-expand",
+        "target": "npm:dotenv@16.6.1",
+        "type": "static"
+      }
+    ],
+    "npm:dotenv-expand@11.0.7": [
+      {
+        "source": "npm:dotenv-expand@11.0.7",
         "target": "npm:dotenv@16.6.1",
         "type": "static"
       }
@@ -9980,6 +10199,13 @@
         "type": "static"
       }
     ],
+    "npm:js-yaml@4.1.0": [
+      {
+        "source": "npm:js-yaml@4.1.0",
+        "target": "npm:argparse",
+        "type": "static"
+      }
+    ],
     "npm:js-yaml": [
       {
         "source": "npm:js-yaml",
@@ -10219,7 +10445,7 @@
       },
       {
         "source": "npm:nx",
-        "target": "npm:dotenv-expand",
+        "target": "npm:dotenv-expand@11.0.7",
         "type": "static"
       },
       {
@@ -11199,6 +11425,13 @@
         "type": "static"
       }
     ],
+    "npm:swagger-ui-dist": [
+      {
+        "source": "npm:swagger-ui-dist",
+        "target": "npm:@scarf/scarf",
+        "type": "static"
+      }
+    ],
     "npm:tar-stream": [
       {
         "source": "npm:tar-stream",
@@ -11591,5 +11824,5 @@
   },
   "version": "6.0",
   "errors": [],
-  "computedAt": 1761598633496
+  "computedAt": 1761653677734
 }
