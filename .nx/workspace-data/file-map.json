@@ -10,156 +10,156 @@
   "fileMap": {
     "nonProjectFiles": [
       {
-        "file": "tsconfig.base.json",
-        "hash": "1064123073758507753"
-      },
-      {
-        "file": ".nx/workspace-data/parsed-lock-file.json",
-        "hash": "18309265689070933326"
-      },
-      {
-        "file": "infra/charts/observability/templates/backend-service.yaml",
-        "hash": "6281343088245106875"
-      },
-      {
-        "file": "infra/kind/kind-config.yaml",
-        "hash": "18095577998118114686"
-      },
-      {
-        "file": ".nx/cache/terminalOutputs/16098620552964734481",
-        "hash": "8790377082759355846"
-      },
-      {
-        "file": ".nx/workspace-data/lockfile.hash",
-        "hash": "14036416301973688037"
-      },
-      {
-        "file": ".nx/workspace-data/nx_files.nxt",
-        "hash": "3828746334802591088"
-      },
-      {
-        "file": "DARK_MODE_SETUP.md",
-        "hash": "9232030804837196827"
-      },
-      {
-        "file": ".nx/cache/16098620552964734481.tar.gz",
-        "hash": "3590582788311677392"
-      },
-      {
-        "file": ".nx/cache/cloud/2510.27.3/index.js",
-        "hash": "13338655137761433805"
-      },
-      {
-        "file": "infra/charts/observability/templates/_helpers.tpl",
-        "hash": "17085127507586473771"
-      },
-      {
-        "file": ".nx/cache/cloud/2510.27.3/lib/core/commands/fix-ci/utilities-mcp-server.js",
-        "hash": "13261556293551467697"
+        "file": ".gitignore",
+        "hash": "12681850839093570034"
       },
       {
         "file": "infra/charts/observability/Chart.lock",
         "hash": "10143180285352225487"
       },
       {
-        "file": "infra/charts/observability/.helmignore",
-        "hash": "4149484917590541800"
-      },
-      {
-        "file": ".nx/workspace-data/85F72FB5-4480-567D-B036-356E9CB20AA4.db-wal",
-        "hash": "1336481923697485283"
-      },
-      {
-        "file": "infra/charts/observability/Chart.yaml",
-        "hash": "8071729306529322462"
-      },
-      {
-        "file": ".nx/workspace-data/file-map.json",
-        "hash": "8283550086457833223"
-      },
-      {
-        "file": ".nx/workspace-data/project-graph.json",
-        "hash": "6218957463133322200"
-      },
-      {
-        "file": "README.md",
-        "hash": "9733744240940167537"
-      },
-      {
-        "file": "infra/charts/observability/templates/backend-deployment.yaml",
-        "hash": "14494783099473265143"
-      },
-      {
-        "file": ".nx/workspace-data/source-maps.json",
-        "hash": "6472604257830709712"
-      },
-      {
-        "file": "infra/charts/observability/templates/clickhouse-init.yaml",
-        "hash": "11628310082947022965"
-      },
-      {
-        "file": ".nx/workspace-data/85F72FB5-4480-567D-B036-356E9CB20AA4.db",
-        "hash": "6240709564311096908"
-      },
-      {
-        "file": ".replit",
-        "hash": "17280406137497808361"
-      },
-      {
-        "file": "DEPLOYMENT.md",
-        "hash": "873387688743824352"
-      },
-      {
-        "file": "replit.md",
-        "hash": "10751151350257423692"
+        "file": "infra/charts/observability/templates/backend-service.yaml",
+        "hash": "6281343088245106875"
       },
       {
         "file": ".nx/cache/16098620552964734481-logs.tar.gz",
         "hash": "17419967330643073015"
       },
       {
-        "file": "nx.json",
-        "hash": "12596173846533887470"
-      },
-      {
-        "file": ".gitignore",
-        "hash": "12681850839093570034"
-      },
-      {
-        "file": "app极/backend/src/common/logger极logger.service.ts",
-        "hash": "7958297216101447316"
-      },
-      {
-        "file": ".nx/workspace-data/85F72FB5-4480-567D-B036-356E9CB20AA4.db-shm",
-        "hash": "5529985181227099335"
-      },
-      {
         "file": "infra/charts/observability/templates/clickhouse-deployment.yaml",
         "hash": "13628650198393052628"
       },
       {
-        "file": "FIXES_SUMMARY.md",
-        "hash": "7033745256583050188"
-      },
-      {
-        "file": ".nx/cache/run.json",
-        "hash": "10808748130277778450"
-      },
-      {
-        "file": "package.json",
-        "hash": "1449941736186802596"
+        "file": "infra/charts/observability/templates/_helpers.tpl",
+        "hash": "17085127507586473771"
       },
       {
         "file": "infra/charts/observability/templates/collector-deployment.yaml",
         "hash": "582429271287981115"
       },
       {
+        "file": "nx.json",
+        "hash": "12596173846533887470"
+      },
+      {
+        "file": "DARK_MODE_SETUP.md",
+        "hash": "9232030804837196827"
+      },
+      {
+        "file": ".nx/workspace-data/85F72FB5-4480-567D-B036-356E9CB20AA4.db-shm",
+        "hash": "6192772289663069832"
+      },
+      {
+        "file": ".nx/workspace-data/85F72FB5-4480-567D-B036-356E9CB20AA4.db-wal",
+        "hash": "13555805961159351969"
+      },
+      {
+        "file": "README.md",
+        "hash": "9733744240940167537"
+      },
+      {
+        "file": ".nx/workspace-data/parsed-lock-file.json",
+        "hash": "18309265689070933326"
+      },
+      {
+        "file": ".nx/cache/terminalOutputs/16098620552964734481",
+        "hash": "8790377082759355846"
+      },
+      {
+        "file": "infra/charts/observability/templates/clickhouse-init.yaml",
+        "hash": "11628310082947022965"
+      },
+      {
         "file": "yarn.lock",
         "hash": "3055917216857646053"
       },
       {
+        "file": "infra/charts/observability/templates/backend-deployment.yaml",
+        "hash": "14494783099473265143"
+      },
+      {
+        "file": ".nx/workspace-data/project-graph.json",
+        "hash": "1690445159641990302"
+      },
+      {
+        "file": "FIXES_SUMMARY.md",
+        "hash": "7033745256583050188"
+      },
+      {
+        "file": ".replit",
+        "hash": "17280406137497808361"
+      },
+      {
+        "file": "package.json",
+        "hash": "1449941736186802596"
+      },
+      {
+        "file": "infra/kind/kind-config.yaml",
+        "hash": "18095577998118114686"
+      },
+      {
+        "file": ".nx/cache/16098620552964734481.tar.gz",
+        "hash": "3590582788311677392"
+      },
+      {
+        "file": ".nx/workspace-data/nx_files.nxt",
+        "hash": "3828746334802591088"
+      },
+      {
+        "file": ".nx/cache/run.json",
+        "hash": "10808748130277778450"
+      },
+      {
+        "file": ".nx/workspace-data/source-maps.json",
+        "hash": "6472604257830709712"
+      },
+      {
+        "file": "tsconfig.base.json",
+        "hash": "1064123073758507753"
+      },
+      {
+        "file": "infra/charts/observability/.helmignore",
+        "hash": "4149484917590541800"
+      },
+      {
+        "file": ".nx/cache/cloud/2510.27.3/index.js",
+        "hash": "13338655137761433805"
+      },
+      {
+        "file": ".nx/workspace-data/file-map.json",
+        "hash": "5887325015751925425"
+      },
+      {
+        "file": ".nx/cache/cloud/2510.27.3/lib/core/commands/fix-ci/utilities-mcp-server.js",
+        "hash": "13261556293551467697"
+      },
+      {
+        "file": "replit.md",
+        "hash": "10751151350257423692"
+      },
+      {
+        "file": ".nx/workspace-data/lockfile.hash",
+        "hash": "14036416301973688037"
+      },
+      {
         "file": "infra/charts/observability/values.yaml",
         "hash": "11513103241006379437"
+      },
+      {
+        "file": "infra/charts/observability/Chart.yaml",
+        "hash": "8071729306529322462"
+      },
+      {
+        "file": "app极/backend/src/common/logger极logger.service.ts",
+        "hash": "7958297216101447316"
+      },
+      {
+        "file": ".nx/workspace-data/85F72FB5-4480-567D-B036-356E9CB20AA4.db",
+        "hash": "6240709564311096908"
+      },
+      {
+        "file": "DEPLOYMENT.md",
+        "hash": "873387688743824352"
       }
     ],
     "projectFileMap": {
