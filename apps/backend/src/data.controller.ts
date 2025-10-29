@@ -26,6 +26,7 @@ export class DataController {
           recordCount: processed.items.length,
         });
         
+        span.setStatus({ code: 1, message: 'Success' });
         this.logger.log(`Request completed with ${processed.items.length} items`);
         
         return processed;

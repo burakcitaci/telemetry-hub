@@ -1,4 +1,4 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+/* import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { createClient, ClickHouseClient } from '@clickhouse/client';
 
 @Injectable()
@@ -191,3 +191,4 @@ export class ClickhouseService implements OnModuleInit {
     return this.query(query);
   }
 }
+ */

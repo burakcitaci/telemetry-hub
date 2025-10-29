@@ -36,6 +36,7 @@ function TracesView() {
   const [timeRange, setTimeRange] = useState<string>('15m');
   const navigate = useNavigate();
 
+
   useEffect(() => {
     loadTraces();
 
@@ -95,7 +96,7 @@ function TracesView() {
     const okTraces = traces.filter(t => t.StatusCode === 'OK');
     const errorTraces = traces.filter(t => t.StatusCode === 'ERROR');
     const durations = traces.map(t => t.Duration / 1000000);
-    
+
     return {
       totalTraces: traces.length,
       successCount: okTraces.length,
@@ -207,6 +208,16 @@ function TracesView() {
     navigate(`/trace/${traceId}`);
   };
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+
+  const totalPages = Math.ceil(filteredTraces.length / pageSize);
+
+  const paginatedTraces = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filteredTraces.slice(start, start + pageSize);
+  }, [filteredTraces, currentPage, pageSize]);
+
   if (loading && traces.length === 0) {
     return (
       <div className="space-y-3 p-4">
@@ -222,9 +233,9 @@ function TracesView() {
   }
 
   return (
-    <div className="flex flex-col h-screen border-2 border-border dark:border-slate-700 bg-background dark:bg-slate-950">
+    <div className="flex flex-col border-1 rounded-sm  dark:border-slate-200 bg-background dark:bg-slate-950">
       {/* Compact Header */}
-      <div className="border-b border-border dark:border-slate-700 px-4 py-3 flex-shrink-0 bg-background dark:bg-slate-900">
+      <div className="border-b border-border rounded-sm dark:border-slate-700 px-4 py-3 flex-shrink-0 bg-background dark:bg-slate-900">
         <div className="flex items-center justify-between">
           <div className="text-sm font-semibold text-foreground dark:text-gray-50">
             {metrics.spansPerSecond} spans/s
@@ -372,13 +383,13 @@ function TracesView() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredTraces.map((trace, idx) => (
+                {paginatedTraces.map((trace, idx) => (
                   <TableRow
                     key={`${trace.TraceId}-${idx}`}
                     className="cursor-pointer hover:bg-accent dark:hover:bg-slate-800/80 transition-colors border-b border-border dark:border-slate-700 h-7 bg-background dark:bg-slate-900"
                     onClick={() => handleRowClick(trace.TraceId)}
                   >
-                    <TableCell className="text-muted-foreground dark:text-gray-300 py-1 px-2 whitespace-nowrap text-xs">
+                    <TableCell className="text-muted-foreground dark:text-gray-300 py-1 px-3 whitespace-nowrap text-xs">
                       {format(new Date(trace.Timestamp), 'MMM dd HH:mm:ss.SSS')}
                     </TableCell>
                     <TableCell className="py-1 px-2">
@@ -400,7 +411,7 @@ function TracesView() {
                         {trace.Method || trace.SpanAttributes?.['http.method'] || 'N/A'}
                       </span>
                     </TableCell>
-                    <TableCell className="py-1 px-2 text-right">
+                    <TableCell className="py-1 px-2 text-right pr-2">
                       <Badge
                         variant={trace.StatusCode === 'ERROR' ? 'destructive' : 'success'}
                         className="text-xs font-semibold py-0.5 px-2 inline-block"
@@ -411,7 +422,50 @@ function TracesView() {
                   </TableRow>
                 ))}
               </TableBody>
+
             </Table>
+            {/* Pagination Controls */}
+            <div className="flex items-center justify-between px-4 py-2 border-t border-border bg-background dark:bg-slate-800">
+              <div className="text-xs text-muted-foreground">
+                Page {currentPage} of {totalPages} ({filteredTraces.length} total)
+              </div>
+              <div className="flex items-center gap-2">
+                <Select value={pageSize.toString()} onValueChange={(val) => { setPageSize(parseInt(val)); setCurrentPage(1); }}>
+                  <SelectTrigger className="h-7 w-[70px] text-xs bg-background border-input dark:bg-slate-700 dark:border-slate-600">
+                    <SelectValue placeholder="Rows" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-background dark:bg-slate-700 dark:border-slate-600">
+                    <SelectItem value="5">5</SelectItem>
+                    <SelectItem value="10">10</SelectItem>
+                    <SelectItem value="20">20</SelectItem>
+                    <SelectItem value="50">50</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <div className="flex items-center gap-1">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                    className="h-7 px-2 text-xs bg-background dark:bg-slate-800 dark:hover:bg-slate-700"
+                  >
+                    Prev
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={currentPage === totalPages}
+                    onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+                    className="h-7 px-2 text-xs bg-background dark:bg-slate-800 dark:hover:bg-slate-700"
+                  >
+                    Next
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+
           </div>
         </div>
       )}

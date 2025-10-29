@@ -72,13 +72,14 @@ export class ClickhouseService implements OnModuleInit {
         ServiceName,
         Timestamp,
         Duration,
+        ParentSpanId,
         StatusCode,
         SpanAttributes
       FROM otel_traces
     `;
 
     if (service) {
-      query += ` WHERE ServiceName = '${service}'`;
+      query += ` WHERE ServiceName = '${service}' AND ParentSpanId = ''`;
     }
 
     query += ` ORDER BY Timestamp DESC LIMIT ${safeLimit}`;
