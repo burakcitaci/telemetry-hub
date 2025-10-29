@@ -1,0 +1,10 @@
+{
+  "nx-console": {
+    "initialGitRef": {
+      "ref": "ac93345ee75ed9519ecabe86169f2537f4dfe3c5",
+      "subject": "chore: migrate nx to latest"
+    },
+    "targetVersion": "latest",
+    "confirmedPackageUpdates": true
+  }
+}
