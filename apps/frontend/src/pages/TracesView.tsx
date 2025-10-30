@@ -118,6 +118,16 @@ function TracesView() {
     }
   };
 
+  const getStatusIcon = (status: string) => {
+    if (status === 'OK') {
+      return <Badge variant="success" className="text-xs font-semibold py-0.5 px-2">200</Badge>;
+    } else if (status === 'ERROR') {
+      return <Badge variant="destructive" className="text-xs font-semibold py-0.5 px-2">ERROR</Badge>;
+    } else {
+      return <Badge variant="secondary" className="text-xs font-semibold py-0.5 px-2">N/A</Badge>;
+    }
+  };
+
   const getServiceIcon = (serviceName: string) => {
     if (serviceName.includes('mongodb') || serviceName.includes('mongo')) {
       return <DatabaseIcon className="h-3 w-3 text-green-600" />;
@@ -412,12 +422,7 @@ function TracesView() {
                       </span>
                     </TableCell>
                     <TableCell className="py-1 px-2 text-right pr-2">
-                      <Badge
-                        variant={trace.StatusCode === 'ERROR' ? 'destructive' : 'success'}
-                        className="text-xs font-semibold py-0.5 px-2 inline-block"
-                      >
-                        {trace.StatusCode === 'ERROR' ? 'ERROR' : '200'}
-                      </Badge>
+                      {getStatusIcon(trace.StatusCode)}
                     </TableCell>
                   </TableRow>
                 ))}
