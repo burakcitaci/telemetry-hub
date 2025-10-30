@@ -1,5 +1,5 @@
 import { Controller, Get, Param } from '@nestjs/common';
-import { ClickhouseService } from './clickhouse.service';
+import { ClickhouseService } from './modules/telemetry/services/clickhouse.service';
 
 @Controller('api/services')
 export class ServicesController {

@@ -22,19 +22,19 @@ backend:
     httpGet:
       path: /health
       port: 3001
-    initialDelaySeconds: 10
-    periodSeconds: 10
-    timeoutSeconds: 5
-    failureThreshold: 3
+    initialDelaySeconds: 20
+    periodSeconds: 60 # every 30s is fine
+    timeoutSeconds: 10 # 10s is fine
+    failureThreshold: 3 # 3 failures is a problem
 
   readinessProbe:
     httpGet:
       path: /health
       port: 3001
-    initialDelaySeconds: 5
-    periodSeconds: 5
-    timeoutSeconds: 3
-    failureThreshold: 2
+    initialDelaySeconds: 10
+    periodSeconds: 65
+    timeoutSeconds: 5
+    failureThreshold: 2 # 2 failures is a problem
 
   # Environment variables
   env:

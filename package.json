@@ -31,6 +31,7 @@
     "helm:delete": "helm uninstall observability -n telemetry-hub",
     "helm:setup": "yarn helm:repos:add && yarn helm:repos:update && yarn helm:deps:build",
     "cluster:up": "yarn kind:create && yarn kind:load:all && yarn helm:setup && yarn helm:deploy",
+    "cluster:restart": "yarn kind:load:all && yarn helm:setup && yarn helm:deploy",
     "cluster:down": "yarn helm:delete && yarn kind:delete",
     "port:backend": "kubectl port-forward svc/backend 3001:3001 -n telemetry-hub",
     "port:clickhouse": "kubectl port-forward svc/clickhouse 8123:8123 -n telemetry-hub",

@@ -1,5 +1,5 @@
-import { useState, ReactElement } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, ReactElement, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   Clock,
   Activity,
@@ -11,6 +11,8 @@ import {
   ChevronRight,
   ArrowLeft,
 } from "lucide-react";
+import { getTraceById } from "@/api";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface Span {
   TraceId: string;
@@ -64,12 +66,36 @@ const mockSpans: Span[] = [
 
 function TraceDetailView() {
   const navigate = useNavigate();
-  const [spans] = useState<Span[]>(mockSpans);
+  const { traceId } = useParams();
+  const [spans, setSpans] = useState<Span[]>(mockSpans);
   const [selectedSpan, setSelectedSpan] = useState<Span | null>(null);
   const [expandedSpans, setExpandedSpans] = useState<Set<string>>(new Set(["span-root-001"]));
+  const [loading, setLoading] = useState(true);
+  //const errorSpans = spans.filter((s) => s.StatusCode === "ERROR").length;
+  //const services = new Set(spans.map((s) => s.ServiceName)).size;
+  //const traceId = "trace-mham2j7s-jIiw3Jfz";
 
   const handleBackClick = () => {
     navigate('/');
+  };
+
+  useEffect(() => {
+    getById(traceId || "");
+  }, [traceId]);
+  
+  const getById = async (traceId: string) => {
+    try {
+      setLoading(true);
+      const response = await getTraceById(traceId);
+      console.log(response);
+       setSpans(Array.isArray(response) ? response : []);
+    } catch (error) {
+      console.error(error);
+      setSpans(mockSpans);
+    }
+    finally {
+      setLoading(false);
+    }
   };
 
   const formatDuration = (nanoseconds: number) => {
@@ -237,9 +263,20 @@ function TraceDetailView() {
     return rootSpans.map((span) => renderSpan(span));
   };
 
-  const errorSpans = spans.filter((s) => s.StatusCode === "ERROR").length;
-  const services = new Set(spans.map((s) => s.ServiceName)).size;
-  const traceId = "trace-mham2j7s-jIiw3Jfz";
+
+  if (loading && spans.length === 0) {
+    return (
+      <div className="space-y-3 p-4">
+        <Skeleton className="h-6 w-64" />
+        <Skeleton className="h-8 w-full" />
+        <div className="space-y-2">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <Skeleton key={i} className="h-7 w-full" />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-screen bg-background dark:bg-slate-950">
@@ -276,7 +313,7 @@ function TraceDetailView() {
                 {formatDuration(calculateTotalDuration() * 1000000)}
               </span>
             </div>
-            <div className="flex items-center gap-2">
+            {/* <div className="flex items-center gap-2">
               <Server className="h-4 w-4 text-purple-600 dark:text-purple-400" />
               <span className="font-medium text-foreground dark:text-gray-100">
                 {services}
@@ -291,7 +328,7 @@ function TraceDetailView() {
                 </span>
                 <span className="text-muted-foreground dark:text-gray-300">errors</span>
               </div>
-            )}
+            )} */}
           </div>
         </div>
       </div>
