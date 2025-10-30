@@ -87,10 +87,44 @@ function TraceDetailView() {
     try {
       setLoading(true);
       const response = await getTraceById(traceId);
-      console.log(response);
-       setSpans(Array.isArray(response) ? response : []);
+      console.log('TraceDetailView response:', response);
+
+      let spansData: Span[] = [];
+      if (Array.isArray(response)) {
+        // If backend returns array of spans, use them directly
+        spansData = response.map((span: any, index: number) => ({
+          TraceId: span.TraceId || traceId,
+          SpanId: span.SpanId || span.TraceId || `span-${index}`,
+          ParentSpanId: span.ParentSpanId || "",
+          SpanName: span.SpanName || span.Resource || 'Unknown Operation',
+          ServiceName: span.ServiceName || 'Unknown Service',
+          Timestamp: span.Timestamp || new Date().toISOString(),
+          Duration: span.Duration || 0,
+          StatusCode: span.StatusCode || 'OK',
+          SpanAttributes: span.SpanAttributes || {},
+          Resource: span.Resource,
+          Method: span.Method || span.SpanAttributes?.['http.method']
+        }));
+      } else if (response && typeof response === 'object') {
+        // If backend returns single trace object, convert to spans
+        spansData = [{
+          TraceId: response.TraceId || traceId,
+          SpanId: response.TraceId || `span-root`,
+          ParentSpanId: "",
+          SpanName: response.SpanName || response.Resource || 'Root Operation',
+          ServiceName: response.ServiceName || 'Unknown Service',
+          Timestamp: response.Timestamp || new Date().toISOString(),
+          Duration: response.Duration || 0,
+          StatusCode: response.StatusCode || 'OK',
+          SpanAttributes: response.SpanAttributes || {},
+          Resource: response.Resource,
+          Method: response.Method || response.SpanAttributes?.['http.method']
+        }];
+      }
+
+      setSpans(spansData.length > 0 ? spansData : mockSpans);
     } catch (error) {
-      console.error(error);
+      console.error('Error loading trace:', error);
       setSpans(mockSpans);
     }
     finally {
