@@ -7,10 +7,13 @@ export class TracesController {
 
   @Get()
   async getTraces(
-    @Query('limit') limit: string = '100',
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
     @Query('service') service?: string,
   ) {
-    return this.clickhouse.getTraces(parseInt(limit), service);
+    const pageNum = page ? parseInt(page) : 1;
+    const limitNum = limit ? parseInt(limit) : 10;
+    return this.clickhouse.getTraces(limitNum, pageNum, service);
   }
 
   @Get(':traceId')

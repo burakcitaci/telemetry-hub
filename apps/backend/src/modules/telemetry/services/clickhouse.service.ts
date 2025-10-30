@@ -68,8 +68,10 @@ export class ClickhouseService implements OnModuleInit {
     }
   }
 
-  async getTraces(limit: number = 100, service?: string) {
+  async getTraces(limit: number = 100, page: number = 1, service?: string) {
     const safeLimit = Math.min(Math.max(1, limit), 1000);
+    const safePage = Math.max(1, page);
+    const offset = (safePage - 1) * safeLimit;
 
     let query = `
     SELECT
@@ -93,9 +95,15 @@ export class ClickhouseService implements OnModuleInit {
       params.service = service;
     }
 
-    query += ` ORDER BY Timestamp DESC LIMIT {limit:UInt32}`;
-    params.limit = safeLimit;
+    query += `
+    ORDER BY Timestamp DESC
+    LIMIT {limit:UInt32} OFFSET {offset:UInt32}
+  `;
 
+    params.limit = safeLimit;
+    params.offset = offset;
+
+    this.logger.log("Executing getTraces with params:", params, query);
     return this.query(query, params);
   }
 
@@ -120,7 +128,7 @@ export class ClickhouseService implements OnModuleInit {
     return this.query(query, { traceId });
   }
   async getTraceById(traceId: string) {
-    
+
     const query = `
   SELECT
     TraceId,

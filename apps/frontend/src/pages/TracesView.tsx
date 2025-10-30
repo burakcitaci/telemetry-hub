@@ -35,10 +35,12 @@ function TracesView() {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [timeRange, setTimeRange] = useState<string>('15m');
   const navigate = useNavigate();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
 
   useEffect(() => {
-    loadTraces();
+    loadTraces(currentPage, pageSize);
 
     const eventSource = createEventSource();
 
@@ -51,7 +53,7 @@ function TracesView() {
       const data = JSON.parse(event.data);
       if (data.type === 'update' && data.traces.length > 0) {
         console.log('New traces received', data.traces);
-        loadTraces();
+        loadTraces(currentPage, pageSize);
       }
     };
 
@@ -63,12 +65,14 @@ function TracesView() {
     return () => {
       eventSource.close();
     };
-  }, []);
+  }, [pageSize, currentPage]);
 
-  const loadTraces = async () => {
+  const loadTraces = async (page: number, pageSize: number) => {
+    console.log(page, pageSize);
     try {
       setLoading(true);
-      const data = await getTraces(100);
+      const data = await getTraces(page, pageSize);
+      console.log('Fetched traces:', data);
       setTraces(data);
       setError(null);
     } catch (err: any) {
@@ -218,15 +222,15 @@ function TracesView() {
     navigate(`/trace/${traceId}`);
   };
 
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
 
-  const totalPages = Math.ceil(filteredTraces.length / pageSize);
+  // Server handles pagination, so we estimate total pages based on current results
+  // If we get fewer results than pageSize, we're at the last page
+  const totalPages = traces.length < pageSize ? currentPage : currentPage + 1;
 
+  // Since backend handles pagination, display traces directly
   const paginatedTraces = useMemo(() => {
-    const start = (currentPage - 1) * pageSize;
-    return filteredTraces.slice(start, start + pageSize);
-  }, [filteredTraces, currentPage, pageSize]);
+    return filteredTraces;
+  }, [filteredTraces]);
 
   if (loading && traces.length === 0) {
     return (
@@ -276,7 +280,7 @@ function TracesView() {
               <Plus className="h-3 w-3 mr-1" />
               Generate
             </Button>
-            <Button onClick={loadTraces} variant="ghost" size="sm" className="h-6 px-2 text-xs dark:hover:bg-slate-800">
+            <Button onClick={()=>loadTraces(currentPage,pageSize)} variant="ghost" size="sm" className="h-6 px-2 text-xs dark:hover:bg-slate-800">
               <RefreshCw className="h-3 w-3" />
             </Button>
           </div>
@@ -460,8 +464,8 @@ function TracesView() {
                   <Button
                     variant="outline"
                     size="sm"
-                    disabled={currentPage === totalPages}
-                    onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+                    disabled={traces.length < pageSize}
+                    onClick={() => setCurrentPage((p) => p +1)}
                     className="h-7 px-2 text-xs bg-background dark:bg-slate-800 dark:hover:bg-slate-700"
                   >
                     Next

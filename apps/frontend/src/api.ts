@@ -6,11 +6,13 @@ export const api = axios.create({
   baseURL: `${API_URL}/api`,
 });
 
-export const getTraces = async (limit: number = 100, service?: string) => {
-  const params: any = { limit };
+export const getTraces = async (page: number, limit: number, service?: string) => {
+  const params: any = {  };
+  params.page = page;
+  params.limit = limit;
   if (service) params.service = service;
   const response = await api.get('/traces', { params });
-  // Extract data array from transformed response wrapper
+  console.log("getTraces response:", response);
   return Array.isArray(response.data) ? response.data : (response.data.data || []);
 };
 
