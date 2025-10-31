@@ -34,7 +34,7 @@ function TracesView() {
   const [statusFilters, setStatusFilters] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<'timestamp' | 'duration' | 'service'>('timestamp');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
-  const [timeRange, setTimeRange] = useState<string>('15m');
+  const [timeRange, setTimeRange] = useState<string>('6h');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [selectedTraceId, setSelectedTraceId] = useState<string | null>(null);
