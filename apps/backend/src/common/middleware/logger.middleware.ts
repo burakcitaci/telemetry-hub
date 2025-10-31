@@ -1,14 +1,25 @@
-import { Injectable, NestMiddleware } from "@nestjs/common";
-import { Request, Response, NextFunction } from "express";
+import { Request, Response, NextFunction } from 'express';
+import { CentralLoggerService } from '../logger/central-logger.service';
 
-@Injectable()
-export class LoggerMiddleware implements NestMiddleware {
-  use(req: Request, res: Response, next: NextFunction) {
+export class LoggerMiddleware {
+  constructor(private readonly logger: CentralLoggerService) {}
+
+  use = (req: Request, res: Response, next: NextFunction) => {
     const { method, originalUrl, ip } = req;
-    
-    res.on("finish", () => {
+
+    res.on('finish', () => {
       const { statusCode } = res;
-      console.log(`[${new Date().toISOString()}] ${method} ${originalUrl} ${statusCode} - ${ip}`);
+      this.logger.logWithAttributes(
+        'HTTP Request',
+        'INFO',
+        {
+          method,
+          url: originalUrl,
+          status: statusCode,
+          ip,
+        },
+        'LoggerMiddleware',
+      );
     });
 
     next();

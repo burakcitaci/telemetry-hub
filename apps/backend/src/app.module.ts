@@ -9,6 +9,7 @@ import loggerConfig from "./config/logger.config";
 import healthConfig from "./config/health.config";
 import { TelemetryModule } from "./modules/telemetry/telemetry.module";
 import { HealthModule } from "./modules/health/health.module";
+import { LoggerModule } from "./common/logger/logger.module";
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { HealthModule } from "./modules/health/health.module";
         ".env",
       ],
     }),
+    LoggerModule,
     TelemetryModule,
     HealthModule,
   ],

@@ -1,41 +1,57 @@
-import { Injectable, Logger, OnModuleInit } from "@nestjs/common";
-import { createClient, ClickHouseClient } from "@clickhouse/client";
+import { Injectable, OnModuleInit } from '@nestjs/common';
+import { CentralLoggerService } from '../../../common/logger/central-logger.service';
+import { createClient, ClickHouseClient } from '@clickhouse/client';
 
 @Injectable()
 export class ClickhouseService implements OnModuleInit {
-  private readonly logger = new Logger(ClickhouseService.name);
   private client: ClickHouseClient;
 
+  constructor(private readonly logger: CentralLoggerService) {}
+
   async onModuleInit() {
-    const host = process.env.CLICKHOUSE_HOST || "clickhouse";
+    const host = process.env.CLICKHOUSE_HOST || 'clickhouse';
 
     this.client = createClient({
       host: `http://${host}:8123`,
-      database: "default",
+      database: 'default',
     });
 
-    this.logger.log(`ClickHouse client initialized: ${host}:8123`);
+    this.logger.logWithAttributes(
+      'ClickHouse client initialized',
+      'INFO',
+      {
+        host: `${host}:8123`,
+      },
+      'ClickhouseService',
+    );
+
     await this.ensureTables();
   }
 
   private async ensureTables() {
     try {
       // Check if tables exist and have the correct schema
-      const tracesTableExists = await this.tableExists("otel_traces");
-      const logsTableExists = await this.tableExists("otel_logs");
+      const tracesTableExists = await this.tableExists('otel_traces');
+      const logsTableExists = await this.tableExists('otel_logs');
 
       if (!tracesTableExists) {
         this.logger.log(
-          "Tables will be created automatically by OpenTelemetry collector"
+          'Tables will be created automatically by OpenTelemetry collector',
+          'ClickhouseService',
         );
         this.logger.log(
-          "Make sure collector has create_schema: true configured"
+          'Make sure collector has create_schema: true configured',
+          'ClickhouseService',
         );
       } else {
-        this.logger.log("Tables already exist");
+        this.logger.log('ClickHouse tables already exist', 'ClickhouseService');
       }
     } catch (error) {
-      this.logger.error("Error checking tables", error);
+      this.logger.error(
+        `Error checking tables: ${error.message}`,
+        error.stack,
+        'ClickhouseService',
+      );
     }
   }
 
@@ -50,108 +66,68 @@ export class ClickhouseService implements OnModuleInit {
     }
   }
 
-  async query<T = any>(
-    query: string,
-    params?: Record<string, any>
-  ): Promise<T[]> {
+  async query<T = any>(query: string): Promise<T[]> {
     try {
       const result = await this.client.query({
         query,
-        format: "JSONEachRow",
-        query_params: params, // ClickHouse client uses query_params
+        format: 'JSONEachRow',
       });
 
       return (await result.json()) as T[];
     } catch (error: any) {
-      this.logger.error(`Query error: ${error.message}`);
+      this.logger.error(
+        `Query error: ${error.message}`,
+        error.stack,
+        'ClickhouseService',
+      );
       throw error;
     }
   }
 
-  async getTraces(limit: number = 100, page: number = 1, service?: string) {
-    const safeLimit = Math.min(Math.max(1, limit), 1000);
-    const safePage = Math.max(1, page);
-    const offset = (safePage - 1) * safeLimit;
-
+  async getTraces(limit: number = 100, service?: string) {
     let query = `
-    SELECT
-      TraceId,
-      SpanId,
-      SpanName,
-      ServiceName,
-      Timestamp,
-      Duration,
-      ParentSpanId,
-      StatusCode,
-      SpanAttributes
-    FROM otel_traces 
-    WHERE ParentSpanId = ''
-  `;
-
-    const params: Record<string, any> = {};
+      SELECT
+        TraceId,
+        SpanId,
+        SpanName,
+        ServiceName,
+        Timestamp,
+        Duration,
+        StatusCode,
+        SpanAttributes
+      FROM otel_traces
+    `;
 
     if (service) {
-      query += ` AND ServiceName = {service:String}`;
-      params.service = service;
+      query += ` WHERE ServiceName = '${service}'`;
     }
 
-    query += `
-    ORDER BY Timestamp DESC
-    LIMIT {limit:UInt32} OFFSET {offset:UInt32}
-  `;
+    query += ` ORDER BY Timestamp DESC LIMIT ${limit}`;
 
-    params.limit = safeLimit;
-    params.offset = offset;
-
-    this.logger.log("Executing getTraces with params:", params, query);
-    return this.query(query, params);
+    return this.query(query);
   }
 
-  // For the trace detail query:
-  async getTraceDetails(traceId: string) {
-    const query = `
-    SELECT
-      TraceId,
-      SpanId,
-      ParentSpanId,
-      SpanName,
-      ServiceName,
-      Timestamp,
-      Duration,
-      StatusCode,
-      SpanAttributes
-    FROM otel_traces
-    WHERE TraceId = {traceId:String} AND ParentSpanId = ''
-    ORDER BY Timestamp ASC
-  `;
-
-    return this.query(query, { traceId });
-  }
   async getTraceById(traceId: string) {
-
     const query = `
-  SELECT
-    TraceId,
-    SpanId,
-    ParentSpanId,
-    SpanName,
-    ServiceName,
-    Timestamp,
-    Duration,
-    StatusCode,
-    SpanAttributes
-  FROM otel_traces
-  WHERE TraceId = {traceId:String}
-  ORDER BY Timestamp ASC
-`;
+      SELECT
+        TraceId,
+        SpanId,
+        ParentSpanId,
+        SpanName,
+        ServiceName,
+        Timestamp,
+        Duration,
+        StatusCode,
+        SpanAttributes
+      FROM otel_traces
+      WHERE TraceId = '${traceId}'
+      ORDER BY Timestamp ASC
+    `;
 
-    return this.query(query, { traceId });
+    return this.query(query);
   }
 
   async getLogs(limit: number = 100, service?: string) {
-    // Cap limit to prevent memory issues
-    const safeLimit = Math.min(Math.max(1, limit), 1000);
-
     let query = `
       SELECT 
         Timestamp,
@@ -168,7 +144,7 @@ export class ClickhouseService implements OnModuleInit {
       query += ` WHERE ServiceName = '${service}'`;
     }
 
-    query += ` ORDER BY Timestamp DESC LIMIT ${safeLimit}`;
+    query += ` ORDER BY Timestamp DESC LIMIT ${limit}`;
 
     return this.query(query);
   }
@@ -178,7 +154,6 @@ export class ClickhouseService implements OnModuleInit {
       SELECT DISTINCT ServiceName
       FROM otel_traces
       ORDER BY ServiceName
-      LIMIT 1000
     `;
 
     return this.query(query);
@@ -204,7 +179,7 @@ export class ClickhouseService implements OnModuleInit {
 
   async getRecentTraces(since: Date) {
     // Format timestamp for ClickHouse DateTime64 compatibility
-    const timestamp = since.toISOString().replace("T", " ").slice(0, -1);
+    const timestamp = since.toISOString().replace('T', ' ').slice(0, -1);
     const query = `
       SELECT
         TraceId,
@@ -224,7 +199,7 @@ export class ClickhouseService implements OnModuleInit {
 
   async getRecentLogs(since: Date) {
     // Format timestamp for ClickHouse DateTime64 compatibility
-    const timestamp = since.toISOString().replace("T", " ").slice(0, -1);
+    const timestamp = since.toISOString().replace('T', ' ').slice(0, -1);
     const query = `
       SELECT
         Timestamp,

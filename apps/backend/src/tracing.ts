@@ -5,10 +5,10 @@ import { OTLPLogExporter } from '@opentelemetry/exporter-logs-otlp-http';
 import { resourceFromAttributes } from '@opentelemetry/resources';
 import {
   BatchLogRecordProcessor,
-  ConsoleLogRecordExporter,
   LoggerProvider,
 } from '@opentelemetry/sdk-logs';
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
+import { logs } from '@opentelemetry/api-logs';
 import * as os from 'os';
 
 // Get OTEL collector endpoint from environment variables
@@ -37,31 +37,35 @@ const sdk = new NodeSDK({
   instrumentations: [getNodeAutoInstrumentations()],
 });
 
-// Logging provider configuration
+// Logging provider configuration with OTLP exporter to collector
 const loggerProvider = new LoggerProvider({
   resource: resourceFromAttributes({
-    'service.name': serviceName,
-    'service.version': version,
+    [SemanticResourceAttributes.SERVICE_NAME]: serviceName,
+    [SemanticResourceAttributes.SERVICE_VERSION]: version,
     'deployment.environment': process.env.NODE_ENV || 'development',
     'host.name': os.hostname(),
   }),
   processors: [
+    // Export logs to OpenTelemetry collector via OTLP
     new BatchLogRecordProcessor(
       new OTLPLogExporter({
         url: otlpLogsUrl,
         headers: {
           'Content-Type': 'application/json',
         },
-      })
+      }),
+      {
+        maxExportBatchSize: 10,
+        maxQueueSize: 2000,
+        exportTimeoutMillis: 10000,
+        scheduledDelayMillis: 1000, // Export every 1 second
+      }
     ),
-    new BatchLogRecordProcessor(new ConsoleLogRecordExporter(), {
-      maxExportBatchSize: 50,
-      maxQueueSize: 1000,
-      exportTimeoutMillis: 5000,
-      scheduledDelayMillis: 1000, // Export every 1 second for console
-    }),
   ],
 });
+
+// Register the logger provider globally
+logs.setGlobalLoggerProvider(loggerProvider);
 
 // Initialize both tracing and logging
 sdk.start();
@@ -70,13 +74,21 @@ console.log('OpenTelemetry tracing and logging initialized');
 console.log(`OTLP Traces endpoint: ${otlpTracesUrl}`);
 console.log(`OTLP Logs endpoint: ${otlpLogsUrl}`);
 console.log(`Service name: ${serviceName}`);
+console.log('Logs are being exported to OpenTelemetry collector');
 
 process.on('SIGTERM', () => {
   sdk
     .shutdown()
-    .then(() => console.log('Tracing and logging terminated'))
-    .catch((error) => console.log('Error terminating services', error))
-    .finally(() => process.exit(0));
+    .then(() => console.log('Tracing terminated'))
+    .catch((error) => console.log('Error terminating tracing', error))
+    .finally(() => {
+      loggerProvider
+        .forceFlush()
+        .then(() => loggerProvider.shutdown())
+        .then(() => console.log('Logging terminated'))
+        .catch((error) => console.log('Error terminating logging', error))
+        .finally(() => process.exit(0));
+    });
 });
 
 export default sdk;

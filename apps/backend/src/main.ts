@@ -9,14 +9,21 @@ import { ValidationExceptionFilter } from "./common/filters/validation-exception
 import { TransformInterceptor } from "./common/interceptors/transform.interceptor";
 import { LoggingInterceptor } from "./common/interceptors/logging.interceptor";
 import { LoggerMiddleware } from "./common/middleware/logger.middleware";
+import { CentralLoggerService } from './common/logger/central-logger.service';
 import { AppModule } from "./app.module";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
+  const logger = app.get(CentralLoggerService);
+
+  // Set the central logger as the NestJS logger
+  app.useLogger(logger);
+
+  console.log('DEBUG: Logger injected and set as NestJS logger');
 
   // Middleware
-  app.use(new LoggerMiddleware().use);
+  app.use(new LoggerMiddleware(logger).use);
 
   // Global pipes
   app.useGlobalPipes(new ValidationPipe());
@@ -30,7 +37,7 @@ async function bootstrap() {
   // Global interceptors
   app.useGlobalInterceptors(
     new TransformInterceptor(),
-    new LoggingInterceptor(),
+    new LoggingInterceptor(logger),
   );
 
   // CORS
@@ -39,10 +46,18 @@ async function bootstrap() {
   const port = configService.get("app.port") || 3001;
   const host = configService.get("app.host") || "0.0.0.0";
   
+  // Emit logs immediately to verify pipeline
+  logger.log('Bootstrap: App configuration starting', 'Bootstrap');
+  
   await app.listen(port, host);
   
-  console.log(`Backend API is running on ${host}:${port}`);
-  console.log(`Environment: ${configService.get("app.nodeEnv")}`);
+  logger.log(`Backend API is running on ${host}:${port}`, 'Bootstrap');
+  logger.log(
+    `Environment: ${configService.get('app.nodeEnv')}`,
+    'Bootstrap',
+  );
+  
+  console.log('DEBUG: Bootstrap logs emitted - check ClickHouse otel_logs table');
 }
 
 bootstrap();

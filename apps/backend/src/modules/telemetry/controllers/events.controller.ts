@@ -1,16 +1,16 @@
-import { Controller, Get, Res, Logger } from '@nestjs/common';
+import { Controller, Get, Res } from '@nestjs/common';
 import { Response } from 'express';
+import { CentralLoggerService } from '../../../common/logger/central-logger.service';
 import { ClickhouseService } from '../services/clickhouse.service';
-import { loggerProvider } from '../../../tracing';
-import { logs } from '@opentelemetry/api-logs';
 
 @Controller('api/events')
 export class EventsController {
-  private readonly logger = new Logger(EventsController.name);
-  private readonly otelLogger = logs.getLogger('EventsController');
   private lastCheckTime: Date = new Date();
 
-  constructor(private readonly clickhouse: ClickhouseService) {}
+  constructor(
+    private readonly clickhouse: ClickhouseService,
+    private readonly logger: CentralLoggerService,
+  ) {}
 
   @Get('stream')
   async stream(@Res() res: Response) {
@@ -20,15 +20,15 @@ export class EventsController {
     res.setHeader('Connection', 'keep-alive');
     res.flushHeaders();
 
-    this.logger.log('Client connected to SSE stream');
-    this.otelLogger.emit({
-      body: 'Client connected to SSE stream',
-      severityNumber: 9, // INFO level
-      attributes: {
+    this.logger.logWithAttributes(
+      'Client connected to SSE stream',
+      'INFO',
+      {
         endpoint: '/api/events/stream',
-        userAgent: res.req.headers['user-agent'],
+        userAgent: res.req.headers['user-agent'] as string,
       },
-    });
+      'EventsController',
+    );
 
     const sendEvent = (data: any) => {
       res.write(`data: ${JSON.stringify(data)}\n\n`);
@@ -49,34 +49,42 @@ export class EventsController {
             traces,
             logs,
           });
+
+          this.logger.logWithAttributes(
+            'SSE update sent',
+            'DEBUG',
+            {
+              traceCount: traces.length,
+              logCount: logs.length,
+            },
+            'EventsController',
+          );
         }
 
         this.lastCheckTime = now;
       } catch (error) {
-        this.logger.error('Error fetching updates', error);
-        this.otelLogger.emit({
-          body: `Error fetching updates: ${error.message}`,
-          severityNumber: 17, // ERROR level
-          attributes: {
-            error: true,
-            endpoint: '/api/events/stream',
-            errorMessage: error.message,
-          },
-        });
+        this.logger.error(
+          `Error fetching updates: ${error.message}`,
+          error.stack,
+          'EventsController',
+        );
       }
     }, 3000);
 
     res.on('close', () => {
       clearInterval(interval);
-      this.logger.log('Client disconnected from SSE stream');
-      this.otelLogger.emit({
-        body: 'Client disconnected from SSE stream',
-        severityNumber: 9, // INFO level
-        attributes: {
+      const connectionDuration = Date.now() - connectionStartTime;
+
+      this.logger.logWithAttributes(
+        'Client disconnected from SSE stream',
+        'INFO',
+        {
           endpoint: '/api/events/stream',
-          connectionDuration: Date.now() - connectionStartTime,
+          connectionDuration: `${connectionDuration}ms`,
         },
-      });
+        'EventsController',
+      );
+
       res.end();
     });
   }

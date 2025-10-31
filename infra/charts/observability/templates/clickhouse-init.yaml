@@ -97,13 +97,28 @@ spec:
         - -c
         - |
           echo "Waiting for ClickHouse to be ready..."
+          MAX_RETRIES=30
+          RETRY_COUNT=0
           until clickhouse-client --host clickhouse --port 9000 --query "SELECT 1" 2>/dev/null; do
-            echo "ClickHouse not ready, waiting..."
+            RETRY_COUNT=$((RETRY_COUNT + 1))
+            if [ $RETRY_COUNT -ge $MAX_RETRIES ]; then
+              echo "ClickHouse failed to start after $MAX_RETRIES attempts"
+              exit 1
+            fi
+            echo "ClickHouse not ready (attempt $RETRY_COUNT/$MAX_RETRIES), waiting..."
             sleep 2
           done
           echo "ClickHouse is ready, running initialization..."
+          sleep 2
           clickhouse-client --host clickhouse --port 9000 < /init/init.sql
-          echo "ClickHouse tables created successfully!"
+          if [ $? -eq 0 ]; then
+            echo "ClickHouse tables created successfully!"
+            clickhouse-client --host clickhouse --port 9000 --query "SHOW TABLES" 
+            clickhouse-client --host clickhouse --port 9000 --query "DESC default.otel_logs"
+          else
+            echo "Failed to create tables"
+            exit 1
+          fi
       volumeMounts:
         - name: init-script
           mountPath: /init

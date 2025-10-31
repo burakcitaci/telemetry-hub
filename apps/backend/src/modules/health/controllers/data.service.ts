@@ -1,9 +1,10 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { CentralLoggerService } from '@/common/logger/central-logger.service';
+import { Injectable } from '@nestjs/common';
 import { trace, context } from '@opentelemetry/api';
 
 @Injectable()
 export class DataService {
-  private readonly logger = new Logger(DataService.name);
+  constructor(private readonly logger: CentralLoggerService) {}
 
   async fetchData(): Promise<any[]> {
     const tracer = trace.getTracer('backend-service');
@@ -14,7 +15,7 @@ export class DataService {
     try {
       return await context.with(trace.setSpan(context.active(), span), async () => {
         await this.simulateDelay(50, 150);
-        
+
         const data = [
           { id: 1, name: 'Item 1', category: 'electronics' },
           { id: 2, name: 'Item 2', category: 'books' },
@@ -24,10 +25,17 @@ export class DataService {
         ];
 
         span.setAttribute('data.count', data.length);
-        this.logger.debug(`Fetched ${data.length} items`);
-        
+        this.logger.debug(`Fetched ${data.length} items`, 'DataService');
+
         return data;
       });
+    } catch (error) {
+      this.logger.error(
+        `Error fetching data: ${error.message}`,
+        error.stack,
+        'DataService',
+      );
+      throw error;
     } finally {
       span.end();
     }
@@ -42,23 +50,30 @@ export class DataService {
     try {
       return await context.with(trace.setSpan(context.active(), span), async () => {
         await this.simulateDelay(30, 100);
-        
+
         const enrichedData = await this.enrichData(data);
-        
+
         const result = {
           timestamp: new Date().toISOString(),
           items: enrichedData,
           summary: {
             total: enrichedData.length,
-            categories: [...new Set(enrichedData.map(item => item.category))],
+            categories: [...new Set(enrichedData.map((item) => item.category))],
           },
         };
 
         span.setAttribute('processed.count', result.items.length);
-        this.logger.debug(`Processed ${result.items.length} items`);
-        
+        this.logger.debug(`Processed ${result.items.length} items`, 'DataService');
+
         return result;
       });
+    } catch (error) {
+      this.logger.error(
+        `Error processing data: ${error.message}`,
+        error.stack,
+        'DataService',
+      );
+      throw error;
     } finally {
       span.end();
     }
@@ -71,14 +86,21 @@ export class DataService {
     try {
       return await context.with(trace.setSpan(context.active(), span), async () => {
         await this.simulateDelay(20, 80);
-        
-        return data.map(item => ({
+
+        return data.map((item) => ({
           ...item,
           enriched: true,
           timestamp: new Date().toISOString(),
           price: Math.floor(Math.random() * 1000) + 10,
         }));
       });
+    } catch (error) {
+      this.logger.error(
+        `Error enriching data: ${error.message}`,
+        error.stack,
+        'DataService',
+      );
+      throw error;
     } finally {
       span.end();
     }
@@ -86,6 +108,6 @@ export class DataService {
 
   private simulateDelay(min: number, max: number): Promise<void> {
     const delay = Math.floor(Math.random() * (max - min + 1)) + min;
-    return new Promise(resolve => setTimeout(resolve, delay));
+    return new Promise((resolve) => setTimeout(resolve, delay));
   }
 }

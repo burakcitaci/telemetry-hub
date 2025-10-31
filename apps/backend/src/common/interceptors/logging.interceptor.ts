@@ -3,29 +3,66 @@ import {
   NestInterceptor,
   ExecutionContext,
   CallHandler,
-  Logger,
-} from "@nestjs/common";
-import { Observable, tap } from "rxjs";
+} from '@nestjs/common';
+import { Observable, tap, catchError } from 'rxjs';
+import { CentralLoggerService } from '../logger/central-logger.service';
 
 @Injectable()
 export class LoggingInterceptor implements NestInterceptor {
-  private readonly logger = new Logger(LoggingInterceptor.name);
+  constructor(private readonly logger: CentralLoggerService) {}
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
-    const now = Date.now();
+    const startTime = Date.now();
     const request = context.switchToHttp().getRequest();
     const { method, url, ip, body } = request;
 
-    this.logger.debug(
-      `Incoming request: ${method} ${url} from ${ip} with body: ${JSON.stringify(body)}`,
+    this.logger.logWithAttributes(
+      'Incoming request',
+      'DEBUG',
+      {
+        method,
+        url,
+        ip,
+        hasBody: !!body,
+      },
+      'LoggingInterceptor',
     );
 
     return next.handle().pipe(
       tap(() => {
-        const responseTime = Date.now() - now;
-        this.logger.debug(
-          `Request completed: ${method} ${url} - ${responseTime}ms`,
+        const response = context.switchToHttp().getResponse();
+        const responseTime = Date.now() - startTime;
+        this.logger.logWithAttributes(
+          'Request completed',
+          'DEBUG',
+          {
+            method,
+            url,
+            status: response.statusCode,
+            duration: `${responseTime}ms`,
+          },
+          'LoggingInterceptor',
         );
+      }),
+      catchError((error) => {
+        const responseTime = Date.now() - startTime;
+        this.logger.error(
+          `Request failed: ${method} ${url}`,
+          error.stack,
+          'LoggingInterceptor',
+        );
+        this.logger.logWithAttributes(
+          'Request failed',
+          'ERROR',
+          {
+            method,
+            url,
+            duration: `${responseTime}ms`,
+            error: error.message,
+          },
+          'LoggingInterceptor',
+        );
+        throw error;
       }),
     );
   }
