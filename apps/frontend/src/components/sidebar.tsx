@@ -1,28 +1,29 @@
 import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
-import { Database, Zap, Globe, Server, AlertTriangle, CheckCircle, Clock, TrendingUp, ChevronDown, ChevronRight } from 'lucide-react';
+import { Database, Zap, Globe, Server, AlertTriangle, CheckCircle, Clock, TrendingUp, ChevronDown, ChevronRight, Filter, ChevronLeft } from 'lucide-react';
 
 interface SidebarProps {
   services: string[];
-  selectedService: string;
-  onServiceSelect: (service: string) => void;
+  selectedServices: string[];
+  onServicesSelect: (services: string[]) => void;
   statusCounts: { ok: number; error: number; total: number };
-  selectedStatus: string;
-  onStatusSelect: (status: string) => void;
+  selectedStatuses: string[];
+  onStatusesSelect: (statuses: string[]) => void;
   timeRange: string;
   onTimeRangeSelect: (timeRange: string) => void;
 }
 
 export function Sidebar({
   services,
-  selectedService,
-  onServiceSelect,
+  selectedServices,
+  onServicesSelect,
   statusCounts,
-  selectedStatus,
-  onStatusSelect,
+  selectedStatuses,
+  onStatusesSelect,
   timeRange,
   onTimeRangeSelect
 }: SidebarProps) {
@@ -73,7 +74,7 @@ export function Sidebar({
 
   return (
     <div className={`bg-card dark:bg-slate-900 border-r border-border dark:border-slate-700 transition-all duration-300 ${
-      isCollapsed ? 'w-16' : 'w-80'
+      isCollapsed ? 'w-16' : 'w-64'
     }`}>
       {/* Header */}
       <div className="p-2 border-b border-border dark:border-slate-700">
@@ -87,7 +88,7 @@ export function Sidebar({
             onClick={() => setIsCollapsed(!isCollapsed)}
             className="h-7 w-7 p-0 hover:bg-accent dark:hover:bg-slate-800"
           >
-            <TrendingUp className={`h-4 w-4 transition-transform ${isCollapsed ? 'rotate-180' : ''}`} />
+            <ChevronLeft className={`h-4 w-4 transition-transform ${isCollapsed ? 'rotate-180' : ''}`} />
           </Button>
         </div>
       </div>
@@ -157,60 +158,56 @@ export function Sidebar({
                 )}
               </Button>
               {statusExpanded && (
-                <div className="space-y-0.5 ml-5 mt-1">
-                  <Button
-                    variant={selectedStatus === 'all' ? "secondary" : "ghost"}
-                    size="sm"
-                    onClick={() => onStatusSelect('all')}
-                    className={`w-full justify-between py-1 h-auto ${
-                      selectedStatus === 'all'
-                        ? 'bg-accent dark:bg-slate-800 text-accent-foreground dark:text-gray-100'
-                        : 'hover:bg-accent dark:hover:bg-slate-800'
-                    }`}
-                  >
-                    <span className="text-xs">All Status</span>
-                    <Badge variant="outline" className="text-xs py-0">
-                      {statusCounts.total}
-                    </Badge>
-                  </Button>
+                <div className="space-y-1 ml-5 mt-1">
+                  <div className="flex items-center space-x-2 py-1">
+                    <Checkbox
+                      id="status-ok"
+                      checked={selectedStatuses.includes('OK')}
+                      onCheckedChange={(checked) => {
+                        const newStatuses = checked
+                          ? [...selectedStatuses, 'OK']
+                          : selectedStatuses.filter(s => s !== 'OK');
+                        onStatusesSelect(newStatuses);
+                      }}
+                    />
+                    <label
+                      htmlFor="status-ok"
+                      className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer flex-1 flex items-center justify-between"
+                    >
+                      <div className="flex items-center gap-2">
+                        <CheckCircle className="h-3 w-3 text-green-600" />
+                        <span className="text-green-600">Success</span>
+                      </div>
+                      <Badge variant="outline" className="text-xs py-0">
+                        {statusCounts.ok}
+                      </Badge>
+                    </label>
+                  </div>
 
-                  <Button
-                    variant={selectedStatus === 'OK' ? "secondary" : "ghost"}
-                    size="sm"
-                    onClick={() => onStatusSelect('OK')}
-                    className={`w-full justify-between py-1 h-auto ${
-                      selectedStatus === 'OK'
-                        ? 'bg-accent dark:bg-slate-800 text-accent-foreground dark:text-gray-100'
-                        : 'hover:bg-accent dark:hover:bg-slate-800'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2">
-                      <CheckCircle className="h-3 w-3 text-green-600" />
-                      <span className="text-xs text-green-600">Success</span>
-                    </div>
-                    <Badge variant="outline" className="text-xs py-0">
-                      {statusCounts.ok}
-                    </Badge>
-                  </Button>
-
-                  <Button
-                    variant={selectedStatus === 'ERROR' ? "secondary" : "ghost"}
-                    size="sm"
-                    onClick={() => onStatusSelect('ERROR')}
-                    className={`w-full justify-between py-1 h-auto ${
-                      selectedStatus === 'ERROR'
-                        ? 'bg-accent dark:bg-slate-800 text-accent-foreground dark:text-gray-100'
-                        : 'hover:bg-accent dark:hover:bg-slate-800'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2">
-                      <AlertTriangle className="h-3 w-3 text-red-600" />
-                      <span className="text-xs text-red-600">Errors</span>
-                    </div>
-                    <Badge variant="outline" className="text-xs py-0">
-                      {statusCounts.error}
-                    </Badge>
-                  </Button>
+                  <div className="flex items-center space-x-2 py-1">
+                    <Checkbox
+                      id="status-error"
+                      checked={selectedStatuses.includes('ERROR')}
+                      onCheckedChange={(checked) => {
+                        const newStatuses = checked
+                          ? [...selectedStatuses, 'ERROR']
+                          : selectedStatuses.filter(s => s !== 'ERROR');
+                        onStatusesSelect(newStatuses);
+                      }}
+                    />
+                    <label
+                      htmlFor="status-error"
+                      className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer flex-1 flex items-center justify-between"
+                    >
+                      <div className="flex items-center gap-2">
+                        <AlertTriangle className="h-3 w-3 text-red-600" />
+                        <span className="text-red-600">Errors</span>
+                      </div>
+                      <Badge variant="outline" className="text-xs py-0">
+                        {statusCounts.error}
+                      </Badge>
+                    </label>
+                  </div>
                 </div>
               )}
             </div>
@@ -238,41 +235,31 @@ export function Sidebar({
                 )}
               </Button>
               {servicesExpanded && (
-                <div className="space-y-0.5 ml-5 mt-1">
-                  <Button
-                    variant={selectedService === 'all' ? "secondary" : "ghost"}
-                    size="sm"
-                    onClick={() => onServiceSelect('all')}
-                    className={`w-full justify-start py-1 h-auto ${
-                      selectedService === 'all'
-                        ? 'bg-accent dark:bg-slate-800 text-accent-foreground dark:text-gray-100'
-                        : 'hover:bg-accent dark:hover:bg-slate-800'
-                    }`}
-                  >
-                    <span className="text-xs">All Services</span>
-                  </Button>
+                <div className="space-y-1 ml-5 mt-1">
                   {services.map((service) => (
-                    <Button
-                      key={service}
-                      variant={selectedService === service ? "secondary" : "ghost"}
-                      size="sm"
-                      onClick={() => onServiceSelect(service)}
-                      className={`w-full justify-start py-1 h-auto ${
-                        selectedService === service
-                          ? 'bg-accent dark:bg-slate-800 text-accent-foreground dark:text-gray-100'
-                          : 'hover:bg-accent dark:hover:bg-slate-800'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        {getServiceIcon(service)}
+                    <div key={service} className="flex items-center space-x-2 py-1">
+                      <Checkbox
+                        id={`service-${service}`}
+                        checked={selectedServices.includes(service)}
+                        onCheckedChange={(checked) => {
+                          const newServices = checked
+                            ? [...selectedServices, service]
+                            : selectedServices.filter(s => s !== service);
+                          onServicesSelect(newServices);
+                        }}
+                      />
+                      <label
+                        htmlFor={`service-${service}`}
+                        className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer flex-1 flex items-center gap-2"
+                      >
                         <Badge
                           variant="outline"
-                          className={`text-xs font-medium py-0 ${getServiceColor(service)}`}
+                          className={`text-xs font-medium py-0`}
                         >
                           {service}
                         </Badge>
-                      </div>
-                    </Button>
+                      </label>
+                    </div>
                   ))}
                 </div>
               )}

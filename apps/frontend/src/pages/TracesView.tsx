@@ -30,8 +30,8 @@ function TracesView() {
   const [error, setError] = useState<string | null>(null);
   const [connected, setConnected] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [serviceFilter, setServiceFilter] = useState<string>('all');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [serviceFilters, setServiceFilters] = useState<string[]>([]);
+  const [statusFilters, setStatusFilters] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<'timestamp' | 'duration' | 'service'>('timestamp');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [timeRange, setTimeRange] = useState<string>('15m');
@@ -124,67 +124,15 @@ function TracesView() {
     }
   };
 
-  const getStatusIcon = (status: string) => {
-    if (status === 'OK') {
-      return <Badge variant="success" className="text-xs font-semibold py-0.5 px-2">200</Badge>;
-    } else if (status === 'ERROR') {
-      return <Badge variant="destructive" className="text-xs font-semibold py-0.5 px-2">ERROR</Badge>;
-    } else {
-      return <Badge variant="secondary" className="text-xs font-semibold py-0.5 px-2">N/A</Badge>;
-    }
-  };
-
-  const getServiceIcon = (serviceName: string) => {
-    if (!serviceName) {
-      return <Server className="h-3 w-3 text-gray-500" />;
-    }
-
-    const service = serviceName.toLowerCase();
-    if (service.includes('mongodb') || service.includes('mongo')) {
-      return <DatabaseIcon className="h-3 w-3 text-green-600" />;
-    }
-    if (service.includes('redis') || service.includes('cache')) {
-      return <Zap className="h-3 w-3 text-red-500" />;
-    }
-    if (service.includes('api') || service.includes('gtw')) {
-      return <Globe className="h-3 w-3 text-blue-500" />;
-    }
-    if (service.includes('ingestion') || service.includes('engine')) {
-      return <Server className="h-3 w-3 text-purple-500" />;
-    }
-    return <Server className="h-3 w-3 text-gray-500" />;
-  };
-
-  const getServiceColor = (serviceName: string) => {
-    if (!serviceName) {
-      return 'bg-gray-100 text-gray-800';
-    }
-
-    const service = serviceName.toLowerCase();
-    if (service.includes('mongodb') || service.includes('mongo')) {
-      return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400';
-    }
-    if (service.includes('redis') || service.includes('cache')) {
-      return 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400';
-    }
-    if (service.includes('api') || service.includes('gtw')) {
-      return 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400';
-    }
-    if (service.includes('ingestion') || service.includes('engine')) {
-      return 'bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400';
-    }
-    return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400';
-  };
-
   const filteredTraces = useMemo(() => {
     let filtered = traces;
 
-    if (serviceFilter !== 'all') {
-      filtered = filtered.filter(trace => trace.ServiceName === serviceFilter);
+    if (serviceFilters.length > 0) {
+      filtered = filtered.filter(trace => serviceFilters.includes(trace.ServiceName || ''));
     }
 
-    if (statusFilter !== 'all') {
-      filtered = filtered.filter(trace => trace.StatusCode === statusFilter);
+    if (statusFilters.length > 0) {
+      filtered = filtered.filter(trace => statusFilters.includes(trace.StatusCode || ''));
     }
 
     if (searchTerm) {
@@ -196,6 +144,24 @@ function TracesView() {
       );
     }
 
+    console.log('Applying time range filter:', timeRange);
+    if(timeRange) {
+      const now = Date.now();
+      let rangeMs = 15 * 60 * 1000; // default 15 minutes
+
+      if (timeRange.endsWith('m')) {
+        rangeMs = parseInt(timeRange) * 60 * 1000;
+      } else if (timeRange.endsWith('h')) {
+        rangeMs = parseInt(timeRange) * 60 * 60 * 1000;
+      } else if (timeRange.endsWith('d')) {
+        rangeMs = parseInt(timeRange) * 24 * 60 * 60 * 1000;
+      }
+
+      filtered = filtered.filter(trace => {
+        const traceTime = new Date(trace.Timestamp).getTime();
+        return (now - traceTime) <= rangeMs;
+      });
+    }
     filtered.sort((a, b) => {
       let aValue: any, bValue: any;
 
@@ -224,7 +190,7 @@ function TracesView() {
     });
 
     return filtered;
-  }, [traces, searchTerm, serviceFilter, statusFilter, sortBy, sortOrder]);
+  }, [traces, searchTerm, serviceFilters, timeRange, statusFilters, sortBy, sortOrder]);
 
   const maxDuration = useMemo(() => {
     return Math.max(...traces.map(t => t.Duration), 1);
@@ -275,11 +241,11 @@ function TracesView() {
       {/* Sidebar */}
       <Sidebar
         services={services}
-        selectedService={serviceFilter}
-        onServiceSelect={setServiceFilter}
+        selectedServices={serviceFilters}
+        onServicesSelect={setServiceFilters}
         statusCounts={statusCounts}
-        selectedStatus={statusFilter}
-        onStatusSelect={setStatusFilter}
+        selectedStatuses={statusFilters}
+        onStatusesSelect={setStatusFilters}
         timeRange={timeRange}
         onTimeRangeSelect={setTimeRange}
       />
@@ -370,11 +336,11 @@ function TracesView() {
           <div className="flex-1 flex items-center justify-center text-center">
             <div>
               <div className="text-sm text-muted-foreground dark:text-gray-300 mb-3">
-                {searchTerm || serviceFilter !== 'all' || statusFilter !== 'all'
+                {searchTerm || serviceFilters.length > 0 || statusFilters.length > 0
                   ? 'No traces match your filters'
                   : 'No traces found'}
               </div>
-              {!searchTerm && serviceFilter === 'all' && statusFilter === 'all' && (
+              {!searchTerm && serviceFilters.length === 0 && statusFilters.length === 0 && (
                 <Button onClick={generateSampleData} size="sm">
                   Generate Sample Data
                 </Button>
@@ -395,7 +361,6 @@ function TracesView() {
                     <TableHead className="flex-1 min-w-48 font-semibold text-foreground dark:text-gray-200 h-6 py-1">Resource</TableHead>
                     <TableHead className="w-24 font-semibold text-foreground dark:text-gray-200 h-6 py-1">Duration</TableHead>
                     <TableHead className="w-24 font-semibold text-foreground dark:text-gray-200 h-6 py-1">Method</TableHead>
-                    <TableHead className="w-16 font-semibold text-foreground dark:text-gray-200 h-6 py-1 text-right pr-2">Status</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -416,8 +381,8 @@ function TracesView() {
                       </TableCell>
                       <TableCell className="py-1 px-2">
                         <div className="flex items-center gap-1.5">
-                          {getServiceIcon(trace.ServiceName || '')}
-                          <Badge variant="outline" className={`text-xs font-medium py-0.5 px-2 inline-block ${getServiceColor(trace.ServiceName || '')}`}>
+                          
+                          <Badge variant="outline" className={`text-xs font-medium py-0.5 px-2 inline-block}`}>
                             {trace.ServiceName || 'Unknown Service'}
                           </Badge>
                         </div>
@@ -432,9 +397,6 @@ function TracesView() {
                         <span className="text-xs font-medium text-foreground dark:text-gray-200 bg-muted dark:bg-slate-700 px-2 py-1 rounded inline-block">
                           {trace.Method || trace.SpanAttributes?.['http.method'] || 'N/A'}
                         </span>
-                      </TableCell>
-                      <TableCell className="py-1 px-2 text-right pr-2">
-                        {getStatusIcon(trace.StatusCode)}
                       </TableCell>
                     </TableRow>
                   ))}
