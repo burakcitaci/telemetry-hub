@@ -45,6 +45,7 @@ interface DataTableProps<TData, TValue> {
   enableRowSelection?: boolean
   enableColumnVisibility?: boolean
   enablePagination?: boolean
+  enableSearch?: boolean
   pageSize?: number
   onRowClick?: (row: TData) => void
 }
@@ -57,6 +58,7 @@ export function DataTable<TData, TValue>({
   enableRowSelection = false,
   enableColumnVisibility = true,
   enablePagination = true,
+  enableSearch = true,
   pageSize = 10,
   onRowClick,
 }: DataTableProps<TData, TValue>) {
@@ -64,6 +66,7 @@ export function DataTable<TData, TValue>({
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = React.useState({})
+  const [globalFilter, setGlobalFilter] = React.useState("")
 
   const table = useReactTable({
     data,
@@ -76,11 +79,14 @@ export function DataTable<TData, TValue>({
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
+    onGlobalFilterChange: setGlobalFilter,
+    globalFilterFn: "includesString",
     state: {
       sorting,
       columnFilters,
       columnVisibility,
       rowSelection,
+      globalFilter,
     },
     initialState: {
       pagination: {
@@ -89,65 +95,61 @@ export function DataTable<TData, TValue>({
     },
   })
 
-  // Get the first column that can be filtered
-  const filterableColumn = React.useMemo(() => {
-    return table.getAllColumns().find(column => column.getCanFilter()) || table.getAllColumns()[0]
-  }, [table])
-
   return (
     <div className="w-full">
-      <div className="flex items-center py-4">
-        <Input
-          placeholder={searchPlaceholder}
-          value={(filterableColumn?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            filterableColumn?.setFilterValue(event.target.value)
-          }
-          className="max-w-sm"
-        />
-        {enableColumnVisibility && (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="ml-auto">
-                Columns <ChevronDown />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {table
-                .getAllColumns()
-                .filter((column) => column.getCanHide())
-                .map((column) => {
-                  return (
-                    <DropdownMenuCheckboxItem
-                      key={column.id}
-                      className="capitalize"
-                      checked={column.getIsVisible()}
-                      onCheckedChange={(value: boolean) =>
-                        column.toggleVisibility(!!value)
-                      }
-                    >
-                      {column.id}
-                    </DropdownMenuCheckboxItem>
-                  )
-                })}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        )}
-      </div>
+      {enableSearch && (
+        <div className="flex items-center py-1">
+          <Input
+            placeholder={searchPlaceholder}
+            value={globalFilter ?? ""}
+            onChange={(event) => setGlobalFilter(event.target.value)}
+            className="max-w-sm border-gray-300 py-0 focus:!border-gray-400 focus:!ring-0"
+          />
+
+          {enableColumnVisibility && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="ml-auto">
+                  Columns <ChevronDown />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {table
+                  .getAllColumns()
+                  .filter((column) => column.getCanHide())
+                  .map((column) => {
+                    return (
+                      <DropdownMenuCheckboxItem
+                        key={column.id}
+                        className="capitalize"
+                        checked={column.getIsVisible()}
+                        onCheckedChange={(value: boolean) =>
+                          column.toggleVisibility(!!value)
+                        }
+                      >
+                        {column.id}
+                      </DropdownMenuCheckboxItem>
+                    )
+                  })}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+        </div>
+      )}
       <div className="rounded-md border">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
+              <TableRow key={headerGroup.id} className="h-8">
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead key={header.id}>
+                    <TableHead key={header.id} className="py-0">
                       {header.isPlaceholder
                         ? null
                         : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
                     </TableHead>
                   )
                 })}
@@ -160,11 +162,11 @@ export function DataTable<TData, TValue>({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
-                  className={onRowClick ? "cursor-pointer hover:bg-muted/50" : ""}
+                  className={`h-8 ${onRowClick ? "cursor-pointer hover:bg-muted/50" : ""}`}
                   onClick={() => onRowClick?.(row.original)}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
+                    <TableCell key={cell.id} className="py-1">
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()

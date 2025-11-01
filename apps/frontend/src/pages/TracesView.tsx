@@ -1,16 +1,16 @@
 import { useEffect, useState, useMemo } from 'react';
 import { getTraces, createEventSource, generateMockTraces, getTraceById, generateMockTraceDetail } from '../api';
 import { formatDistance, format } from 'date-fns';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Sidebar } from '@/components/sidebar';
 import { TraceDetailSheet } from '@/components/trace-detail-sheet';
+import { DataTable, DataTableColumnHeader } from '@/components/data-table';
 import { Search, RefreshCw, Wifi, WifiOff, Plus, Filter, Clock, Database as DatabaseIcon, Server, Globe, Zap, TrendingUp } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { ColumnDef } from "@tanstack/react-table";
 
 interface Trace {
   TraceId: string;
@@ -39,6 +39,94 @@ function TracesView() {
   const [pageSize, setPageSize] = useState(10);
   const [selectedTraceId, setSelectedTraceId] = useState<string | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+
+  const columns: ColumnDef<Trace>[] = [
+    {
+      accessorKey: "Timestamp",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Date" />
+      ),
+      cell: ({ row }) => {
+        const timestamp = row.getValue("Timestamp") as string;
+        return (
+          <div className="text-muted-foreground dark:text-gray-300 py-1 px-3 whitespace-nowrap text-xs">
+            {(() => {
+              try {
+                return format(new Date(timestamp), 'MMM dd HH:mm:ss.SSS');
+              } catch {
+                return 'Invalid date';
+              }
+            })()}
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: "ServiceName",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Service" />
+      ),
+      cell: ({ row }) => {
+        const serviceName = row.getValue("ServiceName") as string;
+        return (
+          <div className="py-1 px-2">
+            <div className="flex items-center gap-1.5">
+              <Badge variant="outline" className={`text-xs font-medium py-0.5 px-2 inline-block}`}>
+                {serviceName || 'Unknown Service'}
+              </Badge>
+            </div>
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: "SpanName",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Resource" />
+      ),
+      cell: ({ row }) => {
+        const spanName = row.getValue("SpanName") as string;
+        const resource = row.original.Resource;
+        return (
+          <div className="text-foreground dark:text-gray-200 py-1 px-2 truncate text-xs" title={resource || spanName}>
+            {resource || spanName}
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: "Duration",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Duration" />
+      ),
+      cell: ({ row }) => {
+        const duration = row.getValue("Duration") as number;
+        return (
+          <div className="text-muted-foreground dark:text-gray-300 py-1 px-2 whitespace-nowrap text-xs">
+            {formatDuration(duration)}
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: "Method",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Method" />
+      ),
+      cell: ({ row }) => {
+        const method = row.getValue("Method") as string;
+        const spanAttributes = row.original.SpanAttributes;
+        const methodValue = method || spanAttributes?.['http.method'] || 'N/A';
+        return (
+          <div className="py-1 px-2">
+            <span className="text-xs font-medium text-foreground dark:text-gray-200 bg-muted dark:bg-slate-700 px-2 py-1 rounded inline-block">
+              {methodValue}
+            </span>
+          </div>
+        );
+      },
+    },
+  ];
 
 
   useEffect(() => {
@@ -298,16 +386,6 @@ function TracesView() {
         {/* Search Bar */}
         <div className="border-b border-border dark:border-slate-700 px-4 py-2 flex-shrink-0 bg-muted dark:bg-slate-800">
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 flex-1 min-w-0 max-w-sm">
-              <Search className="h-3 w-3 text-muted-foreground dark:text-gray-500 flex-shrink-0" />
-              <Input
-                placeholder="Search traces..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="h-7 text-xs border-input dark:border-slate-600 dark:bg-slate-700 dark:text-gray-50 dark:placeholder-gray-400"
-              />
-            </div>
-
             <Select value={`${sortBy}-${sortOrder}`} onValueChange={(value) => {
               const [field, order] = value.split('-');
               setSortBy(field as any);
@@ -352,96 +430,17 @@ function TracesView() {
             <div className="px-4 py-1 text-xs text-muted-foreground dark:text-gray-400 flex-shrink-0">
               {filteredTraces.length} traces
             </div>
-            <div className="flex-1 overflow-auto">
-              <Table className="text-xs">
-                <TableHeader className="sticky top-0 bg-muted dark:bg-slate-800 border-b border-border dark:border-slate-700 h-6">
-                  <TableRow className="hover:bg-transparent">
-                    <TableHead className="w-36 font-semibold text-foreground dark:text-gray-200 h-6 py-1">Date</TableHead>
-                    <TableHead className="font-semibold text-foreground dark:text-gray-200 h-6 py-1">Service</TableHead>
-                    <TableHead className="flex-1 min-w-48 font-semibold text-foreground dark:text-gray-200 h-6 py-1">Resource</TableHead>
-                    <TableHead className="w-24 font-semibold text-foreground dark:text-gray-200 h-6 py-1">Duration</TableHead>
-                    <TableHead className="w-24 font-semibold text-foreground dark:text-gray-200 h-6 py-1">Method</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {paginatedTraces.map((trace, idx) => (
-                    <TableRow
-                      key={`${trace.TraceId}-${idx}`}
-                      className="cursor-pointer hover:bg-accent dark:hover:bg-slate-800/80 transition-colors border-b border-border dark:border-slate-700 h-7 bg-background dark:bg-slate-900"
-                      onClick={() => handleRowClick(trace.TraceId)}
-                    >
-                      <TableCell className="text-muted-foreground dark:text-gray-300 py-1 px-3 whitespace-nowrap text-xs">
-                        {(() => {
-                          try {
-                            return format(new Date(trace.Timestamp), 'MMM dd HH:mm:ss.SSS');
-                          } catch {
-                            return 'Invalid date';
-                          }
-                        })()}
-                      </TableCell>
-                      <TableCell className="py-1 px-2">
-                        <div className="flex items-center gap-1.5">
-                          
-                          <Badge variant="outline" className={`text-xs font-medium py-0.5 px-2 inline-block}`}>
-                            {trace.ServiceName || 'Unknown Service'}
-                          </Badge>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-foreground dark:text-gray-200 py-1 px-2 truncate text-xs" title={trace.SpanName}>
-                        {trace.Resource || trace.SpanName}
-                      </TableCell>
-                      <TableCell className="text-muted-foreground dark:text-gray-300 py-1 px-2 whitespace-nowrap text-xs">
-                        {formatDuration(trace.Duration)}
-                      </TableCell>
-                      <TableCell className="py-1 px-2">
-                        <span className="text-xs font-medium text-foreground dark:text-gray-200 bg-muted dark:bg-slate-700 px-2 py-1 rounded inline-block">
-                          {trace.Method || trace.SpanAttributes?.['http.method'] || 'N/A'}
-                        </span>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-              {/* Pagination Controls */}
-              <div className="flex items-center justify-between px-4 py-2 border-t border-border bg-background dark:bg-slate-800">
-                <div className="text-xs text-muted-foreground">
-                  Page {currentPage} of {totalPages} ({filteredTraces.length} total)
-                </div>
-                <div className="flex items-center gap-2">
-                  <Select value={pageSize.toString()} onValueChange={(val) => { setPageSize(parseInt(val)); setCurrentPage(1); }}>
-                    <SelectTrigger className="h-7 w-[70px] text-xs bg-background border-input dark:bg-slate-700 dark:border-slate-600">
-                      <SelectValue placeholder="Rows" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-background dark:bg-slate-700 dark:border-slate-600">
-                      <SelectItem value="5">5</SelectItem>
-                      <SelectItem value="10">10</SelectItem>
-                      <SelectItem value="20">20</SelectItem>
-                      <SelectItem value="50">50</SelectItem>
-                    </SelectContent>
-                  </Select>
-
-                  <div className="flex items-center gap-1">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      disabled={currentPage === 1}
-                      onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-                      className="h-7 px-2 text-xs bg-background dark:bg-slate-800 dark:hover:bg-slate-700"
-                    >
-                      Prev
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      disabled={traces.length < pageSize}
-                      onClick={() => setCurrentPage((p) => p +1)}
-                      className="h-7 px-2 text-xs bg-background dark:bg-slate-800 dark:hover:bg-slate-700"
-                    >
-                      Next
-                    </Button>
-                  </div>
-                </div>
-              </div>
+            <div className="flex-1 px-2 overflow-auto">
+              <DataTable
+                columns={columns}
+                data={paginatedTraces}
+                searchPlaceholder="Search traces..."
+                enableRowSelection={false}
+                enableColumnVisibility={true}
+                enablePagination={true}
+                pageSize={pageSize}
+                onRowClick={(row) => handleRowClick(row.TraceId)}
+              />
             </div>
           </div>
         )}

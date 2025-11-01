@@ -1,9 +1,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import { getMetrics, createEventSource, generateMockMetrics } from '../api';
 import { formatDistance, format } from 'date-fns';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -11,6 +9,8 @@ import { Sidebar } from '@/components/sidebar';
 import { MetricDetailSheet } from '@/components/metric-detail-sheet.tsx';
 import { Search, RefreshCw, Wifi, WifiOff, Plus, Download } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { DataTable, DataTableColumnHeader } from '@/components/data-table';
+import { ColumnDef } from "@tanstack/react-table";
 
 interface Metric {
   id: string;
@@ -45,6 +45,87 @@ function MetricsView() {
   const [pageSize, setPageSize] = useState(10);
   const [selectedMetric, setSelectedMetric] = useState<Metric | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+
+  const columns: ColumnDef<Metric>[] = [
+    {
+      accessorKey: "name",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Name" />
+      ),
+      cell: ({ row }) => {
+        const name = row.getValue("name") as string;
+        return (
+          <div className="text-foreground dark:text-gray-200 py-1 px-2 truncate text-xs" title={name}>
+            {name}
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: "type",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Type" />
+      ),
+      cell: ({ row }) => {
+        const type = row.getValue("type") as string;
+        return (
+          <div className="py-1 px-2">
+            <Badge variant="outline" className="text-xs font-medium py-0.5 px-2">
+              {type}
+            </Badge>
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: "ingestedCustomMetrics",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Value" />
+      ),
+      cell: ({ row }) => {
+        const value = row.getValue("ingestedCustomMetrics") as number;
+        return (
+          <div className="text-muted-foreground dark:text-gray-300 py-1 px-2 whitespace-nowrap text-xs">
+            {value?.toFixed(2) || 'N/A'}
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: "originProduct",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Product" />
+      ),
+      cell: ({ row }) => {
+        const product = row.getValue("originProduct") as string;
+        return (
+          <div className="text-muted-foreground dark:text-gray-300 py-1 px-2 whitespace-nowrap text-xs">
+            {product || 'N/A'}
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: "updatedAt",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Last Updated" />
+      ),
+      cell: ({ row }) => {
+        const timestamp = row.getValue("updatedAt") as string;
+        return (
+          <div className="text-muted-foreground dark:text-gray-300 py-1 px-2 whitespace-nowrap text-xs">
+            {(() => {
+              try {
+                return formatDistance(new Date(timestamp), new Date(), { addSuffix: true });
+              } catch {
+                return 'Invalid date';
+              }
+            })()}
+          </div>
+        );
+      },
+    },
+  ];
 
   useEffect(() => {
     loadMetrics(currentPage, pageSize);
@@ -312,16 +393,6 @@ function MetricsView() {
         {/* Search Bar */}
         <div className="border-b border-border dark:border-slate-700 px-4 py-2 flex-shrink-0 bg-muted dark:bg-slate-800">
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 flex-1 min-w-0 max-w-sm">
-              <Search className="h-3 w-3 text-muted-foreground dark:text-gray-500 flex-shrink-0" />
-              <Input
-                placeholder="Search metrics..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="h-7 text-xs border-input dark:border-slate-600 dark:bg-slate-700 dark:text-gray-50 dark:placeholder-gray-400"
-              />
-            </div>
-
             <Select value={`${sortBy}-${sortOrder}`} onValueChange={(value) => {
               const [field, order] = value.split('-');
               setSortBy(field as any);
@@ -368,75 +439,17 @@ function MetricsView() {
             <div className="px-4 py-1 text-xs text-muted-foreground dark:text-gray-400 flex-shrink-0">
               Showing {paginatedMetrics.length} of {filteredMetrics.length} metrics
             </div>
-            <div className="flex-1 overflow-auto">
-              <Table className="text-xs">
-                <TableHeader className="sticky top-0 bg-muted dark:bg-slate-800 border-b border-border dark:border-slate-700 h-6">
-                  <TableRow className="hover:bg-transparent">
-                    <TableHead className="flex-1 font-semibold text-foreground dark:text-gray-200 h-6 py-1">Metric Name</TableHead>
-                    <TableHead className="w-32 font-semibold text-foreground dark:text-gray-200 h-6 py-1">Created At</TableHead>
-                    <TableHead className="w-32 font-semibold text-foreground dark:text-gray-200 h-6 py-1">Updated At</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {paginatedMetrics.map((metric, idx) => (
-                    <TableRow
-                      key={`${metric.id}-${idx}`}
-                      className="cursor-pointer hover:bg-accent dark:hover:bg-slate-800/80 transition-colors border-b border-border dark:border-slate-700 h-7 bg-background dark:bg-slate-900"
-                      onClick={() => handleRowClick(metric)}
-                    >
-                      <TableCell className="text-foreground dark:text-gray-200 py-1 px-3 text-xs font-medium">
-                        {metric.name}
-                      </TableCell>
-                      <TableCell className="text-muted-foreground dark:text-gray-300 py-1 px-3 whitespace-nowrap text-xs">
-                        {formatDistance(new Date(metric.createdAt), new Date(), { addSuffix: true })}
-                      </TableCell>
-                      <TableCell className="text-muted-foreground dark:text-gray-300 py-1 px-3 whitespace-nowrap text-xs">
-                        {formatDistance(new Date(metric.updatedAt), new Date(), { addSuffix: true })}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-              {/* Pagination Controls */}
-              <div className="flex items-center justify-between px-4 py-2 border-t border-border bg-background dark:bg-slate-800">
-                <div className="text-xs text-muted-foreground">
-                  Page {currentPage} of {totalPages} ({filteredMetrics.length} total)
-                </div>
-                <div className="flex items-center gap-2">
-                  <Select value={pageSize.toString()} onValueChange={(val) => { setPageSize(parseInt(val)); setCurrentPage(1); }}>
-                    <SelectTrigger className="h-7 w-[70px] text-xs bg-background border-input dark:bg-slate-700 dark:border-slate-600">
-                      <SelectValue placeholder="Rows" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-background dark:bg-slate-700 dark:border-slate-600">
-                      <SelectItem value="5">5</SelectItem>
-                      <SelectItem value="10">10</SelectItem>
-                      <SelectItem value="20">20</SelectItem>
-                      <SelectItem value="50">50</SelectItem>
-                    </SelectContent>
-                  </Select>
-
-                  <div className="flex items-center gap-1">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      disabled={currentPage === 1}
-                      onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-                      className="h-7 px-2 text-xs bg-background dark:bg-slate-800 dark:hover:bg-slate-700"
-                    >
-                      Prev
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      disabled={currentPage >= totalPages}
-                      onClick={() => setCurrentPage((p) => p +1)}
-                      className="h-7 px-2 text-xs bg-background dark:bg-slate-800 dark:hover:bg-slate-700"
-                    >
-                      Next
-                    </Button>
-                  </div>
-                </div>
-              </div>
+            <div className="flex-1 px-2 ‚overflow-auto">
+              <DataTable
+                columns={columns}
+                data={paginatedMetrics}
+                searchPlaceholder="Search metrics..."
+                enableRowSelection={false}
+                enableColumnVisibility={true}
+                enablePagination={true}
+                pageSize={pageSize}
+                onRowClick={(row) => handleRowClick(row)}
+              />
             </div>
           </div>
         )}

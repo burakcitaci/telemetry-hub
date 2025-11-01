@@ -3,16 +3,16 @@ import { getLogs, createEventSource, generateMockLogs } from '../api';
 import { format } from 'date-fns';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Sidebar } from '@/components/sidebar';
 import { Plus, RefreshCw, Search, Wifi, WifiOff } from 'lucide-react';
 import { LogDetailSheet } from '@/components/log-detail-sheet';
+import { DataTable, DataTableColumnHeader } from '@/components/data-table';
+import { ColumnDef } from "@tanstack/react-table";
 
 interface Log {
   Timestamp: string;
@@ -48,6 +48,88 @@ function LogsView() {
   const [pageSize, setPageSize] = useState(10);
   const [selectedLog, setSelectedLog] = useState<Log | null>(null);
   const [isLogDetailOpen, setIsLogDetailOpen] = useState(false);
+
+  const columns: ColumnDef<Log>[] = [
+    {
+      accessorKey: "Timestamp",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Timestamp" />
+      ),
+      cell: ({ row }) => {
+        const timestamp = row.getValue("Timestamp") as string;
+        return (
+          <div className="text-muted-foreground dark:text-gray-300 py-1 px-3 whitespace-nowrap text-xs">
+            {(() => {
+              try {
+                return format(new Date(timestamp), 'MMM dd HH:mm:ss.SSS');
+              } catch {
+                return 'Invalid date';
+              }
+            })()}
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: "SeverityText",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Severity" />
+      ),
+      cell: ({ row }) => {
+        const severity = row.getValue("SeverityText") as string;
+        return (
+          <div className="py-1 px-2">
+            {getSeverityBadge(severity)}
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: "ServiceName",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Service" />
+      ),
+      cell: ({ row }) => {
+        const serviceName = row.getValue("ServiceName") as string;
+        return (
+          <div className="py-1 px-2">
+            <Badge variant="outline" className="text-xs font-medium py-0.5 px-2">
+              {serviceName || 'Unknown Service'}
+            </Badge>
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: "Body",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Message" />
+      ),
+      cell: ({ row }) => {
+        const body = row.getValue("Body") as string;
+        return (
+          <div className="text-foreground dark:text-gray-200 py-1 px-2 truncate text-xs" title={body}>
+            {body}
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: "TraceId",
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Trace ID" />
+      ),
+      cell: ({ row }) => {
+        const traceId = row.getValue("TraceId") as string;
+        const spanId = row.original.SpanId;
+        return (
+          <div className="text-muted-foreground dark:text-gray-300 py-1 px-2 whitespace-nowrap text-xs">
+            {traceId ? traceId.substring(0, 8) : (spanId ? spanId.substring(0, 8) : 'N/A')}
+          </div>
+        );
+      },
+    },
+  ];
 
   useEffect(() => {
     loadLogs(currentPage, pageSize);
@@ -291,16 +373,6 @@ function LogsView() {
         {/* Search Bar */}
         <div className="border-b border-border dark:border-slate-700 px-4 py-2 flex-shrink-0 bg-muted dark:bg-slate-800">
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 flex-1 min-w-0 max-w-sm">
-              <Search className="h-3 w-3 text-muted-foreground dark:text-gray-500 flex-shrink-0" />
-              <Input
-                placeholder="Search logs..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="h-7 text-xs border-input dark:border-slate-600 dark:bg-slate-700 dark:text-gray-50 dark:placeholder-gray-400"
-              />
-            </div>
-
             <Select value={`${sortBy}-${sortOrder}`} onValueChange={(value) => {
               const [field, order] = value.split('-');
               setSortBy(field as any);
@@ -347,94 +419,20 @@ function LogsView() {
             <div className="px-4 py-1 text-xs text-muted-foreground dark:text-gray-400 flex-shrink-0">
               {filteredLogs.length} logs
             </div>
-            <div className="flex-1 overflow-auto">
-              <Table className="text-xs">
-                <TableHeader className="sticky top-0 bg-muted dark:bg-slate-800 border-b border-border dark:border-slate-700 h-6">
-                  <TableRow className="hover:bg-transparent">
-                    <TableHead className="w-36 font-semibold text-foreground dark:text-gray-200 h-6 py-1">Timestamp</TableHead>
-                    <TableHead className="w-20 font-semibold text-foreground dark:text-gray-200 h-6 py-1">Severity</TableHead>
-                    <TableHead className="font-semibold text-foreground dark:text-gray-200 h-6 py-1">Service</TableHead>
-                    <TableHead className="flex-1 min-w-48 font-semibold text-foreground dark:text-gray-200 h-6 py-1">Message</TableHead>
-                    <TableHead className="w-24 font-semibold text-foreground dark:text-gray-200 h-6 py-1">Trace ID</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {paginatedLogs.map((log, idx) => (
-                    <TableRow
-                      key={`${log.Timestamp}-${idx}`}
-                      className="cursor-pointer hover:bg-accent dark:hover:bg-slate-800/80 transition-colors border-b border-border dark:border-slate-700 h-7 bg-background dark:bg-slate-900"
-                      onClick={() => {
-                        setSelectedLog(log);
-                        setIsLogDetailOpen(true);
-                      }}
-                    >
-                      <TableCell className="text-muted-foreground dark:text-gray-300 py-1 px-3 whitespace-nowrap text-xs">
-                        {(() => {
-                          try {
-                            return format(new Date(log.Timestamp), 'MMM dd HH:mm:ss.SSS');
-                          } catch {
-                            return 'Invalid date';
-                          }
-                        })()}
-                      </TableCell>
-                      <TableCell className="py-1 px-2">
-                        {getSeverityBadge(log.SeverityText)}
-                      </TableCell>
-                      <TableCell className="py-1 px-2">
-                        <Badge variant="outline" className="text-xs font-medium py-0.5 px-2">
-                          {log.ServiceName || 'Unknown Service'}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-foreground dark:text-gray-200 py-1 px-2 truncate text-xs" title={log.Body}>
-                        {log.Body}
-                      </TableCell>
-                      <TableCell className="text-muted-foreground dark:text-gray-300 py-1 px-2 whitespace-nowrap text-xs">
-                        {log.TraceId ? log.TraceId.substring(0, 8) : (log.SpanId ? log.SpanId.substring(0, 8) : 'N/A')}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-              {/* Pagination Controls */}
-              <div className="flex items-center justify-between px-4 py-2 border-t border-border bg-background dark:bg-slate-800">
-                <div className="text-xs text-muted-foreground">
-                  Page {currentPage} of {totalPages} ({filteredLogs.length} total)
-                </div>
-                <div className="flex items-center gap-2">
-                  <Select value={pageSize.toString()} onValueChange={(val) => { setPageSize(parseInt(val)); setCurrentPage(1); }}>
-                    <SelectTrigger className="h-7 w-[70px] text-xs bg-background border-input dark:bg-slate-700 dark:border-slate-600">
-                      <SelectValue placeholder="Rows" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-background dark:bg-slate-700 dark:border-slate-600">
-                      <SelectItem value="5">5</SelectItem>
-                      <SelectItem value="10">10</SelectItem>
-                      <SelectItem value="20">20</SelectItem>
-                      <SelectItem value="50">50</SelectItem>
-                    </SelectContent>
-                  </Select>
-
-                  <div className="flex items-center gap-1">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      disabled={currentPage === 1}
-                      onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-                      className="h-7 px-2 text-xs bg-background dark:bg-slate-800 dark:hover:bg-slate-700"
-                    >
-                      Prev
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      disabled={currentPage >= totalPages}
-                      onClick={() => setCurrentPage((p) => p +1)}
-                      className="h-7 px-2 text-xs bg-background dark:bg-slate-800 dark:hover:bg-slate-700"
-                    >
-                      Next
-                    </Button>
-                  </div>
-                </div>
-              </div>
+            <div className="flex-1 px-2 overflow-auto">
+              <DataTable
+                columns={columns}
+                data={paginatedLogs}
+                searchPlaceholder="Search logs..."
+                enableRowSelection={false}
+                enableColumnVisibility={true}
+                enablePagination={true}
+                pageSize={pageSize}
+                onRowClick={(row) => {
+                  setSelectedLog(row);
+                  setIsLogDetailOpen(true);
+                }}
+              />
             </div>
           </div>
         )}

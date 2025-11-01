@@ -381,7 +381,7 @@ function TraceDetailView() {
           </div>
 
           {/* Spans List */}
-          <div className="flex-1 overflow-auto">
+          <div className="flex-1 px-2 overflow-auto">
             <div className="px-4 py-1">{buildSpanTree()}</div>
           </div>
         </div>
