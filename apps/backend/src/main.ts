@@ -11,6 +11,7 @@ import { LoggingInterceptor } from "./common/interceptors/logging.interceptor";
 import { LoggerMiddleware } from "./common/middleware/logger.middleware";
 import { CentralLoggerService } from './common/logger/central-logger.service';
 import { AppModule } from "./app.module";
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -48,7 +49,14 @@ async function bootstrap() {
   
   // Emit logs immediately to verify pipeline
   logger.log('Bootstrap: App configuration starting', 'Bootstrap');
-  
+   const config = new DocumentBuilder()
+    .setTitle('Cats example')
+    .setDescription('The cats API description')
+    .setVersion('1.0')
+    .addTag('cats')
+    .build();
+  const documentFactory = () => SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api', app, documentFactory);
   await app.listen(port, host);
   
   logger.log(`Backend API is running on ${host}:${port}`, 'Bootstrap');

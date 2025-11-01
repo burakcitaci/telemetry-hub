@@ -10,6 +10,7 @@ import healthConfig from "./config/health.config";
 import { TelemetryModule } from "./modules/telemetry/telemetry.module";
 import { HealthModule } from "./modules/health/health.module";
 import { LoggerModule } from "./common/logger/logger.module";
+import { AuthModule } from "./modules/auth/auth.module";
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { LoggerModule } from "./common/logger/logger.module";
         ".env",
       ],
     }),
+    AuthModule,
     LoggerModule,
     TelemetryModule,
     HealthModule,

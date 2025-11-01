@@ -5,13 +5,14 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/main.js",
-    "dev": "ts-node src/main.ts"
+    "dev": "ts-node -r tsconfig-paths/register src/main.ts"
   },
   "dependencies": {
     "@clickhouse/client": "^1.12.1",
     "@nestjs/common": "^11.1.7",
     "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^11.1.7",
+    "@nestjs/jwt": "^11.0.1",
     "@nestjs/platform-express": "^11.1.7",
     "@nestjs/swagger": "^11.2.1",
     "@opentelemetry/api": "^1.9.0",
@@ -32,6 +33,7 @@
     "@types/express": "^5.0.4",
     "@types/node": "^24.9.1",
     "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
     "typescript": "^5.9.3"
   }
 }
