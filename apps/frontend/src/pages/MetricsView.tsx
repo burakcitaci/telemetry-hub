@@ -1,56 +1,53 @@
 import { useEffect, useState, useMemo } from 'react';
-import { getLogs, createEventSource, generateMockLogs } from '../api';
-import { format } from 'date-fns';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { getMetrics, createEventSource, generateMockMetrics } from '../api';
+import { formatDistance, format } from 'date-fns';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Sidebar } from '@/components/sidebar';
-import { Plus, RefreshCw, Search, Wifi, WifiOff } from 'lucide-react';
-import { LogDetailSheet } from '@/components/log-detail-sheet';
+import { MetricDetailSheet } from '@/components/metric-detail-sheet.tsx';
+import { Search, RefreshCw, Wifi, WifiOff, Plus, Download } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
-interface Log {
-  Timestamp: string;
-  TimestampTime: string;
-  TraceId: string;
-  SpanId: string;
-  TraceFlags: number;
-  SeverityText: string;
-  SeverityNumber: number;
-  ServiceName: string;
-  Body: string;
-  ResourceSchemaUrl?: string;
-  ResourceAttributes?: Record<string, any>;
-  ScopeSchemaUrl?: string;
-  ScopeName?: string;
-  ScopeVersion?: string;
-  ScopeAttributes?: Record<string, any>;
-  LogAttributes?: Record<string, any>;
+interface Metric {
+  id: string;
+  name: string;
+  createdAt: string;
+  updatedAt: string;
+  type: string;
+  interval: number;
+  originProduct: string;
+  subproduct: string;
+  productDetail: string;
+  ingestedCustomMetrics: number;
+  indexedCustomMetrics: number;
+  hosts: number;
+  tagValues: number;
+  tags: Record<string, string[]>;
+  historicalMetrics: boolean;
 }
 
-function LogsView() {
-  const [logs, setLogs] = useState<Log[]>([]);
+function MetricsView() {
+  const [metrics, setMetrics] = useState<Metric[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [connected, setConnected] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [serviceFilters, setServiceFilters] = useState<string[]>([]);
-  const [severityFilters, setSeverityFilters] = useState<string[]>([]);
-  const [sortBy, setSortBy] = useState<'timestamp' | 'service' | 'severity'>('timestamp');
+  const [typeFilters, setTypeFilters] = useState<string[]>([]);
+  const [productFilters, setProductFilters] = useState<string[]>([]);
+  const [sortBy, setSortBy] = useState<'createdAt' | 'updatedAt' | 'name'>('updatedAt');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
-  const [timeRange, setTimeRange] = useState<string>('6h');
+  const [timeRange, setTimeRange] = useState<string>('24h');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const [selectedLog, setSelectedLog] = useState<Log | null>(null);
-  const [isLogDetailOpen, setIsLogDetailOpen] = useState(false);
+  const [selectedMetric, setSelectedMetric] = useState<Metric | null>(null);
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   useEffect(() => {
-    loadLogs(currentPage, pageSize);
+    loadMetrics(currentPage, pageSize);
 
     const eventSource = createEventSource();
 
@@ -61,9 +58,9 @@ function LogsView() {
 
     eventSource.onmessage = (event) => {
       const data = JSON.parse(event.data);
-      if (data.type === 'update' && data.logs.length > 0) {
-        console.log('New logs received', data.logs);
-        loadLogs(currentPage, pageSize);
+      if (data.type === 'update' && data.metrics.length > 0) {
+        console.log('New metrics received', data.metrics);
+        loadMetrics(currentPage, pageSize);
       }
     };
 
@@ -77,17 +74,17 @@ function LogsView() {
     };
   }, [pageSize, currentPage]);
 
-  const loadLogs = async (page: number, pageSize: number) => {
+  const loadMetrics = async (page: number, pageSize: number) => {
     console.log(page, pageSize);
     try {
       setLoading(true);
-      const data = await getLogs(pageSize);
-      console.log('Fetched logs:', data);
-      setLogs(data);
+      const data = await getMetrics(page, pageSize);
+      console.log('Fetched metrics:', data);
+      setMetrics(data);
       setError(null);
     } catch (err: any) {
       console.log('Using mock data for demonstration');
-      setLogs(generateMockLogs(100));
+      setMetrics(generateMockMetrics(50));
       setError(null);
     } finally {
       setLoading(false);
@@ -96,64 +93,53 @@ function LogsView() {
 
   const generateSampleData = () => {
     setLoading(true);
-    const newLogs = generateMockLogs(50);
-    setLogs(prev => [...newLogs, ...prev].slice(0, 200));
+    const newMetrics = generateMockMetrics(25);
+    setMetrics(prev => [...newMetrics, ...prev].slice(0, 100));
     setLoading(false);
   };
 
-  const getSeverityBadge = (severity: string) => {
-    const variant = severity?.toUpperCase() === 'ERROR' || severity?.toUpperCase() === 'FATAL' ? 'destructive' :
-                   severity?.toUpperCase() === 'WARN' ? 'warning' :
-                   severity?.toUpperCase() === 'INFO' ? 'info' : 'secondary';
-    return (
-      <Badge variant={variant} className="text-xs">
-        {severity || 'INFO'}
-      </Badge>
-    );
-  };
+  const types = useMemo(() => {
+    const uniqueTypes = [...new Set(metrics.map(metric => metric.type))];
+    return uniqueTypes.sort();
+  }, [metrics]);
 
-  const services = useMemo(() => {
-    const uniqueServices = [...new Set(logs.map(log => log.ServiceName))];
-    return uniqueServices.sort();
-  }, [logs]);
+  const products = useMemo(() => {
+    const uniqueProducts = [...new Set(metrics.map(metric => metric.originProduct))];
+    return uniqueProducts.sort();
+  }, [metrics]);
 
-  const metrics = useMemo(() => {
-    const errorLogs = logs.filter(l => l.SeverityText === 'ERROR');
-    const warnLogs = logs.filter(l => l.SeverityText === 'WARN');
-    const infoLogs = logs.filter(l => l.SeverityText === 'INFO');
-
+  const metricsSummary = useMemo(() => {
     return {
-      totalLogs: logs.length,
-      errorCount: errorLogs.length,
-      warnCount: warnLogs.length,
-      infoCount: infoLogs.length,
-      logsPerMinute: (logs.length * 60).toFixed(0),
+      totalMetrics: metrics.length,
+      customMetrics: metrics.filter(m => m.ingestedCustomMetrics > 0).length,
+      activeHosts: metrics.reduce((sum, m) => sum + m.hosts, 0),
+      totalTags: metrics.reduce((sum, m) => sum + m.tagValues, 0),
     };
-  }, [logs]);
+  }, [metrics]);
 
-  const filteredLogs = useMemo(() => {
-    let filtered = logs;
+  const filteredMetrics = useMemo(() => {
+    let filtered = metrics;
 
-    if (serviceFilters.length > 0) {
-      filtered = filtered.filter(log => serviceFilters.includes(log.ServiceName || ''));
+    if (typeFilters.length > 0) {
+      filtered = filtered.filter(metric => typeFilters.includes(metric.type));
     }
 
-    if (severityFilters.length > 0) {
-      filtered = filtered.filter(log => severityFilters.includes(log.SeverityText || ''));
+    if (productFilters.length > 0) {
+      filtered = filtered.filter(metric => productFilters.includes(metric.originProduct));
     }
 
     if (searchTerm) {
-      filtered = filtered.filter(log =>
-        log.Body.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        log.ServiceName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        log.TraceId.toLowerCase().includes(searchTerm.toLowerCase())
+      filtered = filtered.filter(metric =>
+        metric.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        metric.originProduct.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        metric.subproduct.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
     console.log('Applying time range filter:', timeRange);
     if(timeRange) {
       const now = Date.now();
-      let rangeMs = 15 * 60 * 1000; // default 15 minutes
+      let rangeMs = 24 * 60 * 60 * 1000; // default 24 hours
 
       if (timeRange.endsWith('m')) {
         rangeMs = parseInt(timeRange) * 60 * 1000;
@@ -163,26 +149,27 @@ function LogsView() {
         rangeMs = parseInt(timeRange) * 24 * 60 * 60 * 1000;
       }
 
-      filtered = filtered.filter(log => {
-        const logTime = new Date(log.Timestamp).getTime();
-        return (now - logTime) <= rangeMs;
+      filtered = filtered.filter(metric => {
+        const metricTime = new Date(metric.updatedAt).getTime();
+        return (now - metricTime) <= rangeMs;
       });
     }
+
     filtered.sort((a, b) => {
       let aValue: any, bValue: any;
 
       switch (sortBy) {
-        case 'timestamp':
-          aValue = new Date(a.Timestamp).getTime();
-          bValue = new Date(b.Timestamp).getTime();
+        case 'createdAt':
+          aValue = new Date(a.createdAt).getTime();
+          bValue = new Date(b.createdAt).getTime();
           break;
-        case 'service':
-          aValue = a.ServiceName;
-          bValue = b.ServiceName;
+        case 'updatedAt':
+          aValue = new Date(a.updatedAt).getTime();
+          bValue = new Date(b.updatedAt).getTime();
           break;
-        case 'severity':
-          aValue = a.SeverityText;
-          bValue = b.SeverityText;
+        case 'name':
+          aValue = a.name;
+          bValue = b.name;
           break;
         default:
           return 0;
@@ -196,26 +183,56 @@ function LogsView() {
     });
 
     return filtered;
-  }, [logs, searchTerm, serviceFilters, timeRange, severityFilters, sortBy, sortOrder]);
+  }, [metrics, searchTerm, typeFilters, productFilters, timeRange, sortBy, sortOrder]);
 
-  const severityCounts = useMemo(() => ({
-    ok: logs.filter(l => l.SeverityText === 'INFO').length,
-    error: logs.filter(l => l.SeverityText === 'ERROR').length,
-    warn: logs.filter(l => l.SeverityText === 'WARN').length,
-    total: logs.length
-  }), [logs]);
+  const handleRowClick = (metric: Metric) => {
+    setSelectedMetric(metric);
+    setIsSheetOpen(true);
+  };
+
+  const handleSheetClose = () => {
+    setIsSheetOpen(false);
+    setSelectedMetric(null);
+  };
 
   // Calculate total pages based on filtered results
-  const totalPages = Math.ceil(filteredLogs.length / pageSize) || 1;
+  const totalPages = Math.ceil(filteredMetrics.length / pageSize) || 1;
 
-  // Paginate the filtered logs
-  const paginatedLogs = useMemo(() => {
+  // Paginate the filtered metrics
+  const paginatedMetrics = useMemo(() => {
     const startIndex = (currentPage - 1) * pageSize;
     const endIndex = startIndex + pageSize;
-    return filteredLogs.slice(startIndex, endIndex);
-  }, [filteredLogs, currentPage, pageSize]);
+    return filteredMetrics.slice(startIndex, endIndex);
+  }, [filteredMetrics, currentPage, pageSize]);
 
-  if (loading && logs.length === 0) {
+  const statusCounts = useMemo(() => ({
+    ok: metrics.filter(m => m.historicalMetrics).length,
+    error: metrics.filter(m => !m.historicalMetrics).length,
+    total: metrics.length
+  }), [metrics]);
+
+  const exportToCSV = () => {
+    const csvContent = [
+      ['Metric Name', 'Created At', 'Updated At', 'Type', 'Origin Product'],
+      ...filteredMetrics.map(metric => [
+        metric.name,
+        format(new Date(metric.createdAt), 'yyyy-MM-dd HH:mm:ss'),
+        format(new Date(metric.updatedAt), 'yyyy-MM-dd HH:mm:ss'),
+        metric.type,
+        metric.originProduct
+      ])
+    ].map(row => row.join(',')).join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'metrics.csv';
+    a.click();
+    window.URL.revokeObjectURL(url);
+  };
+
+  if (loading && metrics.length === 0) {
     return (
       <div className="space-y-3 p-4">
         <Skeleton className="h-6 w-64" />
@@ -233,12 +250,12 @@ function LogsView() {
     <div className="flex h-screen bg-background dark:bg-slate-950">
       {/* Sidebar */}
       <Sidebar
-        services={services}
-        selectedServices={serviceFilters}
-        onServicesSelect={setServiceFilters}
-        statusCounts={severityCounts}
-        selectedStatuses={severityFilters}
-        onStatusesSelect={setSeverityFilters}
+        services={types}
+        selectedServices={typeFilters}
+        onServicesSelect={setTypeFilters}
+        statusCounts={statusCounts}
+        selectedStatuses={productFilters}
+        onStatusesSelect={setProductFilters}
         timeRange={timeRange}
         onTimeRangeSelect={setTimeRange}
       />
@@ -250,16 +267,16 @@ function LogsView() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="text-sm font-semibold text-foreground dark:text-gray-50">
-                {metrics.logsPerMinute} logs/min
+                {metricsSummary.totalMetrics} metrics
               </div>
               <div className="flex items-center gap-4 text-xs">
                 <div className="flex items-center gap-2">
-                  <span className="text-muted-foreground dark:text-gray-300">Errors</span>
-                  <span className="font-semibold text-red-600 dark:text-red-400">{metrics.errorCount}</span>
+                  <span className="text-muted-foreground dark:text-gray-300">Custom</span>
+                  <span className="font-semibold text-foreground dark:text-gray-100">{metricsSummary.customMetrics}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-muted-foreground dark:text-gray-300">Warnings</span>
-                  <span className="font-semibold text-yellow-600 dark:text-yellow-400">{metrics.warnCount}</span>
+                  <span className="text-muted-foreground dark:text-gray-300">Hosts</span>
+                  <span className="font-semibold text-blue-600 dark:text-blue-400">{metricsSummary.activeHosts}</span>
                 </div>
               </div>
             </div>
@@ -277,11 +294,15 @@ function LogsView() {
                   </>
                 )}
               </div>
+              <Button onClick={exportToCSV} variant="ghost" size="sm" className="h-6 px-2 text-xs dark:hover:bg-slate-800">
+                <Download className="h-3 w-3 mr-1" />
+                Export CSV
+              </Button>
               <Button onClick={generateSampleData} variant="ghost" size="sm" className="h-6 px-2 text-xs dark:hover:bg-slate-800">
                 <Plus className="h-3 w-3 mr-1" />
                 Generate
               </Button>
-              <Button onClick={()=>loadLogs(currentPage,pageSize)} variant="ghost" size="sm" className="h-6 px-2 text-xs dark:hover:bg-slate-800">
+              <Button onClick={()=>loadMetrics(currentPage,pageSize)} variant="ghost" size="sm" className="h-6 px-2 text-xs dark:hover:bg-slate-800">
                 <RefreshCw className="h-3 w-3" />
               </Button>
             </div>
@@ -294,7 +315,7 @@ function LogsView() {
             <div className="flex items-center gap-2 flex-1 min-w-0 max-w-sm">
               <Search className="h-3 w-3 text-muted-foreground dark:text-gray-500 flex-shrink-0" />
               <Input
-                placeholder="Search logs..."
+                placeholder="Search metrics..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="h-7 text-xs border-input dark:border-slate-600 dark:bg-slate-700 dark:text-gray-50 dark:placeholder-gray-400"
@@ -310,12 +331,12 @@ function LogsView() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="dark:bg-slate-700 dark:border-slate-600">
-                <SelectItem value="timestamp-desc">Latest</SelectItem>
-                <SelectItem value="timestamp-asc">Oldest</SelectItem>
-                <SelectItem value="service-asc">Service A-Z</SelectItem>
-                <SelectItem value="service-desc">Service Z-A</SelectItem>
-                <SelectItem value="severity-desc">Severity High</SelectItem>
-                <SelectItem value="severity-asc">Severity Low</SelectItem>
+                <SelectItem value="updatedAt-desc">Recently Updated</SelectItem>
+                <SelectItem value="updatedAt-asc">Least Recent</SelectItem>
+                <SelectItem value="createdAt-desc">Recently Created</SelectItem>
+                <SelectItem value="createdAt-asc">Oldest</SelectItem>
+                <SelectItem value="name-asc">Name A-Z</SelectItem>
+                <SelectItem value="name-desc">Name Z-A</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -327,15 +348,15 @@ function LogsView() {
           </Alert>
         )}
 
-        {filteredLogs.length === 0 ? (
+        {filteredMetrics.length === 0 ? (
           <div className="flex-1 flex items-center justify-center text-center">
             <div>
               <div className="text-sm text-muted-foreground dark:text-gray-300 mb-3">
-                {searchTerm || serviceFilters.length > 0 || severityFilters.length > 0
-                  ? 'No logs match your filters'
-                  : 'No logs found'}
+                {searchTerm || typeFilters.length > 0 || productFilters.length > 0
+                  ? 'No metrics match your filters'
+                  : 'No metrics found'}
               </div>
-              {!searchTerm && serviceFilters.length === 0 && severityFilters.length === 0 && (
+              {!searchTerm && typeFilters.length === 0 && productFilters.length === 0 && (
                 <Button onClick={generateSampleData} size="sm">
                   Generate Sample Data
                 </Button>
@@ -345,51 +366,32 @@ function LogsView() {
         ) : (
           <div className="flex-1 overflow-hidden flex flex-col">
             <div className="px-4 py-1 text-xs text-muted-foreground dark:text-gray-400 flex-shrink-0">
-              {filteredLogs.length} logs
+              Showing {paginatedMetrics.length} of {filteredMetrics.length} metrics
             </div>
             <div className="flex-1 overflow-auto">
               <Table className="text-xs">
                 <TableHeader className="sticky top-0 bg-muted dark:bg-slate-800 border-b border-border dark:border-slate-700 h-6">
                   <TableRow className="hover:bg-transparent">
-                    <TableHead className="w-36 font-semibold text-foreground dark:text-gray-200 h-6 py-1">Timestamp</TableHead>
-                    <TableHead className="w-20 font-semibold text-foreground dark:text-gray-200 h-6 py-1">Severity</TableHead>
-                    <TableHead className="font-semibold text-foreground dark:text-gray-200 h-6 py-1">Service</TableHead>
-                    <TableHead className="flex-1 min-w-48 font-semibold text-foreground dark:text-gray-200 h-6 py-1">Message</TableHead>
-                    <TableHead className="w-24 font-semibold text-foreground dark:text-gray-200 h-6 py-1">Trace ID</TableHead>
+                    <TableHead className="flex-1 font-semibold text-foreground dark:text-gray-200 h-6 py-1">Metric Name</TableHead>
+                    <TableHead className="w-32 font-semibold text-foreground dark:text-gray-200 h-6 py-1">Created At</TableHead>
+                    <TableHead className="w-32 font-semibold text-foreground dark:text-gray-200 h-6 py-1">Updated At</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {paginatedLogs.map((log, idx) => (
+                  {paginatedMetrics.map((metric, idx) => (
                     <TableRow
-                      key={`${log.Timestamp}-${idx}`}
+                      key={`${metric.id}-${idx}`}
                       className="cursor-pointer hover:bg-accent dark:hover:bg-slate-800/80 transition-colors border-b border-border dark:border-slate-700 h-7 bg-background dark:bg-slate-900"
-                      onClick={() => {
-                        setSelectedLog(log);
-                        setIsLogDetailOpen(true);
-                      }}
+                      onClick={() => handleRowClick(metric)}
                     >
+                      <TableCell className="text-foreground dark:text-gray-200 py-1 px-3 text-xs font-medium">
+                        {metric.name}
+                      </TableCell>
                       <TableCell className="text-muted-foreground dark:text-gray-300 py-1 px-3 whitespace-nowrap text-xs">
-                        {(() => {
-                          try {
-                            return format(new Date(log.Timestamp), 'MMM dd HH:mm:ss.SSS');
-                          } catch {
-                            return 'Invalid date';
-                          }
-                        })()}
+                        {formatDistance(new Date(metric.createdAt), new Date(), { addSuffix: true })}
                       </TableCell>
-                      <TableCell className="py-1 px-2">
-                        {getSeverityBadge(log.SeverityText)}
-                      </TableCell>
-                      <TableCell className="py-1 px-2">
-                        <Badge variant="outline" className="text-xs font-medium py-0.5 px-2">
-                          {log.ServiceName || 'Unknown Service'}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-foreground dark:text-gray-200 py-1 px-2 truncate text-xs" title={log.Body}>
-                        {log.Body}
-                      </TableCell>
-                      <TableCell className="text-muted-foreground dark:text-gray-300 py-1 px-2 whitespace-nowrap text-xs">
-                        {log.TraceId ? log.TraceId.substring(0, 8) : (log.SpanId ? log.SpanId.substring(0, 8) : 'N/A')}
+                      <TableCell className="text-muted-foreground dark:text-gray-300 py-1 px-3 whitespace-nowrap text-xs">
+                        {formatDistance(new Date(metric.updatedAt), new Date(), { addSuffix: true })}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -398,7 +400,7 @@ function LogsView() {
               {/* Pagination Controls */}
               <div className="flex items-center justify-between px-4 py-2 border-t border-border bg-background dark:bg-slate-800">
                 <div className="text-xs text-muted-foreground">
-                  Page {currentPage} of {totalPages} ({filteredLogs.length} total)
+                  Page {currentPage} of {totalPages} ({filteredMetrics.length} total)
                 </div>
                 <div className="flex items-center gap-2">
                   <Select value={pageSize.toString()} onValueChange={(val) => { setPageSize(parseInt(val)); setCurrentPage(1); }}>
@@ -438,19 +440,16 @@ function LogsView() {
             </div>
           </div>
         )}
-
-        {/* Log Detail Sheet */}
-        <LogDetailSheet
-          log={selectedLog}
-          isOpen={isLogDetailOpen}
-          onClose={() => {
-            setIsLogDetailOpen(false);
-            setSelectedLog(null);
-          }}
-        />
       </div>
+
+      {/* Metric Detail Sheet */}
+      <MetricDetailSheet
+        metric={selectedMetric}
+        isOpen={isSheetOpen}
+        onClose={handleSheetClose}
+      />
     </div>
   );
 }
 
-export default LogsView;
+export default MetricsView;

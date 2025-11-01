@@ -6,15 +6,17 @@ import { ModeToggle } from './components/mode-toggle';
 import TracesView from './pages/TracesView';
 import TraceDetailView from './pages/TraceDetailView';
 import LogsView from './pages/LogsView';
+import MetricsView from './pages/MetricsView';
 import ServicesView from './pages/ServicesView';
 import TasksView from './pages/TasksView';
-import { Activity, FileText, Server, Menu, X, CheckSquare } from 'lucide-react';
+import { Activity, FileText, Server, Menu, X, CheckSquare, BarChart3 } from 'lucide-react';
 
 function Navigation() {
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navItems = [
+    { path: '/metrics', label: 'Metrics', icon: BarChart3 },
     { path: '/', label: 'APM', icon: Activity },
     { path: '/logs', label: 'Logs', icon: FileText },
     { path: '/services', label: 'Services', icon: Server },
@@ -117,6 +119,7 @@ function AppContent() {
           <Route path="/trace/:traceId" element={<TraceDetailView />} />
           <Route path="/logs" element={<LogsView />} />
           <Route path="/services" element={<ServicesView />} />
+          <Route path="/metrics" element={<MetricsView />} />
           <Route path="/tasks" element={<TasksView />} />
         </Routes>
       </main>

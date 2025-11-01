@@ -304,3 +304,89 @@ export const generateMockLogs = (count: number = 100): MockLog[] => {
 
   return logs;
 };
+export const getMetrics = async (page: number, limit: number, service?: string) => {
+  const params: any = {  };
+  params.page = page;
+  params.limit = limit;
+  if (service) params.service = service;
+  const response = await api.get("/metrics", { params });
+  console.log("getMetrics response:", response);
+  return Array.isArray(response.data) ? response.data : (response.data.data || []);
+};
+
+// Mock data generator for metrics
+interface MockMetric {
+  id: string;
+  name: string;
+  createdAt: string;
+  updatedAt: string;
+  type: string;
+  interval: number;
+  originProduct: string;
+  subproduct: string;
+  productDetail: string;
+  ingestedCustomMetrics: number;
+  indexedCustomMetrics: number;
+  hosts: number;
+  tagValues: number;
+  tags: Record<string, string[]>;
+  historicalMetrics: boolean;
+}
+
+export const generateMockMetrics = (count: number = 50): MockMetric[] => {
+  const metricNames = [
+    "CRM_BRIDGE_FAILED_REQUESTS",
+    "API_RESPONSE_TIME",
+    "DATABASE_CONNECTIONS",
+    "CACHE_HIT_RATIO",
+    "ERROR_RATE",
+    "MEMORY_USAGE",
+    "CPU_UTILIZATION",
+    "NETWORK_TRAFFIC",
+    "QUEUE_LENGTH",
+    "RESPONSE_SIZE"
+  ];
+  const types = ["Count", "Gauge", "Histogram", "Summary"];
+  const products = ["Logs", "APM", "Infrastructure", "Custom"];
+  const subproducts = ["Log Metrics", "Trace Metrics", "System Metrics", "Business Metrics"];
+
+  const metrics: MockMetric[] = [];
+  const now = Date.now();
+
+  for (let i = 0; i < count; i++) {
+    const name = metricNames[Math.floor(Math.random() * metricNames.length)];
+    const type = types[Math.floor(Math.random() * types.length)];
+    const originProduct = products[Math.floor(Math.random() * products.length)];
+    const subproduct = subproducts[Math.floor(Math.random() * subproducts.length)];
+
+    // Create realistic timestamps
+    const createdDaysAgo = Math.floor(Math.random() * 365) + 1;
+    const updatedHoursAgo = Math.floor(Math.random() * 24) + 1;
+    const createdAt = new Date(now - createdDaysAgo * 24 * 60 * 60 * 1000).toISOString();
+    const updatedAt = new Date(now - updatedHoursAgo * 60 * 60 * 1000).toISOString();
+
+    metrics.push({
+      id: `metric-${Math.random().toString(36).substr(2, 9)}`,
+      name: `${name}_${Math.floor(Math.random() * 1000)}`,
+      createdAt,
+      updatedAt,
+      type,
+      interval: Math.floor(Math.random() * 300) + 10, // 10-310 seconds
+      originProduct,
+      subproduct,
+      productDetail: `${originProduct} to Metrics`,
+      ingestedCustomMetrics: Math.floor(Math.random() * 100),
+      indexedCustomMetrics: Math.floor(Math.random() * 50) + 1,
+      hosts: Math.floor(Math.random() * 10) + 1,
+      tagValues: Math.floor(Math.random() * 20) + 1,
+      tags: {
+        env: ["production", "staging", "development"],
+        region: ["us-east-1", "us-west-2", "eu-west-1"],
+        service: ["api", "worker", "web", "db"]
+      },
+      historicalMetrics: Math.random() > 0.5
+    });
+  }
+
+  return metrics;
+};
