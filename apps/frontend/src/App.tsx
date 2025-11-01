@@ -16,9 +16,9 @@ function Navigation() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navItems = [
-    { path: '/metrics', label: 'Metrics', icon: BarChart3 },
-    { path: '/', label: 'APM', icon: Activity },
+    { path: '/', label: 'Traces', icon: Activity },
     { path: '/logs', label: 'Logs', icon: FileText },
+    { path: '/metrics', label: 'Metrics', icon: BarChart3 },
     { path: '/services', label: 'Services', icon: Server },
     { path: '/tasks', label: 'Tasks', icon: CheckSquare },
   ];

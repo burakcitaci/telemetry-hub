@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Database, Zap, Globe, Server, Clock, ArrowRight, Copy, ExternalLink, Activity, BarChart3, Code, Share2, ChevronDown, ChevronRight, X } from 'lucide-react';
+import { Database, Zap, Globe, Server, Clock, ArrowRight, Copy, ExternalLink, Activity, BarChart3, Code, Share2, ChevronDown, ChevronRight, X, GitBranch } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface Span {
@@ -581,45 +581,43 @@ export function TraceDetailSheet({ traceId, isOpen, onClose }: TraceDetailSheetP
                     </div>
                   </TabsContent>
 
-                  <TabsContent value="attributes" className="mt-0">
-                    <div className="space-y-1">
-                      {traceDetail.SpanAttributes && Object.keys(traceDetail.SpanAttributes).length > 0 && (
-                        <div>
-                          <h4 className="text-sm font-medium mb-2 text-foreground dark:text-gray-200">Span Attributes</h4>
-                          <div className="space-y-1">
-                            {Object.entries(traceDetail.SpanAttributes).map(([key, value]) => (
-                              <div key={key} className="flex items-center justify-between py-1 px-2 bg-muted/50 dark:bg-slate-100/50 rounded text-sm">
-                                <span className="text-muted-foreground font-mono text-xs">{key}:</span>
-                                <div className="flex items-center gap-1">
-                                  <span className="font-mono text-xs">{value}</span>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => copyToClipboard(value)}
-                                    className="h-5 w-5 p-0 opacity-50 hover:opacity-100"
-                                  >
-                                    <Copy className="h-2.5 w-2.5" />
-                                  </Button>
-                                </div>
+                  <TabsContent value="attributes" className="mt-0 space-y-3">
+                    {traceDetail.SpanAttributes && Object.keys(traceDetail.SpanAttributes).length > 0 && (
+                      <div className="bg-muted/10 dark:bg-slate-50/30 rounded-lg p-3 border border-border/30 dark:border-slate-600/30">
+                        <div className="text-sm font-medium mb-3">Span Attributes</div>
+                        <div className="space-y-2">
+                          {Object.entries(traceDetail.SpanAttributes).map(([key, value]) => (
+                            <div key={key} className="flex justify-between items-start gap-4 py-1">
+                              <span className="text-sm text-muted-foreground font-mono">{key}:</span>
+                              <div className="flex items-center gap-2 flex-1 justify-end">
+                                <span className="text-sm break-all text-right">{value}</span>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => copyToClipboard(value)}
+                                  className="h-5 w-5 p-0 opacity-50 hover:opacity-100"
+                                >
+                                  <Copy className="h-2.5 w-2.5" />
+                                </Button>
                               </div>
-                            ))}
-                          </div>
+                            </div>
+                          ))}
                         </div>
-                      )}
+                      </div>
+                    )}
 
-                      {traceDetail.Tags && Object.keys(traceDetail.Tags).length > 0 && (
-                        <div>
-                          <h4 className="text-sm font-medium mb-2 text-foreground dark:text-gray-200">Tags</h4>
-                          <div className="flex flex-wrap gap-1">
-                            {Object.entries(traceDetail.Tags).map(([key, value]) => (
-                              <Badge key={key} variant="outline" className="text-xs">
-                                {key}: {value}
-                              </Badge>
-                            ))}
-                          </div>
+                    {traceDetail.Tags && Object.keys(traceDetail.Tags).length > 0 && (
+                      <div className="bg-muted/10 dark:bg-slate-50/30 rounded-lg p-3 border border-border/30 dark:border-slate-600/30">
+                        <div className="text-sm font-medium mb-3">Tags</div>
+                        <div className="flex flex-wrap gap-1">
+                          {Object.entries(traceDetail.Tags).map(([key, value]) => (
+                            <Badge key={key} variant="outline" className="text-xs">
+                              {key}: {value}
+                            </Badge>
+                          ))}
                         </div>
-                      )}
-                    </div>
+                      </div>
+                    )}
                   </TabsContent>
 
                   <TabsContent value="metrics" className="mt-0">
