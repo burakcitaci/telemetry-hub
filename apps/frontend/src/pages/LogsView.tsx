@@ -428,6 +428,7 @@ function LogsView() {
                 enableColumnVisibility={true}
                 enablePagination={true}
                 pageSize={pageSize}
+                onPageSizeChange={setPageSize}
                 onRowClick={(row) => {
                   setSelectedLog(row);
                   setIsLogDetailOpen(true);

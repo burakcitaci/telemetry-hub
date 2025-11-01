@@ -448,6 +448,7 @@ function MetricsView() {
                 enableColumnVisibility={true}
                 enablePagination={true}
                 pageSize={pageSize}
+                onPageSizeChange={setPageSize}
                 onRowClick={(row) => handleRowClick(row)}
               />
             </div>

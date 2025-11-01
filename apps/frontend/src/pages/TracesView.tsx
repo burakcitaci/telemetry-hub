@@ -439,6 +439,7 @@ function TracesView() {
                 enableColumnVisibility={true}
                 enablePagination={true}
                 pageSize={pageSize}
+                onPageSizeChange={setPageSize}
                 onRowClick={(row) => handleRowClick(row.TraceId)}
               />
             </div>

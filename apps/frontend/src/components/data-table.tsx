@@ -28,6 +28,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import {
   Table,
   TableBody,
@@ -47,6 +48,7 @@ interface DataTableProps<TData, TValue> {
   enablePagination?: boolean
   enableSearch?: boolean
   pageSize?: number
+  onPageSizeChange?: (pageSize: number) => void
   onRowClick?: (row: TData) => void
 }
 
@@ -60,6 +62,7 @@ export function DataTable<TData, TValue>({
   enablePagination = true,
   enableSearch = true,
   pageSize = 10,
+  onPageSizeChange,
   onRowClick,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([])
@@ -194,23 +197,44 @@ export function DataTable<TData, TValue>({
             {table.getFilteredSelectedRowModel().rows.length} of{" "}
             {table.getFilteredRowModel().rows.length} row(s) selected.
           </div>
-          <div className="space-x-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => table.previousPage()}
-              disabled={!table.getCanPreviousPage()}
+          <div className="flex items-center space-x-2">
+            <Select
+              value={pageSize.toString()}
+              onValueChange={(value) => {
+                const newPageSize = parseInt(value);
+                table.setPageSize(newPageSize);
+                onPageSizeChange?.(newPageSize);
+              }}
             >
-              Previous
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => table.nextPage()}
-              disabled={!table.getCanNextPage()}
-            >
-              Next
-            </Button>
+              <SelectTrigger className="h-8 w-[70px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent side="top">
+                {[5, 10, 20, 30, 40, 50].map((size) => (
+                  <SelectItem key={size} value={size.toString()}>
+                    {size}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <div className="space-x-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => table.previousPage()}
+                disabled={!table.getCanPreviousPage()}
+              >
+                Previous
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => table.nextPage()}
+                disabled={!table.getCanNextPage()}
+              >
+                Next
+              </Button>
+            </div>
           </div>
         </div>
       )}
