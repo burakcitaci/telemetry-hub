@@ -207,3 +207,100 @@ export const generateMockTraceDetail = (traceId: string): MockSpan[] => {
 
   return spans;
 };
+
+interface MockLog {
+  Timestamp: string;
+  TimestampTime: string;
+  TraceId: string;
+  SpanId: string;
+  TraceFlags: number;
+  SeverityText: string;
+  SeverityNumber: number;
+  ServiceName: string;
+  Body: string;
+  ResourceSchemaUrl?: string;
+  ResourceAttributes?: Record<string, any>;
+  ScopeSchemaUrl?: string;
+  ScopeName?: string;
+  ScopeVersion?: string;
+  ScopeAttributes?: Record<string, any>;
+  LogAttributes?: Record<string, any>;
+}
+
+export const generateMockLogs = (count: number = 100): MockLog[] => {
+  const services = [
+    'customer-app-gtw',
+    'shadow-ingestion-engine',
+    'dam-api',
+    'iotdb1',
+    'enpal-redis-cache',
+    'mongodb',
+    'customer-app-gtw-graphql',
+    'epal.redis.cache'
+  ];
+  const severities = ['INFO', 'WARN', 'ERROR', 'DEBUG'];
+  const messages = [
+    'Processing request for user authentication',
+    'Database connection established',
+    'Cache miss for key: user_123',
+    'Payment processing completed successfully',
+    'Failed to connect to external service',
+    'Rate limit exceeded for API endpoint',
+    'Background job completed',
+    'Invalid input parameters received',
+    'System health check passed',
+    'Memory usage above threshold',
+    'New user registration processed',
+    'Order fulfillment initiated',
+    'Email notification sent',
+    'File upload completed',
+    'Session expired for user',
+    'Data synchronization started',
+    'Backup process initiated',
+    'Security scan completed',
+    'Performance metrics updated',
+    'Configuration reloaded'
+  ];
+
+  const logs: MockLog[] = [];
+  const now = Date.now();
+
+  for (let i = 0; i < count; i++) {
+    const service = services[Math.floor(Math.random() * services.length)];
+    const severity = severities[Math.floor(Math.random() * severities.length)];
+    const message = messages[Math.floor(Math.random() * messages.length)];
+    const traceId = Math.random() > 0.5 ? `trace-${(now - i * 1000).toString(36)}-${Math.random().toString(36).substr(2, 9)}` : '';
+    const timestamp = new Date(now - i * (Math.random() * 5000 + 1000)).toISOString();
+    const spanId = `span-${Math.random().toString(36).substr(2, 9)}`;
+
+    logs.push({
+      Timestamp: timestamp,
+      TimestampTime: timestamp.split('T')[1].split('.')[0], // Extract time part
+      TraceId: traceId,
+      SpanId: spanId,
+      TraceFlags: Math.floor(Math.random() * 256), // 0-255
+      SeverityText: severity,
+      SeverityNumber: severity === 'DEBUG' ? 5 : severity === 'INFO' ? 9 : severity === 'WARN' ? 13 : severity === 'ERROR' ? 17 : 9,
+      ServiceName: service,
+      Body: message,
+      ResourceAttributes: {
+        'deployment.environment': 'production',
+        'host.name': `${service}-7666759f8d-t4qw2`,
+        'service.name': service,
+        'service.version': '1.0.0'
+      },
+      ScopeName: service,
+      ScopeVersion: '1.0.0',
+      ScopeAttributes: {},
+      LogAttributes: {
+        'context': 'LoggingInterceptor',
+        'hasBody': Math.random() > 0.5 ? 'true' : 'false',
+        'ip': '127.0.0.1',
+        'method': ['GET', 'POST', 'PUT', 'DELETE'][Math.floor(Math.random() * 4)],
+        'url': `/api/${['users', 'orders', 'products', 'events'][Math.floor(Math.random() * 4)]}`
+      }
+    });
+  }
+
+  return logs;
+};
