@@ -13,7 +13,7 @@ import { LoggerModule } from '../../common/logger/logger.module';
     JwtModule.register({
       global: true,
       secret: jwtConstants.secret,
-      signOptions: { expiresIn: '60s' },
+      signOptions: { expiresIn: '60m' },
     }),
     LoggerModule,
   ],
