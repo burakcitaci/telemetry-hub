@@ -1,9 +1,13 @@
 import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
+import { IsString } from 'class-validator';
 
 class SignInDto {
+  @IsString()
   username: string;
+
+  @IsString()
   password: string;
 }
 
