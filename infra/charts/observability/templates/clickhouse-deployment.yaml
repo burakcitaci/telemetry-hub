@@ -2,13 +2,14 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Values.clickhouse.name }}
-  namespace: {{ .Values.global.namespace }}
+  namespace: {{ .Release.Namespace }}
   labels:
-    app: {{ .Values.clickhouse.name }}
-    version: v1
-    managed-by: helm
+    {{- include "observability.commonLabels" . | nindent 4 }}
+    app.kubernetes.io/name: {{ .Values.clickhouse.name }}
+    app.kubernetes.io/component: database
 spec:
   replicas: {{ .Values.clickhouse.replicaCount }}
+  # Deployment selectors are immutable; keep the original selector for upgrades.
   selector:
     matchLabels:
       app: {{ .Values.clickhouse.name }}
@@ -16,40 +17,30 @@ spec:
     metadata:
       labels:
         app: {{ .Values.clickhouse.name }}
-        version: v1
+        app.kubernetes.io/name: {{ .Values.clickhouse.name }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/component: database
       {{- with .Values.clickhouse.podAnnotations }}
       annotations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
     spec:
-      {{- with .Values.clickhouse.securityContext }}
+      {{- with .Values.clickhouse.podSecurityContext }}
       securityContext:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      
       containers:
         - name: {{ .Values.clickhouse.name }}
           image: "{{ .Values.clickhouse.image.repository }}:{{ .Values.clickhouse.image.tag }}"
           imagePullPolicy: {{ .Values.clickhouse.image.pullPolicy }}
-          
-          command:
-            - /bin/bash
-            - -c
-            - |
-              # Fix ClickHouse to listen on all interfaces
-              sed -i 's/<http_port>8123<\/http_port>/<http_port>8123<\/http_port>\n<listen_host>0.0.0.0<\/listen_host>/g' /etc/clickhouse-server/config.xml
-              sed -i 's/<native_port>9000<\/native_port>/<native_port>9000<\/native_port>\n<listen_host>0.0.0.0<\/listen_host>/g' /etc/clickhouse-server/config.xml
-              # Start ClickHouse in background
-              /entrypoint.sh &
-              # Wait for user config to be created and modify it
-              while [ ! -f /etc/clickhouse-server/users.d/default-user.xml ]; do sleep 1; done
-              sed -i 's|<ip>::1</ip>|<ip>::/0</ip>|g' /etc/clickhouse-server/users.d/default-user.xml
-              sed -i 's|<ip>127.0.0.1</ip>|<ip>0.0.0.0/0</ip>|g' /etc/clickhouse-server/users.d/default-user.xml
-              # Send SIGHUP to reload configuration
-              pkill -HUP clickhouse-server
-              # Wait for background process
-              wait
-          
+          {{- with .Values.clickhouse.containerSecurityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          env:
+            # This is intentionally passwordless for the isolated local Kind cluster.
+            - name: CLICKHOUSE_SKIP_USER_SETUP
+              value: "1"
           ports:
             - name: http
               containerPort: {{ .Values.clickhouse.service.http.port }}
@@ -57,45 +48,33 @@ spec:
             - name: native
               containerPort: {{ .Values.clickhouse.service.native.port }}
               protocol: TCP
-          
           {{- with .Values.clickhouse.livenessProbe }}
           livenessProbe:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          
           {{- with .Values.clickhouse.readinessProbe }}
           readinessProbe:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          
           {{- with .Values.clickhouse.resources }}
           resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          
           volumeMounts:
             - name: clickhouse-data
               mountPath: /var/lib/clickhouse
-            - name: clickhouse-config
-              mountPath: /etc/clickhouse-server/config.d
-      
       volumes:
+        # The local demo intentionally discards telemetry when the pod is removed.
         - name: clickhouse-data
           emptyDir: {}
-        - name: clickhouse-config
-          configMap:
-            name: clickhouse-config
-      
       {{- with .Values.clickhouse.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      
       {{- with .Values.clickhouse.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      
       {{- with .Values.clickhouse.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
@@ -106,10 +85,11 @@ apiVersion: v1
 kind: Service
 metadata:
   name: {{ .Values.clickhouse.name }}
-  namespace: {{ .Values.global.namespace }}
+  namespace: {{ .Release.Namespace }}
   labels:
-    app: {{ .Values.clickhouse.name }}
-    managed-by: helm
+    {{- include "observability.commonLabels" . | nindent 4 }}
+    app.kubernetes.io/name: {{ .Values.clickhouse.name }}
+    app.kubernetes.io/component: database
   {{- with .Values.clickhouse.service.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
@@ -117,7 +97,8 @@ metadata:
 spec:
   type: {{ .Values.clickhouse.service.type }}
   selector:
-    app: {{ .Values.clickhouse.name }}
+    app.kubernetes.io/name: {{ .Values.clickhouse.name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
   ports:
     - name: http
       port: {{ .Values.clickhouse.service.http.port }}
@@ -127,28 +108,3 @@ spec:
       port: {{ .Values.clickhouse.service.native.port }}
       targetPort: native
       protocol: TCP
-
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: clickhouse-config
-  namespace: {{ .Values.global.namespace }}
-  labels:
-    app: {{ .Values.clickhouse.name }}
-    managed-by: helm
-data:
-  no-auth.xml: |
-    <clickhouse>
-      <users>
-        <default>
-          <password></password>
-          <networks>
-            <ip>::/0</ip>
-            <ip>0.0.0.0/0</ip>
-          </networks>
-          <profile>default</profile>
-          <quota>default</quota>
-        </default>
-      </users>
-    </clickhouse>

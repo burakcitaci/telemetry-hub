@@ -1,7 +1,10 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, ServiceUnavailableException } from "@nestjs/common";
+import { ClickhouseService } from "../../telemetry/services/clickhouse.service";
 
 @Injectable()
 export class HealthService {
+  constructor(private readonly clickhouse: ClickhouseService) {}
+
   getHealth() {
     return {
       status: "ok",
@@ -11,8 +14,25 @@ export class HealthService {
     };
   }
 
-  async checkDatabase(): Promise<{ status: string; details?: any }> {
-    // Add database health check logic here
-    return { status: "healthy" };
+  async checkDatabase(): Promise<{
+    status: "healthy";
+    latencyMs: number;
+  }> {
+    const startedAt = Date.now();
+
+    try {
+      await this.clickhouse.ping();
+      return {
+        status: "healthy",
+        latencyMs: Date.now() - startedAt,
+      };
+    } catch (error) {
+      throw new ServiceUnavailableException({
+        status: "unhealthy",
+        latencyMs: Date.now() - startedAt,
+        message:
+          error instanceof Error ? error.message : "ClickHouse ping failed",
+      });
+    }
   }
 }

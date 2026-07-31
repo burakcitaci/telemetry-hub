@@ -1,203 +1,112 @@
-# Local Observability Platform
+# Telemetry Hub
 
-A complete local observability platform using **NestJS**, **React (Vite)**, **OpenTelemetry**, **ClickHouse**, and **Kubernetes Kind**.
+Telemetry Hub is a local OpenTelemetry playground for exploring application traces and logs. A NestJS backend emits telemetry, an OpenTelemetry Collector writes it to ClickHouse, and a React dashboard queries it through the backend.
 
-## 🏗 Architecture
+The infrastructure runs in a local [Kind](https://kind.sigs.k8s.io/) cluster. The Vite frontend runs on the host for fast iteration.
 
+## What is real today
+
+- **Traces** come from instrumented backend requests and are stored in ClickHouse.
+- **Logs** are emitted by the backend, exported over OTLP, and stored in ClickHouse.
+- **Services** are aggregates derived from stored spans; they are not a separate metrics signal.
+- `GET /api/data` is the built-in telemetry generator. Each request performs sample work and emits spans and correlated logs.
+
+Metrics and tasks are not implemented or exposed. There is no OTLP metrics pipeline or tasks API in this repository.
+
+## Data flow
+
+```text
+curl /api/data
+      |
+      v
+NestJS backend -- OTLP/HTTP --> OpenTelemetry Collector
+      ^                                  |
+      |                                  v
+React dashboard <-- query API/SSE -- ClickHouse
 ```
-React (Vite Frontend)
-   ↓ (port-forward)
-Backend API (NestJS, OTel SDK) [in Kind]
-   ↓ (OTLP)
-OTel Collector [in Kind]
-   ↓
-ClickHouse [in Kind]
+
+ClickHouse uses ephemeral `emptyDir` storage in this local setup. Telemetry is discarded when its pod or the cluster is removed. The collector-created trace and log tables retain rows for seven days while the pod exists.
+
+## Prerequisites
+
+- Docker Desktop or another Docker-compatible daemon
+- Node.js 24 LTS or newer
+- Yarn 1.22.22 (the version is pinned in `package.json`)
+- Kind, Helm 3, and kubectl
+
+With a standard Node.js 24 installation, enable the pinned Yarn version with Corepack:
+
+```bash
+corepack enable
+yarn install --frozen-lockfile
 ```
 
-## 📁 Project Structure
+## Quick start
 
-```
-apps/
-  backend/          → NestJS API with OpenTelemetry instrumentation
-  frontend/         → React + Vite UI
-infra/
-  charts/           → Helm charts for backend, collector, clickhouse
-  kind/             → Kind cluster configuration
+Install dependencies once:
+
+```bash
+corepack enable
+yarn install --frozen-lockfile
 ```
 
-## 🚀 Quick Start
-
-### Prerequisites
-
-- Docker Desktop running
-- Kind CLI installed (`brew install kind` or https://kind.sigs.k8s.io/docs/user/quick-start/)
-- Helm CLI installed (`brew install helm` or https://helm.sh/docs/intro/install/)
-- kubectl CLI installed
-- Node.js 18+ and Yarn installed
-
-### 1. Start the Cluster
+Start or update the cluster:
 
 ```bash
 yarn cluster:up
 ```
 
-This will:
-- Create a Kind cluster named "observability"
-- Build and load the backend Docker image
-- Update Helm dependencies (OTel Collector + ClickHouse)
-- Deploy everything to Kubernetes
+This command creates the `observability` Kind cluster when necessary, builds and loads the backend image, deploys the self-contained Helm chart into the `telemetry-hub` namespace, restarts the backend with the loaded image, and waits for its rollout.
 
-### 2. Set Up Port Forwarding
+In a second terminal, expose the backend:
 
-Open two terminals:
-
-**Terminal 1 - Backend API:**
 ```bash
 yarn port:backend
 ```
 
-**Terminal 2 (Optional) - ClickHouse:**
-```bash
-yarn port:clickhouse
-```
-
-### 3. Start the Frontend
+In a third terminal, start the frontend:
 
 ```bash
 yarn dev:frontend
 ```
 
-Access the dashboard at **http://localhost:5000**
-
-## 📊 Usage
-
-### Generate Traces
-
-Send requests to the backend to generate telemetry:
+Vite is configured to prefer [http://localhost:5000](http://localhost:5000). If that port is already in use, it will print the next available local URL, such as `http://localhost:5003`. Open the URL printed by Vite, then generate telemetry:
 
 ```bash
 curl http://localhost:3001/api/data
 ```
 
-The backend will automatically:
-- Create distributed traces with multiple spans
-- Send logs correlated to traces
-- Export everything via OTLP to the collector
+The collector batches exports, so allow a few seconds for new traces and logs to appear.
 
-### View Observability Data
+The frontend accepts backend API calls from the common Vite fallback ports `5000` through `5003`. If Vite chooses a higher port, either free one of those ports or add the new local origin to `apps/backend/src/config/cors.config.ts` and reload the backend.
 
-Open the dashboard at http://localhost:5000 to see:
+## Common commands
 
-- **Traces View**: Real-time distributed tracing with waterfall visualization
-- **Logs View**: Live log streaming with severity filtering
-- **Services View**: Service metrics and health status
+| Task | Command |
+| --- | --- |
+| Build both apps | `yarn build` |
+| Type-check both apps | `yarn typecheck` |
+| Show cluster pods | `yarn status` |
+| Follow backend logs | `yarn logs:backend` |
+| Follow collector logs | `yarn logs:collector` |
+| Rebuild and roll out the backend | `yarn backend:reload` |
+| Apply Helm changes and reload the backend | `yarn cluster:restart` |
+| Forward ClickHouse HTTP to port 8123 | `yarn port:clickhouse` |
+| Delete the release and cluster | `yarn cluster:down` |
 
-### Monitor Status
+See [DEPLOYMENT.md](DEPLOYMENT.md) for verification and troubleshooting.
 
-```bash
-# Check pod status
-yarn status
+## Repository layout
 
-# View backend logs
-yarn logs:backend
-
-# View collector logs
-yarn logs:collector
+```text
+apps/backend/                    NestJS API and OpenTelemetry instrumentation
+apps/frontend/                   React and Vite dashboard
+infra/charts/observability/      Self-contained local Helm chart
+infra/kind/                      Kind configuration and lifecycle scripts
 ```
 
-## 🔧 Development Workflow
+## Scope
 
-### Backend Development
+This is a local learning and development environment, not a production deployment. It intentionally uses a passwordless ClickHouse user inside the isolated Kind network, ephemeral storage, one replica per component, and port forwarding instead of ingress.
 
-```bash
-# Make changes to apps/backend
-yarn kind:load:backend
-yarn helm:deploy
-```
-
-### Frontend Development
-
-```bash
-# Make changes to apps/frontend
-# Hot-reload happens automatically
-yarn dev:frontend
-```
-
-## 🧹 Cleanup
-
-```bash
-yarn cluster:down
-```
-
-This will:
-- Uninstall the Helm release
-- Delete the Kind cluster
-
-## 🐛 Troubleshooting
-
-### Pods Not Starting
-
-Check pod status and logs:
-```bash
-kubectl get pods -n observability
-kubectl describe pod <pod-name> -n observability
-kubectl logs <pod-name> -n observability
-```
-
-### ClickHouse Connection Issues
-
-Ensure ClickHouse pod is running:
-```bash
-kubectl get pods -n observability -l app.kubernetes.io/name=clickhouse
-```
-
-### Frontend Can't Connect to Backend
-
-Verify port-forwarding is active:
-```bash
-# Should show: Forwarding from 127.0.0.1:3001 -> 3001
-ps aux | grep "port-forward"
-```
-
-Restart if needed:
-```bash
-yarn port:backend
-```
-
-## 📚 Key Features
-
-- ✅ **Full OpenTelemetry Integration**: Auto-instrumentation for NestJS with traces and logs
-- ✅ **Real-time Updates**: Server-Sent Events (SSE) for live trace/log streaming
-- ✅ **Waterfall Visualization**: Interactive trace timeline with span hierarchy
-- ✅ **ClickHouse Storage**: High-performance time-series database for telemetry
-- ✅ **Kubernetes Native**: Production-like infrastructure running locally
-- ✅ **One-Command Deploy**: Automated cluster setup with Yarn scripts
-- ✅ **Fast Frontend Development**: Vite hot-reload with no containerization
-
-## 🛠 Tech Stack
-
-**Backend:**
-- NestJS
-- OpenTelemetry SDK (auto-instrumentations)
-- ClickHouse Client
-
-**Frontend:**
-- React 18
-- Vite
-- React Router
-- Recharts
-- Axios
-
-**Infrastructure:**
-- Kubernetes Kind
-- Helm
-- OpenTelemetry Collector
-- ClickHouse
-- Docker
-
-## 📖 Next Steps
-
-- Add more instrumented services to demonstrate distributed tracing
-- Implement custom metrics collection
-- Add alerting based on error rates or latency thresholds
-- Create custom dashboards for specific use cases
+ClickHouse stores telemetry timestamps in UTC. The dashboard treats ClickHouse timestamp strings as UTC and renders them in the browser's local timezone.

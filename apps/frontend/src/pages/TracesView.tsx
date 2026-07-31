@@ -1,457 +1,271 @@
-import { useEffect, useState, useMemo } from 'react';
-import { getTraces, createEventSource, generateMockTraces, getTraceById, generateMockTraceDetail } from '../api';
-import { formatDistance, format } from 'date-fns';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Sidebar } from '@/components/sidebar';
-import { TraceDetailSheet } from '@/components/trace-detail-sheet';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Activity, RefreshCw, Wifi, WifiOff } from 'lucide-react';
+import type { ColumnDef } from '@tanstack/react-table';
+import { generateTelemetry, getTraces } from '@/api';
 import { DataTable, DataTableColumnHeader } from '@/components/data-table';
-import { Search, RefreshCw, Wifi, WifiOff, Plus, Filter, Clock, Database as DatabaseIcon, Server, Globe, Zap, TrendingUp } from 'lucide-react';
+import { Sidebar, type FacetOption } from '@/components/sidebar';
+import { TraceDetailSheet } from '@/components/trace-detail-sheet';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { ColumnDef } from "@tanstack/react-table";
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useTelemetryStream } from '@/hooks/use-telemetry-stream';
+import { getErrorMessage } from '@/lib/errors';
+import {
+  formatDuration,
+  formatTelemetryTimestamp,
+  isWithinTimeRange,
+  TELEMETRY_FETCH_LIMIT,
+} from '@/lib/telemetry';
+import type { TelemetryEvent, TraceSummary } from '@/types/telemetry';
 
-interface Trace {
-  TraceId: string;
-  SpanName: string;
-  ServiceName: string;
-  Timestamp: string;
-  Duration: number;
-  StatusCode: string;
-  SpanAttributes?: Record<string, string>;
-  Resource?: string;
-  Method?: string;
+function statusBadge(status: string) {
+  const normalized = status.toUpperCase();
+  if (normalized === 'ERROR') return <Badge variant="destructive">Error</Badge>;
+  if (normalized === 'OK') return <Badge variant="success">OK</Badge>;
+  return <Badge variant="secondary">{status || 'Unset'}</Badge>;
 }
 
+const columns: ColumnDef<TraceSummary>[] = [
+  {
+    accessorKey: 'Timestamp',
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Timestamp" />,
+    cell: ({ row }) => (
+      <span className="whitespace-nowrap px-2 text-xs text-muted-foreground">
+        {formatTelemetryTimestamp(row.original.Timestamp)}
+      </span>
+    ),
+  },
+  {
+    accessorKey: 'ServiceName',
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Service" />,
+    cell: ({ row }) => <Badge variant="outline">{row.original.ServiceName}</Badge>,
+  },
+  {
+    accessorKey: 'SpanName',
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Operation" />,
+    cell: ({ row }) => (
+      <span className="block max-w-xl truncate text-xs" title={row.original.SpanName}>
+        {row.original.SpanName}
+      </span>
+    ),
+  },
+  {
+    accessorKey: 'Duration',
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Duration" />,
+    cell: ({ row }) => (
+      <span className="whitespace-nowrap text-xs text-muted-foreground">
+        {formatDuration(row.original.Duration)}
+      </span>
+    ),
+  },
+  {
+    accessorKey: 'SpanCount',
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Spans" />,
+    cell: ({ row }) => <span className="text-xs text-muted-foreground">{row.original.SpanCount}</span>,
+  },
+  {
+    accessorKey: 'ServiceCount',
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Services" />,
+    cell: ({ row }) => <span className="text-xs text-muted-foreground">{row.original.ServiceCount}</span>,
+  },
+  {
+    accessorKey: 'StatusCode',
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
+    cell: ({ row }) => statusBadge(row.original.StatusCode),
+  },
+];
+
 function TracesView() {
-  const [traces, setTraces] = useState<Trace[]>([]);
+  const [traces, setTraces] = useState<TraceSummary[]>([]);
   const [loading, setLoading] = useState(true);
+  const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [connected, setConnected] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
   const [serviceFilters, setServiceFilters] = useState<string[]>([]);
   const [statusFilters, setStatusFilters] = useState<string[]>([]);
-  const [sortBy, setSortBy] = useState<'timestamp' | 'duration' | 'service'>('timestamp');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
-  const [timeRange, setTimeRange] = useState<string>('6h');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [timeRange, setTimeRange] = useState('6h');
   const [selectedTraceId, setSelectedTraceId] = useState<string | null>(null);
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
 
-  const columns: ColumnDef<Trace>[] = [
-    {
-      accessorKey: "Timestamp",
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Date" />
-      ),
-      cell: ({ row }) => {
-        const timestamp = row.getValue("Timestamp") as string;
-        return (
-          <div className="text-muted-foreground dark:text-gray-300 py-1 px-3 whitespace-nowrap text-xs">
-            {(() => {
-              try {
-                return format(new Date(timestamp), 'MMM dd HH:mm:ss.SSS');
-              } catch {
-                return 'Invalid date';
-              }
-            })()}
-          </div>
-        );
-      },
-    },
-    {
-      accessorKey: "ServiceName",
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Service" />
-      ),
-      cell: ({ row }) => {
-        const serviceName = row.getValue("ServiceName") as string;
-        return (
-          <div className="py-1 px-2">
-            <div className="flex items-center gap-1.5">
-              <Badge variant="outline" className={`text-xs font-medium py-0.5 px-2 inline-block}`}>
-                {serviceName || 'Unknown Service'}
-              </Badge>
-            </div>
-          </div>
-        );
-      },
-    },
-    {
-      accessorKey: "SpanName",
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Resource" />
-      ),
-      cell: ({ row }) => {
-        const spanName = row.getValue("SpanName") as string;
-        const resource = row.original.Resource;
-        return (
-          <div className="text-foreground dark:text-gray-200 py-1 px-2 truncate text-xs" title={resource || spanName}>
-            {resource || spanName}
-          </div>
-        );
-      },
-    },
-    {
-      accessorKey: "Duration",
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Duration" />
-      ),
-      cell: ({ row }) => {
-        const duration = row.getValue("Duration") as number;
-        return (
-          <div className="text-muted-foreground dark:text-gray-300 py-1 px-2 whitespace-nowrap text-xs">
-            {formatDuration(duration)}
-          </div>
-        );
-      },
-    },
-    {
-      accessorKey: "Method",
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Method" />
-      ),
-      cell: ({ row }) => {
-        const method = row.getValue("Method") as string;
-        const spanAttributes = row.original.SpanAttributes;
-        const methodValue = method || spanAttributes?.['http.method'] || 'N/A';
-        return (
-          <div className="py-1 px-2">
-            <span className="text-xs font-medium text-foreground dark:text-gray-200 bg-muted dark:bg-slate-700 px-2 py-1 rounded inline-block">
-              {methodValue}
-            </span>
-          </div>
-        );
-      },
-    },
-  ];
-
-
-  useEffect(() => {
-    loadTraces(currentPage, pageSize);
-
-    const eventSource = createEventSource();
-
-    eventSource.onopen = () => {
-      console.log('SSE connected');
-      setConnected(true);
-    };
-
-    eventSource.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      if (data.type === 'update' && data.traces.length > 0) {
-        console.log('New traces received', data.traces);
-        loadTraces(currentPage, pageSize);
-      }
-    };
-
-    eventSource.onerror = () => {
-      console.error('SSE error');
-      setConnected(false);
-    };
-
-    return () => {
-      eventSource.close();
-    };
-  }, [pageSize, currentPage]);
-
-  const loadTraces = async (page: number, pageSize: number) => {
-    console.log(page, pageSize);
+  const loadTraces = useCallback(async () => {
+    setLoading(true);
     try {
-      setLoading(true);
-      const data = await getTraces(page, pageSize);
-      console.log('Fetched traces:', data);
-      setTraces(data);
+      setTraces(await getTraces(TELEMETRY_FETCH_LIMIT));
       setError(null);
-    } catch (err: any) {
-      console.log('Using mock data for demonstration');
-      setTraces(generateMockTraces(50));
-      setError(null);
+    } catch (loadError) {
+      setError(getErrorMessage(
+        loadError,
+        'Unable to load traces. Verify that the backend is reachable and VITE_BACKEND_URL is correct.',
+      ));
     } finally {
       setLoading(false);
     }
+  }, []);
+
+  useEffect(() => {
+    void loadTraces();
+  }, [loadTraces]);
+
+  const handleStreamEvent = useCallback((event: TelemetryEvent) => {
+    if (event.type === 'update' && event.tracesChanged) {
+      void loadTraces();
+    }
+  }, [loadTraces]);
+
+  const connected = useTelemetryStream(handleStreamEvent);
+
+  const generateAndRefresh = async () => {
+    setGenerating(true);
+    try {
+      await generateTelemetry();
+      await loadTraces();
+    } catch (generateError) {
+      setError(getErrorMessage(
+        generateError,
+        'Unable to generate telemetry. Check the backend /api/data endpoint and port-forward.',
+      ));
+    } finally {
+      setGenerating(false);
+    }
   };
 
-  const generateSampleData = () => {
-    setLoading(true);
-    const newTraces = generateMockTraces(25);
-    setTraces(prev => [...newTraces, ...prev].slice(0, 100));
-    setLoading(false);
-  };
+  const services = useMemo(
+    () => [...new Set(traces.map((trace) => trace.ServiceName))].sort(),
+    [traces],
+  );
 
-  const services = useMemo(() => {
-    const uniqueServices = [...new Set(traces.map(trace => trace.ServiceName))];
-    return uniqueServices.sort();
+  const facetOptions = useMemo<FacetOption[]>(() => {
+    const count = (status: string) => traces.filter(
+      (trace) => trace.StatusCode.toUpperCase() === status,
+    ).length;
+
+    return [
+      { value: 'OK', label: 'Success', count: count('OK'), tone: 'success' },
+      { value: 'ERROR', label: 'Error', count: count('ERROR'), tone: 'error' },
+      {
+        value: 'UNSET',
+        label: 'Unset',
+        count: traces.filter((trace) => !['OK', 'ERROR'].includes(trace.StatusCode.toUpperCase())).length,
+        tone: 'neutral',
+      },
+    ];
   }, [traces]);
 
-  const metrics = useMemo(() => {
-    const okTraces = traces.filter(t => t.StatusCode === 'OK');
-    const errorTraces = traces.filter(t => t.StatusCode === 'ERROR');
-    const durations = traces.map(t => t.Duration / 1000000);
+  const filteredTraces = useMemo(() => traces.filter((trace) => {
+    const normalizedStatus = ['OK', 'ERROR'].includes(trace.StatusCode.toUpperCase())
+      ? trace.StatusCode.toUpperCase()
+      : 'UNSET';
 
-    return {
-      totalTraces: traces.length,
-      successCount: okTraces.length,
-      errorCount: errorTraces.length,
-      successRate: traces.length > 0 ? ((okTraces.length / traces.length) * 100).toFixed(1) : 0,
-      avgDuration: durations.length > 0 ? (durations.reduce((a, b) => a + b, 0) / durations.length).toFixed(2) : 0,
-      p99Duration: durations.length > 0 ? durations.sort((a, b) => a - b)[Math.floor(durations.length * 0.99)] : 0,
-      spansPerSecond: (traces.length * 60).toFixed(0),
-    };
-  }, [traces]);
+    return (serviceFilters.length === 0 || serviceFilters.includes(trace.ServiceName))
+      && (statusFilters.length === 0 || statusFilters.includes(normalizedStatus))
+      && isWithinTimeRange(trace.Timestamp, timeRange);
+  }), [serviceFilters, statusFilters, timeRange, traces]);
 
-  const formatDuration = (nanoseconds: number) => {
-    const microseconds = nanoseconds / 1000;
-    if (microseconds < 1000) {
-      return `${microseconds.toFixed(1)}μs`;
-    } else {
-      const ms = microseconds / 1000;
-      return `${ms.toFixed(2)}ms`;
-    }
-  };
-
-  const filteredTraces = useMemo(() => {
-    let filtered = traces;
-
-    if (serviceFilters.length > 0) {
-      filtered = filtered.filter(trace => serviceFilters.includes(trace.ServiceName || ''));
-    }
-
-    if (statusFilters.length > 0) {
-      filtered = filtered.filter(trace => statusFilters.includes(trace.StatusCode || ''));
-    }
-
-    if (searchTerm) {
-      filtered = filtered.filter(trace =>
-        trace.TraceId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        trace.SpanName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        trace.ServiceName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        trace.Resource?.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-
-    console.log('Applying time range filter:', timeRange);
-    if(timeRange) {
-      const now = Date.now();
-      let rangeMs = 15 * 60 * 1000; // default 15 minutes
-
-      if (timeRange.endsWith('m')) {
-        rangeMs = parseInt(timeRange) * 60 * 1000;
-      } else if (timeRange.endsWith('h')) {
-        rangeMs = parseInt(timeRange) * 60 * 60 * 1000;
-      } else if (timeRange.endsWith('d')) {
-        rangeMs = parseInt(timeRange) * 24 * 60 * 60 * 1000;
-      }
-
-      filtered = filtered.filter(trace => {
-        const traceTime = new Date(trace.Timestamp).getTime();
-        return (now - traceTime) <= rangeMs;
-      });
-    }
-    filtered.sort((a, b) => {
-      let aValue: any, bValue: any;
-
-      switch (sortBy) {
-        case 'timestamp':
-          aValue = new Date(a.Timestamp).getTime();
-          bValue = new Date(b.Timestamp).getTime();
-          break;
-        case 'duration':
-          aValue = a.Duration;
-          bValue = b.Duration;
-          break;
-        case 'service':
-          aValue = a.ServiceName;
-          bValue = b.ServiceName;
-          break;
-        default:
-          return 0;
-      }
-
-      if (sortOrder === 'asc') {
-        return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
-      } else {
-        return aValue > bValue ? -1 : aValue < bValue ? 1 : 0;
-      }
-    });
-
-    return filtered;
-  }, [traces, searchTerm, serviceFilters, timeRange, statusFilters, sortBy, sortOrder]);
-
-  const maxDuration = useMemo(() => {
-    return Math.max(...traces.map(t => t.Duration), 1);
-  }, [traces]);
-
-  const handleRowClick = (traceId: string) => {
-    setSelectedTraceId(traceId);
-    setIsSheetOpen(true);
-  };
-
-  const handleSheetClose = () => {
-    setIsSheetOpen(false);
-    setSelectedTraceId(null);
-  };
-
-
-  // Server handles pagination, so we estimate total pages based on current results
-  // If we get fewer results than pageSize, we're at the last page
-  const totalPages = traces.length < pageSize ? currentPage : currentPage + 1;
-
-  // Since backend handles pagination, display traces directly
-  const paginatedTraces = useMemo(() => {
-    return filteredTraces;
-  }, [filteredTraces]);
-
-  const statusCounts = useMemo(() => ({
-    ok: traces.filter(t => t.StatusCode === 'OK').length,
-    error: traces.filter(t => t.StatusCode === 'ERROR').length,
-    total: traces.length
-  }), [traces]);
-
-  if (loading && traces.length === 0) {
+  if (loading && traces.length === 0 && !error) {
     return (
       <div className="space-y-3 p-4">
-        <Skeleton className="h-6 w-64" />
-        <Skeleton className="h-8 w-full" />
-        <div className="space-y-2">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <Skeleton key={i} className="h-7 w-full" />
-          ))}
-        </div>
+        <Skeleton className="h-8 w-64" />
+        <Skeleton className="h-10 w-full" />
+        {Array.from({ length: 8 }).map((_, index) => (
+          <Skeleton key={index} className="h-9 w-full" />
+        ))}
       </div>
     );
   }
 
   return (
-    <div className="flex h-screen bg-background dark:bg-slate-950">
-      {/* Sidebar */}
+    <div className="flex h-full min-h-0 bg-background">
       <Sidebar
         services={services}
         selectedServices={serviceFilters}
         onServicesSelect={setServiceFilters}
-        statusCounts={statusCounts}
-        selectedStatuses={statusFilters}
-        onStatusesSelect={setStatusFilters}
+        facetTitle="Status"
+        facetOptions={facetOptions}
+        selectedFacets={statusFilters}
+        onFacetsSelect={setStatusFilters}
         timeRange={timeRange}
         onTimeRangeSelect={setTimeRange}
       />
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col">
-        {/* Header */}
-        <div className="border-b border-border dark:border-slate-700 px-4 py-3 flex-shrink-0 bg-background dark:bg-slate-900">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="text-sm font-semibold text-foreground dark:text-gray-50">
-                {metrics.spansPerSecond} spans/s
-              </div>
-              <div className="flex items-center gap-4 text-xs">
-                <div className="flex items-center gap-2">
-                  <span className="text-muted-foreground dark:text-gray-300">P99</span>
-                  <span className="font-semibold text-foreground dark:text-gray-100">{metrics.p99Duration?.toFixed(2)}ms</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-muted-foreground dark:text-gray-300">Errors</span>
-                  <span className="font-semibold text-red-600 dark:text-red-400">{metrics.errorCount}</span>
-                </div>
-              </div>
-            </div>
-            <div className="flex items-center gap-4 text-xs">
-              <div className="flex items-center gap-2">
-                {connected ? (
-                  <>
-                    <Wifi className="h-3 w-3 text-green-600 dark:text-green-400" />
-                    <span className="text-green-600 dark:text-green-400 font-medium">Live</span>
-                  </>
-                ) : (
-                  <>
-                    <WifiOff className="h-3 w-3 text-red-600 dark:text-red-400" />
-                    <span className="text-red-600 dark:text-red-400 font-medium">Offline</span>
-                  </>
-                )}
-              </div>
-              <Button onClick={generateSampleData} variant="ghost" size="sm" className="h-6 px-2 text-xs dark:hover:bg-slate-800">
-                <Plus className="h-3 w-3 mr-1" />
-                Generate
-              </Button>
-              <Button onClick={()=>loadTraces(currentPage,pageSize)} variant="ghost" size="sm" className="h-6 px-2 text-xs dark:hover:bg-slate-800">
-                <RefreshCw className="h-3 w-3" />
-              </Button>
-            </div>
+      <section className="flex min-w-0 flex-1 flex-col">
+        <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-3">
+          <div>
+            <h1 className="text-sm font-semibold">Recent traces</h1>
+            <p className="text-xs text-muted-foreground">
+              {filteredTraces.length} visible from the latest {traces.length} traces
+              {traces.length === TELEMETRY_FETCH_LIMIT ? ` (capped at ${TELEMETRY_FETCH_LIMIT})` : ''}
+            </p>
           </div>
-        </div>
-
-        {/* Search Bar */}
-        <div className="border-b border-border dark:border-slate-700 px-4 py-2 flex-shrink-0 bg-muted dark:bg-slate-800">
-          <div className="flex items-center gap-3">
-            <Select value={`${sortBy}-${sortOrder}`} onValueChange={(value) => {
-              const [field, order] = value.split('-');
-              setSortBy(field as any);
-              setSortOrder(order as any);
-            }}>
-              <SelectTrigger className="w-32 h-7 text-xs border-input dark:border-slate-600 dark:bg-slate-700 dark:text-gray-50">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="dark:bg-slate-700 dark:border-slate-600">
-                <SelectItem value="timestamp-desc">Latest</SelectItem>
-                <SelectItem value="timestamp-asc">Oldest</SelectItem>
-                <SelectItem value="duration-desc">Slowest</SelectItem>
-                <SelectItem value="duration-asc">Fastest</SelectItem>
-              </SelectContent>
-            </Select>
+          <div className="flex items-center gap-2">
+            <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              {connected
+                ? <Wifi className="h-3.5 w-3.5 text-green-600" />
+                : <WifiOff className="h-3.5 w-3.5 text-muted-foreground" />}
+              {connected ? 'Stream connected' : 'Stream disconnected'}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => void generateAndRefresh()}
+              disabled={generating}
+            >
+              <Activity className="mr-1.5 h-3.5 w-3.5" />
+              {generating ? 'Generating…' : 'Generate telemetry'}
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => void loadTraces()}
+              disabled={loading}
+              aria-label="Refresh traces"
+              title="Refresh"
+            >
+              <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} />
+            </Button>
           </div>
-        </div>
+        </header>
 
         {error && (
           <Alert variant="destructive" className="mx-4 mt-3">
-            <AlertDescription>Error: {error}</AlertDescription>
+            <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}
 
-        {filteredTraces.length === 0 ? (
-          <div className="flex-1 flex items-center justify-center text-center">
-            <div>
-              <div className="text-sm text-muted-foreground dark:text-gray-300 mb-3">
-                {searchTerm || serviceFilters.length > 0 || statusFilters.length > 0
-                  ? 'No traces match your filters'
-                  : 'No traces found'}
+        <div className="min-h-0 flex-1 overflow-auto px-4 py-2">
+          {filteredTraces.length > 0 ? (
+            <DataTable
+              columns={columns}
+              data={filteredTraces}
+              searchPlaceholder="Search recent traces…"
+              enableRowSelection={false}
+              enableColumnVisibility
+              enablePagination
+              pageSize={20}
+              onRowClick={(trace) => setSelectedTraceId(trace.TraceId)}
+            />
+          ) : (
+            <div className="flex h-full min-h-64 items-center justify-center text-center">
+              <div className="max-w-md space-y-3">
+                <p className="text-sm text-muted-foreground">
+                  {traces.length > 0
+                    ? 'No recent traces match the selected filters.'
+                    : 'No traces have been stored yet. Generate a request to exercise the instrumented backend.'}
+                </p>
+                {traces.length === 0 && (
+                  <Button onClick={() => void generateAndRefresh()} disabled={generating}>
+                    <Activity className="mr-2 h-4 w-4" />
+                    {generating ? 'Generating…' : 'Generate telemetry'}
+                  </Button>
+                )}
               </div>
-              {!searchTerm && serviceFilters.length === 0 && statusFilters.length === 0 && (
-                <Button onClick={generateSampleData} size="sm">
-                  Generate Sample Data
-                </Button>
-              )}
             </div>
-          </div>
-        ) : (
-          <div className="flex-1 overflow-hidden flex flex-col">
-            <div className="px-4 py-1 text-xs text-muted-foreground dark:text-gray-400 flex-shrink-0">
-              {filteredTraces.length} traces
-            </div>
-            <div className="flex-1 px-2 overflow-auto">
-              <DataTable
-                columns={columns}
-                data={paginatedTraces}
-                searchPlaceholder="Search traces..."
-                enableRowSelection={false}
-                enableColumnVisibility={true}
-                enablePagination={true}
-                pageSize={pageSize}
-                onPageSizeChange={setPageSize}
-                onRowClick={(row) => handleRowClick(row.TraceId)}
-              />
-            </div>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      </section>
 
-      {/* Trace Detail Sheet */}
       <TraceDetailSheet
         traceId={selectedTraceId}
-        isOpen={isSheetOpen}
-        onClose={handleSheetClose}
+        isOpen={selectedTraceId !== null}
+        onClose={() => setSelectedTraceId(null)}
       />
     </div>
   );

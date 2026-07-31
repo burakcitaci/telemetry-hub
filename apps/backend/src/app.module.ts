@@ -1,16 +1,12 @@
 import { Module } from "@nestjs/common";
-import { ConfigModule, ConfigService } from "@nestjs/config";
+import { ConfigModule } from "@nestjs/config";
 import appConfig from "./config/app.config";
 import corsConfig from "./config/cors.config";
 import clickhouseConfig from "./config/clickhouse.config";
-import otelConfig from "./config/otel.config";
-import validationConfig from "./config/validation.config";
-import loggerConfig from "./config/logger.config";
-import healthConfig from "./config/health.config";
+import swaggerConfig from "./config/swagger.config";
 import { TelemetryModule } from "./modules/telemetry/telemetry.module";
 import { HealthModule } from "./modules/health/health.module";
 import { LoggerModule } from "./common/logger/logger.module";
-import { AuthModule } from "./modules/auth/auth.module";
 
 @Module({
   imports: [
@@ -20,10 +16,7 @@ import { AuthModule } from "./modules/auth/auth.module";
         appConfig,
         corsConfig,
         clickhouseConfig,
-        otelConfig,
-        validationConfig,
-        loggerConfig,
-        healthConfig,
+        swaggerConfig,
       ],
       envFilePath: [
         `.env.${process.env.NODE_ENV || "development"}.local`,
@@ -32,7 +25,6 @@ import { AuthModule } from "./modules/auth/auth.module";
         ".env",
       ],
     }),
-    AuthModule,
     LoggerModule,
     TelemetryModule,
     HealthModule,

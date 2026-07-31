@@ -12,16 +12,18 @@ import { LoggerMiddleware } from "./common/middleware/logger.middleware";
 import { CentralLoggerService } from './common/logger/central-logger.service';
 import { AppModule } from "./app.module";
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import type { SwaggerConfig } from "./config/swagger.config";
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    forceCloseConnections: true,
+  });
   const configService = app.get(ConfigService);
   const logger = app.get(CentralLoggerService);
 
   // Set the central logger as the NestJS logger
   app.useLogger(logger);
-
-  console.log('DEBUG: Logger injected and set as NestJS logger');
+  app.enableShutdownHooks();
 
   // Middleware
   app.use(new LoggerMiddleware(logger).use);
@@ -47,16 +49,20 @@ async function bootstrap() {
   const port = configService.get("app.port") || 3001;
   const host = configService.get("app.host") || "0.0.0.0";
   
-  // Emit logs immediately to verify pipeline
-  logger.log('Bootstrap: App configuration starting', 'Bootstrap');
-   const config = new DocumentBuilder()
-    .setTitle('Cats example')
-    .setDescription('The cats API description')
-    .setVersion('1.0')
-    .addTag('cats')
+  const swagger = configService.getOrThrow<SwaggerConfig>("swagger");
+  const swaggerDocument = new DocumentBuilder()
+    .setTitle(swagger.title)
+    .setDescription(swagger.description)
+    .setVersion(swagger.version)
+    .addTag("telemetry", "Explore OpenTelemetry traces and logs")
+    .addTag("health", "Application and ClickHouse health")
     .build();
-  const documentFactory = () => SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, documentFactory);
+  SwaggerModule.setup(
+    swagger.path,
+    app,
+    SwaggerModule.createDocument(app, swaggerDocument),
+  );
+
   await app.listen(port, host);
   
   logger.log(`Backend API is running on ${host}:${port}`, 'Bootstrap');
@@ -64,8 +70,13 @@ async function bootstrap() {
     `Environment: ${configService.get('app.nodeEnv')}`,
     'Bootstrap',
   );
-  
-  console.log('DEBUG: Bootstrap logs emitted - check ClickHouse otel_logs table');
+  logger.log(
+    `API documentation: http://${host}:${port}/${swagger.path}`,
+    "Bootstrap",
+  );
 }
 
-bootstrap();
+void bootstrap().catch((error) => {
+  console.error("Backend failed to start", error);
+  process.exitCode = 1;
+});

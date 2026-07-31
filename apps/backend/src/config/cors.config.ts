@@ -10,6 +10,8 @@ export default registerAs("cors", (): CorsConfig => ({
   origin: [
     "http://localhost:5000",
     "http://localhost:5001",
+    "http://localhost:5002",
+    "http://localhost:5003",
     "http://localhost:5173",
     "http://localhost:3000",
     "http://localhost:4000",
@@ -17,6 +19,8 @@ export default registerAs("cors", (): CorsConfig => ({
     "http://localhost:8080",
     "http://127.0.0.1:5000",
     "http://127.0.0.1:5001",
+    "http://127.0.0.1:5002",
+    "http://127.0.0.1:5003",
     "http://127.0.0.1:5173",
     "http://127.0.0.1:3000",
     "http://127.0.0.1:4000"

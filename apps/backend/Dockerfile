@@ -1,4 +1,4 @@
-FROM node:20-alpine AS builder
+FROM node:24-alpine AS builder
 
 WORKDIR /app
 
@@ -15,14 +15,13 @@ RUN yarn install --frozen-lockfile
 # Copy backend source files
 COPY apps/backend/ ./apps/backend/
 
-# Copy shared config files
+# Copy shared TypeScript configuration
 COPY tsconfig.base.json ./
-COPY nx.json ./
 
 # Build backend
-RUN npx nx build backend --skip-nx-cache
+RUN yarn workspace backend build
 
-FROM node:20-alpine AS runtime
+FROM node:24-alpine AS runtime
 
 WORKDIR /app
 
@@ -30,8 +29,7 @@ WORKDIR /app
 COPY --from=builder /app/node_modules ./node_modules
 
 # Copy built backend from builder stage
-# Note: TypeScript build outputs to apps/backend/dist/apps/backend/src/
-COPY --from=builder /app/apps/backend/dist/apps/backend/src ./dist
+COPY --from=builder /app/apps/backend/dist ./dist
 
 EXPOSE 3001
 

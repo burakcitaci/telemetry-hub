@@ -1,15 +1,17 @@
-import { Controller, Get, Query } from '@nestjs/common';
-import { ClickhouseService } from '../services/clickhouse.service';
+import { Controller, Get, Query } from "@nestjs/common";
+import { TelemetryQueryDto } from "../../../dto/query.dto";
+import { ClickhouseService } from "../services/clickhouse.service";
 
 @Controller('api/logs')
 export class LogsController {
   constructor(private readonly clickhouse: ClickhouseService) {}
 
   @Get()
-  async getLogs(
-    @Query('limit') limit: string = '100',
-    @Query('service') service?: string,
-  ) {
-    return this.clickhouse.getLogs(parseInt(limit), service);
+  async getLogs(@Query() query: TelemetryQueryDto) {
+    return this.clickhouse.getLogs({
+      limit: query.limit,
+      offset: query.offset,
+      service: query.service,
+    });
   }
 }

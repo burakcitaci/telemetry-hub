@@ -1,0 +1,18 @@
+.git
+.gitignore
+.nx
+.DS_Store
+node_modules
+**/node_modules
+**/dist
+**/build
+coverage
+*.log
+.env
+.env.*
+!.env.example
+
+# The backend image does not need the local frontend or deployment sources.
+apps/frontend
+infra
+*.md

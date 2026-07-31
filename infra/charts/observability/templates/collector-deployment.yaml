@@ -1,116 +1,71 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: opentelemetry-collector
-  namespace: telemetry-hub
+  name: {{ .Values.collector.name }}
+  namespace: {{ .Release.Namespace }}
   labels:
-    app: opentelemetry-collector
+    {{- include "observability.commonLabels" . | nindent 4 }}
+    app.kubernetes.io/name: {{ .Values.collector.name }}
+    app.kubernetes.io/component: collector
 spec:
-  replicas: 1
+  replicas: {{ .Values.collector.replicaCount }}
+  # Deployment selectors are immutable; keep the original selector for upgrades.
   selector:
     matchLabels:
-      app: opentelemetry-collector
+      app: {{ .Values.collector.name }}
   template:
     metadata:
       labels:
-        app: opentelemetry-collector
+        app: {{ .Values.collector.name }}
+        app.kubernetes.io/name: {{ .Values.collector.name }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/component: collector
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/collector-config.yaml") . | sha256sum }}
     spec:
       containers:
-        - name: opentelemetry-collector
-          image: otel/opentelemetry-collector-contrib:latest
+        - name: {{ .Values.collector.name }}
+          image: "{{ .Values.collector.image.repository }}:{{ .Values.collector.image.tag }}"
+          imagePullPolicy: {{ .Values.collector.image.pullPolicy }}
+          args:
+            - --config=/etc/otelcol-contrib/config.yaml
           ports:
             - containerPort: 4317
               name: otlp-grpc
             - containerPort: 4318
               name: otlp-http
-          command:
-            - /otelcol-contrib
-            - --config=/etc/config/config.yaml
           volumeMounts:
             - name: config
-              mountPath: /etc/config
+              mountPath: /etc/otelcol-contrib
+              readOnly: true
+          {{- with .Values.collector.resources }}
           resources:
-            requests:
-              memory: "128Mi"
-              cpu: "100m"
-            limits:
-              memory: "256Mi"
-              cpu: "500m"
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
       volumes:
         - name: config
           configMap:
             name: collector-config
+
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: opentelemetry-collector
-  namespace: telemetry-hub
+  name: {{ .Values.collector.name }}
+  namespace: {{ .Release.Namespace }}
   labels:
-    app: opentelemetry-collector
+    {{- include "observability.commonLabels" . | nindent 4 }}
+    app.kubernetes.io/name: {{ .Values.collector.name }}
+    app.kubernetes.io/component: collector
 spec:
   selector:
-    app: opentelemetry-collector
+    app.kubernetes.io/name: {{ .Values.collector.name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
   ports:
     - name: otlp-grpc
       port: 4317
-      targetPort: 4317
+      targetPort: otlp-grpc
     - name: otlp-http
       port: 4318
-      targetPort: 4318
+      targetPort: otlp-http
   type: ClusterIP
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: collector-config
-  namespace: telemetry-hub
-data:
-  config.yaml: |
-    receivers:
-      otlp:
-        protocols:
-          grpc:
-            endpoint: 0.0.0.0:4317
-          http:
-            endpoint: 0.0.0.0:4318
-
-    processors:
-      batch:
-        timeout: 10s
-        send_batch_size: 512
-      memory_limiter:
-        check_interval: 1s
-        limit_mib: 256
-        spike_limit_mib: 64
-
-    exporters:
-      clickhouse:
-        endpoint: "tcp://clickhouse.telemetry-hub.svc.cluster.local:9000?database=default"
-        timeout: 30s
-        create_schema: true
-        traces_table_name: otel_traces
-        logs_table_name: otel_logs
-        metrics_table_name: otel_metrics
-        sending_queue:
-          queue_size: 5000
-          num_consumers: 10
-        retry_on_failure:
-          enabled: true
-          initial_interval: 5s
-          max_interval: 30s
-          max_elapsed_time: 300s
-      
-      debug:
-        verbosity: detailed
-
-    service:
-      pipelines:
-        traces:
-          receivers: [otlp]
-          processors: [memory_limiter, batch]
-          exporters: [clickhouse, debug]
-        logs:
-          receivers: [otlp]
-          processors: [memory_limiter, batch]
-          exporters: [clickhouse, debug]

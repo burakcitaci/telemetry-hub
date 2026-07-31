@@ -1,9 +1,8 @@
-"use client"
-
 import * as React from "react"
 import {
   ColumnDef,
   ColumnFiltersState,
+  PaginationState,
   SortingState,
   VisibilityState,
   flexRender,
@@ -17,7 +16,6 @@ import {
 import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -42,13 +40,11 @@ interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
   searchPlaceholder?: string
-  searchColumn?: string
   enableRowSelection?: boolean
   enableColumnVisibility?: boolean
   enablePagination?: boolean
   enableSearch?: boolean
   pageSize?: number
-  onPageSizeChange?: (pageSize: number) => void
   onRowClick?: (row: TData) => void
 }
 
@@ -56,13 +52,11 @@ export function DataTable<TData, TValue>({
   columns,
   data,
   searchPlaceholder = "Filter...",
-  searchColumn,
   enableRowSelection = false,
   enableColumnVisibility = true,
   enablePagination = true,
   enableSearch = true,
-  pageSize = 10,
-  onPageSizeChange,
+  pageSize = 20,
   onRowClick,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([])
@@ -70,6 +64,17 @@ export function DataTable<TData, TValue>({
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = React.useState({})
   const [globalFilter, setGlobalFilter] = React.useState("")
+  const [pagination, setPagination] = React.useState<PaginationState>({
+    pageIndex: 0,
+    pageSize,
+  })
+
+  React.useEffect(() => {
+    setPagination({
+      pageIndex: 0,
+      pageSize,
+    })
+  }, [pageSize])
 
   const table = useReactTable({
     data,
@@ -82,7 +87,9 @@ export function DataTable<TData, TValue>({
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
+    onPaginationChange: setPagination,
     onGlobalFilterChange: setGlobalFilter,
+    enableRowSelection,
     globalFilterFn: "includesString",
     state: {
       sorting,
@@ -90,11 +97,7 @@ export function DataTable<TData, TValue>({
       columnVisibility,
       rowSelection,
       globalFilter,
-    },
-    initialState: {
-      pagination: {
-        pageSize,
-      },
+      pagination,
     },
   })
 
@@ -139,7 +142,7 @@ export function DataTable<TData, TValue>({
           )}
         </div>
       )}
-      <div className="rounded-md border">
+      <div className="overflow-x-auto rounded-md border">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -192,18 +195,20 @@ export function DataTable<TData, TValue>({
         </Table>
       </div>
       {enablePagination && (
-        <div className="flex items-center justify-end space-x-2 py-4">
-          <div className="flex-1 text-sm text-muted-foreground">
-            {table.getFilteredSelectedRowModel().rows.length} of{" "}
-            {table.getFilteredRowModel().rows.length} row(s) selected.
-          </div>
-          <div className="flex items-center space-x-2">
+        <div className="flex flex-wrap items-center justify-end gap-2 py-4">
+          {enableRowSelection && (
+            <div className="mr-auto text-sm text-muted-foreground">
+              {table.getFilteredSelectedRowModel().rows.length} of{" "}
+              {table.getFilteredRowModel().rows.length} row(s) selected.
+            </div>
+          )}
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-sm text-muted-foreground">Rows</span>
             <Select
-              value={pageSize.toString()}
+              value={pagination.pageSize.toString()}
               onValueChange={(value) => {
                 const newPageSize = parseInt(value);
                 table.setPageSize(newPageSize);
-                onPageSizeChange?.(newPageSize);
               }}
             >
               <SelectTrigger className="h-8 w-[70px]">
@@ -217,6 +222,9 @@ export function DataTable<TData, TValue>({
                 ))}
               </SelectContent>
             </Select>
+            <span className="whitespace-nowrap text-sm text-muted-foreground">
+              Page {pagination.pageIndex + 1} of {Math.max(table.getPageCount(), 1)}
+            </span>
             <div className="space-x-2">
               <Button
                 variant="outline"

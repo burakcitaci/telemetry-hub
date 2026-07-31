@@ -10,12 +10,10 @@ build/
 *~
 .vscode/
 .idea/
-helm/charts/
-helm/Chart.lock
 coverage/
 *.tgz
 
-# Nx generated files and cache - IGNORE ALL
+# Tool caches
 .nx/
 .cursor/rules/nx-rules.mdc
 .github/instructions/nx.instructions.md

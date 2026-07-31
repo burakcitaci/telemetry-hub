@@ -1,13 +1,14 @@
-import { Injectable, LoggerService } from '@nestjs/common';
+import { Injectable, LoggerService, OnApplicationShutdown } from '@nestjs/common';
 import { logs } from '@opentelemetry/api-logs';
 import { SeverityNumber } from '@opentelemetry/api-logs';
+import { shutdownTelemetry } from '../../tracing';
 
 /**
  * Central Logger Service - Integrates with OpenTelemetry for centralized logging
  * Logs are exported to ClickHouse via the OpenTelemetry Collector
  */
 @Injectable()
-export class CentralLoggerService implements LoggerService {
+export class CentralLoggerService implements LoggerService, OnApplicationShutdown {
   /**
    * Get logger lazily to ensure global provider is initialized
    */
@@ -166,5 +167,9 @@ export class CentralLoggerService implements LoggerService {
     }
 
     return `${timestamp} ${contextStr} ${JSON.stringify(message)}`;
+  }
+
+  async onApplicationShutdown(): Promise<void> {
+    await shutdownTelemetry();
   }
 }

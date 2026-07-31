@@ -2,13 +2,14 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Values.backend.name }}
-  namespace: {{ .Values.global.namespace }}
+  namespace: {{ .Release.Namespace }}
   labels:
-    app: {{ .Values.backend.name }}
-    version: v1
-    managed-by: helm
+    {{- include "observability.commonLabels" . | nindent 4 }}
+    app.kubernetes.io/name: {{ .Values.backend.name }}
+    app.kubernetes.io/component: api
 spec:
   replicas: {{ .Values.backend.replicaCount }}
+  # Deployment selectors are immutable; keep the original selector for upgrades.
   selector:
     matchLabels:
       app: {{ .Values.backend.name }}
@@ -16,59 +17,56 @@ spec:
     metadata:
       labels:
         app: {{ .Values.backend.name }}
-        version: v1
+        app.kubernetes.io/name: {{ .Values.backend.name }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/component: api
       annotations:
         prometheus.io/scrape: "false"
         {{- with .Values.backend.podAnnotations }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
-      {{- with .Values.backend.securityContext }}
+      {{- with .Values.backend.podSecurityContext }}
       securityContext:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      
       containers:
         - name: {{ .Values.backend.name }}
           image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag }}"
           imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
-          
+          {{- with .Values.backend.containerSecurityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           ports:
             - name: http
-              containerPort: 3001
+              containerPort: {{ .Values.backend.service.port }}
               protocol: TCP
-          
           env:
             {{- range .Values.backend.env }}
             - name: {{ .name }}
               value: {{ .value | quote }}
             {{- end }}
-          
           {{- with .Values.backend.livenessProbe }}
           livenessProbe:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          
           {{- with .Values.backend.readinessProbe }}
           readinessProbe:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          
           {{- with .Values.backend.resources }}
           resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-      
       {{- with .Values.backend.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      
       {{- with .Values.backend.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      
       {{- with .Values.backend.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}

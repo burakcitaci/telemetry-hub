@@ -12,6 +12,7 @@ export function ModeToggle() {
         size="sm"
         onClick={() => setTheme("light")}
         title="Light mode"
+        aria-label="Use light theme"
         className={`h-8 w-8 p-0 transition-all ${
           theme === "light"
             ? "bg-white text-foreground shadow-sm hover:bg-gray-100 dark:hover:bg-gray-200"
@@ -25,6 +26,7 @@ export function ModeToggle() {
         size="sm"
         onClick={() => setTheme("dark")}
         title="Dark mode"
+        aria-label="Use dark theme"
         className={`h-8 w-8 p-0 transition-all ${
           theme === "dark"
             ? "bg-slate-800 text-white shadow-sm hover:bg-slate-700"
@@ -38,6 +40,7 @@ export function ModeToggle() {
         size="sm"
         onClick={() => setTheme("system")}
         title={`System preference (${resolvedTheme})`}
+        aria-label={`Use system theme, currently ${resolvedTheme}`}
         className={`h-8 w-8 p-0 transition-all ${
           theme === "system"
             ? resolvedTheme === "dark"

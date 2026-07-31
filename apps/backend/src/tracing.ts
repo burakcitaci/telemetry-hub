@@ -76,20 +76,27 @@ console.log(`OTLP Logs endpoint: ${otlpLogsUrl}`);
 console.log(`Service name: ${serviceName}`);
 console.log('Logs are being exported to OpenTelemetry collector');
 
-process.on('SIGTERM', () => {
-  sdk
-    .shutdown()
-    .then(() => console.log('Tracing terminated'))
-    .catch((error) => console.log('Error terminating tracing', error))
-    .finally(() => {
-      loggerProvider
-        .forceFlush()
-        .then(() => loggerProvider.shutdown())
-        .then(() => console.log('Logging terminated'))
-        .catch((error) => console.log('Error terminating logging', error))
-        .finally(() => process.exit(0));
-    });
-});
+let telemetryShutdown: Promise<void> | undefined;
+
+export function shutdownTelemetry(): Promise<void> {
+  if (!telemetryShutdown) {
+    telemetryShutdown = (async () => {
+      const results = await Promise.allSettled([
+        sdk.shutdown(),
+        loggerProvider.forceFlush().then(() => loggerProvider.shutdown()),
+      ]);
+      const failures = results
+        .filter((result): result is PromiseRejectedResult => result.status === 'rejected')
+        .map((result) => result.reason);
+
+      if (failures.length > 0) {
+        throw new AggregateError(failures, 'OpenTelemetry shutdown failed');
+      }
+    })();
+  }
+
+  return telemetryShutdown;
+}
 
 export default sdk;
 export { loggerProvider };

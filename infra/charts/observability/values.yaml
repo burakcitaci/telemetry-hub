@@ -1,12 +1,7 @@
-# Global settings
-global:
-  namespace: telemetry-hub
-  environment: development
-
-# Backend Service Configuration
 backend:
   name: backend
   replicaCount: 1
+
   image:
     repository: local/backend
     tag: latest
@@ -17,26 +12,24 @@ backend:
     port: 3001
     annotations: {}
 
-  # Health checks
   livenessProbe:
     httpGet:
       path: /health
       port: 3001
     initialDelaySeconds: 20
-    periodSeconds: 60 # every 30s is fine
-    timeoutSeconds: 10 # 10s is fine
-    failureThreshold: 3 # 3 failures is a problem
+    periodSeconds: 30
+    timeoutSeconds: 10
+    failureThreshold: 3
 
   readinessProbe:
     httpGet:
       path: /health
       port: 3001
     initialDelaySeconds: 10
-    periodSeconds: 65
+    periodSeconds: 15
     timeoutSeconds: 5
-    failureThreshold: 2 # 2 failures is a problem
+    failureThreshold: 2
 
-  # Environment variables
   env:
     - name: PORT
       value: "3001"
@@ -45,19 +38,18 @@ backend:
     - name: NODE_ENV
       value: "production"
     - name: CLICKHOUSE_HOST
-      value: "clickhouse.telemetry-hub.svc.cluster.local"
+      value: "clickhouse"
     - name: CLICKHOUSE_PORT
       value: "8123"
     - name: CLICKHOUSE_DATABASE
       value: "default"
     - name: OTEL_EXPORTER_OTLP_ENDPOINT
-      value: "http://opentelemetry-collector.telemetry-hub.svc.cluster.local:4318"
+      value: "http://opentelemetry-collector:4318"
     - name: OTEL_SERVICE_NAME
       value: "backend-service"
     - name: OTEL_SERVICE_VERSION
       value: "1.0.0"
 
-  # Resource management
   resources:
     requests:
       memory: "128Mi"
@@ -66,26 +58,24 @@ backend:
       memory: "256Mi"
       cpu: "500m"
 
-  # Pod security and network
-  securityContext:
+  podSecurityContext:
     runAsNonRoot: false
-    fsReadOnlyRootFilesystem: false
+
+  containerSecurityContext:
+    readOnlyRootFilesystem: false
 
   affinity: {}
   nodeSelector: {}
   tolerations: []
-
-  # Pod annotations
   podAnnotations: {}
 
-# ClickHouse Configuration
 clickhouse:
   name: clickhouse
   replicaCount: 1
 
   image:
     repository: clickhouse/clickhouse-server
-    tag: "25.9" # Pin version for stability
+    tag: "26.3.17.56"
     pullPolicy: IfNotPresent
 
   service:
@@ -96,7 +86,6 @@ clickhouse:
       port: 9000
     annotations: {}
 
-  # Health checks
   livenessProbe:
     httpGet:
       path: /ping
@@ -115,7 +104,6 @@ clickhouse:
     timeoutSeconds: 3
     failureThreshold: 2
 
-  # Resource management
   resources:
     requests:
       memory: "512Mi"
@@ -124,41 +112,30 @@ clickhouse:
       memory: "2Gi"
       cpu: "1000m"
 
-  # Storage
-  persistence:
-    enabled: false # Set to true for production with PVC
-    size: 10Gi
-    storageClassName: ""
-
-  # Pod security and network
-  securityContext:
+  podSecurityContext:
     runAsNonRoot: false
-    fsReadOnlyRootFilesystem: false
+
+  containerSecurityContext:
+    readOnlyRootFilesystem: false
 
   affinity: {}
   nodeSelector: {}
   tolerations: []
-
-  # Pod annotations
   podAnnotations: {}
 
-# Namespace configuration
-namespace:
-  create: true
-  name: telemetry-hub
+collector:
+  name: opentelemetry-collector
+  replicaCount: 1
 
-# Ingress (optional)
-ingress:
-  enabled: false
-  className: "nginx"
-  annotations: {}
-  hosts:
-    - host: observability.local
-      paths:
-        - path: /
-          pathType: Prefix
-  tls: []
+  image:
+    repository: ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib
+    tag: "0.153.0"
+    pullPolicy: IfNotPresent
 
-# Service Monitor (for Prometheus, optional)
-serviceMonitor:
-  enabled: false
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "256Mi"
+      cpu: "500m"

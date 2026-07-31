@@ -4,9 +4,10 @@ import { HealthService } from "./services/health.service";
 import { DataController } from "./controllers/data.controller";
 import { DataService } from "./services/data.service";
 import { LoggerModule } from "../../common/logger/logger.module";
+import { TelemetryModule } from "../telemetry/telemetry.module";
 
 @Module({
-  imports: [LoggerModule],
+  imports: [LoggerModule, TelemetryModule],
   controllers: [HealthController, DataController],
   providers: [HealthService, DataService],
   exports: [HealthService],

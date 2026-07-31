@@ -48,10 +48,4 @@ export class DataController {
       span.end();
     }
   }
-
-  @Get('health')
-  getHealth() {
-    this.logger.log('Health check endpoint accessed', 'HealthDataController');
-    return { status: 'ok', service: 'backend' };
-  }
 }
