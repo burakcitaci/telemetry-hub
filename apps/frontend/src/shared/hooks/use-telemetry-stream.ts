@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { createEventSource } from '@/api';
-import type { TelemetryEvent } from '@/types/telemetry';
+import { createEventSource } from '@/shared/api/telemetry-api';
+import type { TelemetryEvent } from '@/shared/types/telemetry';
 
 export function useTelemetryStream(onEvent: (event: TelemetryEvent) => void) {
   const callbackRef = useRef(onEvent);

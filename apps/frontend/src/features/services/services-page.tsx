@@ -9,21 +9,22 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import { generateTelemetry, getServiceMetrics, getServices } from '@/api';
+import { getServiceMetrics, getServices } from '@/features/services/api';
+import type { ServiceMetrics, ServiceSummary } from '@/features/services/types';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { getErrorMessage } from '@/lib/errors';
-import { formatDuration } from '@/lib/telemetry';
-import type { ServiceMetrics, ServiceSummary } from '@/types/telemetry';
+import { generateTelemetry } from '@/shared/api/telemetry-api';
+import { getErrorMessage } from '@/shared/lib/errors';
+import { formatDuration } from '@/shared/lib/telemetry';
 
 function numberValue(value: string | number | undefined): number {
   const parsed = Number(value ?? 0);
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
-function ServicesView() {
+function ServicesPage() {
   const [services, setServices] = useState<ServiceSummary[]>([]);
   const [selectedService, setSelectedService] = useState<string | null>(null);
   const [metrics, setMetrics] = useState<ServiceMetrics | null>(null);
@@ -269,4 +270,4 @@ function ServicesView() {
   );
 }
 
-export default ServicesView;
+export default ServicesPage;

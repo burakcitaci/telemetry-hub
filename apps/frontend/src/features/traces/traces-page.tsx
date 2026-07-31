@@ -1,23 +1,26 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Activity, RefreshCw, Wifi, WifiOff } from 'lucide-react';
 import type { ColumnDef } from '@tanstack/react-table';
-import { generateTelemetry, getTraces } from '@/api';
-import { DataTable, DataTableColumnHeader } from '@/components/data-table';
-import { Sidebar, type FacetOption } from '@/components/sidebar';
-import { TraceDetailSheet } from '@/components/trace-detail-sheet';
+import { getTraces } from '@/features/traces/api';
+import { TraceDetailSheet } from '@/features/traces/components/trace-detail-sheet';
+import type { TraceSummary } from '@/features/traces/types';
+import { DataTable, DataTableColumnHeader } from '@/shared/components/data-table';
+import { TelemetrySidebar, type FacetOption } from '@/shared/components/telemetry-sidebar';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useTelemetryStream } from '@/hooks/use-telemetry-stream';
-import { getErrorMessage } from '@/lib/errors';
+import { generateTelemetry } from '@/shared/api/telemetry-api';
+import { useTelemetryStream } from '@/shared/hooks/use-telemetry-stream';
+import { useTelemetryViewParams } from '@/shared/hooks/use-telemetry-view-params';
+import { getErrorMessage } from '@/shared/lib/errors';
 import {
   formatDuration,
   formatTelemetryTimestamp,
   isWithinTimeRange,
   TELEMETRY_FETCH_LIMIT,
-} from '@/lib/telemetry';
-import type { TelemetryEvent, TraceSummary } from '@/types/telemetry';
+} from '@/shared/lib/telemetry';
+import type { TelemetryEvent } from '@/shared/types/telemetry';
 
 function statusBadge(status: string) {
   const normalized = status.toUpperCase();
@@ -31,7 +34,7 @@ const columns: ColumnDef<TraceSummary>[] = [
     accessorKey: 'Timestamp',
     header: ({ column }) => <DataTableColumnHeader column={column} title="Timestamp" />,
     cell: ({ row }) => (
-      <span className="whitespace-nowrap px-2 text-xs text-muted-foreground">
+      <span className="whitespace-nowrap text-xs text-muted-foreground">
         {formatTelemetryTimestamp(row.original.Timestamp)}
       </span>
     ),
@@ -76,15 +79,22 @@ const columns: ColumnDef<TraceSummary>[] = [
   },
 ];
 
-function TracesView() {
+function TracesPage() {
   const [traces, setTraces] = useState<TraceSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [serviceFilters, setServiceFilters] = useState<string[]>([]);
-  const [statusFilters, setStatusFilters] = useState<string[]>([]);
-  const [timeRange, setTimeRange] = useState('6h');
   const [selectedTraceId, setSelectedTraceId] = useState<string | null>(null);
+  const {
+    serviceFilters,
+    setServiceFilters,
+    facetFilters: statusFilters,
+    setFacetFilters: setStatusFilters,
+    timeRange,
+    setTimeRange,
+    searchQuery,
+    setSearchQuery,
+  } = useTelemetryViewParams({ facetParam: 'status' });
 
   const loadTraces = useCallback(async () => {
     setLoading(true);
@@ -174,7 +184,7 @@ function TracesView() {
 
   return (
     <div className="flex h-full min-h-0 bg-background">
-      <Sidebar
+      <TelemetrySidebar
         services={services}
         selectedServices={serviceFilters}
         onServicesSelect={setServiceFilters}
@@ -240,6 +250,8 @@ function TracesView() {
               enableColumnVisibility
               enablePagination
               pageSize={20}
+              searchValue={searchQuery}
+              onSearchChange={setSearchQuery}
               onRowClick={(trace) => setSelectedTraceId(trace.TraceId)}
             />
           ) : (
@@ -271,4 +283,4 @@ function TracesView() {
   );
 }
 
-export default TracesView;
+export default TracesPage;

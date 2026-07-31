@@ -10,6 +10,7 @@ The infrastructure runs in a local [Kind](https://kind.sigs.k8s.io/) cluster. Th
 - **Logs** are emitted by the backend, exported over OTLP, and stored in ClickHouse.
 - **Services** are aggregates derived from stored spans; they are not a separate metrics signal.
 - `GET /api/data` is the built-in telemetry generator. Each request performs sample work and emits spans and correlated logs.
+- Logs and traces keep service, severity or status, time-range, and text-search filters in the URL so filtered views can be bookmarked or shared.
 
 Metrics and tasks are not implemented or exposed. There is no OTLP metrics pipeline or tasks API in this repository.
 
@@ -101,9 +102,15 @@ See [DEPLOYMENT.md](DEPLOYMENT.md) for verification and troubleshooting.
 ```text
 apps/backend/                    NestJS API and OpenTelemetry instrumentation
 apps/frontend/                   React and Vite dashboard
+  src/app/                       Application shell, routing, navigation, and theme
+  src/features/                  Logs, traces, and services feature modules
+  src/shared/                    Cross-feature API, telemetry, and UI utilities
+  src/components/ui/             Reusable UI primitives
 infra/charts/observability/      Self-contained local Helm chart
 infra/kind/                      Kind configuration and lifecycle scripts
 ```
+
+Each frontend feature owns its API adapter, domain types, page, and feature-specific components. Features expose a small `index.ts` entry point to the app router. Route components are loaded with static dynamic imports, so Vite produces a separate chunk for each feature. Shared code should only move into `src/shared` after it is used by more than one feature.
 
 ## Scope
 

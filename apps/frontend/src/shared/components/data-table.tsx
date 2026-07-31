@@ -35,6 +35,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { cn } from "@/lib/utils"
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
@@ -45,6 +46,8 @@ interface DataTableProps<TData, TValue> {
   enablePagination?: boolean
   enableSearch?: boolean
   pageSize?: number
+  searchValue?: string
+  onSearchChange?: (value: string) => void
   onRowClick?: (row: TData) => void
 }
 
@@ -57,13 +60,16 @@ export function DataTable<TData, TValue>({
   enablePagination = true,
   enableSearch = true,
   pageSize = 20,
+  searchValue,
+  onSearchChange,
   onRowClick,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = React.useState({})
-  const [globalFilter, setGlobalFilter] = React.useState("")
+  const [internalGlobalFilter, setInternalGlobalFilter] = React.useState("")
+  const globalFilter = searchValue ?? internalGlobalFilter
   const [pagination, setPagination] = React.useState<PaginationState>({
     pageIndex: 0,
     pageSize,
@@ -88,7 +94,11 @@ export function DataTable<TData, TValue>({
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
     onPaginationChange: setPagination,
-    onGlobalFilterChange: setGlobalFilter,
+    onGlobalFilterChange: (value) => {
+      const nextValue = typeof value === "function" ? value(globalFilter) : value
+      if (onSearchChange) onSearchChange(nextValue)
+      else setInternalGlobalFilter(nextValue)
+    },
     enableRowSelection,
     globalFilterFn: "includesString",
     state: {
@@ -108,7 +118,11 @@ export function DataTable<TData, TValue>({
           <Input
             placeholder={searchPlaceholder}
             value={globalFilter ?? ""}
-            onChange={(event) => setGlobalFilter(event.target.value)}
+            onChange={(event) => {
+              const value = event.target.value
+              if (onSearchChange) onSearchChange(value)
+              else setInternalGlobalFilter(value)
+            }}
             className="max-w-sm border-gray-300 py-0 focus:!border-gray-400 focus:!ring-0"
           />
 
@@ -149,7 +163,7 @@ export function DataTable<TData, TValue>({
               <TableRow key={headerGroup.id} className="h-8">
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead key={header.id} className="py-0">
+                    <TableHead key={header.id} className="px-3 py-0">
                       {header.isPlaceholder
                         ? null
                         : flexRender(
@@ -172,7 +186,7 @@ export function DataTable<TData, TValue>({
                   onClick={() => onRowClick?.(row.original)}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className="py-1">
+                    <TableCell key={cell.id} className="px-3 py-1">
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()
@@ -261,17 +275,20 @@ export function DataTableColumnHeader<TData, TValue>({
   className?: string
 }) {
   if (!column.getCanSort()) {
-    return <div className={className}>{title}</div>
+    return <div className={cn("flex h-8 items-center text-left", className)}>{title}</div>
   }
 
   return (
     <Button
       variant="ghost"
       onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-      className={className}
+      className={cn(
+        "-mx-3 h-8 w-[calc(100%+1.5rem)] justify-start rounded-none px-3 text-left font-semibold",
+        className,
+      )}
     >
       {title}
-      <ArrowUpDown className="ml-2 h-4 w-4" />
+      <ArrowUpDown className="ml-1.5 h-3.5 w-3.5 shrink-0" />
     </Button>
   )
 }

@@ -1,18 +1,21 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Activity, RefreshCw, Wifi, WifiOff } from 'lucide-react';
 import type { ColumnDef } from '@tanstack/react-table';
-import { generateTelemetry, getLogs } from '@/api';
-import { DataTable, DataTableColumnHeader } from '@/components/data-table';
-import { LogDetailSheet } from '@/components/log-detail-sheet';
-import { Sidebar, type FacetOption } from '@/components/sidebar';
+import { getLogs } from '@/features/logs/api';
+import { LogDetailSheet } from '@/features/logs/components/log-detail-sheet';
+import type { LogRecord } from '@/features/logs/types';
+import { DataTable, DataTableColumnHeader } from '@/shared/components/data-table';
+import { TelemetrySidebar, type FacetOption } from '@/shared/components/telemetry-sidebar';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useTelemetryStream } from '@/hooks/use-telemetry-stream';
-import { getErrorMessage } from '@/lib/errors';
-import { formatTelemetryTimestamp, isWithinTimeRange, TELEMETRY_FETCH_LIMIT } from '@/lib/telemetry';
-import type { LogRecord, TelemetryEvent } from '@/types/telemetry';
+import { generateTelemetry } from '@/shared/api/telemetry-api';
+import { useTelemetryStream } from '@/shared/hooks/use-telemetry-stream';
+import { useTelemetryViewParams } from '@/shared/hooks/use-telemetry-view-params';
+import { getErrorMessage } from '@/shared/lib/errors';
+import { formatTelemetryTimestamp, isWithinTimeRange, TELEMETRY_FETCH_LIMIT } from '@/shared/lib/telemetry';
+import type { TelemetryEvent } from '@/shared/types/telemetry';
 
 function severityBadge(severity: string) {
   const normalized = severity.toUpperCase();
@@ -31,7 +34,7 @@ const columns: ColumnDef<LogRecord>[] = [
     accessorKey: 'Timestamp',
     header: ({ column }) => <DataTableColumnHeader column={column} title="Timestamp" />,
     cell: ({ row }) => (
-      <span className="whitespace-nowrap px-2 text-xs text-muted-foreground">
+      <span className="whitespace-nowrap text-xs text-muted-foreground">
         {formatTelemetryTimestamp(row.original.Timestamp)}
       </span>
     ),
@@ -73,15 +76,22 @@ function normalizeSeverity(severity: string): string {
   return ['INFO', 'WARN', 'ERROR'].includes(normalized) ? normalized : 'OTHER';
 }
 
-function LogsView() {
+function LogsPage() {
   const [logs, setLogs] = useState<LogRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [serviceFilters, setServiceFilters] = useState<string[]>([]);
-  const [severityFilters, setSeverityFilters] = useState<string[]>([]);
-  const [timeRange, setTimeRange] = useState('6h');
   const [selectedLog, setSelectedLog] = useState<LogRecord | null>(null);
+  const {
+    serviceFilters,
+    setServiceFilters,
+    facetFilters: severityFilters,
+    setFacetFilters: setSeverityFilters,
+    timeRange,
+    setTimeRange,
+    searchQuery,
+    setSearchQuery,
+  } = useTelemetryViewParams({ facetParam: 'severity' });
 
   const loadLogs = useCallback(async () => {
     setLoading(true);
@@ -163,7 +173,7 @@ function LogsView() {
 
   return (
     <div className="flex h-full min-h-0 bg-background">
-      <Sidebar
+      <TelemetrySidebar
         services={services}
         selectedServices={serviceFilters}
         onServicesSelect={setServiceFilters}
@@ -229,6 +239,8 @@ function LogsView() {
               enableColumnVisibility
               enablePagination
               pageSize={20}
+              searchValue={searchQuery}
+              onSearchChange={setSearchQuery}
               onRowClick={setSelectedLog}
             />
           ) : (
@@ -260,4 +272,4 @@ function LogsView() {
   );
 }
 
-export default LogsView;
+export default LogsPage;
