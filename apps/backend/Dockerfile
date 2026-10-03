@@ -29,7 +29,8 @@ WORKDIR /app
 COPY --from=builder /app/node_modules ./node_modules
 
 # Copy built backend from builder stage
-COPY --from=builder /app/apps/backend/dist ./dist
+COPY --from=builder /app/apps/backend/dist/app.js ./dist/app.js
+COPY --from=builder /app/apps/backend/package.json ./package.json
 
 EXPOSE 3001
 
@@ -37,4 +38,4 @@ ENV PORT=3001
 ENV HOST=0.0.0.0
 ENV NODE_ENV=production
 
-CMD ["node", "dist/main.js"]
+CMD ["node", "dist/app.js"]
