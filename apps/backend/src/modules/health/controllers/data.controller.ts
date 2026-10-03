@@ -18,6 +18,7 @@ export class DataController {
     try {
       this.logger.log('Processing data request', 'HealthDataController');
 
+      this.logger.log('Fetching data from DataService', process.env.OTEL_SERVICE_NAME);
       const activeContext = trace.setSpan(context.active(), span);
 
       return await context.with(activeContext, async () => {
