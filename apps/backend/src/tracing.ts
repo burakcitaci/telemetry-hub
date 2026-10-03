@@ -47,20 +47,18 @@ const loggerProvider = new LoggerProvider({
   }),
   processors: [
     // Export logs to OpenTelemetry collector via OTLP
-    new BatchLogRecordProcessor(
-      new OTLPLogExporter({
+    new BatchLogRecordProcessor({
+      exporter: new OTLPLogExporter({
         url: otlpLogsUrl,
         headers: {
           'Content-Type': 'application/json',
         },
       }),
-      {
-        maxExportBatchSize: 10,
-        maxQueueSize: 2000,
-        exportTimeoutMillis: 10000,
-        scheduledDelayMillis: 1000, // Export every 1 second
-      }
-    ),
+      maxExportBatchSize: 10,
+      maxQueueSize: 2000,
+      exportTimeoutMillis: 10000,
+      scheduledDelayMillis: 1000, // Export every 1 second
+    }),
   ],
 });
 

@@ -155,18 +155,15 @@ export class CentralLoggerService implements LoggerService, OnApplicationShutdow
    * Format message for consistent logging
    */
   private formatMessage(message: any, context?: string): string {
-    const timestamp = new Date().toISOString();
-    const contextStr = context ? `[${context}]` : '';
-
     if (typeof message === 'string') {
-      return `${timestamp} ${contextStr} ${message}`;
+      return `${message}`;
     }
 
     if (message instanceof Error) {
-      return `${timestamp} ${contextStr} ${message.message}`;
+      return `${message.message}`;
     }
 
-    return `${timestamp} ${contextStr} ${JSON.stringify(message)}`;
+    return `${JSON.stringify(message)}`;
   }
 
   async onApplicationShutdown(): Promise<void> {
