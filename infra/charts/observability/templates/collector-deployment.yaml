@@ -4,9 +4,7 @@ metadata:
   name: {{ .Values.collector.name }}
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "observability.commonLabels" . | nindent 4 }}
-    app.kubernetes.io/name: {{ .Values.collector.name }}
-    app.kubernetes.io/component: collector
+    {{- include "observability.resourceLabels" (dict "root" . "name" .Values.collector.name "component" "collector") | nindent 4 }}
 spec:
   replicas: {{ .Values.collector.replicaCount }}
   # Deployment selectors are immutable; keep the original selector for upgrades.
@@ -16,10 +14,7 @@ spec:
   template:
     metadata:
       labels:
-        app: {{ .Values.collector.name }}
-        app.kubernetes.io/name: {{ .Values.collector.name }}
-        app.kubernetes.io/instance: {{ .Release.Name }}
-        app.kubernetes.io/component: collector
+        {{- include "observability.podLabels" (dict "root" . "name" .Values.collector.name "component" "collector") | nindent 8 }}
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/collector-config.yaml") . | sha256sum }}
     spec:
@@ -54,13 +49,10 @@ metadata:
   name: {{ .Values.collector.name }}
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "observability.commonLabels" . | nindent 4 }}
-    app.kubernetes.io/name: {{ .Values.collector.name }}
-    app.kubernetes.io/component: collector
+    {{- include "observability.resourceLabels" (dict "root" . "name" .Values.collector.name "component" "collector") | nindent 4 }}
 spec:
   selector:
-    app.kubernetes.io/name: {{ .Values.collector.name }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
+    {{- include "observability.serviceSelectorLabels" (dict "root" . "name" .Values.collector.name) | nindent 4 }}
   ports:
     - name: otlp-grpc
       port: 4317

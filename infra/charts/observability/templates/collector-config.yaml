@@ -4,9 +4,7 @@ metadata:
   name: collector-config
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "observability.commonLabels" . | nindent 4 }}
-    app.kubernetes.io/name: {{ .Values.collector.name }}
-    app.kubernetes.io/component: collector
+    {{- include "observability.resourceLabels" (dict "root" . "name" .Values.collector.name "component" "collector") | nindent 4 }}
 data:
   config.yaml: |
     receivers:

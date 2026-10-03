@@ -4,9 +4,7 @@ metadata:
   name: {{ .Values.backend.name }}
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "observability.commonLabels" . | nindent 4 }}
-    app.kubernetes.io/name: {{ .Values.backend.name }}
-    app.kubernetes.io/component: api
+    {{- include "observability.resourceLabels" (dict "root" . "name" .Values.backend.name "component" "api") | nindent 4 }}
   {{- with .Values.backend.service.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
@@ -14,8 +12,7 @@ metadata:
 spec:
   type: {{ .Values.backend.service.type }}
   selector:
-    app.kubernetes.io/name: {{ .Values.backend.name }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
+    {{- include "observability.serviceSelectorLabels" (dict "root" . "name" .Values.backend.name) | nindent 4 }}
   ports:
     - name: http
       port: {{ .Values.backend.service.port }}

@@ -4,9 +4,7 @@ metadata:
   name: {{ .Values.clickhouse.name }}
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "observability.commonLabels" . | nindent 4 }}
-    app.kubernetes.io/name: {{ .Values.clickhouse.name }}
-    app.kubernetes.io/component: database
+    {{- include "observability.resourceLabels" (dict "root" . "name" .Values.clickhouse.name "component" "database") | nindent 4 }}
 spec:
   replicas: {{ .Values.clickhouse.replicaCount }}
   # Deployment selectors are immutable; keep the original selector for upgrades.
@@ -16,10 +14,7 @@ spec:
   template:
     metadata:
       labels:
-        app: {{ .Values.clickhouse.name }}
-        app.kubernetes.io/name: {{ .Values.clickhouse.name }}
-        app.kubernetes.io/instance: {{ .Release.Name }}
-        app.kubernetes.io/component: database
+        {{- include "observability.podLabels" (dict "root" . "name" .Values.clickhouse.name "component" "database") | nindent 8 }}
       {{- with .Values.clickhouse.podAnnotations }}
       annotations:
         {{- toYaml . | nindent 8 }}
@@ -87,9 +82,7 @@ metadata:
   name: {{ .Values.clickhouse.name }}
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "observability.commonLabels" . | nindent 4 }}
-    app.kubernetes.io/name: {{ .Values.clickhouse.name }}
-    app.kubernetes.io/component: database
+    {{- include "observability.resourceLabels" (dict "root" . "name" .Values.clickhouse.name "component" "database") | nindent 4 }}
   {{- with .Values.clickhouse.service.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
@@ -97,8 +90,7 @@ metadata:
 spec:
   type: {{ .Values.clickhouse.service.type }}
   selector:
-    app.kubernetes.io/name: {{ .Values.clickhouse.name }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
+    {{- include "observability.serviceSelectorLabels" (dict "root" . "name" .Values.clickhouse.name) | nindent 4 }}
   ports:
     - name: http
       port: {{ .Values.clickhouse.service.http.port }}

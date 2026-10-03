@@ -4,9 +4,7 @@ metadata:
   name: {{ .Values.backend.name }}
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "observability.commonLabels" . | nindent 4 }}
-    app.kubernetes.io/name: {{ .Values.backend.name }}
-    app.kubernetes.io/component: api
+    {{- include "observability.resourceLabels" (dict "root" . "name" .Values.backend.name "component" "api") | nindent 4 }}
 spec:
   replicas: {{ .Values.backend.replicaCount }}
   # Deployment selectors are immutable; keep the original selector for upgrades.
@@ -16,10 +14,7 @@ spec:
   template:
     metadata:
       labels:
-        app: {{ .Values.backend.name }}
-        app.kubernetes.io/name: {{ .Values.backend.name }}
-        app.kubernetes.io/instance: {{ .Release.Name }}
-        app.kubernetes.io/component: api
+        {{- include "observability.podLabels" (dict "root" . "name" .Values.backend.name "component" "api") | nindent 8 }}
       annotations:
         prometheus.io/scrape: "false"
         {{- with .Values.backend.podAnnotations }}
