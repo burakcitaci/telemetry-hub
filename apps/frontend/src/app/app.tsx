@@ -7,6 +7,7 @@ import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 const TracesPage = lazy(() => import('@/features/traces'));
 const LogsPage = lazy(() => import('@/features/logs'));
 const ServicesPage = lazy(() => import('@/features/services'));
+const ServiceDetailPage = lazy(() => import('@/features/services/service-detail-page'));
 
 function AppRoutes() {
   return (
@@ -21,9 +22,10 @@ function AppRoutes() {
           </div>
         )}>
           <Routes>
-            <Route path="/" element={<TracesPage />} />
+            <Route path="/" element={<ServicesPage />} />
+            <Route path="/services/:serviceName" element={<ServiceDetailPage />} />
             <Route path="/logs" element={<LogsPage />} />
-            <Route path="/services" element={<ServicesPage />} />
+            <Route path="/traces" element={<TracesPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Suspense>

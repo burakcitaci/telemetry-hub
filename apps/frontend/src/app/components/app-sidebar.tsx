@@ -19,9 +19,9 @@ import {
 } from '@/components/ui/sidebar';
 
 const navItems = [
-  { path: '/', label: 'Traces', description: 'Distributed requests', icon: Activity },
+  { path: '/', label: 'Services', description: 'Service health', icon: Server },
+  { path: '/traces', label: 'Traces', description: 'Distributed requests', icon: Activity },
   { path: '/logs', label: 'Logs', description: 'Application events', icon: FileText },
-  { path: '/services', label: 'Services', description: 'Service health', icon: Server },
 ];
 
 export function AppSidebar() {
