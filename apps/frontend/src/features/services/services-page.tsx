@@ -38,7 +38,7 @@ function ServicesPage() {
     try {
       setServices(await getServices());
       setError(null);
-    } catch (loadError) {
+    } catch (loadError: unknown) {
       setError(getErrorMessage(
         loadError,
         'Unable to load services. Verify that the backend is reachable and VITE_BACKEND_URL is correct.',

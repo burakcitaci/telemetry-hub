@@ -1,4 +1,4 @@
-import { Activity, FileText, Server } from 'lucide-react';
+import { Activity, FileText, Gauge, Server } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { ModeToggle } from '@/app/components/mode-toggle';
 import { cn } from '@/lib/utils';
@@ -20,6 +20,7 @@ import {
 
 const navItems = [
   { path: '/', label: 'Services', description: 'Service health', icon: Server },
+  { path: '/metrics', label: 'Metrics', description: 'Collected metrics', icon: Gauge },
   { path: '/traces', label: 'Traces', description: 'Distributed requests', icon: Activity },
   { path: '/logs', label: 'Logs', description: 'Application events', icon: FileText },
 ];

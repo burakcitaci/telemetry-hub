@@ -36,7 +36,7 @@ export class MetricsService {
     constructor(private readonly clickhouseService: ClickhouseService, private readonly logger: CentralLoggerService,) { }
 
     /**
-   * Get all metrics from all tables - flattened for UI table display
+   * Get unique metric definitions from all tables - flattened for UI table display
    */
     async getAllMetricsFlattened(options: TelemetryListOptions = {}) {
         const { limit, offset } = this.normalizeListOptions(options);
@@ -62,7 +62,7 @@ export class MetricsService {
             const metricType = this.extractMetricType(table.table_name);
 
             const query = `
-        SELECT
+        SELECT DISTINCT
           ServiceName,
           MetricName
         FROM ${table.table_name}

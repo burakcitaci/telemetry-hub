@@ -8,6 +8,7 @@ const TracesPage = lazy(() => import('@/features/traces'));
 const LogsPage = lazy(() => import('@/features/logs'));
 const ServicesPage = lazy(() => import('@/features/services'));
 const ServiceDetailPage = lazy(() => import('@/features/services/service-detail-page'));
+const MetricsPage = lazy(() => import('@/features/metrics'));
 
 function AppRoutes() {
   return (
@@ -24,6 +25,7 @@ function AppRoutes() {
           <Routes>
             <Route path="/" element={<ServicesPage />} />
             <Route path="/services/:serviceName" element={<ServiceDetailPage />} />
+            <Route path="/metrics" element={<MetricsPage />} />
             <Route path="/logs" element={<LogsPage />} />
             <Route path="/traces" element={<TracesPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
