@@ -2,51 +2,55 @@ import { NodeSDK } from '@opentelemetry/sdk-node';
 import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
 import { OTLPLogExporter } from '@opentelemetry/exporter-logs-otlp-http';
+import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-http';
 import { resourceFromAttributes } from '@opentelemetry/resources';
 import {
   BatchLogRecordProcessor,
   LoggerProvider,
 } from '@opentelemetry/sdk-logs';
+import {
+  MeterProvider,
+  PeriodicExportingMetricReader,
+} from '@opentelemetry/sdk-metrics';
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 import { logs } from '@opentelemetry/api-logs';
 import * as os from 'os';
 
-// Get OTEL collector endpoint from environment variables
-// Use HTTP port 4318 for HTTP exporters
 const OTEL_EXPORTER_OTLP_ENDPOINT =
   process.env.OTEL_EXPORTER_OTLP_ENDPOINT || 'http://localhost:4318';
 const otlpTracesUrl = `${OTEL_EXPORTER_OTLP_ENDPOINT}/v1/traces`;
 const otlpLogsUrl = `${OTEL_EXPORTER_OTLP_ENDPOINT}/v1/logs`;
+const otlpMetricsUrl = `${OTEL_EXPORTER_OTLP_ENDPOINT}/v1/metrics`;
 const serviceName = process.env.OTEL_SERVICE_NAME || 'backend-service';
 const version = process.env.OTEL_SERVICE_VERSION || '1.0.0';
 
-// Tracing SDK configuration
-const sdk = new NodeSDK({
-  resource: resourceFromAttributes({
-    [SemanticResourceAttributes.SERVICE_NAME]: serviceName,
-    [SemanticResourceAttributes.SERVICE_VERSION]: version,
-    'deployment.environment': process.env.NODE_ENV || 'development',
-    'host.name': os.hostname(),
-  }),
-  traceExporter: new OTLPTraceExporter({
-    url: otlpTracesUrl,
+const resourceAttributes = {
+  [SemanticResourceAttributes.SERVICE_NAME]: serviceName,
+  [SemanticResourceAttributes.SERVICE_VERSION]: version,
+  'deployment.environment': process.env.NODE_ENV || 'development',
+  'host.name': os.hostname(),
+};
+
+// Metrics setup
+const metricReader = new PeriodicExportingMetricReader({
+  exporter: new OTLPMetricExporter({
+    url: otlpMetricsUrl,
     headers: {
       'Content-Type': 'application/json',
     },
+    timeoutMillis: 10000,
   }),
-  instrumentations: [getNodeAutoInstrumentations()],
 });
 
-// Logging provider configuration with OTLP exporter to collector
+const meterProvider = new MeterProvider({
+  resource: resourceFromAttributes(resourceAttributes),
+  readers: [metricReader],
+});
+
+// Logging setup
 const loggerProvider = new LoggerProvider({
-  resource: resourceFromAttributes({
-    [SemanticResourceAttributes.SERVICE_NAME]: serviceName,
-    [SemanticResourceAttributes.SERVICE_VERSION]: version,
-    'deployment.environment': process.env.NODE_ENV || 'development',
-    'host.name': os.hostname(),
-  }),
+  resource: resourceFromAttributes(resourceAttributes),
   processors: [
-    // Export logs to OpenTelemetry collector via OTLP
     new BatchLogRecordProcessor({
       exporter: new OTLPLogExporter({
         url: otlpLogsUrl,
@@ -57,22 +61,33 @@ const loggerProvider = new LoggerProvider({
       maxExportBatchSize: 10,
       maxQueueSize: 2000,
       exportTimeoutMillis: 10000,
-      scheduledDelayMillis: 1000, // Export every 1 second
+      scheduledDelayMillis: 1000,
     }),
   ],
 });
 
-// Register the logger provider globally
 logs.setGlobalLoggerProvider(loggerProvider);
 
-// Initialize both tracing and logging
+// Tracing SDK setup
+const sdk = new NodeSDK({
+  resource: resourceFromAttributes(resourceAttributes),
+  traceExporter: new OTLPTraceExporter({
+    url: otlpTracesUrl,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  }),
+  instrumentations: [getNodeAutoInstrumentations()],
+});
+
+// Initialize telemetry
 sdk.start();
 
-console.log('OpenTelemetry tracing and logging initialized');
+console.log('OpenTelemetry tracing, logging, and metrics initialized');
 console.log(`OTLP Traces endpoint: ${otlpTracesUrl}`);
 console.log(`OTLP Logs endpoint: ${otlpLogsUrl}`);
+console.log(`OTLP Metrics endpoint: ${otlpMetricsUrl}`);
 console.log(`Service name: ${serviceName}`);
-console.log('Logs are being exported to OpenTelemetry collector');
 
 let telemetryShutdown: Promise<void> | undefined;
 
@@ -82,6 +97,7 @@ export function shutdownTelemetry(): Promise<void> {
       const results = await Promise.allSettled([
         sdk.shutdown(),
         loggerProvider.forceFlush().then(() => loggerProvider.shutdown()),
+        meterProvider.forceFlush().then(() => meterProvider.shutdown()),
       ]);
       const failures = results
         .filter((result): result is PromiseRejectedResult => result.status === 'rejected')
@@ -97,4 +113,4 @@ export function shutdownTelemetry(): Promise<void> {
 }
 
 export default sdk;
-export { loggerProvider };
+export { loggerProvider, meterProvider };

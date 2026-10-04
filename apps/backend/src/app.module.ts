@@ -7,6 +7,7 @@ import swaggerConfig from "./config/swagger.config";
 import { TelemetryModule } from "./modules/telemetry/telemetry.module";
 import { HealthModule } from "./modules/health/health.module";
 import { LoggerModule } from "./common/logger/logger.module";
+import { MetricsModule } from "./modules/telemetry/metrics.module";
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { LoggerModule } from "./common/logger/logger.module";
     }),
     LoggerModule,
     TelemetryModule,
+    MetricsModule,
     HealthModule,
   ],
 })

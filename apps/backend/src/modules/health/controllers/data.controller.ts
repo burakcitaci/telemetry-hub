@@ -2,13 +2,14 @@ import { Controller, Get } from '@nestjs/common';
 import { CentralLoggerService } from '../../../common/logger/central-logger.service';
 import { DataService } from '../services/data.service';
 import { trace, context } from '@opentelemetry/api';
+import { meterProvider } from '../../../tracing';
 
 @Controller('api')
 export class DataController {
   constructor(
     private readonly dataService: DataService,
     private readonly logger: CentralLoggerService,
-  ) {}
+  ) { }
 
   @Get('data')
   async getData() {
@@ -48,5 +49,34 @@ export class DataController {
     } finally {
       span.end();
     }
+  }
+
+  @Get('metrics')
+  async getMetrics() {
+
+
+    const meter = meterProvider.getMeter('my-app', '1.0.0');
+
+    // Counter example
+    const requestCounter = meter.createCounter('http.requests', {
+      description: 'Total HTTP requests',
+      unit: '1',
+    });
+    requestCounter.add(1, { method: 'GET', status: '200' });
+
+    // Histogram example
+    const responseTime = meter.createHistogram('http.response_time', {
+      description: 'HTTP response time',
+      unit: 'ms',
+    });
+    responseTime.record(42, { method: 'GET' });
+
+    // Gauge example (async)
+    meter.createObservableGauge('memory.usage', {
+      description: 'Process memory usage',
+      unit: 'bytes',
+    }).addCallback((result) => {
+      result.observe(process.memoryUsage().heapUsed);
+    });
   }
 }
