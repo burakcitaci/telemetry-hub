@@ -51,7 +51,7 @@ export class DataController {
     }
   }
 
-  @Get('metrics')
+  @Get('data/metrics')
   async getMetrics() {
 
 

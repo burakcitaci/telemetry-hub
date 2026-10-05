@@ -11,5 +11,7 @@ export async function getServiceMetrics(service: string): Promise<ServiceMetrics
   const response = await api.get<ApiEnvelope<ServiceMetrics> | ServiceMetrics>(
     `/services/${encodeURIComponent(service)}/metrics`,
   );
+
+  console.log(api);
   return unwrap(response.data);
 }
