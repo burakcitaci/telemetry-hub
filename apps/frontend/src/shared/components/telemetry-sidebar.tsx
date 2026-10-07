@@ -3,13 +3,12 @@ import {
   AlertTriangle,
   CheckCircle,
   ChevronDown,
-  ChevronLeft,
   ChevronRight,
   Circle,
   Clock,
   Info,
+  PanelLeft,
   Server,
-  SlidersHorizontal,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -42,6 +41,11 @@ interface TelemetrySidebarProps {
   onFacetsSelect: (facets: string[]) => void;
   timeRange: string;
   onTimeRangeSelect: (timeRange: string) => void;
+  /** Optional — controlled collapse from the parent (e.g. header button). */
+  collapsed?: boolean;
+  onCollapsedChange?: (collapsed: boolean) => void;
+  /** Optional — uppercase label shown next to the collapse icon. Defaults to "Filters". */
+  title?: string;
 }
 
 const timeRanges = [
@@ -90,41 +94,6 @@ function FilterPanel({
   return (
     <ScrollArea className="min-h-0 flex-1">
       <div className="space-y-2 p-2">
-        <section>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setTimeRangeExpanded((value) => !value)}
-            className="h-auto w-full justify-between px-2 py-1.5"
-            aria-expanded={timeRangeExpanded}
-          >
-            <span className="flex items-center gap-2 text-xs font-medium">
-              <Clock className="h-3.5 w-3.5 text-muted-foreground" />
-              Time range
-            </span>
-            {timeRangeExpanded
-              ? <ChevronDown className="h-3.5 w-3.5" />
-              : <ChevronRight className="h-3.5 w-3.5" />}
-          </Button>
-          {timeRangeExpanded && (
-            <div className="ml-5 mt-1 space-y-0.5">
-              {timeRanges.map((range) => (
-                <Button
-                  key={range.value}
-                  variant={timeRange === range.value ? 'secondary' : 'ghost'}
-                  size="sm"
-                  onClick={() => onTimeRangeSelect(range.value)}
-                  className="h-auto w-full justify-start py-1 text-xs"
-                >
-                  {range.label}
-                </Button>
-              ))}
-            </div>
-          )}
-        </section>
-
-        <Separator />
-
         <section>
           <Button
             variant="ghost"
@@ -234,8 +203,19 @@ export function TelemetrySidebar({
   onFacetsSelect,
   timeRange,
   onTimeRangeSelect,
+  collapsed,
+  onCollapsedChange,
+  title = 'Filters',
 }: TelemetrySidebarProps) {
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [internalCollapsed, setInternalCollapsed] = useState(false);
+
+  // Controlled when the parent passes `collapsed`; otherwise fall back to local state.
+  const isCollapsed = collapsed ?? internalCollapsed;
+  const setCollapsed = (value: boolean) => {
+    if (onCollapsedChange) onCollapsedChange(value);
+    else setInternalCollapsed(value);
+  };
+
   const filterProps = {
     services,
     selectedServices,
@@ -250,22 +230,10 @@ export function TelemetrySidebar({
 
   return (
     <>
+      {/* Mobile sheet (unchanged) */}
       <Sheet>
         <SheetTrigger asChild>
-          <Button
-            variant="secondary"
-            size="sm"
-            className="fixed bottom-4 right-4 z-40 gap-1.5 shadow-lg md:hidden"
-            aria-label="Open filters"
-          >
-            <SlidersHorizontal className="size-4" />
-            Filters
-            {(selectedServices.length + selectedFacets.length) > 0 && (
-              <Badge className="ml-0.5 h-5 min-w-5 justify-center px-1 text-[10px]">
-                {selectedServices.length + selectedFacets.length}
-              </Badge>
-            )}
-          </Button>
+          <span />
         </SheetTrigger>
         <SheetContent side="left" className="flex w-[min(20rem,calc(100vw-3rem))] flex-col gap-0 p-0">
           <SheetHeader className="border-b border-border px-4 py-3 text-left">
@@ -278,27 +246,47 @@ export function TelemetrySidebar({
         </SheetContent>
       </Sheet>
 
+      {/* Desktop sidebar — matches the metrics page visual style */}
       <aside
-        className={`hidden h-full min-h-0 shrink-0 flex-col border-r border-border bg-card transition-all duration-200 md:flex ${
-          isCollapsed ? 'w-14' : 'w-64'
+        className={`hidden md:flex h-full min-h-0 shrink-0 flex-col border-r bg-muted/30 transition-all duration-200 ${
+          isCollapsed ? 'w-11' : 'w-64 sm:w-72'
         }`}
       >
-        <div className="border-b border-border p-2">
-          <div className="flex items-center justify-between">
-            {!isCollapsed && <h2 className="text-sm font-semibold">Filters</h2>}
+        {isCollapsed ? (
+          /* Collapsed rail */
+          <div className="flex flex-col items-center py-3">
             <Button
               variant="ghost"
-              size="sm"
-              onClick={() => setIsCollapsed((value) => !value)}
-              className="h-7 w-7 p-0"
-              aria-label={isCollapsed ? 'Expand filters' : 'Collapse filters'}
+              size="icon"
+              onClick={() => setCollapsed(false)}
+              title="Expand sidebar"
+              className="h-8 w-8"
             >
-              <ChevronLeft className={`h-4 w-4 transition-transform ${isCollapsed ? 'rotate-180' : ''}`} />
+              <PanelLeft className="h-4 w-4" />
             </Button>
           </div>
-        </div>
+        ) : (
+          <>
+            {/* Header — matches metrics page: uppercase muted title on left,
+                PanelLeft collapse icon on right, hairline divider below */}
+            <div className="flex shrink-0 items-center justify-between border-b px-3 py-2">
+              <span className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+                {title}
+              </span>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setCollapsed(true)}
+                title="Collapse sidebar"
+                className="h-7 w-7"
+              >
+                <PanelLeft className="h-3.5 w-3.5" />
+              </Button>
+            </div>
 
-        {!isCollapsed && <FilterPanel {...filterProps} idPrefix="desktop" />}
+            <FilterPanel {...filterProps} idPrefix="desktop" />
+          </>
+        )}
       </aside>
     </>
   );

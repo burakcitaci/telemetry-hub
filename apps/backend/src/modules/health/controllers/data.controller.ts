@@ -1,8 +1,27 @@
 import { Controller, Get } from '@nestjs/common';
 import { CentralLoggerService } from '../../../common/logger/central-logger.service';
 import { DataService } from '../services/data.service';
-import { trace, context } from '@opentelemetry/api';
-import { meterProvider } from '../../../tracing';
+import { trace, context, metrics } from '@opentelemetry/api';
+
+// ── Metrics instruments (created once) ───────────────────────────────────────
+const meter = metrics.getMeter('my-app', '1.0.0');
+
+const requestCounter = meter.createCounter('http.requests', {
+  description: 'Total HTTP requests',
+  unit: '1',
+});
+
+const responseTime = meter.createHistogram('http.test_time', {
+  description: 'HTTP response time',
+  unit: 'ms',
+});
+
+meter.createObservableGauge('memory.usage', {
+  description: 'Process memory usage',
+  unit: 'bytes',
+}).addCallback((result) => {
+  result.observe(process.memoryUsage().heapUsed);
+});
 
 @Controller('api')
 export class DataController {
@@ -53,30 +72,22 @@ export class DataController {
 
   @Get('data/metrics')
   async getMetrics() {
+    // Simulate a bit of work so the histogram records varying values
+    const started = Date.now();
+    const jitter = Math.random() * 200; // 0..200ms
+    await new Promise((r) => setTimeout(r, Math.min(jitter, 30))); // don't sleep too long
+    const durationMs = Date.now() - started + jitter;
 
+    const failed = Math.random() < 0.05; // 5% error rate
+    const status = failed ? 500 : 200;
 
-    const meter = meterProvider.getMeter('my-app', '1.0.0');
+    requestCounter.add(1, { method: 'GET', status: String(status) });
+    responseTime.record(durationMs, { method: 'GET' });
 
-    // Counter example
-    const requestCounter = meter.createCounter('http.requests', {
-      description: 'Total HTTP requests',
-      unit: '1',
-    });
-    requestCounter.add(1, { method: 'GET', status: '200' });
-
-    // Histogram example
-    const responseTime = meter.createHistogram('http.response_time', {
-      description: 'HTTP response time',
-      unit: 'ms',
-    });
-    responseTime.record(42, { method: 'GET' });
-
-    // Gauge example (async)
-    meter.createObservableGauge('memory.usage', {
-      description: 'Process memory usage',
-      unit: 'bytes',
-    }).addCallback((result) => {
-      result.observe(process.memoryUsage().heapUsed);
-    });
+    return {
+      ok: !failed,
+      status,
+      durationMs: Math.round(durationMs * 100) / 100,
+    };
   }
 }

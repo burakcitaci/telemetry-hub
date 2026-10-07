@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Activity, RefreshCw, Wifi, WifiOff } from 'lucide-react';
+import { Activity, PanelLeft, RefreshCw, Wifi, WifiOff } from 'lucide-react';
 import type { ColumnDef } from '@tanstack/react-table';
 import { getTraces } from '@/features/traces/api';
 import { TraceDetailSheet } from '@/features/traces/components/trace-detail-sheet';
@@ -21,6 +21,10 @@ import {
   TELEMETRY_FETCH_LIMIT,
 } from '@/shared/lib/telemetry';
 import type { TelemetryEvent } from '@/shared/types/telemetry';
+import { TimeRangePicker } from '@/app/components/timer-range.picker';
+
+const SIDEBAR_STORAGE_KEY = 'traces:sidebar';
+const MAIN_MIN_WIDTH = 720;
 
 function statusBadge(status: string) {
   const normalized = status.toUpperCase();
@@ -85,16 +89,35 @@ function TracesPage() {
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedTraceId, setSelectedTraceId] = useState<string | null>(null);
-  const {
-    serviceFilters,
-    setServiceFilters,
-    facetFilters: statusFilters,
-    setFacetFilters: setStatusFilters,
-    timeRange,
-    setTimeRange,
-    searchQuery,
-    setSearchQuery,
-  } = useTelemetryViewParams({ facetParam: 'status' });
+
+  // Sidebar open/closed — same pattern as metrics page.
+  const [sidebarOpen, setSidebarOpen] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return true;
+    return window.localStorage.getItem(SIDEBAR_STORAGE_KEY) !== 'collapsed';
+  });
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(
+        SIDEBAR_STORAGE_KEY,
+        sidebarOpen ? 'expanded' : 'collapsed',
+      );
+    } catch { /* ignore */ }
+  }, [sidebarOpen]);
+
+
+
+// inside TracesPage, replace the useTelemetryViewParams destructuring
+const {
+  serviceFilters,
+  setServiceFilters,
+  facetFilters: statusFilters,
+  setFacetFilters: setStatusFilters,
+  timeRange,
+  setTimeRange,
+  searchQuery,
+  setSearchQuery,
+} = useTelemetryViewParams({ facetParam: 'status' });
 
   const loadTraces = useCallback(async () => {
     setLoading(true);
@@ -170,109 +193,134 @@ function TracesPage() {
       && isWithinTimeRange(trace.Timestamp, timeRange);
   }), [serviceFilters, statusFilters, timeRange, traces]);
 
-  if (loading && traces.length === 0 && !error) {
-    return (
-      <div className="space-y-3 p-4">
-        <Skeleton className="h-8 w-64" />
-        <Skeleton className="h-10 w-full" />
-        {Array.from({ length: 8 }).map((_, index) => (
-          <Skeleton key={index} className="h-9 w-full" />
-        ))}
-      </div>
-    );
-  }
+  const isEmpty = !loading && traces.length === 0 && !error;
 
   return (
-    <div className="flex h-full min-h-0 bg-background">
-      <TelemetrySidebar
-        services={services}
-        selectedServices={serviceFilters}
-        onServicesSelect={setServiceFilters}
-        facetTitle="Status"
-        facetOptions={facetOptions}
-        selectedFacets={statusFilters}
-        onFacetsSelect={setStatusFilters}
-        timeRange={timeRange}
-        onTimeRangeSelect={setTimeRange}
-      />
+    <div className="flex h-screen flex-col bg-background overflow-hidden">
+      {/* ── Header ────────────────────────────────────────────────────────── */}
+      <header className="sticky top-0 z-20 shrink-0 border-b bg-background/95 backdrop-blur">
+        <div className="flex h-14 items-center gap-2 px-3 sm:gap-3 sm:px-4">
+          
+          <Activity className="h-4 w-4 text-indigo-500 shrink-0 hidden sm:block" />
+          <h1 className="text-sm font-semibold shrink-0">Traces</h1>
+          <span className="text-muted-foreground hidden md:inline shrink-0">/</span>
+          <span className="text-sm text-muted-foreground truncate min-w-0">
+            {filteredTraces.length} visible from the latest {traces.length}
+            {traces.length === TELEMETRY_FETCH_LIMIT ? ` (capped at ${TELEMETRY_FETCH_LIMIT})` : ''}
+          </span>
 
-      <section className="flex min-w-0 flex-1 flex-col">
-        <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-3">
-          <div>
-            <h1 className="text-sm font-semibold">Recent traces</h1>
-            <p className="text-xs text-muted-foreground">
-              {filteredTraces.length} visible from the latest {traces.length} traces
-              {traces.length === TELEMETRY_FETCH_LIMIT ? ` (capped at ${TELEMETRY_FETCH_LIMIT})` : ''}
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              {connected
-                ? <Wifi className="h-3.5 w-3.5 text-green-600" />
-                : <WifiOff className="h-3.5 w-3.5 text-muted-foreground" />}
-              {connected ? 'Stream connected' : 'Stream disconnected'}
-            </span>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => void generateAndRefresh()}
-              disabled={generating}
-            >
-              <Activity className="mr-1.5 h-3.5 w-3.5" />
-              {generating ? 'Generating…' : 'Generate telemetry'}
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => void loadTraces()}
-              disabled={loading}
-              aria-label="Refresh traces"
-              title="Refresh"
-            >
-              <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} />
-            </Button>
-          </div>
-        </header>
+          <div className="ml-auto flex items-center gap-1.5 sm:gap-2 shrink-0">
+  <span className="hidden lg:flex items-center gap-1.5 text-xs text-muted-foreground">
+    {connected
+      ? <Wifi className="h-3.5 w-3.5 text-green-600" />
+      : <WifiOff className="h-3.5 w-3.5 text-muted-foreground" />}
+    <span className="hidden xl:inline">
+      {connected ? 'Stream connected' : 'Stream disconnected'}
+    </span>
+  </span>
 
-        {error && (
-          <Alert variant="destructive" className="mx-4 mt-3">
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
+  {/* NEW: Datadog-style time picker */}
+  <TimeRangePicker value={timeRange} onChange={setTimeRange} />
 
-        <div className="min-h-0 flex-1 overflow-auto px-4 py-2">
-          {filteredTraces.length > 0 ? (
-            <DataTable
-              columns={columns}
-              data={filteredTraces}
-              searchPlaceholder="Search recent traces…"
-              enableRowSelection={false}
-              enableColumnVisibility
-              enablePagination
-              pageSize={20}
-              searchValue={searchQuery}
-              onSearchChange={setSearchQuery}
-              onRowClick={(trace) => setSelectedTraceId(trace.TraceId)}
-            />
-          ) : (
-            <div className="flex h-full min-h-64 items-center justify-center text-center">
-              <div className="max-w-md space-y-3">
-                <p className="text-sm text-muted-foreground">
-                  {traces.length > 0
-                    ? 'No recent traces match the selected filters.'
-                    : 'No traces have been stored yet. Generate a request to exercise the instrumented backend.'}
-                </p>
-                {traces.length === 0 && (
-                  <Button onClick={() => void generateAndRefresh()} disabled={generating}>
-                    <Activity className="mr-2 h-4 w-4" />
-                    {generating ? 'Generating…' : 'Generate telemetry'}
-                  </Button>
-                )}
-              </div>
-            </div>
-          )}
+  <Button
+    variant="outline"
+    size="sm"
+    onClick={() => void generateAndRefresh()}
+    disabled={generating}
+    className="gap-1.5"
+  >
+    <Activity className="h-3.5 w-3.5" />
+    <span className="hidden sm:inline">
+      {generating ? 'Generating…' : 'Generate telemetry'}
+    </span>
+  </Button>
+
+  <Button
+    variant="ghost"
+    size="icon"
+    onClick={() => void loadTraces()}
+    disabled={loading}
+    aria-label="Refresh traces"
+    title="Refresh"
+    className="shrink-0"
+  >
+    <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} />
+  </Button>
+</div>
         </div>
-      </section>
+      </header>
+
+      {/* ── Body: sidebar + main ─────────────────────────────────────────── */}
+      <div className="flex flex-1 min-h-0 overflow-hidden">
+        {/* Sidebar wrapper — matches metrics page look:
+            expanded = 256/288px, collapsed = 44px icon rail */}
+       <TelemetrySidebar
+            services={services}
+            selectedServices={serviceFilters}
+            onServicesSelect={setServiceFilters}
+            facetTitle="Status"
+            facetOptions={facetOptions}
+            selectedFacets={statusFilters}
+            onFacetsSelect={setStatusFilters}
+            timeRange={timeRange}
+            onTimeRangeSelect={setTimeRange}
+          />
+
+        {/* Main column — vertical scroll, horizontal scroll under min width */}
+        <div className="flex-1 min-w-0 overflow-x-auto overflow-y-hidden">
+          <section
+            className="flex h-full flex-col overflow-y-auto"
+            style={{ minWidth: MAIN_MIN_WIDTH }}
+          >
+            {error && (
+              <Alert variant="destructive" className="m-4">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+
+            <div className="min-h-0 flex-1 p-4 lg:p-6">
+              {loading && traces.length === 0 && !error ? (
+                <div className="space-y-3">
+                  <Skeleton className="h-8 w-64" />
+                  <Skeleton className="h-10 w-full" />
+                  {Array.from({ length: 8 }).map((_, index) => (
+                    <Skeleton key={index} className="h-9 w-full" />
+                  ))}
+                </div>
+              ) : filteredTraces.length > 0 ? (
+                <DataTable
+                  columns={columns}
+                  data={filteredTraces}
+                  searchPlaceholder="Search recent traces…"
+                  enableRowSelection={false}
+                  enableColumnVisibility
+                  enablePagination
+                  pageSize={20}
+                  searchValue={searchQuery}
+                  onSearchChange={setSearchQuery}
+                  onRowClick={(trace) => setSelectedTraceId(trace.TraceId)}
+                />
+              ) : (
+                <div className="flex h-full min-h-64 items-center justify-center text-center">
+                  <div className="max-w-md space-y-3">
+                    <p className="text-sm text-muted-foreground">
+                      {traces.length > 0
+                        ? 'No recent traces match the selected filters.'
+                        : 'No traces have been stored yet. Generate a request to exercise the instrumented backend.'}
+                    </p>
+                    {traces.length === 0 && (
+                      <Button onClick={() => void generateAndRefresh()} disabled={generating}>
+                        <Activity className="mr-2 h-4 w-4" />
+                        {generating ? 'Generating…' : 'Generate telemetry'}
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </section>
+        </div>
+      </div>
 
       <TraceDetailSheet
         traceId={selectedTraceId}
@@ -283,4 +331,59 @@ function TracesPage() {
   );
 }
 
+// ─── Sidebar shell ──────────────────────────────────────────────────────────
+// Visual wrapper that matches the metrics page sidebar chrome: a header row
+// with a collapse button, and a slim icon rail when closed. It just renders
+// children inside a scrollable body — all the filtering UI still comes from
+// TelemetrySidebar.
+
+const TracesSidebarShell: React.FC<{
+  open: boolean;
+  onToggle: () => void;
+  children: React.ReactNode;
+}> = ({ open, onToggle, children }) => {
+  if (!open) {
+    return (
+      <aside className="flex w-11 shrink-0 flex-col items-center border-r bg-muted/30 py-3">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onToggle}
+          title="Expand sidebar"
+          className="h-8 w-8"
+        >
+          <PanelLeft className="h-4 w-4" />
+        </Button>
+      </aside>
+    );
+  }
+
+  return (
+    <aside className="flex w-64 sm:w-72 shrink-0 flex-col border-r bg-muted/30 min-h-0">
+      {/* Header — matches the metrics page look:
+          uppercase muted title on the left, collapse icon on the right. */}
+      <div className="flex shrink-0 items-center justify-between border-b px-3 py-2">
+        <span className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+          Filters
+        </span>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onToggle}
+          title="Collapse sidebar"
+          className="h-7 w-7"
+        >
+          <PanelLeft className="h-3.5 w-3.5" />
+        </Button>
+      </div>
+
+      {/* Hide TelemetrySidebar's own internal header row so we don't
+          duplicate the title. This targets the first child block inside
+          its scroll container. */}
+      <div className="traces-sidebar-body min-h-0 flex-1 overflow-y-auto [&>*:first-child>div:first-child]:hidden">
+        {children}
+      </div>
+    </aside>
+  );
+};
 export default TracesPage;
