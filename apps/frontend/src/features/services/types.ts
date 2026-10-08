@@ -10,3 +10,23 @@ export interface ServiceMetrics {
   p99_duration: string | number;
   error_count: string | number;
 }
+
+export type ServiceMetadata = {
+  serviceName: string;
+  team: string;
+  type: 'Web' | 'DB' | 'Cache' | 'Function' | 'Custom' | 'Browser' | 'Mobile';
+  onCall: string;
+  contact: string;
+  repo: string;
+  metadataSource: 'UI' | 'API' | 'Terraform';
+};
+
+export const EMPTY_METADATA = (serviceName: string): ServiceMetadata => ({
+  serviceName,
+  team: '',
+  type: 'Web',
+  onCall: '',
+  contact: '',
+  repo: '',
+  metadataSource: 'UI',
+});

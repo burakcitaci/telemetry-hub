@@ -57,10 +57,13 @@ const timeRanges = [
 ];
 
 function FacetIcon({ tone }: { tone: FacetOption['tone'] }) {
-  if (tone === 'success') return <CheckCircle className="h-3 w-3 text-green-600" />;
-  if (tone === 'warning') return <AlertTriangle className="h-3 w-3 text-amber-600" />;
-  if (tone === 'error') return <AlertTriangle className="h-3 w-3 text-red-600" />;
-  if (tone === 'info') return <Info className="h-3 w-3 text-blue-600" />;
+  if (tone === 'success')
+    return <CheckCircle className="h-3 w-3 text-success" />;
+  if (tone === 'warning')
+    return <AlertTriangle className="h-3 w-3 text-warning" />;
+  if (tone === 'error')
+    return <AlertTriangle className="h-3 w-3 text-destructive" />;
+  if (tone === 'info') return <Info className="h-3 w-3 text-primary" />;
   return <Circle className="h-3 w-3 text-muted-foreground" />;
 }
 
@@ -86,9 +89,11 @@ function FilterPanel({
     checked: boolean,
     onChange: (values: string[]) => void,
   ) => {
-    onChange(checked
-      ? [...new Set([...currentValues, value])]
-      : currentValues.filter((item) => item !== value));
+    onChange(
+      checked
+        ? [...new Set([...currentValues, value])]
+        : currentValues.filter((item) => item !== value),
+    );
   };
 
   return (
@@ -106,32 +111,45 @@ function FilterPanel({
               <Circle className="h-3.5 w-3.5 text-muted-foreground" />
               {facetTitle}
             </span>
-            {facetsExpanded
-              ? <ChevronDown className="h-3.5 w-3.5" />
-              : <ChevronRight className="h-3.5 w-3.5" />}
+            {facetsExpanded ? (
+              <ChevronDown className="h-3.5 w-3.5" />
+            ) : (
+              <ChevronRight className="h-3.5 w-3.5" />
+            )}
           </Button>
           {facetsExpanded && (
             <div className="ml-5 mt-1 space-y-1">
               {facetOptions.map((option) => {
                 const id = `${idPrefix}-facet-${encodeURIComponent(option.value)}`;
                 return (
-                  <div key={option.value} className="flex items-center gap-2 py-1">
+                  <div
+                    key={option.value}
+                    className="flex items-center gap-2 py-1"
+                  >
                     <Checkbox
                       id={id}
                       checked={selectedFacets.includes(option.value)}
-                      onCheckedChange={(checked) => toggleValue(
-                        selectedFacets,
-                        option.value,
-                        checked,
-                        onFacetsSelect,
-                      )}
+                      onCheckedChange={(checked) =>
+                        toggleValue(
+                          selectedFacets,
+                          option.value,
+                          checked,
+                          onFacetsSelect,
+                        )
+                      }
                     />
-                    <label htmlFor={id} className="flex flex-1 cursor-pointer items-center justify-between text-xs">
+                    <label
+                      htmlFor={id}
+                      className="flex flex-1 cursor-pointer items-center justify-between text-xs"
+                    >
                       <span className="flex items-center gap-2">
                         <FacetIcon tone={option.tone} />
                         {option.label}
                       </span>
-                      <Badge variant="outline" className="px-1.5 py-0 text-[10px]">
+                      <Badge
+                        variant="outline"
+                        className="px-1.5 py-0 text-[10px]"
+                      >
                         {option.count}
                       </Badge>
                     </label>
@@ -156,14 +174,18 @@ function FilterPanel({
               <Server className="h-3.5 w-3.5 text-muted-foreground" />
               Services
             </span>
-            {servicesExpanded
-              ? <ChevronDown className="h-3.5 w-3.5" />
-              : <ChevronRight className="h-3.5 w-3.5" />}
+            {servicesExpanded ? (
+              <ChevronDown className="h-3.5 w-3.5" />
+            ) : (
+              <ChevronRight className="h-3.5 w-3.5" />
+            )}
           </Button>
           {servicesExpanded && (
             <div className="ml-5 mt-1 space-y-1">
               {services.length === 0 && (
-                <p className="py-1 text-xs text-muted-foreground">No services loaded</p>
+                <p className="py-1 text-xs text-muted-foreground">
+                  No services loaded
+                </p>
               )}
               {services.map((service) => {
                 const id = `${idPrefix}-service-${encodeURIComponent(service)}`;
@@ -172,15 +194,22 @@ function FilterPanel({
                     <Checkbox
                       id={id}
                       checked={selectedServices.includes(service)}
-                      onCheckedChange={(checked) => toggleValue(
-                        selectedServices,
-                        service,
-                        checked,
-                        onServicesSelect,
-                      )}
+                      onCheckedChange={(checked) =>
+                        toggleValue(
+                          selectedServices,
+                          service,
+                          checked,
+                          onServicesSelect,
+                        )
+                      }
                     />
-                    <label htmlFor={id} className="min-w-0 flex-1 cursor-pointer text-xs">
-                      <span className="block truncate" title={service}>{service}</span>
+                    <label
+                      htmlFor={id}
+                      className="min-w-0 flex-1 cursor-pointer text-xs"
+                    >
+                      <span className="block truncate" title={service}>
+                        {service}
+                      </span>
                     </label>
                   </div>
                 );
@@ -235,11 +264,15 @@ export function TelemetrySidebar({
         <SheetTrigger asChild>
           <span />
         </SheetTrigger>
-        <SheetContent side="left" className="flex w-[min(20rem,calc(100vw-3rem))] flex-col gap-0 p-0">
+        <SheetContent
+          side="left"
+          className="flex w-[min(20rem,calc(100vw-3rem))] flex-col gap-0 p-0"
+        >
           <SheetHeader className="border-b border-border px-4 py-3 text-left">
             <SheetTitle className="text-sm">Filters</SheetTitle>
             <SheetDescription className="sr-only">
-              Filter telemetry by time range, {facetTitle.toLowerCase()}, and service.
+              Filter telemetry by time range, {facetTitle.toLowerCase()}, and
+              service.
             </SheetDescription>
           </SheetHeader>
           <FilterPanel {...filterProps} idPrefix="mobile" />

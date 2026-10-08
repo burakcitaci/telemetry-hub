@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { ServiceMetadata } from '../service-meta.sheet';
+import type { ServiceMetadata } from '../types';
 
 const STORAGE_KEY = 'service-catalog-metadata';
 

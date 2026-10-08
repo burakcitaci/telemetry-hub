@@ -1,37 +1,35 @@
 import { useEffect, useState } from 'react';
 import {
-  Save, Info, User, GitBranch, Phone, Tag, Box, Users,
+  Save,
+  Info,
+  User,
+  GitBranch,
+  Phone,
+  Tag,
+  Box,
+  Users,
 } from 'lucide-react';
 import {
-  Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetClose,
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+  SheetClose,
 } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
-export type ServiceMetadata = {
-  serviceName: string;
-  team: string;
-  type: 'Web' | 'DB' | 'Cache' | 'Function' | 'Custom' | 'Browser' | 'Mobile';
-  onCall: string;
-  contact: string;
-  repo: string;
-  metadataSource: 'UI' | 'API' | 'Terraform';
-};
-
-export const EMPTY_METADATA = (serviceName: string): ServiceMetadata => ({
-  serviceName,
-  team: '',
-  type: 'Web',
-  onCall: '',
-  contact: '',
-  repo: '',
-  metadataSource: 'UI',
-});
+import { EMPTY_METADATA, type ServiceMetadata } from '../types';
 
 type Props = {
   open: boolean;
@@ -42,7 +40,11 @@ type Props = {
 };
 
 export function ServiceMetadataSheet({
-  open, onOpenChange, serviceName, metadata, onSave,
+  open,
+  onOpenChange,
+  serviceName,
+  metadata,
+  onSave,
 }: Props) {
   const [draft, setDraft] = useState<ServiceMetadata>(
     metadata ?? EMPTY_METADATA(serviceName),
@@ -52,8 +54,10 @@ export function ServiceMetadataSheet({
     if (open) setDraft(metadata ?? EMPTY_METADATA(serviceName));
   }, [open, metadata, serviceName]);
 
-  const update = <K extends keyof ServiceMetadata>(field: K, value: ServiceMetadata[K]) =>
-    setDraft((prev) => ({ ...prev, [field]: value }));
+  const update = <K extends keyof ServiceMetadata>(
+    field: K,
+    value: ServiceMetadata[K],
+  ) => setDraft((prev) => ({ ...prev, [field]: value }));
 
   const handleSave = () => {
     onSave(draft);
@@ -65,7 +69,7 @@ export function ServiceMetadataSheet({
       <SheetContent side="right" className="w-full sm:max-w-lg overflow-y-auto">
         <SheetHeader className="mb-6">
           <SheetTitle className="flex items-center gap-2">
-            <Box className="h-5 w-5 text-purple-600" />
+            <Box className="h-5 w-5 text-primary" />
             Service Metadata
           </SheetTitle>
           <SheetDescription>
@@ -86,11 +90,28 @@ export function ServiceMetadataSheet({
             <Label className="text-xs flex items-center gap-1 text-muted-foreground">
               <Tag className="h-3 w-3" /> Type
             </Label>
-            <Select value={draft.type} onValueChange={(v) => update('type', v as ServiceMetadata['type'])}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+            <Select
+              value={draft.type}
+              onValueChange={(v) =>
+                update('type', v as ServiceMetadata['type'])
+              }
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
-                {['Web', 'DB', 'Cache', 'Function', 'Custom', 'Browser', 'Mobile'].map((t) => (
-                  <SelectItem key={t} value={t}>{t}</SelectItem>
+                {[
+                  'Web',
+                  'DB',
+                  'Cache',
+                  'Function',
+                  'Custom',
+                  'Browser',
+                  'Mobile',
+                ].map((t) => (
+                  <SelectItem key={t} value={t}>
+                    {t}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -147,12 +168,18 @@ export function ServiceMetadataSheet({
             </Label>
             <Select
               value={draft.metadataSource}
-              onValueChange={(v) => update('metadataSource', v as ServiceMetadata['metadataSource'])}
+              onValueChange={(v) =>
+                update('metadataSource', v as ServiceMetadata['metadataSource'])
+              }
             >
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 {['UI', 'API', 'Terraform'].map((s) => (
-                  <SelectItem key={s} value={s}>{s}</SelectItem>
+                  <SelectItem key={s} value={s}>
+                    {s}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>

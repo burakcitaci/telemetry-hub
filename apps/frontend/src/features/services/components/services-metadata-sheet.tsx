@@ -1,21 +1,37 @@
 import { useEffect, useState } from 'react';
-import { Save, Plus, Trash2, Info, User, GitBranch, Phone, Tag, Box } from 'lucide-react';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetClose } from '@/components/ui/sheet';
+import {
+  Save,
+  Plus,
+  Trash2,
+  Info,
+  User,
+  GitBranch,
+  Phone,
+  Tag,
+  Box,
+} from 'lucide-react';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+  SheetClose,
+} from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Label } from '@/components/ui/label';
 
-export type StaticMetadata = {
-  serviceName: string;
-  team: string;
-  type: 'Web' | 'DB' | 'Cache' | 'Function' | 'Custom' | 'Browser' | 'Mobile';
-  onCall: string;
-  contact: string;
-  repo: string;
-  metadataSource: 'UI' | 'API' | 'Terraform';
-};
+import type { ServiceMetadata } from '../types';
+export type StaticMetadata = ServiceMetadata;
 
 type Props = {
   open: boolean;
@@ -25,7 +41,13 @@ type Props = {
   onSave: (metadata: Record<string, StaticMetadata>) => void;
 };
 
-export function ServiceMetadataSheet({ open, onOpenChange, services, metadata, onSave }: Props) {
+export function ServiceMetadataSheet({
+  open,
+  onOpenChange,
+  services,
+  metadata,
+  onSave,
+}: Props) {
   const [draft, setDraft] = useState<Record<string, StaticMetadata>>(metadata);
   const [selectedService, setSelectedService] = useState<string>('');
 
@@ -34,7 +56,11 @@ export function ServiceMetadataSheet({ open, onOpenChange, services, metadata, o
     if (open) setDraft(metadata);
   }, [open, metadata]);
 
-  const handleChange = (serviceName: string, field: keyof StaticMetadata, value: string) => {
+  const handleChange = (
+    serviceName: string,
+    field: keyof StaticMetadata,
+    value: string,
+  ) => {
     setDraft((prev) => ({
       ...prev,
       [serviceName]: {
@@ -79,23 +105,32 @@ export function ServiceMetadataSheet({ open, onOpenChange, services, metadata, o
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full sm:max-w-2xl overflow-y-auto">
+      <SheetContent
+        side="right"
+        className="w-full sm:max-w-2xl overflow-y-auto"
+      >
         <SheetHeader className="mb-6">
           <SheetTitle className="flex items-center gap-2">
-            <Box className="h-5 w-5 text-purple-600" />
+            <Box className="h-5 w-5 text-primary" />
             Service Metadata Setup
           </SheetTitle>
           <SheetDescription>
-            Define static ownership and repository metadata. This data appears in the Service Catalog table.
+            Define static ownership and repository metadata. This data appears
+            in the Service Catalog table.
           </SheetDescription>
         </SheetHeader>
 
         {availableServices.length > 0 && (
-          <div className="mb-6 flex items-end gap-2 rounded-lg border bg-slate-50 p-3">
+          <div className="mb-6 flex items-end gap-2 rounded-lg border bg-muted/10 p-3">
             <div className="flex-1">
-              <Label className="mb-1 block text-xs uppercase text-muted-foreground">Add Service</Label>
-              <Select value={selectedService} onValueChange={setSelectedService}>
-                <SelectTrigger className="bg-white">
+              <Label className="mb-1 block text-xs uppercase text-muted-foreground">
+                Add Service
+              </Label>
+              <Select
+                value={selectedService}
+                onValueChange={setSelectedService}
+              >
+                <SelectTrigger className="bg-background">
                   <SelectValue placeholder="Select a service to configure…" />
                 </SelectTrigger>
                 <SelectContent>
@@ -107,7 +142,11 @@ export function ServiceMetadataSheet({ open, onOpenChange, services, metadata, o
                 </SelectContent>
               </Select>
             </div>
-            <Button onClick={handleAdd} disabled={!selectedService} className="gap-1">
+            <Button
+              onClick={handleAdd}
+              disabled={!selectedService}
+              className="gap-1"
+            >
               <Plus className="h-4 w-4" /> Add
             </Button>
           </div>
@@ -117,21 +156,30 @@ export function ServiceMetadataSheet({ open, onOpenChange, services, metadata, o
           <Alert>
             <Info className="h-4 w-4" />
             <AlertDescription>
-              No metadata configured yet. Add a service above to define its Team, Repo, and On-Call info.
+              No metadata configured yet. Add a service above to define its
+              Team, Repo, and On-Call info.
             </AlertDescription>
           </Alert>
         ) : (
           <div className="space-y-4">
             {Object.values(draft).map((meta) => (
-              <div key={meta.serviceName} className="rounded-lg border bg-card p-4 shadow-sm">
+              <div
+                key={meta.serviceName}
+                className="rounded-lg border bg-card p-4 shadow-sm"
+              >
                 <div className="mb-3 flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <div className="h-4 w-4 rounded-sm bg-blue-100 flex items-center justify-center">
-                      <Box className="h-3 w-3 text-blue-600" />
+                    <div className="h-4 w-4 rounded-sm bg-primary/10 flex items-center justify-center">
+                      <Box className="h-3 w-3 text-primary" />
                     </div>
                     <h4 className="font-medium text-sm">{meta.serviceName}</h4>
                   </div>
-                  <Button variant="ghost" size="sm" onClick={() => handleRemove(meta.serviceName)} className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleRemove(meta.serviceName)}
+                    className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive"
+                  >
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
@@ -141,11 +189,28 @@ export function ServiceMetadataSheet({ open, onOpenChange, services, metadata, o
                     <Label className="text-xs flex items-center gap-1 text-muted-foreground">
                       <Tag className="h-3 w-3" /> Type
                     </Label>
-                    <Select value={meta.type} onValueChange={(v) => handleChange(meta.serviceName, 'type', v)}>
-                      <SelectTrigger className="h-8 text-sm"><SelectValue /></SelectTrigger>
+                    <Select
+                      value={meta.type}
+                      onValueChange={(v) =>
+                        handleChange(meta.serviceName, 'type', v)
+                      }
+                    >
+                      <SelectTrigger className="h-8 text-sm">
+                        <SelectValue />
+                      </SelectTrigger>
                       <SelectContent>
-                        {['Web', 'DB', 'Cache', 'Function', 'Custom', 'Browser', 'Mobile'].map((t) => (
-                          <SelectItem key={t} value={t}>{t}</SelectItem>
+                        {[
+                          'Web',
+                          'DB',
+                          'Cache',
+                          'Function',
+                          'Custom',
+                          'Browser',
+                          'Mobile',
+                        ].map((t) => (
+                          <SelectItem key={t} value={t}>
+                            {t}
+                          </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -159,7 +224,9 @@ export function ServiceMetadataSheet({ open, onOpenChange, services, metadata, o
                       className="h-8 text-sm"
                       placeholder="e.g. transactions"
                       value={meta.team}
-                      onChange={(e) => handleChange(meta.serviceName, 'team', e.target.value)}
+                      onChange={(e) =>
+                        handleChange(meta.serviceName, 'team', e.target.value)
+                      }
                     />
                   </div>
 
@@ -171,7 +238,9 @@ export function ServiceMetadataSheet({ open, onOpenChange, services, metadata, o
                       className="h-8 text-sm"
                       placeholder="e.g. @slack-alerts"
                       value={meta.onCall}
-                      onChange={(e) => handleChange(meta.serviceName, 'onCall', e.target.value)}
+                      onChange={(e) =>
+                        handleChange(meta.serviceName, 'onCall', e.target.value)
+                      }
                     />
                   </div>
 
@@ -183,7 +252,13 @@ export function ServiceMetadataSheet({ open, onOpenChange, services, metadata, o
                       className="h-8 text-sm"
                       placeholder="e.g. #team-channel"
                       value={meta.contact}
-                      onChange={(e) => handleChange(meta.serviceName, 'contact', e.target.value)}
+                      onChange={(e) =>
+                        handleChange(
+                          meta.serviceName,
+                          'contact',
+                          e.target.value,
+                        )
+                      }
                     />
                   </div>
 
@@ -195,7 +270,9 @@ export function ServiceMetadataSheet({ open, onOpenChange, services, metadata, o
                       className="h-8 text-sm"
                       placeholder="e.g. github.com/org/repo"
                       value={meta.repo}
-                      onChange={(e) => handleChange(meta.serviceName, 'repo', e.target.value)}
+                      onChange={(e) =>
+                        handleChange(meta.serviceName, 'repo', e.target.value)
+                      }
                     />
                   </div>
 
@@ -203,11 +280,20 @@ export function ServiceMetadataSheet({ open, onOpenChange, services, metadata, o
                     <Label className="text-xs flex items-center gap-1 text-muted-foreground">
                       <Info className="h-3 w-3" /> Metadata Source
                     </Label>
-                    <Select value={meta.metadataSource} onValueChange={(v) => handleChange(meta.serviceName, 'metadataSource', v)}>
-                      <SelectTrigger className="h-8 text-sm"><SelectValue /></SelectTrigger>
+                    <Select
+                      value={meta.metadataSource}
+                      onValueChange={(v) =>
+                        handleChange(meta.serviceName, 'metadataSource', v)
+                      }
+                    >
+                      <SelectTrigger className="h-8 text-sm">
+                        <SelectValue />
+                      </SelectTrigger>
                       <SelectContent>
                         {['UI', 'API', 'Terraform'].map((s) => (
-                          <SelectItem key={s} value={s}>{s}</SelectItem>
+                          <SelectItem key={s} value={s}>
+                            {s}
+                          </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>

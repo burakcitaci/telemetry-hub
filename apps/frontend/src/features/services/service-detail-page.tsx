@@ -1,22 +1,45 @@
 import { useCallback, useEffect, useState } from 'react';
 import {
-  Activity, AlertTriangle, ArrowLeft, Clock, RefreshCw, Settings,
-  Users, GitBranch, Phone, Tag, ExternalLink, Pencil,
+  Activity,
+  AlertTriangle,
+  ArrowLeft,
+  Clock,
+  RefreshCw,
+  Settings,
+  Users,
+  GitBranch,
+  Phone,
+  Tag,
+  ExternalLink,
+  Pencil,
 } from 'lucide-react';
 import {
-  Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis,
+  Bar,
+  BarChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
 } from 'recharts';
 import { Link, useParams } from 'react-router-dom';
 import { getServiceMetrics } from '@/features/services/api';
 import type { ServiceMetrics } from '@/features/services/types';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getErrorMessage } from '@/shared/lib/errors';
 import { formatDuration } from '@/shared/lib/telemetry';
-import { EMPTY_METADATA, ServiceMetadata, ServiceMetadataSheet } from './service-meta.sheet';
-import { useServiceMetadata } from './hooks/useServiceMetaData';
+import { ServiceMetadataSheet } from './components/service-metadata-sheet';
+import { EMPTY_METADATA, type ServiceMetadata } from './types';
+import { useServiceMetadata } from './hooks/use-service-metadata';
 
 function numberValue(value: unknown): number {
   if (typeof value !== 'string' && typeof value !== 'number') return 0;
@@ -43,10 +66,12 @@ function ServiceDetailPage() {
       setMetrics(await getServiceMetrics(serviceName));
       setError(null);
     } catch (loadError) {
-      setError(getErrorMessage(
-        loadError,
-        `Unable to load the one-hour summary for ${serviceName}.`,
-      ));
+      setError(
+        getErrorMessage(
+          loadError,
+          `Unable to load the one-hour summary for ${serviceName}.`,
+        ),
+      );
     } finally {
       setLoading(false);
     }
@@ -59,11 +84,13 @@ function ServiceDetailPage() {
   const requestCount = numberValue(metrics?.request_count);
   const errorCount = numberValue(metrics?.error_count);
   const errorRate = requestCount > 0 ? (errorCount / requestCount) * 100 : 0;
-  const latencyData = metrics ? [
-    { name: 'P50', value: numberValue(metrics.p50_duration) / 1_000_000 },
-    { name: 'P95', value: numberValue(metrics.p95_duration) / 1_000_000 },
-    { name: 'P99', value: numberValue(metrics.p99_duration) / 1_000_000 },
-  ] : [];
+  const latencyData = metrics
+    ? [
+        { name: 'P50', value: numberValue(metrics.p50_duration) / 1_000_000 },
+        { name: 'P95', value: numberValue(metrics.p95_duration) / 1_000_000 },
+        { name: 'P99', value: numberValue(metrics.p99_duration) / 1_000_000 },
+      ]
+    : [];
 
   const hasMetadata = Boolean(metadata[serviceName]);
 
@@ -81,11 +108,13 @@ function ServiceDetailPage() {
           <div>
             <div className="flex items-center gap-3">
               <h1 className="text-xl font-semibold">{serviceName}</h1>
-              <span className="text-xs font-medium text-purple-600 bg-purple-50 px-2 py-0.5 rounded">
+              <span className="text-xs font-medium text-primary bg-primary/10 px-2 py-0.5 rounded">
                 {currentMetadata.type}
               </span>
             </div>
-            <p className="text-sm text-muted-foreground">One-hour performance summary</p>
+            <p className="text-sm text-muted-foreground">
+              One-hour performance summary
+            </p>
           </div>
         </div>
 
@@ -106,7 +135,9 @@ function ServiceDetailPage() {
             onClick={() => setRefreshCount((c) => c + 1)}
             disabled={loading}
           >
-            <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+            <RefreshCw
+              className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`}
+            />
             Refresh
           </Button>
         </div>
@@ -130,7 +161,7 @@ function ServiceDetailPage() {
           <div className="grid gap-4 md:grid-cols-3">
             <Card>
               <CardContent className="flex items-center gap-3 p-5">
-                <Activity className="h-5 w-5 text-blue-500" />
+                <Activity className="h-5 w-5 text-primary" />
                 <div>
                   <p className="text-2xl font-bold">{requestCount}</p>
                   <p className="text-sm text-muted-foreground">Requests (1h)</p>
@@ -139,7 +170,7 @@ function ServiceDetailPage() {
             </Card>
             <Card>
               <CardContent className="flex items-center gap-3 p-5">
-                <AlertTriangle className="h-5 w-5 text-red-500" />
+                <AlertTriangle className="h-5 w-5 text-destructive" />
                 <div>
                   <p className="text-2xl font-bold">{errorRate.toFixed(2)}%</p>
                   <p className="text-sm text-muted-foreground">Error rate</p>
@@ -148,10 +179,14 @@ function ServiceDetailPage() {
             </Card>
             <Card>
               <CardContent className="flex items-center gap-3 p-5">
-                <Clock className="h-5 w-5 text-green-500" />
+                <Clock className="h-5 w-5 text-success" />
                 <div>
-                  <p className="text-2xl font-bold">{formatDuration(metrics.avg_duration)}</p>
-                  <p className="text-sm text-muted-foreground">Average span duration</p>
+                  <p className="text-2xl font-bold">
+                    {formatDuration(metrics.avg_duration)}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Average span duration
+                  </p>
                 </div>
               </CardContent>
             </Card>
@@ -162,18 +197,30 @@ function ServiceDetailPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="text-base">Latency percentiles</CardTitle>
-                <CardDescription>Span duration distribution for {serviceName}.</CardDescription>
+                <CardDescription>
+                  Span duration distribution for {serviceName}.
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={280}>
                   <BarChart data={latencyData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      stroke="hsl(var(--border))"
+                    />
                     <XAxis dataKey="name" fontSize={12} />
                     <YAxis fontSize={12} unit="ms" />
                     <Tooltip
-                      formatter={(value) => [`${numberValue(value).toFixed(2)}ms`, 'Duration']}
+                      formatter={(value) => [
+                        `${numberValue(value).toFixed(2)}ms`,
+                        'Duration',
+                      ]}
                     />
-                    <Bar dataKey="value" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                    <Bar
+                      dataKey="value"
+                      fill="hsl(var(--primary))"
+                      radius={[4, 4, 0, 0]}
+                    />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -182,7 +229,9 @@ function ServiceDetailPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="text-base">One-hour summary</CardTitle>
-                <CardDescription>Aggregated directly by the telemetry API.</CardDescription>
+                <CardDescription>
+                  Aggregated directly by the telemetry API.
+                </CardDescription>
               </CardHeader>
               <CardContent className="divide-y rounded-md border text-sm">
                 {[
@@ -191,7 +240,10 @@ function ServiceDetailPage() {
                   ['P99 latency', formatDuration(metrics.p99_duration)],
                   ['Error span count', String(errorCount)],
                 ].map(([label, value]) => (
-                  <div key={label} className="flex items-center justify-between px-4 py-3">
+                  <div
+                    key={label}
+                    className="flex items-center justify-between px-4 py-3"
+                  >
                     <span className="text-muted-foreground">{label}</span>
                     <span className="font-medium">{value}</span>
                   </div>
@@ -222,10 +274,26 @@ function ServiceDetailPage() {
             <CardContent>
               {hasMetadata ? (
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                  <MetadataField icon={<Tag className="h-3 w-3" />} label="Type" value={currentMetadata.type} />
-                  <MetadataField icon={<Users className="h-3 w-3" />} label="Team" value={currentMetadata.team || '—'} />
-                  <MetadataField icon={<Phone className="h-3 w-3" />} label="On-Call" value={currentMetadata.onCall || '—'} />
-                  <MetadataField icon={<Users className="h-3 w-3" />} label="Contact" value={currentMetadata.contact || '—'} />
+                  <MetadataField
+                    icon={<Tag className="h-3 w-3" />}
+                    label="Type"
+                    value={currentMetadata.type}
+                  />
+                  <MetadataField
+                    icon={<Users className="h-3 w-3" />}
+                    label="Team"
+                    value={currentMetadata.team || '—'}
+                  />
+                  <MetadataField
+                    icon={<Phone className="h-3 w-3" />}
+                    label="On-Call"
+                    value={currentMetadata.onCall || '—'}
+                  />
+                  <MetadataField
+                    icon={<Users className="h-3 w-3" />}
+                    label="Contact"
+                    value={currentMetadata.contact || '—'}
+                  />
                   <div className="sm:col-span-2 lg:col-span-4">
                     <MetadataField
                       icon={<GitBranch className="h-3 w-3" />}
@@ -236,12 +304,14 @@ function ServiceDetailPage() {
                             href={`https://${currentMetadata.repo.replace(/^https?:\/\//, '')}`}
                             target="_blank"
                             rel="noreferrer"
-                            className="inline-flex items-center gap-1 text-blue-600 hover:underline"
+                            className="inline-flex items-center gap-1 text-primary hover:underline"
                           >
                             {currentMetadata.repo}
                             <ExternalLink className="h-3 w-3" />
                           </a>
-                        ) : '—'
+                        ) : (
+                          '—'
+                        )
                       }
                     />
                   </div>
@@ -275,8 +345,14 @@ function ServiceDetailPage() {
 }
 
 function MetadataField({
-  icon, label, value,
-}: { icon: React.ReactNode; label: string; value: React.ReactNode }) {
+  icon,
+  label,
+  value,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: React.ReactNode;
+}) {
   return (
     <div>
       <p className="text-xs text-muted-foreground flex items-center gap-1 mb-1">

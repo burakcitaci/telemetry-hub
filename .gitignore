@@ -14,6 +14,7 @@ coverage/
 *.tgz
 
 # Tool caches
+.codex-tools/
 .nx/
 .cursor/rules/nx-rules.mdc
 .github/instructions/nx.instructions.md

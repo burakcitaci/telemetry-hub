@@ -151,3 +151,32 @@ graphify . --update
 - [ ] **TASK-VITE-8.1 [Explizite Zustimmung erforderlich]**: Die Implementierung beginnt erst nach ausdrücklicher Freigabe dieses Plans.
 - [ ] **TASK-VITE-8.2 [Offener Graph-Entscheid]**: Vor der Umsetzung ist zu entscheiden, ob ein aktuelles `graphify-out/graph.json` bereitgestellt oder die Graph-Erzeugung separat freigegeben wird.
 
+## Umsetzung – Feature-Struktur und Shadcn-Styling
+
+- [x] **TASK-UI-2.1 [Freigabe und Scope]**: Mit „super implement“ wurde die Umsetzung für Services, Logs, Traces, Metrics und Monitors freigegeben. Die frühere Vite-/Workspace-Roadmap bleibt ein separater Plan; es wurden keine Dependency-Versionen oder Workspace-Konfigurationen geändert.
+- [x] **TASK-UI-2.2 [Graphify-Baseline]**: Frontend-Codegraph lokal und ausschließlich per AST erstellt. Scope: `apps/frontend/src`; Ausgangswert 64 Codedateien, 401 Knoten, 1.343 Kanten. CSS wird vom AST-Parser nicht modelliert und wurde separat überprüft. Keine semantischen API-Aufrufe, keine LLM-Clusterbenennung: 0 LLM-Tokens für Graph-Erzeugung und Updates.
+- [x] **TASK-UI-2.3 [Feature-Aufteilung]**: Alle fünf Features besitzen `<feature>-page.tsx`, `components/`, `hooks/`, `model.ts`, `api.ts` soweit schon vorhanden, `types.ts` soweit schon vorhanden und `index.ts`. Pages sind jeweils acht Zeilen lange Orchestratoren. Die ursprüngliche Logik wurde in lokale Controller-Hooks übernommen; bestehende Filter, URL-Synchronisierung, Streaming, Charts und Detailansichten bleiben erhalten.
+- [x] **TASK-UI-2.4 [Service-Metadaten]**: Beide bestehenden Sheet-Varianten nach `services/components/` verschoben. Metadatenvertrag und Defaultwerte liegen in `services/types.ts`; der lokale Hook heißt konsistent `use-service-metadata.ts`. Die Sheet-Varianten bleiben getrennt, weil eine Einzelbearbeitung und eine Katalogbearbeitung unterschiedliche Verträge besitzen.
+- [x] **TASK-UI-2.5 [Shadcn-Tokens]**: Tailwind-4-`@theme inline` um Background-, Text-, Border-, Ring-, Status-, Chart- und Radius-Tokens ergänzt. Doppelte handgeschriebene Tailwind-Utilities entfernt. Feste Feature-Farben durch semantische Tokens ersetzt; Dark-Mode-Fehlerfarbe für lesbaren Kontrast angepasst.
+- [x] **TASK-UI-2.6 [Gemeinsame Primitives]**: Cards verwenden `rounded-xl` und `border-border`; Badge-Varianten nutzen semantische Statusfarben. Service-Inputs, Feature-Checkboxes und Monitor-Textarea verwenden zentrale UI-Primitives. Diagramme verwenden CSS-Variablen statt Hexfarben. Ein zentraler `Textarea`-Baustein wurde ergänzt, ohne neue Frontend-Laufzeitabhängigkeit.
+- [x] **TASK-UI-2.7 [Verifikation]**: Standard-Frontend-Typecheck und Produktionsbuild erfolgreich. AST-Vergleich bestätigt die unverändert übernommene Controller-Logik aller fünf Features; 85 interne TS-/TSX-Module auf auflösbare Imports und fehlende Laufzeitzyklen geprüft.
+- [x] **TASK-UI-2.8 [Graph-Update]**: Graph nach den Teilschritten inkrementell aktualisiert. Endstand: 445 Knoten, 1.540 Kanten; keine Kanten mit fehlenden Endpunkten. Die höhere Knoten-/Kantenzahl resultiert aus expliziten Modulgrenzen und ist kein Beleg einer Komplexitätsreduktion. Die ursprünglichen großen Page-God-Nodes wurden aufgeteilt; die wichtigsten gemeinsamen UI-Knoten bleiben `cn`, `Button`, `Input` und `DataTable`.
+- [x] **TASK-UI-2.9 [Browser-Smokecheck]**: Alle fünf Routen rendern in der Produktionsvorschau. Light-/Dark-Mode-Styling und die Monitor-Liste geprüft. Für Services, Logs, Traces und Metrics war kein Backend erreichbar; Datenabruf und Streaming konnten deshalb nicht mit echten Daten end-to-end geprüft werden.
+- [ ] **TASK-UI-3.1 [Verbleibende Bestandskomplexität]**: Große Controller und Monitor-Unterkomponenten enthalten weiterhin geerbte Methoden über 20 Zeilen. Weitere Aufteilung nach Datenabruf, Filtern, Persistenz und Formularzustand ist ein eigener Schritt; die vorliegende Änderung behauptet keine vollständige Komplexitäts- oder Duplikationsreduktion.
+- [ ] **TASK-UI-3.2 [Strengere Unused-Prüfung]**: Der optionale Check mit `--noUnusedLocals` meldet bestehende ungenutzte Bindungen in App-Komponenten, Shared-Facetten und Controller-Code. Diese Option ist nicht Teil des derzeitigen Projekt-Typechecks.
+
+### Reproduzierbare Prüfungen
+
+- [x] **TASK-UI-CMD-1 [Typecheck und Build]**:
+
+```powershell
+yarn typecheck:frontend
+yarn build:frontend
+```
+
+- [x] **TASK-UI-CMD-2 [Kostenfreier Frontend-Graph]**: Graphify wurde als isoliertes Werkzeug unter dem ignorierten `.codex-tools/graphify` installiert. Wiederholte Ausführung verwendet Manifest und AST-Cache für unveränderte Dateien.
+
+```powershell
+$env:PYTHONPATH = Join-Path (Get-Location) '.codex-tools/graphify'
+& 'C:\Users\burak\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe' -m graphify extract apps/frontend/src --out . --code-only --no-cluster --max-workers 1
+```
