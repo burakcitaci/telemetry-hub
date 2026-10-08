@@ -23,6 +23,8 @@ const navItems = [
   { path: '/metrics', label: 'Metrics', description: 'Collected metrics', icon: Gauge },
   { path: '/traces', label: 'Traces', description: 'Distributed requests', icon: Activity },
   { path: '/logs', label: 'Logs', description: 'Application events', icon: FileText },
+   { path: '/monitors', label: 'Monitors', description: 'Application events', icon: FileText },
+
 ];
 
 export function AppSidebar() {
