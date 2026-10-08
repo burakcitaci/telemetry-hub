@@ -114,7 +114,7 @@ export function DataTable<TData, TValue>({
   return (
     <div className="w-full">
       {enableSearch && (
-        <div className="flex items-center py-1">
+        <div className="flex items-center px-0 py-2">
           <Input
             placeholder={searchPlaceholder}
             value={globalFilter ?? ""}
@@ -123,7 +123,7 @@ export function DataTable<TData, TValue>({
               if (onSearchChange) onSearchChange(value)
               else setInternalGlobalFilter(value)
             }}
-            className="max-w-sm border-gray-300 py-0 focus:!border-gray-400 focus:!ring-0"
+            className="max-w-sm border-gray-300 rounded-sm focus:!border-gray-400 focus:!ring-0"
           />
 
           {enableColumnVisibility && (
