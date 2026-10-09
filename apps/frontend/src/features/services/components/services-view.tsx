@@ -45,11 +45,6 @@ export function ServicesView({
         description={`${services.length} discovered services · ${env}`}
         actions={
           <>
-            <Button asChild variant="outline" size="sm">
-              <Link to="/setup">
-                <Settings className="h-4 w-4" /> Setup & Config
-              </Link>
-            </Button>
             <FeatureRefreshButton
               loading={loading}
               onRefresh={() => void loadServices()}

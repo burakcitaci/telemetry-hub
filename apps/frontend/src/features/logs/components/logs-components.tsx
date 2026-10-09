@@ -1,24 +1,45 @@
-import type { ColumnDef } from '@tanstack/react-table';
-import type { LogRecord } from '@/features/logs/types';
-import { DataTableColumnHeader } from '@/shared/components/data-table';
-import { Badge } from '@/components/ui/badge';
-import { formatTelemetryTimestamp } from '@/shared/lib/telemetry';
+import type { ColumnDef } from "@tanstack/react-table";
+import type { LogRecord } from "@/features/logs/types";
+import { DataTableColumnHeader } from "@/shared/components/data-table";
+import { Badge } from "@/components/ui/badge";
+import { formatTelemetryTimestamp } from "@/shared/lib/telemetry";
+import { useActiveTrace } from "@/shared/hooks/use-active-trace";
+
+function LogTraceLink({ traceId }: { traceId: string }) {
+  const { openTrace } = useActiveTrace();
+  if (!/^[a-f0-9]{32}$/i.test(traceId) || /^0{32}$/.test(traceId))
+    return <span className="text-xs text-muted-foreground">N/A</span>;
+  return (
+    <button
+      type="button"
+      title={traceId}
+      aria-label={`Open trace ${traceId}`}
+      className="whitespace-nowrap rounded-sm font-mono text-xs tracking-tight text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      onClick={(event) => {
+        event.stopPropagation();
+        openTrace(traceId);
+      }}
+    >
+      {traceId.slice(0, 10)}…
+    </button>
+  );
+}
 
 export function severityBadge(severity: string) {
   const normalized = severity.toUpperCase();
-  if (normalized === 'ERROR' || normalized === 'FATAL') {
+  if (normalized === "ERROR" || normalized === "FATAL") {
     return <Badge variant="destructive">{normalized}</Badge>;
   }
-  if (normalized === 'WARN' || normalized === 'WARNING') {
+  if (normalized === "WARN" || normalized === "WARNING") {
     return <Badge variant="warning">WARN</Badge>;
   }
-  if (normalized === 'INFO') return <Badge variant="info">INFO</Badge>;
-  return <Badge variant="secondary">{normalized || 'UNSET'}</Badge>;
+  if (normalized === "INFO") return <Badge variant="info">INFO</Badge>;
+  return <Badge variant="secondary">{normalized || "UNSET"}</Badge>;
 }
 
 export const columns: ColumnDef<LogRecord>[] = [
   {
-    accessorKey: 'Timestamp',
+    accessorKey: "Timestamp",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Timestamp" />
     ),
@@ -29,25 +50,25 @@ export const columns: ColumnDef<LogRecord>[] = [
     ),
   },
   {
-    accessorKey: 'SeverityText',
+    accessorKey: "SeverityText",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Severity" />
     ),
     cell: ({ row }) => severityBadge(row.original.SeverityText),
   },
   {
-    accessorKey: 'ServiceName',
+    accessorKey: "ServiceName",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Service" />
     ),
     cell: ({ row }) => (
       <Badge variant="outline">
-        {row.original.ServiceName || 'Unknown service'}
+        {row.original.ServiceName || "Unknown service"}
       </Badge>
     ),
   },
   {
-    accessorKey: 'Body',
+    accessorKey: "Body",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Message" />
     ),
@@ -61,14 +82,10 @@ export const columns: ColumnDef<LogRecord>[] = [
     ),
   },
   {
-    accessorKey: 'TraceId',
+    accessorKey: "TraceId",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Trace ID" />
     ),
-    cell: ({ row }) => (
-      <code className="whitespace-nowrap font-mono text-xs tracking-tight text-muted-foreground">
-        {row.original.TraceId ? `${row.original.TraceId.slice(0, 10)}…` : 'N/A'}
-      </code>
-    ),
+    cell: ({ row }) => <LogTraceLink traceId={row.original.TraceId} />,
   },
 ];

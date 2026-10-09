@@ -19,6 +19,15 @@
 
 ## Kontext
 
+### TASK-TRACING-1.1 – Log-to-Trace-Drilldown
+
+- [x] Graphify-Abgleich: bestehender hierarchischer Viewer und /api/traces/:traceId gefunden. Viewer nach components/shared verschoben; alter Importpfad reexportiert kompatibel.
+- [x] Globaler ActiveTraceProvider innerhalb React Router; Logs-Trace-ID-Button und Traces-Zeilen öffnen denselben Viewer ohne Navigation. Log-Button stoppt Row-Click; ungültige/all-zero IDs nicht klickbar. Environment-Wechsel verwirft Auswahl, Close stellt Fokus zum Auslöser wieder her.
+- [x] Kompatible GET /api/traces/detail?traceId=...&env=... Route vor dynamischer ID-Route mit DTO-Validierung; alter Endpoint bleibt erhalten. Vollständiger Trace wird env-gefiltert geladen, ohne Zeit-/Servicefilter der Liste auf einzelne Spans anzuwenden.
+- [x] ViewSkeleton/QueryError mit Retry; bestehende Attribute-/JSON-Ansichten erhalten. Relative Wasserfall-Balken h-2 mit blauer/error-roter Semantik, begrenzte Offsets/Breiten, NaN-/Null-Dauer-Schutz und Rekursionsschutz.
+- [x] Frontend-/Backend-Typechecks und lokale SQL-/URL-/Geometrie-Regressionsprüfungen erfolgreich.
+- [ ] Backend-Reload für neue Detail-Route und Live-Log-to-Trace-/Tastatur-/Mobile-Test.
+
 ### TASK-RESPONSIVE-UI-1.1 – Einheitliche Feature-Header und mobile Filter
 
 - [x] Graphify-Abgleich: zwei Header-Implementierungen, md-only Sidebar, leere SheetTrigger bei Logs/Traces und fehlender mobiler Toggle bei Metrics erkannt.

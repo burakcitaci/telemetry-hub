@@ -11,7 +11,7 @@ import {
 } from "@/shared/components/feature-layout";
 import type { useTraces } from "../hooks/use-traces";
 import { Activity } from "lucide-react";
-import { TraceDetailSheet } from "@/features/traces/components/trace-detail-sheet";
+import { useActiveTrace } from "@/shared/hooks/use-active-trace";
 import { DataTable } from "@/shared/components/data-table";
 import { TelemetrySidebar } from "@/shared/components/telemetry-sidebar";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -26,8 +26,6 @@ export function TracesView({
   loading,
   generating,
   error,
-  selectedTraceId,
-  setSelectedTraceId,
   serviceFilters,
   setServiceFilters,
   statusFilters,
@@ -43,6 +41,7 @@ export function TracesView({
   facetOptions,
   filteredTraces,
 }: TracesViewProps) {
+  const { openTrace } = useActiveTrace();
   const [filtersOpen, setFiltersOpen] = useState(false);
   return (
     <FeaturePage>
@@ -116,7 +115,7 @@ export function TracesView({
                   pageSize={20}
                   searchValue={searchQuery}
                   onSearchChange={setSearchQuery}
-                  onRowClick={(trace) => setSelectedTraceId(trace.TraceId)}
+                  onRowClick={(trace) => openTrace(trace.TraceId)}
                 />
               ) : (
                 <FeatureEmptyState>
@@ -142,12 +141,6 @@ export function TracesView({
           </div>
         </FeatureContent>
       </FeatureBody>
-
-      <TraceDetailSheet
-        traceId={selectedTraceId}
-        isOpen={selectedTraceId !== null}
-        onClose={() => setSelectedTraceId(null)}
-      />
     </FeaturePage>
   );
 }

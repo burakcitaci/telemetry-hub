@@ -3,7 +3,7 @@ import { TelemetryQueryDto } from "../../../dto/query.dto";
 import { TraceIdParamDto } from "../../../dto/trace.dto";
 import { ClickhouseService } from "../services/clickhouse.service";
 
-@Controller('api/traces')
+@Controller("api/traces")
 export class TracesController {
   constructor(private readonly clickhouse: ClickhouseService) {}
 
@@ -17,8 +17,19 @@ export class TracesController {
     });
   }
 
-  @Get(':traceId')
-  async getTrace(@Param() params: TraceIdParamDto, @Query() query: TelemetryQueryDto) {
+  @Get("detail")
+  async getTraceDetail(
+    @Query() params: TraceIdParamDto,
+    @Query() query: TelemetryQueryDto,
+  ) {
+    return this.clickhouse.getTraceById(params.traceId, query.env);
+  }
+
+  @Get(":traceId")
+  async getTrace(
+    @Param() params: TraceIdParamDto,
+    @Query() query: TelemetryQueryDto,
+  ) {
     return this.clickhouse.getTraceById(params.traceId, query.env);
   }
 }

@@ -742,7 +742,7 @@
       "file_type": "code",
       "norm_label": "tracessidebarshell()",
       "source_file": "features/traces/components/traces-components.tsx",
-      "source_location": "L96"
+      "source_location": "L107"
     },
     {
       "id": "shared_components_data_table_datatablecolumnheader",
@@ -12785,6 +12785,17 @@
     },
     {
       "source": "features_traces_components_traces_components",
+      "target": "features_traces_components_traces_components_tracessidebarshell",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "features/traces/components/traces-components.tsx",
+      "source_location": "L107",
+      "weight": 1.0
+    },
+    {
+      "source": "features_traces_components_traces_components",
       "target": "features_traces_components_traces_components_statusbadge",
       "relation": "contains",
       "_origin": "ast",
@@ -12803,17 +12814,6 @@
       "confidence_score": 1.0,
       "source_file": "features/traces/components/traces-components.tsx",
       "source_location": "L19",
-      "weight": 1.0
-    },
-    {
-      "source": "features_traces_components_traces_components",
-      "target": "features_traces_components_traces_components_tracessidebarshell",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "features/traces/components/traces-components.tsx",
-      "source_location": "L96",
       "weight": 1.0
     },
     {
@@ -13379,5 +13379,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "080851461b294d6951a7f1fcedc587abc7dcb3c1"
+  "built_at_commit": "6276bca5ce6861e5f153fcad35ece30ea5abc8b7"
 }

@@ -23,7 +23,6 @@ export function useTraces() {
 
   const [error, setError] = useState<string | null>(null);
 
-  const [selectedTraceId, setSelectedTraceId] = useState<string | null>(null);
 
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(() => {
     if (typeof window === 'undefined') return true;
@@ -52,7 +51,6 @@ export function useTraces() {
     searchQuery,
     setSearchQuery,
   } = useTelemetryViewParams({ facetParam: 'status' });
-  useEffect(() => { setSelectedTraceId(null); }, [env]);
 
   const loadTraces = useCallback(async () => {
     const id = ++requestId.current;
@@ -159,8 +157,6 @@ export function useTraces() {
     loading,
     generating,
     error,
-    selectedTraceId,
-    setSelectedTraceId,
     serviceFilters,
     setServiceFilters,
     statusFilters,

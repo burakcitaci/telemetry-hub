@@ -176,37 +176,10 @@ export function FeatureSidebar({
       <aside
         aria-label={title}
         className={cn(
-          "hidden min-h-0 shrink-0 flex-col border-r border-border dark:border-[#242936] bg-card lg:flex",
-          open ? "w-64" : "w-12",
+          "hidden min-h-0 px-2 shrink-0 flex-col bg-card lg:flex w-64"
         )}
       >
-        <div
-          className={cn(
-            "flex h-11 shrink-0 items-center border-b border-border px-3",
-            open ? "justify-between" : "justify-center px-0",
-          )}
-        >
-          {open && (
-            <h2 className="text-xs font-medium text-muted-foreground">
-              {title}
-            </h2>
-          )}
-          {onOpenChange && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-7"
-              aria-label={`${open ? "Hide" : "Show"} ${title}`}
-              aria-expanded={open}
-              onClick={() => onOpenChange(!open)}
-            >
-              <PanelLeft className="size-4" />
-            </Button>
-          )}
-        </div>
-        {open && (
-          <div className="min-h-0 flex-1 overflow-auto">{children}</div>
-        )}
+        <div className="min-h-0 flex-1 overflow-auto">{children}</div>
       </aside>
     </>
   );
