@@ -1,3 +1,14 @@
+import { FeatureRefreshButton } from '@/shared/components/feature-actions';
+import {
+  FeaturePage,
+  FeatureHeader,
+  FeatureBody,
+  FeatureContent,
+  FeaturePanel,
+  FeaturePanelHeader,
+  FeatureSidebar,
+  FeatureSearch,
+} from '@/shared/components/feature-layout';
 import type { useMetrics } from '../hooks/use-metrics';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
@@ -22,20 +33,15 @@ import {
   Info,
   PanelLeft,
   RefreshCw,
-  Search,
 } from 'lucide-react';
 import { DataTable } from '@/shared/components/data-table';
 import { FacetQueryBar } from '@/shared/components/facet-query-bar';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
+import { CardContent, CardTitle } from '@/components/ui/card';
+
 import { TimeRangePicker } from '@/app/components/timer-range.picker';
-import {
-  MAIN_MIN_WIDTH,
-  makeSeriesId,
-  formatValue,
-} from '@/features/metrics/model';
+import { makeSeriesId, formatValue } from '@/features/metrics/model';
 import {
   MetricStatCard,
   CustomTooltip,
@@ -87,38 +93,37 @@ export function MetricsView({
   columns,
 }: MetricsViewProps) {
   return (
-    <div className="flex h-full min-h-0 flex-col bg-background text-foreground overflow-hidden">
-      <header className="sticky top-0 z-20 shrink-0 border-b bg-background/95 backdrop-blur">
-        <div className="flex h-14 items-center gap-2 px-3 sm:gap-3 sm:px-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => navigate(-1)}
-            className="shrink-0"
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="shrink-0"
-            title={sidebarOpen ? 'Hide sidebar' : 'Show sidebar'}
-            onClick={() => setSidebarOpen((v) => !v)}
-          >
-            <PanelLeft className="h-4 w-4" />
-          </Button>
-          <Activity className="h-4 w-4 text-primary shrink-0 hidden sm:block" />
-          <h1 className="text-sm font-semibold hidden md:block shrink-0">
-            Metrics Explorer
-          </h1>
-          <span className="text-muted-foreground hidden md:inline shrink-0">
-            /
-          </span>
-          <span className="font-mono text-sm text-muted-foreground truncate min-w-0">
-            {selectedMetric?.metricName ?? '—'}
-          </span>
-
-          <div className="ml-auto flex items-center gap-1.5 sm:gap-2 shrink-0">
+    <FeaturePage>
+      <FeatureHeader
+        title="Metrics"
+        icon={Activity}
+        description={<>{selectedMetric?.metricName ?? 'Select a metric'}</>}
+        leading={
+          <>
+            {' '}
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label="Go back"
+              onClick={() => navigate(-1)}
+              className="shrink-0"
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="shrink-0"
+              aria-label={sidebarOpen ? 'Hide sidebar' : 'Show sidebar'}
+              title={sidebarOpen ? 'Hide sidebar' : 'Show sidebar'}
+              onClick={() => setSidebarOpen((v) => !v)}
+            >
+              <PanelLeft className="h-4 w-4" />
+            </Button>{' '}
+          </>
+        }
+        actions={
+          <>
             <TimeRangePicker value={timeRange} onChange={setTimeRange} />
             <Button
               variant={autoRefresh ? 'default' : 'outline'}
@@ -129,126 +134,84 @@ export function MetricsView({
               <RefreshCw
                 className={`h-3.5 w-3.5 ${seriesLoading ? 'animate-spin' : ''}`}
               />
-              <span className="hidden sm:inline">
+              <span className="sr-only sm:not-sr-only">
                 {autoRefresh ? 'Auto' : 'Manual'}
               </span>
             </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setRefreshTick((x) => x + 1)}
-              disabled={seriesLoading}
-            >
-              <RefreshCw
-                className={`h-3.5 w-3.5 ${seriesLoading ? 'animate-spin' : ''}`}
-              />
-            </Button>
-          </div>
-        </div>
-      </header>
+            <FeatureRefreshButton
+              loading={seriesLoading}
+              onRefresh={() => setRefreshTick((x) => x + 1)}
+              label="Refresh metrics"
+            />
+          </>
+        }
+      />
 
-      <div className="flex flex-1 min-h-0 overflow-hidden">
+      <FeatureBody>
         {/* Metric catalog sidebar */}
-        <aside
-          className={`hidden md:flex h-full min-h-0 shrink-0 flex-col border-r bg-muted/30 transition-all duration-200 ${
-            sidebarOpen ? 'w-64 sm:w-72' : 'w-11'
-          }`}
+        <FeatureSidebar
+          title="Metrics"
+          open={sidebarOpen}
+          onOpenChange={setSidebarOpen}
         >
-          {sidebarOpen ? (
-            <>
-              <div className="flex shrink-0 items-center justify-between border-b px-3 py-2">
-                <span className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
-                  Metrics
-                </span>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setSidebarOpen(false)}
-                  className="h-7 w-7"
-                >
-                  <PanelLeft className="h-3.5 w-3.5" />
-                </Button>
-              </div>
-              <div className="min-h-0 flex-1 overflow-y-auto p-3">
-                <div className="relative mb-3">
-                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search metrics…"
-                    value={metricSearch}
-                    onChange={(e) => setMetricSearch(e.target.value)}
-                    className="pl-8"
-                  />
-                </div>
-                <p className="mb-2 text-[10px] uppercase tracking-wide text-muted-foreground">
-                  {filteredCatalog.length} metric
-                  {filteredCatalog.length === 1 ? '' : 's'}
-                </p>
-                {catalogError && (
-                  <Alert variant="destructive" className="mb-2">
-                    <AlertCircle className="h-3.5 w-3.5" />
-                    <AlertDescription className="text-xs">
-                      {catalogError}
-                    </AlertDescription>
-                  </Alert>
-                )}
-                <div className="space-y-0.5">
-                  {filteredCatalog.map((m) => {
-                    const id = makeSeriesId(m);
-                    const isSelected = selectedId === id;
-                    return (
-                      <button
-                        key={id}
-                        onClick={() => {
-                          setSelectedId(id);
-                          setFacetSelection({});
-                          setHiddenSeries(new Set());
-                        }}
-                        className={`flex w-full items-center gap-2.5 rounded-md px-3 py-1.5 text-left transition-colors ${
-                          isSelected
-                            ? 'bg-accent text-accent-foreground'
-                            : 'text-muted-foreground hover:bg-accent/50'
-                        }`}
-                      >
-                        <span
-                          className={`h-2.5 w-2.5 shrink-0 rounded-full ${isSelected ? 'bg-primary' : 'bg-muted/60'}`}
-                        />
-                        <span className="min-w-0 flex-1">
-                          <span className="block truncate font-mono text-xs">
-                            {m.metricName}
-                          </span>
-                          <span className="block truncate text-[10px] opacity-70">
-                            {m.serviceName ?? '—'} · {m.metricType}
-                          </span>
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            </>
-          ) : (
-            <div className="flex flex-col items-center py-3">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setSidebarOpen(true)}
-                className="h-8 w-8"
-              >
-                <PanelLeft className="h-4 w-4" />
-              </Button>
-            </div>
+          <FeatureSearch
+            placeholder="Search metrics…"
+            value={metricSearch}
+            onChange={(e) => setMetricSearch(e.target.value)}
+          />
+          <p className="my-3 text-xs text-muted-foreground">
+            {filteredCatalog.length} metric
+            {filteredCatalog.length === 1 ? '' : 's'}
+          </p>
+          {catalogError && (
+            <Alert variant="destructive" className="mb-2">
+              <AlertCircle className="h-3.5 w-3.5" />
+              <AlertDescription className="text-xs">
+                {catalogError}
+              </AlertDescription>
+            </Alert>
           )}
-        </aside>
+          <div className="space-y-0.5">
+            {filteredCatalog.map((m) => {
+              const id = makeSeriesId(m);
+              const isSelected = selectedId === id;
+              return (
+                <button
+                  key={id}
+                  onClick={() => {
+                    setSelectedId(id);
+                    setFacetSelection({});
+                    setHiddenSeries(new Set());
+                  }}
+                  className={`flex w-full items-center gap-2.5 rounded-md px-3 py-1.5 text-left transition-colors ${
+                    isSelected
+                      ? 'bg-accent text-accent-foreground'
+                      : 'text-muted-foreground hover:bg-accent/50'
+                  }`}
+                >
+                  <span
+                    className={`h-2.5 w-2.5 shrink-0 rounded-full ${isSelected ? 'bg-primary' : 'bg-muted/60'}`}
+                  />
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate font-mono text-xs">
+                      {m.metricName}
+                    </span>
+                    <span className="block truncate text-[10px] opacity-70">
+                      {m.serviceName ?? '—'} · {m.metricType}
+                    </span>
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </FeatureSidebar>
 
         {/* Main */}
-        <div className="flex-1 min-w-0 overflow-x-auto overflow-y-hidden">
-          <section
-            className="h-full overflow-y-auto p-4 lg:p-6"
-            style={{ minWidth: MAIN_MIN_WIDTH }}
-          >
+        <FeatureContent>
+          <div className="min-w-0">
             {/* Filters + group by */}
-            <Card className="mb-4">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <FeaturePanel className="mb-4">
+              <FeaturePanelHeader>
                 <CardTitle className="text-sm font-medium">Filters</CardTitle>
                 <span className="text-xs text-muted-foreground">
                   {filteredRecords.length} of {records.length} records · grouped
@@ -257,7 +220,7 @@ export function MetricsView({
                     {groupBy.join(' + ') || 'nothing'}
                   </code>
                 </span>
-              </CardHeader>
+              </FeaturePanelHeader>
               <CardContent className="space-y-3">
                 <FacetQueryBar
                   facets={facets}
@@ -299,7 +262,7 @@ export function MetricsView({
                   )}
                 </div>
               </CardContent>
-            </Card>
+            </FeaturePanel>
 
             {selectedNotInCatalog && (
               <Alert variant="destructive" className="mb-4">
@@ -347,8 +310,8 @@ export function MetricsView({
             )}
 
             {/* Chart */}
-            <Card className="mb-4">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <FeaturePanel className="mb-4">
+              <FeaturePanelHeader>
                 <CardTitle className="text-sm font-medium">
                   Time Series
                   {activeUnit && (
@@ -357,7 +320,7 @@ export function MetricsView({
                     </span>
                   )}
                 </CardTitle>
-                <div className="flex items-center gap-3">
+                <div className="flex flex-wrap items-center gap-3">
                   <label className="flex items-center gap-1.5 text-xs text-muted-foreground cursor-pointer">
                     <Checkbox
                       checked={hideTransient}
@@ -369,7 +332,7 @@ export function MetricsView({
                   <span className="text-xs text-muted-foreground">
                     {visibleSeries.length} of {series.length}
                   </span>
-                  <div className="flex items-center gap-1 rounded-md border p-0.5">
+                  <div className="flex flex-wrap items-center gap-1 rounded-md border border-border p-0.5">
                     {(['line', 'bar', 'area', 'composed'] as const).map((t) => (
                       <button
                         key={t}
@@ -385,7 +348,7 @@ export function MetricsView({
                     ))}
                   </div>
                 </div>
-              </CardHeader>
+              </FeaturePanelHeader>
               <CardContent className="pt-0">
                 <div className="h-[220px] w-full">
                   {seriesLoading ? (
@@ -634,7 +597,7 @@ export function MetricsView({
                   onShowAll={() => setHiddenSeries(new Set())}
                 />
               </CardContent>
-            </Card>
+            </FeaturePanel>
 
             {selectedMetric && (
               <Alert className="mb-4">
@@ -653,8 +616,8 @@ export function MetricsView({
               </Alert>
             )}
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+            <FeaturePanel>
+              <FeaturePanelHeader>
                 <CardTitle className="text-sm font-medium">
                   Raw Data
                   <span className="ml-2 text-xs font-normal text-muted-foreground">
@@ -669,7 +632,7 @@ export function MetricsView({
                     <Download className="h-3.5 w-3.5" /> CSV
                   </Button>
                 </div>
-              </CardHeader>
+              </FeaturePanelHeader>
               <CardContent>
                 {tableRows.length ? (
                   <DataTable columns={columns} data={tableRows} />
@@ -679,10 +642,10 @@ export function MetricsView({
                   </p>
                 )}
               </CardContent>
-            </Card>
-          </section>
-        </div>
-      </div>
-    </div>
+            </FeaturePanel>
+          </div>
+        </FeatureContent>
+      </FeatureBody>
+    </FeaturePage>
   );
 }

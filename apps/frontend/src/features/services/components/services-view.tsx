@@ -1,9 +1,19 @@
-import { Input } from '@/components/ui/input';
+import { FeatureRefreshButton } from '@/shared/components/feature-actions';
+import {
+  FeaturePage,
+  FeatureHeader,
+  FeatureBody,
+  FeatureContent,
+  FeaturePanel,
+  FeatureSidebar,
+  FeatureSearch,
+  FeatureLoading,
+  FeatureEmptyState,
+} from '@/shared/components/feature-layout';
+
 import type { useServices } from '../hooks/use-services';
 import {
   Activity,
-  RefreshCw,
-  Search,
   Filter,
   LayoutList,
   Map as MapIcon,
@@ -15,7 +25,7 @@ import { Link } from 'react-router-dom';
 import { DataTable } from '@/shared/components/data-table';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
+
 import {
   columns,
   FacetSection,
@@ -33,48 +43,49 @@ export function ServicesView({
   generateAndRefresh,
 }: ServicesViewProps) {
   return (
-    <div className="flex h-full min-h-0 w-full flex-col bg-background text-foreground">
+    <FeaturePage>
       {/* Top Navigation Bar */}
-      <header className="flex h-14 items-center border-b px-4 gap-6">
-        <div className="flex items-center gap-2">
-          <Activity className="h-5 w-5 text-primary" />
-          <span className="font-semibold text-lg">Service Catalog</span>
-        </div>
-        <nav className="flex gap-4 text-sm font-medium">
-          <a
-            href="#"
-            className="text-primary border-b-2 border-primary pb-4 pt-4"
-          >
-            Explore
-          </a>
-          <Link
-            to="/setup"
-            className="text-muted-foreground hover:text-foreground pb-4 pt-4 flex items-center gap-1"
-          >
-            <Settings className="h-3 w-3" /> Setup & Config
-          </Link>
-        </nav>
-        <div className="ml-auto flex items-center gap-4 text-xs text-muted-foreground">
-          <span>Feb 22, 10:40 am – Feb 22, 11:40 am</span>
-          <Button variant="outline" size="sm" className="h-7 text-xs">
-            <Info className="mr-1 h-3 w-3" /> Learn More
-          </Button>
-        </div>
-      </header>
+      <FeatureHeader
+        title="Services"
+        icon={Activity}
+        description={<>{services.length} discovered services</>}
+        actions={
+          <>
+            <nav className="flex items-center gap-3 text-xs font-medium">
+              <a
+                href="#"
+                className="text-primary border-b-2 border-primary py-1"
+              >
+                Explore
+              </a>
+              <Link
+                to="/setup"
+                className="text-muted-foreground hover:text-foreground py-1 flex items-center gap-1"
+              >
+                <Settings className="h-3 w-3" /> Setup & Config
+              </Link>
+            </nav>
+            <span className="text-xs text-muted-foreground">
+              Feb 22, 10:40 am – Feb 22, 11:40 am
+            </span>
+            <Button variant="outline" size="sm" className="h-7 text-xs">
+              <Info className="mr-1 h-3 w-3" /> Learn More
+            </Button>
+            <FeatureRefreshButton
+              loading={loading}
+              onRefresh={() => void loadServices()}
+              label="Refresh services"
+            />
+          </>
+        }
+      />
 
       {/* Main Content Area */}
-      <div className="flex flex-1 overflow-hidden">
+      <FeatureBody>
         {/* Left Sidebar */}
-        <aside className="w-64 border-r bg-muted/50 overflow-y-auto p-4 hidden md:block">
+        <FeatureSidebar title="Filters">
           <div className="mb-6">
-            <div className="relative">
-              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="text"
-                placeholder="Search facets"
-                className="w-full rounded-md border border-input bg-background pl-8 pr-2 py-1.5 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              />
-            </div>
+            <FeatureSearch type="text" placeholder="Search facets" />
           </div>
           <FacetSection
             title="Service Overview"
@@ -108,13 +119,13 @@ export function ServicesView({
               { label: 'Mobile', count: 7 },
             ]}
           />
-        </aside>
+        </FeatureSidebar>
 
         {/* Right Main Content */}
-        <main className="flex-1 overflow-y-auto p-6">
+        <FeatureContent>
           {/* Top Action Bar */}
-          <div className="mb-4 flex items-center justify-between">
-            <div className="flex items-center gap-2">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+            <div className="flex flex-wrap items-center gap-2">
               <Button variant="outline" size="sm" className="h-8 gap-1">
                 <LayoutList className="h-3 w-3" /> List
               </Button>
@@ -125,14 +136,10 @@ export function ServicesView({
               >
                 <MapIcon className="h-3 w-3" /> Map
               </Button>
-              <div className="relative ml-4 w-96">
-                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  type="text"
-                  placeholder="Search for service by name or facets"
-                  className="w-full rounded-md border border-input bg-background pl-8 pr-2 py-1.5 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                />
-              </div>
+              <FeatureSearch
+                type="text"
+                placeholder="Search for service by name or facets"
+              />
             </div>
             <div className="flex gap-2">
               <Button variant="outline" size="sm" className="h-8 gap-1">
@@ -144,19 +151,14 @@ export function ServicesView({
             </div>
           </div>
           {/* Table Section */}
-          <div className="rounded-xl border border-border bg-card text-card-foreground">
+          <FeaturePanel className="p-4">
             {error && (
-              <Alert variant="destructive" className="m-4">
+              <Alert variant="destructive" className="mb-4">
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
             {loading && services.length === 0 ? (
-              <div className="space-y-3 bg-background p-4 text-foreground">
-                <Skeleton className="h-10 w-full" />
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <Skeleton key={i} className="h-9 w-full" />
-                ))}
-              </div>
+              <FeatureLoading />
             ) : rows.length > 0 ? (
               <DataTable
                 columns={columns}
@@ -168,7 +170,7 @@ export function ServicesView({
                 pageSize={20}
               />
             ) : (
-              <div className="flex flex-col items-center gap-3 py-12 text-center">
+              <FeatureEmptyState>
                 <Activity className="h-8 w-8 text-muted-foreground" />
                 <div>
                   <p className="font-medium">No traced services found</p>
@@ -183,26 +185,13 @@ export function ServicesView({
                 >
                   {generating ? 'Generating…' : 'Generate telemetry'}
                 </Button>
-              </div>
+              </FeatureEmptyState>
             )}
-          </div>
+          </FeaturePanel>
 
           {/* Refresh button */}
-          <div className="mt-4 flex justify-end">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => void loadServices()}
-              disabled={loading}
-            >
-              <RefreshCw
-                className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`}
-              />
-              Refresh
-            </Button>
-          </div>
-        </main>
-      </div>
-    </div>
+        </FeatureContent>
+      </FeatureBody>
+    </FeaturePage>
   );
 }

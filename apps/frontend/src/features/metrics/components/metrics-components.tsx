@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card } from '@/components/ui/card';
+import { FeaturePanel } from '@/shared/components/feature-layout';
 import { Series, formatValue } from '@/features/metrics/model';
 
 export const MetricStatCard: React.FC<{
@@ -8,7 +8,7 @@ export const MetricStatCard: React.FC<{
   change?: number;
   color?: string;
 }> = ({ label, value, change, color = 'text-foreground' }) => (
-  <Card className="p-4">
+  <FeaturePanel className="p-4">
     <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
       {label}
     </p>
@@ -23,7 +23,7 @@ export const MetricStatCard: React.FC<{
         </span>
       )}
     </div>
-  </Card>
+  </FeaturePanel>
 );
 
 export const CustomTooltip: React.FC<any> = ({

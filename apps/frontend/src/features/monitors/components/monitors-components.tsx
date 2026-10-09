@@ -373,7 +373,7 @@ export const MonitorRow: React.FC<{
 }> = ({ monitor, series, onToggleMute, onOpen, onDelete }) => {
   return (
     <div
-      className="group grid cursor-pointer grid-cols-[16px_minmax(0,1fr)_112px_120px_auto_auto] items-center gap-4 border-b px-4 py-3 transition-colors hover:bg-accent/40"
+      className="group grid cursor-pointer grid-cols-[16px_minmax(0,1fr)] items-center gap-x-3 gap-y-2 border-b border-border px-4 py-3 transition-colors hover:bg-accent/40 @4xl:grid-cols-[16px_minmax(0,1fr)_112px_120px_auto_auto]"
       onClick={() => onOpen(monitor.id)}
     >
       {/* 1. Status dot */}
@@ -381,7 +381,7 @@ export const MonitorRow: React.FC<{
 
       {/* 2. Name + badges + query (truncates) */}
       <div className="min-w-0">
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <span className="truncate text-sm font-medium">{monitor.name}</span>
           <TypeBadge type={monitor.type} />
           {monitor.isMuted && <MutedBadge />}
@@ -397,12 +397,12 @@ export const MonitorRow: React.FC<{
       </div>
 
       {/* 3. Sparkline — own fixed column */}
-      <div className="hidden lg:block h-7">
+      <div className="hidden h-7 @4xl:block">
         <MonitorGraph series={series} status={monitor.status} compact />
       </div>
 
       {/* 4. Condition (comparator + threshold + window) */}
-      <div className="hidden lg:flex flex-col items-end text-xs text-muted-foreground">
+      <div className="hidden flex-col items-end text-xs text-muted-foreground @4xl:flex">
         <span className="text-foreground font-medium whitespace-nowrap">
           {monitor.comparator.replace(/_/g, ' ')}{' '}
           {formatNumber(monitor.threshold)}
@@ -413,7 +413,7 @@ export const MonitorRow: React.FC<{
       </div>
 
       {/* 5. Last trigger */}
-      <div className="hidden sm:block text-right">
+      <div className="hidden text-right @4xl:block">
         <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
           Last trigger
         </div>
@@ -423,10 +423,10 @@ export const MonitorRow: React.FC<{
       </div>
 
       {/* 6. Status badge + actions */}
-      <div className="flex items-center gap-1">
+      <div className="col-start-2 flex flex-wrap items-center gap-1 @4xl:col-auto">
         <StatusBadge status={monitor.status} />
         <div
-          className="flex items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100"
+          className="flex items-center gap-0.5 transition-opacity @4xl:opacity-0 @4xl:group-hover:opacity-100 @4xl:focus-within:opacity-100"
           onClick={(e) => e.stopPropagation()}
         >
           <Button

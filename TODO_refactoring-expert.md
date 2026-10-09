@@ -180,3 +180,21 @@ yarn build:frontend
 $env:PYTHONPATH = Join-Path (Get-Location) '.codex-tools/graphify'
 & 'C:\Users\burak\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe' -m graphify extract apps/frontend/src --out . --code-only --no-cluster --max-workers 1
 ```
+
+## Umsetzung – Wiederverwendbares Feature-Layout
+
+### Ist-Analyse & Audit
+
+- [x] **TASK-UI-4.1 [Graph-Abgleich]**: Vor der Migration die fünf View-Knoten und deren Beziehungen zu `Card`, `Button`, `DataTable` und `TelemetrySidebar` geprüft. Gleiche Shadcn-Primitives waren vorhanden, aber Header, Sidebar-Rahmen, Content-Abstände und Zustände wurden mehrfach separat gestaltet.
+
+### Harmonisierungs-Strategie & Ausführung
+
+- [x] **TASK-UI-4.2 [Gemeinsame Layout-Komponenten]**: `shared/components/feature-layout.tsx` enthält `FeaturePage`, `FeatureHeader`, `FeatureBody`, `FeatureContent`, `FeaturePanel`, `FeaturePanelHeader`, `FeatureSidebar`, `FeatureSearch`, `FeatureLoading` und `FeatureEmptyState`. Alle fünf Views verwenden denselben Rahmen. Ein Desktop-Sidebar-Rahmen ersetzt die separaten Services-/Metrics-/Monitors-/Telemetry-Rahmen.
+- [x] **TASK-UI-4.3 [Wiederverwendbare Styling-Regeln]**: Header-Typografie, responsive Titel-/Aktionsanordnung, Sidebar-Breite (256 px / 48 px eingeklappt), Content-Abstände (`p-4 lg:p-6`), Panel-Rundung und semantische Shadcn-Farben sind zentral definiert. `FeatureRefreshButton` wird in allen fünf Features genutzt; `TelemetryActions` vereinheitlicht Logs-/Traces-Aktionen und Streamstatus. Feature-spezifische Inhalte und Controller bleiben erhalten. Keine neuen Pakete oder Laufzeitabhängigkeiten.
+- [x] **TASK-UI-4.4 [Responsive Korrekturen]**: Feste Mindestbreiten bei Metrics/Traces entfernt; Panel-Header umbrechbar. Monitor-Zeilen reagieren per Tailwind-Container-Query auf die tatsächliche Panel-Breite: zweizeilig auf schmalen Flächen, vollständiges Spaltenraster ab 896 px. Aktionsbeschriftungen bleiben auf kleinen Bildschirmen für Screenreader verfügbar. `FeatureContent` ist eine Section, damit kein zusätzliches Main-Landmark im bestehenden App-Main verschachtelt wird.
+
+### Validierung & Qualitäts-Check
+
+- [x] **TASK-UI-4.5 [Typecheck/Build/Komponenten]**: Root-Scripts `yarn typecheck:frontend` und `yarn build:frontend` erfolgreich. Lokale SSR-/AST-Checks unter `.codex-tools/verify-feature-layout.cjs` prüfen semantische Tokens, Beschriftungen, Sidebar-Collapse, Lade-/Streamzustände, gemeinsame Layout-Verwendung aller fünf Views und unveränderte Controller gegenüber HEAD. 87 interne Module ohne unaufgelöste Imports oder Laufzeitzyklen. Diese lokalen Checks sind keine neu eingerichtete CI-Testsuite.
+- [x] **TASK-UI-4.6 [Graphify-Update]**: Inkrementelle Code-only-Extraktion mit AST-Cache und ohne Clustering/LLM/API-Aufrufe. Stand: 464 Knoten / 1.670 Kanten, keine fehlenden Kanten-Endpunkte. Zentralisierung reduziert Layout-Duplikate, nicht die gesamte Graph-Knotenanzahl. CSS wird vom eingesetzten Code-Extractor nicht modelliert.
+- [x] **TASK-UI-4.7 [Visuelle Prüfung]**: Alle fünf Routen während der Migration einzeln in lokaler Vorschau geöffnet. Monitor-Raster bei 390 px, normaler Vorschau-Breite und 1.440 px kontrolliert; Metrics-Panels bei 390 px ohne kollidierende Header-Controls. Der zusätzliche abschließende automatisierte Routenvergleich wurde durch ein Browser-Zeitlimit abgebrochen; ein vollständiger visueller Regressionstest wird nicht behauptet. Daten-/Streaming-End-to-End-Tests waren nicht Gegenstand dieser Styling-Migration; die Vorschau zeigt mangels Backend-Verbindung bestehende Fehler-/Leerzustände. Versteckte mobile Feature-Filter und bisherige Services-Platzhalter bleiben separate Bestands-Themen.

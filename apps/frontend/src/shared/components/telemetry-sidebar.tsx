@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { FeatureSidebar } from '@/shared/components/feature-layout';
 import {
   AlertTriangle,
   CheckCircle,
@@ -7,7 +8,6 @@ import {
   Circle,
   Clock,
   Info,
-  PanelLeft,
   Server,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
@@ -98,7 +98,7 @@ function FilterPanel({
 
   return (
     <ScrollArea className="min-h-0 flex-1">
-      <div className="space-y-2 p-2">
+      <div className={idPrefix === 'desktop' ? 'space-y-2' : 'space-y-2 p-4'}>
         <section>
           <Button
             variant="ghost"
@@ -280,47 +280,13 @@ export function TelemetrySidebar({
       </Sheet>
 
       {/* Desktop sidebar — matches the metrics page visual style */}
-      <aside
-        className={`hidden md:flex h-full min-h-0 shrink-0 flex-col border-r bg-muted/30 transition-all duration-200 ${
-          isCollapsed ? 'w-11' : 'w-64 sm:w-72'
-        }`}
+      <FeatureSidebar
+        title={title}
+        open={!isCollapsed}
+        onOpenChange={(open) => setCollapsed(!open)}
       >
-        {isCollapsed ? (
-          /* Collapsed rail */
-          <div className="flex flex-col items-center py-3">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setCollapsed(false)}
-              title="Expand sidebar"
-              className="h-8 w-8"
-            >
-              <PanelLeft className="h-4 w-4" />
-            </Button>
-          </div>
-        ) : (
-          <>
-            {/* Header — matches metrics page: uppercase muted title on left,
-                PanelLeft collapse icon on right, hairline divider below */}
-            <div className="flex shrink-0 items-center justify-between border-b px-3 py-2">
-              <span className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
-                {title}
-              </span>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setCollapsed(true)}
-                title="Collapse sidebar"
-                className="h-7 w-7"
-              >
-                <PanelLeft className="h-3.5 w-3.5" />
-              </Button>
-            </div>
-
-            <FilterPanel {...filterProps} idPrefix="desktop" />
-          </>
-        )}
-      </aside>
+        <FilterPanel {...filterProps} idPrefix="desktop" />
+      </FeatureSidebar>
     </>
   );
 }
