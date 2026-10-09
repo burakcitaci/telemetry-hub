@@ -181,6 +181,21 @@ $env:PYTHONPATH = Join-Path (Get-Location) '.codex-tools/graphify'
 & 'C:\Users\burak\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe' -m graphify extract apps/frontend/src --out . --code-only --no-cluster --max-workers 1
 ```
 
+## Datadog-UX – Header-Schnittstelle
+
+### TASK-UX-2.1 – URL-basierte Query-Basis
+
+- [x] Graphify-Abgleich vor Refactoring; vorhandenen Zeitparser wiederverwendet.
+- [x] `useTelemetryViewParams` erweitert, `useTelemetryQuery` als kompatibler Export: URL als einzige Zustandsquelle, gemeinsamer Default `6h`, Legacy-`time` lesbar; Setter erhalten fremde Parameter.
+- [x] API-Adapter liefert frische ISO-Zeitgrenzen, Pagination und Service-/Severity-/Statusfilter; URLSearchParams-Adapter für Fetch ergänzt.
+- [x] Parser und lokale Mock-Router-Checks sowie Frontend-Typecheck erfolgreich. Ungültige Zeitangaben werden abgelehnt; keine Browser-E2E-Prüfung behauptet.
+- [ ] Backend-Vertrag erweitern und Fetches migrieren: aktuelles TelemetryQueryDto unterstützt nur Pagination und einen einzelnen Service. Zeitgrenzen und Multi-Value-Filter noch nicht serverseitig implementiert. Metrics verwendet weiterhin bisherigen lokalen Feature-Zustand; keine vollständige Page-Migration behauptet.
+
+- [x] **TASK-UX-1.1 [Audit]**: Graphify-Abgleich und Quellenprüfung: fünf Hauptfeatures nutzen den bisherigen `FeatureHeader`, Service-Details einen eigenen Header. Services zeigt ein statisches Datum, Logs keinen TimeRangePicker im Header. Metrics/Traces/Monitors integrieren ihn selbst im Actions-Slot. Suche/Filter sind auf Sidebar, Toolbar und Tabelle verteilt; die App-Shell koordiniert keinen gemeinsamen Zeitbereich. Services-Suchfelder außerhalb der DataTable sind nicht an Filterzustand angebunden.
+- [x] **TASK-UX-1.2 [Komponente]**: `components/shared/feature-header.tsx` ergänzt die gewünschte Drei-Zonen-Schnittstelle: Titel/Beschreibung, `children` für Filter, fest eingebundener bestehender `TimeRangePicker` plus `actions`. Zeitbereich und Callback sind verpflichtend und kontrolliert; Typen aus der vorhandenen Picker-Schnittstelle abgeleitet. Nur semantische Tailwind/Shadcn-Tokens, responsive Grid-Anordnung. Keine Page-Migration oder Änderung am vorhandenen Picker.
+- [x] **TASK-UX-1.3 [Validierung]**: Frontend-Typecheck und SSR-Slot-Prüfung erfolgreich; Graphify inkrementell Code-only aktualisiert, ohne semantische LLM-/API-Aufrufe. Neue Komponente hängt von Picker und `cn` ab, nicht von Feature-Controllern.
+- [ ] **TASK-UX-1.4 [Folgemigration]**: Den bisherigen Header durch die neue Schnittstelle ersetzen; dazu Services und Service-Details mit tatsächlich wirksamer Zeitauswahl versehen und die Filterzustände anbinden. Nicht Teil der angefragten Komponenten-Lieferung.
+
 ## Umsetzung – Wiederverwendbares Feature-Layout
 
 ### Ist-Analyse & Audit

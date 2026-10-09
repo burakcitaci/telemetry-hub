@@ -318,10 +318,10 @@
     "semantic_hash": "05af2192313e49d7362651ccc5ec7d81"
   },
   "apps/frontend/src/shared/hooks/use-telemetry-view-params.ts": {
-    "mtime": 1791053902.9778087,
-    "seen": 1791494299.9693623,
-    "ast_hash": "4b5113b7dca4daba24918e1be4b6664b",
-    "semantic_hash": "4b5113b7dca4daba24918e1be4b6664b"
+    "mtime": 1791526083.684102,
+    "seen": 1791526103.522758,
+    "ast_hash": "e098c83c74c806929a811452b02ad0df",
+    "semantic_hash": "e098c83c74c806929a811452b02ad0df"
   },
   "apps/frontend/src/shared/lib/errors.ts": {
     "mtime": 1791053902.9778087,
@@ -336,16 +336,16 @@
     "semantic_hash": "d4a9c092d54b6d85425843e7a714b450"
   },
   "apps/frontend/src/shared/lib/telemetry.ts": {
-    "mtime": 1791053902.9778087,
-    "seen": 1791494299.9693623,
-    "ast_hash": "1970be4ce0ee053bab4b0cae8acf4257",
-    "semantic_hash": "1970be4ce0ee053bab4b0cae8acf4257"
+    "mtime": 1791526032.196485,
+    "seen": 1791526103.5309446,
+    "ast_hash": "930dde259c82fb834f59b09c384203e9",
+    "semantic_hash": "930dde259c82fb834f59b09c384203e9"
   },
   "apps/frontend/src/shared/lib/time-range.ts": {
-    "mtime": 1791231353.6717749,
-    "seen": 1791494299.9693623,
-    "ast_hash": "ef971e1839478d34ce7794f85f4c1a3a",
-    "semantic_hash": "ef971e1839478d34ce7794f85f4c1a3a"
+    "mtime": 1791526032.2598577,
+    "seen": 1791526103.5309446,
+    "ast_hash": "751fd3ca8701da0a3fbeca3313bd1131",
+    "semantic_hash": "751fd3ca8701da0a3fbeca3313bd1131"
   },
   "apps/frontend/src/shared/types/telemetry.ts": {
     "mtime": 1791053902.9778087,
@@ -520,5 +520,17 @@
     "seen": 1791496916.4580534,
     "ast_hash": "7b4e4146dd2f5c1c75820d0429e6c8fb",
     "semantic_hash": "7b4e4146dd2f5c1c75820d0429e6c8fb"
+  },
+  "apps/frontend/src/components/shared/feature-header.tsx": {
+    "mtime": 1791525388.5911596,
+    "seen": 1791525411.8995416,
+    "ast_hash": "5092cce739b38d874ab2d13f5b4fc442",
+    "semantic_hash": "5092cce739b38d874ab2d13f5b4fc442"
+  },
+  "apps/frontend/src/shared/hooks/use-telemetry-query.ts": {
+    "mtime": 1791526030.276227,
+    "seen": 1791526103.5163243,
+    "ast_hash": "9c4542ba681956803399ed1728089777",
+    "semantic_hash": "9c4542ba681956803399ed1728089777"
   }
 }

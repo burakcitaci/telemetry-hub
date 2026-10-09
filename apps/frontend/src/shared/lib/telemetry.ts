@@ -1,4 +1,19 @@
 import { format } from 'date-fns';
+import { parseTimeRange, resolveTimeRange } from './time-range';
+
+export const DEFAULT_TELEMETRY_RANGE = '6h';
+
+export function resolveTelemetryRange(range: string, now = Date.now()) {
+  const spec = parseTimeRange(range, now);
+  if (!spec) throw new RangeError(`Invalid telemetry range: ${range}`);
+  const resolved = resolveTimeRange(spec, now);
+  const from = resolved.from.getTime();
+  const to = resolved.to.getTime();
+  if (!Number.isFinite(from) || !Number.isFinite(to) || from > to) {
+    throw new RangeError(`Invalid telemetry range: ${range}`);
+  }
+  return resolved;
+}
 
 export const TELEMETRY_FETCH_LIMIT = 200;
 
@@ -24,10 +39,14 @@ export function getTelemetryTimestampMs(timestamp: string): number {
 
 export function formatTelemetryTimestamp(timestamp: string): string {
   const date = parseTelemetryTimestamp(timestamp);
-  return Number.isNaN(date.getTime()) ? 'Invalid date' : format(date, 'MMM dd HH:mm:ss.SSS');
+  return Number.isNaN(date.getTime())
+    ? 'Invalid date'
+    : format(date, 'MMM dd HH:mm:ss.SSS');
 }
 
-export function formatDuration(nanoseconds: number | string | undefined): string {
+export function formatDuration(
+  nanoseconds: number | string | undefined,
+): string {
   const value = Number(nanoseconds ?? 0);
   if (!Number.isFinite(value) || value < 0) return 'N/A';
 
@@ -40,21 +59,18 @@ export function formatDuration(nanoseconds: number | string | undefined): string
   return `${(milliseconds / 1_000).toFixed(2)}s`;
 }
 
-export function isWithinTimeRange(timestamp: string, range: string): boolean {
+export function isWithinTimeRange(
+  timestamp: string,
+  range: string,
+  now = Date.now(),
+): boolean {
   const timestampMs = getTelemetryTimestampMs(timestamp);
   if (!Number.isFinite(timestampMs)) return false;
 
-  const amount = Number.parseInt(range, 10);
-  if (!Number.isFinite(amount)) return true;
-
-  const unit = range.at(-1);
-  const multiplier = unit === 'm'
-    ? 60_000
-    : unit === 'h'
-      ? 3_600_000
-      : unit === 'd'
-        ? 86_400_000
-        : 1;
-
-  return Date.now() - timestampMs <= amount * multiplier;
+  try {
+    const { from, to } = resolveTelemetryRange(range, now);
+    return timestampMs >= from.getTime() && timestampMs <= to.getTime();
+  } catch {
+    return false;
+  }
 }

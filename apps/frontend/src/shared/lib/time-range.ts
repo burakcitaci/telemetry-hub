@@ -39,7 +39,10 @@ function normUnit(u: string): string {
   return '';
 }
 
-export function parseTimeRange(input: string): TimeRangeSpec | null {
+export function parseTimeRange(
+  input: string,
+  now = Date.now(),
+): TimeRangeSpec | null {
   const s = input.trim().toLowerCase();
   if (!s) return null;
 
@@ -55,39 +58,45 @@ export function parseTimeRange(input: string): TimeRangeSpec | null {
         durationMs: n * UNIT_MS[u],
       };
     }
+    return null;
   }
 
   // 2. Growing: "since <ts>", "from <ts>", "<ts> to now"
   const growingSince = s.match(/^(?:since|from)\s+(.+)$/);
   if (growingSince) {
-    const startMs = parseTimestamp(growingSince[1]);
+    const startMs = parseTimestamp(growingSince[1], now);
     if (startMs != null) return { kind: 'growing', raw: input, startMs };
   }
   const growingToNow = s.match(/^(.+?)\s+to\s+now$/);
   if (growingToNow) {
-    const startMs = parseTimestamp(growingToNow[1]);
+    const startMs = parseTimestamp(growingToNow[1], now);
     if (startMs != null) return { kind: 'growing', raw: input, startMs };
   }
 
   // 3. Fixed range: "<a> - <b>" or "<a> to <b>"
   const range = s.match(/^(.+?)\s+(?:-|to)\s+(.+)$/);
   if (range && !range[1].includes(' to ') && !range[1].includes(' - ')) {
-    const a = parseTimestamp(range[1]);
-    const b = parseTimestamp(range[2]);
+    const a = parseTimestamp(range[1], now);
+    const b = parseTimestamp(range[2], now);
     if (a != null && b != null) {
       return { kind: 'fixed', raw: input, startMs: a, endMs: b };
     }
   }
 
   // 4. Single timestamp → fixed "point" range (1 minute window)
-  const single = parseTimestamp(s);
+  const single = parseTimestamp(s, now);
   if (single != null) {
-    return { kind: 'fixed', raw: input, startMs: single, endMs: single + 60_000 };
+    return {
+      kind: 'fixed',
+      raw: input,
+      startMs: single,
+      endMs: single + 60_000,
+    };
   }
 
   // 5. Keywords
   if (s === 'today') {
-    const start = new Date();
+    const start = new Date(now);
     start.setHours(0, 0, 0, 0);
     return { kind: 'growing', raw: input, startMs: start.getTime() };
   }
@@ -97,7 +106,7 @@ export function parseTimeRange(input: string): TimeRangeSpec | null {
 
 // Supports: epoch seconds, ISO, "Jun 1", "Jun 1, 2024", "Jun 1 2024 3pm",
 // "3pm", "15:00", "2024-01-15", "1/15/2024", and relative like "5h ago"
-function parseTimestamp(input: string): number | null {
+function parseTimestamp(input: string, now: number): number | null {
   const s = input.trim();
   if (!s) return null;
 
@@ -106,7 +115,7 @@ function parseTimestamp(input: string): number | null {
   if (ago) {
     const n = Number(ago[1]);
     const u = normUnit(ago[2]);
-    if (u) return Date.now() - n * UNIT_MS[u];
+    if (u) return now - n * UNIT_MS[u];
   }
 
   // Bare relative (e.g. "5h" inside "since 5h") → treat as ago
@@ -114,7 +123,7 @@ function parseTimestamp(input: string): number | null {
   if (bare) {
     const n = Number(bare[1]);
     const u = normUnit(bare[2]);
-    if (u) return Date.now() - n * UNIT_MS[u];
+    if (u) return now - n * UNIT_MS[u];
   }
 
   // Epoch seconds (10 digits) or millis (13 digits)
@@ -124,10 +133,10 @@ function parseTimestamp(input: string): number | null {
   // Time-only: "3pm", "15:00"
   const timeOnly = s.match(/^(\d{1,2})(?::(\d{2}))?\s*(am|pm)?$/);
   if (timeOnly) {
-    const now = new Date();
     let h = Number(timeOnly[1]);
     const m = Number(timeOnly[2] ?? 0);
     const ap = timeOnly[3];
+    if (m > 59 || (ap ? h < 1 || h > 12 : h > 23)) return null;
     if (ap === 'pm' && h < 12) h += 12;
     if (ap === 'am' && h === 12) h = 0;
     const d = new Date(now);
@@ -142,7 +151,10 @@ function parseTimestamp(input: string): number | null {
   return null;
 }
 
-export function resolveTimeRange(spec: TimeRangeSpec, now = Date.now()): ResolvedRange {
+export function resolveTimeRange(
+  spec: TimeRangeSpec,
+  now = Date.now(),
+): ResolvedRange {
   if (spec.kind === 'sliding') {
     return {
       from: new Date(now - spec.durationMs),
