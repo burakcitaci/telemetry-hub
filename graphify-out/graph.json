@@ -1263,52 +1263,6 @@
       "_origin": "ast"
     },
     {
-      "id": "shared_components_facet_query_bar",
-      "label": "facet-query-bar.tsx",
-      "file_type": "code",
-      "source_file": "shared/components/facet-query-bar.tsx",
-      "source_location": "L1",
-      "_origin": "ast"
-    },
-    {
-      "id": "shared_components_facet_query_bar_facetquerybarprops",
-      "label": "FacetQueryBarProps",
-      "file_type": "code",
-      "source_file": "shared/components/facet-query-bar.tsx",
-      "source_location": "L8",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast"
-    },
-    {
-      "id": "shared_components_facet_query_bar_suggestion",
-      "label": "Suggestion",
-      "file_type": "code",
-      "source_file": "shared/components/facet-query-bar.tsx",
-      "source_location": "L14",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast"
-    },
-    {
-      "id": "shared_components_facet_query_bar_facetpill",
-      "label": "FacetPill()",
-      "file_type": "code",
-      "source_file": "shared/components/facet-query-bar.tsx",
-      "source_location": "L21",
-      "_callable": true,
-      "_origin": "ast"
-    },
-    {
-      "id": "shared_components_facet_query_bar_facetquerybar",
-      "label": "FacetQueryBar()",
-      "file_type": "code",
-      "source_file": "shared/components/facet-query-bar.tsx",
-      "source_location": "L40",
-      "_callable": true,
-      "_origin": "ast"
-    },
-    {
       "id": "shared_hooks_use_telemetry_stream",
       "label": "use-telemetry-stream.ts",
       "file_type": "code",
@@ -4309,6 +4263,52 @@
       "file_type": "code",
       "source_file": "shared/components/data-table.tsx",
       "source_location": "L318",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "shared_components_facet_query_bar",
+      "label": "facet-query-bar.tsx",
+      "file_type": "code",
+      "source_file": "shared/components/facet-query-bar.tsx",
+      "source_location": "L1",
+      "_origin": "ast"
+    },
+    {
+      "id": "shared_components_facet_query_bar_facetquerybarprops",
+      "label": "FacetQueryBarProps",
+      "file_type": "code",
+      "source_file": "shared/components/facet-query-bar.tsx",
+      "source_location": "L8",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "shared_components_facet_query_bar_suggestion",
+      "label": "Suggestion",
+      "file_type": "code",
+      "source_file": "shared/components/facet-query-bar.tsx",
+      "source_location": "L14",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "shared_components_facet_query_bar_facetpill",
+      "label": "FacetPill()",
+      "file_type": "code",
+      "source_file": "shared/components/facet-query-bar.tsx",
+      "source_location": "L21",
+      "_callable": true,
+      "_origin": "ast"
+    },
+    {
+      "id": "shared_components_facet_query_bar_facetquerybar",
+      "label": "FacetQueryBar()",
+      "file_type": "code",
+      "source_file": "shared/components/facet-query-bar.tsx",
+      "source_location": "L40",
       "_callable": true,
       "_origin": "ast"
     }
@@ -8006,156 +8006,6 @@
       "_origin": "ast"
     },
     {
-      "source": "shared_components_facet_query_bar",
-      "target": "ref_react",
-      "relation": "imports_from",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "shared/components/facet-query-bar.tsx",
-      "source_location": "L1",
-      "weight": 1.0,
-      "_origin": "ast"
-    },
-    {
-      "source": "shared_components_facet_query_bar",
-      "target": "ref_lucide_react",
-      "relation": "imports_from",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "shared/components/facet-query-bar.tsx",
-      "source_location": "L2",
-      "weight": 1.0,
-      "_origin": "ast"
-    },
-    {
-      "source": "shared_components_facet_query_bar",
-      "target": "components_ui_button",
-      "relation": "imports_from",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "shared/components/facet-query-bar.tsx",
-      "source_location": "L3",
-      "weight": 1.0,
-      "_origin": "ast"
-    },
-    {
-      "source": "shared_components_facet_query_bar",
-      "target": "components_ui_button_button",
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "shared/components/facet-query-bar.tsx",
-      "source_location": "L3",
-      "weight": 1.0,
-      "_origin": "ast"
-    },
-    {
-      "source": "shared_components_facet_query_bar",
-      "target": "components_ui_input",
-      "relation": "imports_from",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "shared/components/facet-query-bar.tsx",
-      "source_location": "L4",
-      "weight": 1.0,
-      "_origin": "ast"
-    },
-    {
-      "source": "shared_components_facet_query_bar",
-      "target": "components_ui_input_input",
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "shared/components/facet-query-bar.tsx",
-      "source_location": "L4",
-      "weight": 1.0,
-      "_origin": "ast"
-    },
-    {
-      "source": "shared_components_facet_query_bar",
-      "target": "shared_lib_facet",
-      "relation": "imports_from",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "shared/components/facet-query-bar.tsx",
-      "source_location": "L5",
-      "weight": 1.0,
-      "_origin": "ast"
-    },
-    {
-      "source": "shared_components_facet_query_bar",
-      "target": "shared_lib_facet_facet",
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "shared/components/facet-query-bar.tsx",
-      "source_location": "L5",
-      "weight": 1.0,
-      "_origin": "ast"
-    },
-    {
-      "source": "shared_components_facet_query_bar",
-      "target": "shared_lib_facet_facetselection",
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "shared/components/facet-query-bar.tsx",
-      "source_location": "L5",
-      "weight": 1.0,
-      "_origin": "ast"
-    },
-    {
-      "source": "shared_components_facet_query_bar",
-      "target": "shared_components_facet_query_bar_facetquerybarprops",
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "shared/components/facet-query-bar.tsx",
-      "source_location": "L8",
-      "weight": 1.0,
-      "_origin": "ast"
-    },
-    {
-      "source": "shared_components_facet_query_bar",
-      "target": "shared_components_facet_query_bar_suggestion",
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "shared/components/facet-query-bar.tsx",
-      "source_location": "L14",
-      "weight": 1.0,
-      "_origin": "ast"
-    },
-    {
-      "source": "shared_components_facet_query_bar",
-      "target": "shared_components_facet_query_bar_facetpill",
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "shared/components/facet-query-bar.tsx",
-      "source_location": "L21",
-      "weight": 1.0,
-      "_origin": "ast"
-    },
-    {
-      "source": "shared_components_facet_query_bar",
-      "target": "shared_components_facet_query_bar_facetquerybar",
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "shared/components/facet-query-bar.tsx",
-      "source_location": "L40",
-      "weight": 1.0,
-      "_origin": "ast"
-    },
-    {
-      "source": "shared_components_facet_query_bar_facetquerybar",
-      "target": "shared_components_facet_query_bar_facetpill",
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "shared/components/facet-query-bar.tsx",
-      "source_location": "L143",
-      "weight": 1.0,
-      "_origin": "ast"
-    },
-    {
       "source": "shared_hooks_use_telemetry_stream",
       "target": "ref_react",
       "relation": "imports_from",
@@ -8742,28 +8592,6 @@
       "confidence": "EXTRACTED",
       "source_file": "shared/components/facet-explorer.tsx",
       "source_location": "L14",
-      "weight": 1.0,
-      "_origin": "ast"
-    },
-    {
-      "source": "shared_components_facet_query_bar_facetquerybarprops",
-      "target": "shared_lib_facet_facet",
-      "relation": "references",
-      "context": "field",
-      "confidence": "EXTRACTED",
-      "source_file": "shared/components/facet-query-bar.tsx",
-      "source_location": "L9",
-      "weight": 1.0,
-      "_origin": "ast"
-    },
-    {
-      "source": "shared_components_facet_query_bar_facetquerybarprops",
-      "target": "shared_lib_facet_facetselection",
-      "relation": "references",
-      "context": "field",
-      "confidence": "EXTRACTED",
-      "source_file": "shared/components/facet-query-bar.tsx",
-      "source_location": "L10",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -9952,18 +9780,6 @@
       "confidence_score": 1.0,
       "source_file": "shared/components/facet-explorer.tsx",
       "source_location": "L169",
-      "weight": 1.0,
-      "_origin": "ast"
-    },
-    {
-      "source": "shared_components_facet_query_bar_facetquerybar",
-      "target": "components_ui_input_input",
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "shared/components/facet-query-bar.tsx",
-      "source_location": "L151",
       "weight": 1.0,
       "_origin": "ast"
     },
@@ -23944,6 +23760,179 @@
       "confidence_score": 1.0,
       "source_file": "shared/components/data-table.tsx",
       "source_location": "L341",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shared_components_facet_query_bar",
+      "target": "ref_react",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "shared/components/facet-query-bar.tsx",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shared_components_facet_query_bar",
+      "target": "ref_react_dom",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "shared/components/facet-query-bar.tsx",
+      "source_location": "L2",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shared_components_facet_query_bar",
+      "target": "ref_lucide_react",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "shared/components/facet-query-bar.tsx",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shared_components_facet_query_bar",
+      "target": "components_ui_input",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "shared/components/facet-query-bar.tsx",
+      "source_location": "L4",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shared_components_facet_query_bar",
+      "target": "components_ui_input_input",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "shared/components/facet-query-bar.tsx",
+      "source_location": "L4",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shared_components_facet_query_bar",
+      "target": "shared_lib_facet",
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "shared/components/facet-query-bar.tsx",
+      "source_location": "L5",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shared_components_facet_query_bar",
+      "target": "shared_lib_facet_facet",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "shared/components/facet-query-bar.tsx",
+      "source_location": "L5",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shared_components_facet_query_bar",
+      "target": "shared_lib_facet_facetselection",
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "shared/components/facet-query-bar.tsx",
+      "source_location": "L5",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shared_components_facet_query_bar",
+      "target": "shared_components_facet_query_bar_facetquerybarprops",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "shared/components/facet-query-bar.tsx",
+      "source_location": "L8",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shared_components_facet_query_bar",
+      "target": "shared_components_facet_query_bar_suggestion",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "shared/components/facet-query-bar.tsx",
+      "source_location": "L14",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shared_components_facet_query_bar",
+      "target": "shared_components_facet_query_bar_facetpill",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "shared/components/facet-query-bar.tsx",
+      "source_location": "L21",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shared_components_facet_query_bar",
+      "target": "shared_components_facet_query_bar_facetquerybar",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "shared/components/facet-query-bar.tsx",
+      "source_location": "L40",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shared_components_facet_query_bar_facetquerybar",
+      "target": "shared_components_facet_query_bar_facetpill",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "shared/components/facet-query-bar.tsx",
+      "source_location": "L190",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shared_components_facet_query_bar_facetquerybarprops",
+      "target": "shared_lib_facet_facet",
+      "relation": "references",
+      "context": "field",
+      "confidence": "EXTRACTED",
+      "source_file": "shared/components/facet-query-bar.tsx",
+      "source_location": "L9",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shared_components_facet_query_bar_facetquerybarprops",
+      "target": "shared_lib_facet_facetselection",
+      "relation": "references",
+      "context": "field",
+      "confidence": "EXTRACTED",
+      "source_file": "shared/components/facet-query-bar.tsx",
+      "source_location": "L10",
+      "weight": 1.0,
+      "_origin": "ast"
+    },
+    {
+      "source": "shared_components_facet_query_bar_facetquerybar",
+      "target": "components_ui_input_input",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "shared/components/facet-query-bar.tsx",
+      "source_location": "L198",
       "weight": 1.0,
       "_origin": "ast"
     }

@@ -1,7 +1,7 @@
 import { format } from 'date-fns';
 import { parseTimeRange, resolveTimeRange } from './time-range';
 
-export const DEFAULT_TELEMETRY_RANGE = '6h';
+export const DEFAULT_TELEMETRY_RANGE = '5m';
 
 export function resolveTelemetryRange(range: string, now = Date.now()) {
   const spec = parseTimeRange(range, now);

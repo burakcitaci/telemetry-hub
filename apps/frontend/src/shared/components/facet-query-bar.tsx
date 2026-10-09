@@ -1,6 +1,6 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Plus, X } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import React, { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Facet, FacetSelection } from '../lib/facet';
 
@@ -43,6 +43,14 @@ export function FacetQueryBar({ facets, selection, onChange }: FacetQueryBarProp
   const [highlighted, setHighlighted] = useState(0);
   const rootRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const listId = useId();
+  const [position, setPosition] = useState<{
+    top: number;
+    left: number;
+    width: number;
+    maxHeight: number;
+  } | null>(null);
 
   // Flatten facets → suggestions. Counts come straight from the facet builder.
   const allSuggestions = useMemo<Suggestion[]>(() => {
@@ -76,15 +84,54 @@ export function FacetQueryBar({ facets, selection, onChange }: FacetQueryBarProp
       .slice(0, 12);
   }, [allSuggestions, query, selection]);
 
-  // Close on outside click
+  // The portalled list is outside rootRef, but still belongs to this control.
   useEffect(() => {
     if (!open) return;
-    const h = (e: MouseEvent) => {
-      if (rootRef.current && !rootRef.current.contains(e.target as Node)) setOpen(false);
+    const outside = (e: Event) => {
+      const target = e.target as Node | null;
+      if (target && !rootRef.current?.contains(target) && !dropdownRef.current?.contains(target)) {
+        setOpen(false);
+      }
     };
-    document.addEventListener('mousedown', h);
-    return () => document.removeEventListener('mousedown', h);
+    document.addEventListener('pointerdown', outside);
+    document.addEventListener('focusin', outside);
+    return () => {
+      document.removeEventListener('pointerdown', outside);
+      document.removeEventListener('focusin', outside);
+    };
   }, [open]);
+
+  // Fixed positioning escapes clipping and follows nested scroll containers.
+  useLayoutEffect(() => {
+    if (!open || suggestions.length === 0) return;
+    const update = () => {
+      const rect = rootRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      const gap = 4;
+      const below = Math.max(0, window.innerHeight - rect.bottom - gap - 8);
+      const above = Math.max(0, rect.top - gap - 8);
+      const desired = Math.min(288, suggestions.length * 36);
+      const flip = below < desired && above > below;
+      const maxHeight = Math.min(desired, flip ? above : below);
+      const width = Math.min(rect.width, Math.max(0, window.innerWidth - 16));
+      setPosition({
+        top: flip ? rect.top - gap - maxHeight : rect.bottom + gap,
+        left: Math.max(8, Math.min(rect.left, window.innerWidth - width - 8)),
+        width,
+        maxHeight,
+      });
+    };
+    update();
+    const observer = new ResizeObserver(update);
+    if (rootRef.current) observer.observe(rootRef.current);
+    window.addEventListener('resize', update);
+    window.addEventListener('scroll', update, true);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('resize', update);
+      window.removeEventListener('scroll', update, true);
+    };
+  }, [open, suggestions.length]);
 
   useEffect(() => setHighlighted(0), [query, open]);
 
@@ -109,14 +156,14 @@ export function FacetQueryBar({ facets, selection, onChange }: FacetQueryBarProp
   const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'ArrowDown') {
       e.preventDefault();
-      setHighlighted((h) => Math.min(h + 1, suggestions.length - 1));
+      setHighlighted((h) => open ? Math.max(0, Math.min(h + 1, suggestions.length - 1)) : 0);
       setOpen(true);
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
       setHighlighted((h) => Math.max(h - 1, 0));
     } else if (e.key === 'Enter') {
       e.preventDefault();
-      if (suggestions[highlighted]) addSelection(suggestions[highlighted]);
+      if (open && suggestions[highlighted]) addSelection(suggestions[highlighted]);
     } else if (e.key === 'Escape') {
       setOpen(false);
     } else if (e.key === 'Backspace' && query === '') {
@@ -150,6 +197,12 @@ export function FacetQueryBar({ facets, selection, onChange }: FacetQueryBarProp
         <div className="relative flex flex-1 items-center gap-1.5 min-w-[140px]">
           <Input
             ref={inputRef}
+            role="combobox"
+            aria-label="Add telemetry filter"
+            aria-autocomplete="list"
+            aria-expanded={open && suggestions.length > 0}
+            aria-controls={open && suggestions.length > 0 ? listId : undefined}
+            aria-activedescendant={open && suggestions[highlighted] ? `${listId}-${highlighted}` : undefined}
             value={query}
             onChange={(e) => { setQuery(e.target.value); setOpen(true); }}
             onFocus={() => setOpen(true)}
@@ -160,28 +213,41 @@ export function FacetQueryBar({ facets, selection, onChange }: FacetQueryBarProp
         </div>
       </div>
 
-      {open && suggestions.length > 0 && (
-        <div className="absolute left-0 right-0 top-full z-40 mt-1 max-h-72 overflow-y-auto rounded-md border bg-popover shadow-lg">
+      {open && suggestions.length > 0 && position && createPortal(
+        <div
+          ref={dropdownRef}
+          id={listId}
+          role="listbox"
+          aria-label="Telemetry filter suggestions"
+          style={position}
+          className="fixed z-[50] overflow-y-auto rounded-md border bg-popover text-popover-foreground shadow-lg"
+        >
           {suggestions.map((s, i) => (
             <button
               key={`${s.key}::${s.value}`}
               type="button"
+              id={`${listId}-${i}`}
+              role="option"
+              aria-selected={i === highlighted}
+              tabIndex={-1}
+              onMouseDown={(e) => e.preventDefault()}
               onMouseEnter={() => setHighlighted(i)}
               onClick={() => addSelection(s)}
               className={`flex w-full items-center justify-between px-3 py-1.5 text-left text-xs ${
                 i === highlighted ? 'bg-accent text-accent-foreground' : 'hover:bg-accent/50'
               }`}
             >
-              <span className="flex items-center gap-2">
+              <span className="flex min-w-0 items-center gap-2">
                 <span className="text-[10px] uppercase tracking-wide text-muted-foreground">
                   {s.key}
                 </span>
-                <span className="font-mono">{s.value}</span>
+                <span className="min-w-0 font-mono [overflow-wrap:anywhere]">{s.value}</span>
               </span>
               <span className="text-[10px] text-muted-foreground">{s.count}</span>
             </button>
           ))}
-        </div>
+        </div>,
+        document.body,
       )}
     </div>
   );

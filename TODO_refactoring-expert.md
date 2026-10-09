@@ -19,6 +19,17 @@
 
 ## Kontext
 
+### TASK-VITE-CACHE-1.1 – React-DOM-Portal-Dependency
+
+- [x] Nach neuem createPortal-Import meldete Vite 504 Outdated Optimize Dep für react-dom; bisher wurde react-dom/client separat geladen. Beide Einstiegspunkte und React-JSX-Runtimes explizit in optimizeDeps.include aufgenommen.
+- [ ] Laufenden Dev-Server mit --force neu starten und Browser hart neu laden; Benutzer-Server nicht ungefragt beendet. Keine Cache-Verzeichnisse gelöscht.
+
+### TASK-UX-FILTER-1.1 – Autocomplete-Portal und Fokus
+
+- [x] FacetQueryBar via Graphify lokalisiert: Dropdown war innerhalb des overflow-hidden FeaturePanel. React-Portal zu document.body, fixed z-[50], Viewport-Positionierung mit Flip/ResizeObserver/Scroll-Capture ergänzt.
+- [x] Portal-Ref in Pointer-/Focus-Outside-Prüfung einbezogen; onMouseDown.preventDefault auf Vorschlägen hält Input-Fokus bis onClick-Auswahl. Escape/Enter und Combobox-/Listbox-ARIA konsolidiert.
+- [x] Frontend-Typecheck und SSR-/Wiring-Prüfungen bestanden. Keine echte Browser-Interaktionsprüfung behauptet.
+
 ### TASK-PLATFORM-1.3 – Helm-Array-Override korrigiert
 
 - [x] Index-Override backend.env[7].value entfernt: Helm ersetzte die Liste durch sparse Einträge und verursachte nil.name. Neuer skalarer Wert backend.otelServiceName mit Default backend-service; Template erzeugt OTEL_SERVICE_NAME separat und eindeutig.

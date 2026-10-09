@@ -5,6 +5,9 @@ import path from 'path';
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  optimizeDeps: {
+    include: ['react', 'react-dom', 'react-dom/client', 'react/jsx-runtime', 'react/jsx-dev-runtime'],
+  },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
