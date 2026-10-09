@@ -1,17 +1,29 @@
-import { context } from "@opentelemetry/api";
-import { suppressTracing } from "@opentelemetry/core";
+import { context } from '@opentelemetry/api';
+import { suppressTracing } from '@opentelemetry/core';
 import {
   createClient,
   type ClickHouseClient,
-} from "@clickhouse/client";
-import { Injectable, OnModuleDestroy, OnModuleInit } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
+  type ClickHouseSettings,
+} from '@clickhouse/client';
+import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { telemetryTimeWindow } from './telemetry-time-window';
-import type { ClickhouseConfig } from "../../../config/clickhouse.config";
-import { CentralLoggerService } from "../../../common/logger/central-logger.service";
+import type { ClickhouseConfig } from '../../../config/clickhouse.config';
+import { CentralLoggerService } from '../../../common/logger/central-logger.service';
 
 const DEFAULT_LIMIT = 100;
 const MAX_LIMIT = 500;
+const LIST_QUERY_SETTINGS: ClickHouseSettings = {
+  max_rows_to_read: '200000',
+  max_bytes_to_read: String(64 * 1024 * 1024),
+  read_overflow_mode: 'throw',
+  max_result_rows: String(MAX_LIMIT),
+  max_result_bytes: String(8 * 1024 * 1024),
+  result_overflow_mode: 'throw',
+  max_memory_usage: String(256 * 1024 * 1024),
+  max_execution_time: 10,
+  timeout_overflow_mode: 'throw',
+};
 
 export interface TelemetryListOptions {
   limit?: number;
@@ -37,7 +49,7 @@ export interface TelemetryChangeSignal {
 @Injectable()
 export class ClickhouseService implements OnModuleInit, OnModuleDestroy {
   private client!: ClickHouseClient;
-  private database = "default";
+  private database = 'default';
 
   constructor(
     private readonly logger: CentralLoggerService,
@@ -46,7 +58,7 @@ export class ClickhouseService implements OnModuleInit, OnModuleDestroy {
 
   async onModuleInit(): Promise<void> {
     const config =
-      this.configService.getOrThrow<ClickhouseConfig>("clickhouse");
+      this.configService.getOrThrow<ClickhouseConfig>('clickhouse');
     const url = this.buildUrl(config.host, config.port);
 
     this.database = config.database;
@@ -56,14 +68,14 @@ export class ClickhouseService implements OnModuleInit, OnModuleDestroy {
       username: config.username,
       password: config.password,
       request_timeout: config.timeout,
-      application: "telemetry-hub-backend",
+      application: 'telemetry-hub-backend',
     });
 
     this.logger.logWithAttributes(
-      "ClickHouse client initialized",
-      "INFO",
+      'ClickHouse client initialized',
+      'INFO',
       { url, database: config.database },
-      "ClickhouseService",
+      'ClickhouseService',
     );
 
     await this.checkRequiredTables();
@@ -85,8 +97,8 @@ export class ClickhouseService implements OnModuleInit, OnModuleDestroy {
   async getTraces(options: TelemetryListOptions = {}) {
     const { limit, offset } = this.normalizeListOptions(options);
     const serviceFilter = options.service
-      ? "HAVING countIf(ServiceName = {service:String}) > 0"
-      : "";
+      ? 'HAVING countIf(ServiceName = {service:String}) > 0'
+      : '';
     const queryParams: Record<string, unknown> = { limit, offset };
 
     if (options.service) {
@@ -130,7 +142,7 @@ export class ClickhouseService implements OnModuleInit, OnModuleDestroy {
       LIMIT {limit:UInt32} OFFSET {offset:UInt32}
     `;
 
-    return this.query(query, queryParams);
+    return this.query(query, queryParams, LIST_QUERY_SETTINGS);
   }
 
   async getTraceById(traceId: string) {
@@ -158,6 +170,7 @@ export class ClickhouseService implements OnModuleInit, OnModuleDestroy {
 
   async getLogs(options: LogsListOptions = {}) {
     const { limit, offset } = this.normalizeListOptions(options);
+    const timeWindow = telemetryTimeWindow(options, 'Timestamp');
     const predicates: string[] = [];
     const queryParams: Record<string, unknown> = { limit, offset };
 
@@ -165,11 +178,9 @@ export class ClickhouseService implements OnModuleInit, OnModuleDestroy {
       predicates.push('ServiceName = {service:String}');
       queryParams.service = options.service;
     }
-    if (options.from && options.to) {
-      predicates.push("Timestamp >= fromUnixTimestamp64Milli({from:Int64}, 'UTC')");
-      predicates.push("Timestamp <= fromUnixTimestamp64Milli({to:Int64}, 'UTC')");
-      queryParams.from = Date.parse(options.from);
-      queryParams.to = Date.parse(options.to);
+    if (timeWindow.sql) {
+      predicates.push(timeWindow.sql);
+      Object.assign(queryParams, timeWindow.params);
     }
     const where = predicates.length ? `WHERE ${predicates.join(' AND ')}` : '';
 
@@ -197,7 +208,7 @@ export class ClickhouseService implements OnModuleInit, OnModuleDestroy {
       LIMIT {limit:UInt32} OFFSET {offset:UInt32}
     `;
 
-    return this.query(query, queryParams);
+    return this.query(query, queryParams, LIST_QUERY_SETTINGS);
   }
 
   async getServices() {
@@ -208,7 +219,10 @@ export class ClickhouseService implements OnModuleInit, OnModuleDestroy {
     `);
   }
 
-  async getServiceMetrics(service: string, window: { from: string; to: string }) {
+  async getServiceMetrics(
+    service: string,
+    window: { from: string; to: string },
+  ) {
     const timeWindow = telemetryTimeWindow(window, 'Timestamp', true);
     const query = `
       SELECT
@@ -347,26 +361,26 @@ export class ClickhouseService implements OnModuleInit, OnModuleDestroy {
   private async checkRequiredTables(): Promise<void> {
     try {
       const [tracesTableExists, logsTableExists] = await Promise.all([
-        this.tableExists("otel_traces"),
-        this.tableExists("otel_logs"),
+        this.tableExists('otel_traces'),
+        this.tableExists('otel_logs'),
       ]);
 
       const missingTables = [
-        !tracesTableExists && "otel_traces",
-        !logsTableExists && "otel_logs",
+        !tracesTableExists && 'otel_traces',
+        !logsTableExists && 'otel_logs',
       ].filter(Boolean);
 
       if (missingTables.length > 0) {
         this.logger.warn(
-          `Waiting for the collector to create: ${missingTables.join(", ")}`,
-          "ClickhouseService",
+          `Waiting for the collector to create: ${missingTables.join(', ')}`,
+          'ClickhouseService',
         );
       }
     } catch (error) {
       const details = this.errorDetails(error);
       this.logger.warn(
         `ClickHouse is not ready during startup: ${details.message}`,
-        "ClickhouseService",
+        'ClickhouseService',
       );
     }
   }
@@ -385,16 +399,25 @@ export class ClickhouseService implements OnModuleInit, OnModuleDestroy {
     return Number(rows[0]?.count ?? 0) > 0;
   }
 
+  executeQuery<T = Record<string, unknown>>(
+    sql: string,
+    params: Record<string, unknown> = {},
+  ): Promise<T[]> {
+    return this.query<T>(sql, params);
+  }
+
   private async query<T = Record<string, unknown>>(
     query: string,
     queryParams: Record<string, unknown> = {},
+    settings?: ClickHouseSettings,
   ): Promise<T[]> {
     try {
       return await this.withTracingSuppressed(async () => {
         const result = await this.client.query({
           query,
           query_params: queryParams,
-          format: "JSONEachRow",
+          format: 'JSONEachRow',
+          clickhouse_settings: settings,
         });
 
         return (await result.json()) as T[];
@@ -404,7 +427,7 @@ export class ClickhouseService implements OnModuleInit, OnModuleDestroy {
       this.logger.error(
         `ClickHouse query failed: ${details.message}`,
         details.stack,
-        "ClickhouseService",
+        'ClickhouseService',
       );
       throw error;
     }
@@ -416,19 +439,25 @@ export class ClickhouseService implements OnModuleInit, OnModuleDestroy {
 
   private normalizeListOptions(options: TelemetryListOptions) {
     return {
-      limit: this.clamp(options.limit ?? DEFAULT_LIMIT, 1, MAX_LIMIT),
-      offset: Math.max(options.offset ?? 0, 0),
+      limit: this.clamp(
+        Number.isFinite(options.limit) ? options.limit! : DEFAULT_LIMIT,
+        1,
+        MAX_LIMIT,
+      ),
+      offset: this.clamp(
+        Number.isFinite(options.offset) ? options.offset! : 0,
+        0,
+        1_000_000,
+      ),
     };
   }
 
   private normalizeChangeSignal(
-    signal:
-      | { EventCount: number | string; Fingerprint: string }
-      | undefined,
+    signal: { EventCount: number | string; Fingerprint: string } | undefined,
   ): TelemetryChangeSignal {
     return {
       eventCount: Number(signal?.EventCount ?? 0),
-      fingerprint: signal?.Fingerprint ?? "0",
+      fingerprint: signal?.Fingerprint ?? '0',
     };
   }
 
@@ -437,13 +466,13 @@ export class ClickhouseService implements OnModuleInit, OnModuleDestroy {
   }
 
   private buildUrl(host: string, port: number): string {
-    const normalizedHost = host.replace(/\/+$/, "");
+    const normalizedHost = host.replace(/\/+$/, '');
     if (/^https?:\/\//i.test(normalizedHost)) {
       const url = new URL(normalizedHost);
       if (!url.port) {
         url.port = String(port);
       }
-      return url.toString().replace(/\/$/, "");
+      return url.toString().replace(/\/$/, '');
     }
 
     return `http://${normalizedHost}:${port}`;

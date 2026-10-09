@@ -1,5 +1,22 @@
 # Refactoring-Plan: React-/Vite-Frontend-Alignment
 
+## TASK-BACKEND-1.2 – Listen-Query-Budgets
+ 
+## TASK-BACKEND-1.3 – Zeitvalidierung und öffentliche Query-Schnittstelle
+
+- [x] Wiederverwendbare TelemetryTimeWindowPipe für Logs sowie Metrics-Liste/Detail: gemeinsame Prüfung von Paarigkeit, Zeitzone und Reihenfolge; bestehende ISO-DTO-Validierung bleibt aktiv.
+- [x] LogsController delegiert ohne manuelle Datumsprüfung. SQL-Generator verwendet dieselbe Prüfung für interne Aufrufe.
+- [x] MetricsService verwendet öffentliche, typisierte executeQuery-Schnittstelle; privater Bracket-Zugriff entfernt.
+- [x] Metrics-Detail-Controller ohne Console-Logging und Try-Catch-Re-Throw; bestehender globaler LoggingInterceptor und ExceptionFilter bleiben zuständig. Fachliche 503-Übersetzung im MetricsService bleibt erhalten.
+- [x] Backend-Typecheck und lokale Regressionstests erfolgreich; keine Live-ClickHouse-/HTTP-End-to-End-Prüfung.
+
+## Listen-Query-Budgets (TASK-BACKEND-1.2)
+
+- [x] Graphify-Abgleich: bestehende Listenlimits 100/500 bestätigt; unverändert beibehalten und nicht-endliche interne Parameter abgesichert.
+- [x] Logs/Traces erhalten Scan-, Ergebnis-, Speicher- und Laufzeitbudgets mit `throw`; keine stillen Teilresultate und kein verfälschendes Span-Limit vor GROUP BY.
+- [x] Backend-Typecheck und lokale Mock-Regressionsprüfungen erfolgreich; Backend-Graph code-only inkrementell aktualisiert (287 Knoten / 607 Kanten, keine semantischen API-Kosten).
+- [ ] Live-ClickHouse-/Lasttest; blockweise geprüfte Serverbudgets sind keine exakte Node.js-Speicherobergrenze. Optionaler Trace-Zeitfilter und Kandidaten-Trace-Paginierung bleiben separate Optimierungen.
+
 ## Kontext
 
 - [ ] **TASK-VITE-0.1 [Scope und Freigabe-Gate]**: Dieser Stand ist ausschließlich ein Plan. Vor einer ausdrücklichen Freigabe werden keine Quellcode-, Konfigurations-, Dependency- oder Graphify-Änderungen umgesetzt.
@@ -182,6 +199,13 @@ $env:PYTHONPATH = Join-Path (Get-Location) '.codex-tools/graphify'
 ```
 
 ## Datadog-UX – Header-Schnittstelle
+
+### TASK-BACKEND-1.1-FIX – ClickHouse-Zeitstempel-Aliaskonflikt
+
+- [x] Backend-Graph abgefragt und drei Detailqueries direkt geprüft: toString(TimeUnix) AS TimeUnix kollidierte mit Datumsfilter.
+- [x] Gauge-/Sum-/Histogram-Ausgabealias auf TimeUnixText umbenannt; RawRow/mapRow angepasst. Öffentlicher timeUnix-Vertrag, Datumsfilter, Sortierung, Parameter, Parallelität und 503-Verhalten bleiben erhalten.
+- [x] Backend-Typecheck und lokale SQL-/Mapping-Regressionsprüfungen erfolgreich: keine gleichnamige String-Aliasdefinition, originale Datumsspalte für Filter/Sortierung, Timestamp inklusive Nachkommastellen unverändert im API-Mapping.
+- [ ] Verifikation an laufender ClickHouse-Instanz nach Backend-Neustart/Rollout erforderlich; lokale Mock-Tests führen kein SQL auf ClickHouse aus.
 
 ### TASK-BACKEND-1.1 – Metrics-Detailfehler sichtbar machen
 

@@ -104,7 +104,7 @@ export class MetricsService {
             SELECT
                 ServiceName, MetricName, MetricDescription, MetricUnit,
                 ResourceAttributes, Attributes,
-                toString(TimeUnix) AS TimeUnix,
+                toString(TimeUnix) AS TimeUnixText,
                 toString(StartTimeUnix) AS StartTimeUnix,
                 Value,
                 0 AS Count, Value AS Sum, Value AS Min, Value AS Max,
@@ -122,7 +122,7 @@ export class MetricsService {
             SELECT
                 ServiceName, MetricName, MetricDescription, MetricUnit,
                 ResourceAttributes, Attributes,
-                toString(TimeUnix) AS TimeUnix,
+                toString(TimeUnix) AS TimeUnixText,
                 toString(StartTimeUnix) AS StartTimeUnix,
                 Value,
                 1 AS Count, Value AS Sum, Value AS Min, Value AS Max,
@@ -140,7 +140,7 @@ export class MetricsService {
             SELECT
                 ServiceName, MetricName, MetricDescription, MetricUnit,
                 ResourceAttributes, Attributes,
-                toString(TimeUnix) AS TimeUnix,
+                toString(TimeUnix) AS TimeUnixText,
                 toString(StartTimeUnix) AS StartTimeUnix,
                 0 AS Value,
                 Count, Sum, Min, Max,
@@ -162,7 +162,7 @@ export class MetricsService {
         MetricUnit: string;
         ResourceAttributes: Record<string, string> | string;
         Attributes: Record<string, string> | string;
-        TimeUnix: string;
+        TimeUnixText: string;
         StartTimeUnix: string;
         Value: number;
         Count: number;
@@ -215,7 +215,7 @@ export class MetricsService {
                 ? (this.parseJson(row.ResourceAttributes) ?? {})
                 : (row.ResourceAttributes ?? {}),
         tableName: table,
-        timeUnix: row.TimeUnix,
+        timeUnix: row.TimeUnixText,
         startTimeUnix: row.StartTimeUnix,
         count: Number(row.Count) || 1,
         sum: Number(row.Sum),
@@ -857,7 +857,7 @@ export class MetricsService {
         query: string,
         queryParams: Record<string, unknown> = {},
     ): Promise<T[]> {
-        return this.clickhouseService['query'](query, queryParams);
+        return this.clickhouseService.executeQuery<T>(query, queryParams);
     }
 
     private normalizeMetric(row: any): MetricSummary {
