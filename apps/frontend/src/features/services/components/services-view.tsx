@@ -14,6 +14,8 @@ import {
 } from '@/shared/components/feature-layout';
 import { columns } from './services-components';
 import type { useServices } from '../hooks/use-services';
+import { TimeRangePicker } from '@/app/components/timer-range.picker';
+import { useTelemetryQuery } from '@/shared/hooks/use-telemetry-query';
 
 type ServicesViewProps = ReturnType<typeof useServices>;
 
@@ -28,6 +30,7 @@ export function ServicesView({
   searchQuery,
   setSearchQuery,
 }: ServicesViewProps) {
+  const { timeRange, setTimeRange } = useTelemetryQuery();
   return (
     <FeaturePage>
       <FeatureHeader
@@ -46,12 +49,13 @@ export function ServicesView({
               onRefresh={() => void loadServices()}
               label="Refresh services"
             />
+            <TimeRangePicker value={timeRange} onChange={setTimeRange} />
           </>
         }
       />
       <FeatureBody>
         <FeatureContent>
-          <FeaturePanel className="p-4">
+          <FeaturePanel>
             {loading && services.length === 0 ? (
               <ViewSkeleton
                 variant="list"

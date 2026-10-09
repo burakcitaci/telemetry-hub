@@ -55,6 +55,7 @@ interface DataTableProps<TData, TValue> {
   searchValue?: string;
   onSearchChange?: (value: string) => void;
   onRowClick?: (row: TData) => void;
+  density?: 'default' | 'telemetry';
 }
 
 export function DataTable<TData, TValue>({
@@ -69,6 +70,7 @@ export function DataTable<TData, TValue>({
   searchValue,
   onSearchChange,
   onRowClick,
+  density = 'default',
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -124,7 +126,7 @@ export function DataTable<TData, TValue>({
   });
 
   return (
-    <div className="w-full">
+    <div className={cn('w-full', density === 'telemetry' && 'font-mono text-xs tracking-tight')}>
       {enableSearch && (
         <div className="flex items-center px-0 py-2">
           <Input
@@ -168,14 +170,14 @@ export function DataTable<TData, TValue>({
           )}
         </div>
       )}
-      <div className="overflow-x-auto rounded-md border">
-        <Table>
+      <div className="overflow-x-auto rounded-md border border-border">
+        <Table className={density === 'telemetry' ? 'font-mono text-xs tracking-tight' : undefined}>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id} className="h-8">
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead key={header.id} className="px-3 py-0">
+                    <TableHead key={header.id} className="px-2 py-0">
                       {header.isPlaceholder
                         ? null
                         : flexRender(
@@ -194,11 +196,11 @@ export function DataTable<TData, TValue>({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && 'selected'}
-                  className={`h-8 ${onRowClick ? 'cursor-pointer hover:bg-muted/50' : ''}`}
+                  className={cn('border-b border-border/40', density === 'telemetry' && 'odd:bg-muted/40', onRowClick && 'cursor-pointer hover:bg-muted/50')}
                   onClick={() => onRowClick?.(row.original)}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className="px-3 py-1">
+                    <TableCell key={cell.id} className="px-2 py-1">
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext(),

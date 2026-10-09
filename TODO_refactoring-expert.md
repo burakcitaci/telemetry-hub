@@ -19,6 +19,20 @@
 
 ## Kontext
 
+### TASK-ONYX-1.6 – Theme-Toggle-Regression
+
+- [x] Erzwungene lokale dark-Klassen in PageLayout sowie Desktop-/Mobile-Sidebar entfernt. Flächen, Konturen und Zebra-Zeilen verwenden wieder Shadcn-Tokens; Onyx/Slate-Werte sind ausschließlich in den globalen Dark-Variablen definiert.
+- [x] Padding-/Grid-Regeln bleiben bestehen. Regressionstest prüft Token-Nutzung und verhindert erneute lokale Dark-Sperren oder festverdrahtete Onyx-Flächen.
+
+### TASK-ONYX-1 – High-Density Layout
+
+- [x] **TASK-ONYX-1.1**: PageLayout erzwingt p-3/lg:p-4, space-y-4, min-h-screen und Onyx-Hintergrund auch bei widersprechenden className-Paddings. FeaturePage verwendet diesen Rahmen für alle fünf Kern-Views; FeatureContent besitzt kein zusätzliches Seitenpadding. Dark-Tokens lokal sichern Kontrast bei gespeicherter Light-Einstellung.
+- [x] **TASK-ONYX-1.2**: TelemetryWidget/TelemetryGrid angelegt; FeaturePanel und MetricCard delegieren darauf. Service-Detail-Panels und Skeletons nutzen Widgets, Metrics-KPIs nutzen das gemeinsame Vier-Spalten-Grid. P95 ergänzt die bisher dreiteilige Service-KPI-Leiste. Kein separates Dashboard vorhanden: Startseite bleibt Services.
+- [x] **TASK-ONYX-1.3**: Logs/Traces verwenden dichte DataTable-Variante mit py-1/px-2, Mono-Typografie, dünnen Slate-Konturen und Zebra-Zeilen. Seitenheader ohne zusätzliche horizontale Insets, Picker am rechten Ende der Aktionszone; Services-Picker bewahrt URL-Zeitraum für Details, Katalog bleibt ausdrücklich zeitunabhängig.
+- [x] **TASK-ONYX-1.4**: Desktop-/Mobile-App-Sidebar mit Slate-Kanten. Frontend-Typecheck, SSR-/Wiring-Checks und Produktionsbuild erfolgreich (Build benötigte Sandbox-Freigabe wegen Windows EPERM). Keine visuelle Browser- oder Live-Daten-Regression behauptet.
+- [x] **TASK-ONYX-1.5**: Graphify inkrementell code-only aktualisiert: 496 Knoten / 1.785 Kanten, ohne semantische API-Kosten. CSS wird vom Code-Extractor nicht modelliert.
+- [ ] Vollständige visuelle Prüfung und Portals/Light-Theme-Prüfung; Detail-Sheets und Monitor-Editor-Formulare sind keine vollständig neu gestalteten Hauptansichten.
+
 - [ ] **TASK-VITE-0.1 [Scope und Freigabe-Gate]**: Dieser Stand ist ausschließlich ein Plan. Vor einer ausdrücklichen Freigabe werden keine Quellcode-, Konfigurations-, Dependency- oder Graphify-Änderungen umgesetzt.
 - [ ] **TASK-VITE-0.2 [Graphify-Voraussetzung]**: `graphify-out/graph.json` liegt zum Analysezeitpunkt nicht im Repository. Daher sind Graph-Aussagen, Importpfade, God Nodes, Zyklen und Duplikate noch nicht bestätigt. Nach Freigabe ist der Graph zunächst read-only auszuwerten; falls er weiterhin fehlt, ist seine Erzeugung separat freizugeben.
 - [ ] **TASK-VITE-0.3 [Aktueller Frontend-Scope]**: Der Scan findet derzeit eine Vite-Konfiguration unter `apps/frontend/vite.config.ts` und damit nur einen nachweisbaren Vite-Consumer. Eine Root-Auslagerung darf deshalb nicht allein aufgrund hypothetischer weiterer Apps erfolgen.

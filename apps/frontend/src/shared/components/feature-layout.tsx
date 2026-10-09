@@ -5,14 +5,16 @@ import { Card, CardHeader } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
+import { PageLayout } from '@/components/shared/page-layout';
+import { TelemetryWidget } from '@/components/shared/telemetry-widget';
 
 type LayoutProps = ComponentProps<'div'>;
 
 export function FeaturePage({ className, ...props }: LayoutProps) {
   return (
-    <div
+    <PageLayout
       className={cn(
-        'flex h-full min-h-0 min-w-0 flex-col overflow-hidden bg-background text-foreground',
+        'flex min-w-0 flex-col',
         className,
       )}
       {...props}
@@ -36,7 +38,7 @@ export function FeatureHeader({
   actions,
 }: HeaderProps) {
   return (
-    <header className="flex shrink-0 flex-col gap-3 border-b border-border bg-background px-4 py-3 lg:px-6 xl:flex-row xl:items-center">
+    <header className="flex shrink-0 flex-col gap-3 border-b border-border pb-3 xl:flex-row xl:items-center">
       <div className="flex min-h-10 min-w-0 flex-1 items-center gap-3">
         {leading && (
           <div className="flex shrink-0 items-center gap-1">{leading}</div>
@@ -52,7 +54,7 @@ export function FeatureHeader({
         </div>
       </div>
       {actions && (
-        <div className="flex min-h-9 max-w-full flex-wrap items-center gap-2">
+        <div className="flex min-h-9 max-w-full flex-wrap items-center justify-end gap-2 xl:ml-auto">
           {actions}
         </div>
       )}
@@ -63,7 +65,7 @@ export function FeatureHeader({
 export function FeatureBody({ className, ...props }: LayoutProps) {
   return (
     <div
-      className={cn('flex min-h-0 min-w-0 flex-1 overflow-hidden', className)}
+      className={cn('flex min-h-0 min-w-0 flex-1 gap-3', className)}
       {...props}
     />
   );
@@ -77,7 +79,7 @@ export function FeatureContent({
     <section
       data-slot="feature-content"
       className={cn(
-        'min-h-0 min-w-0 flex-1 overflow-auto p-4 lg:p-6',
+        'min-h-0 min-w-0 flex-1 space-y-4 overflow-auto',
         className,
       )}
       {...props}
@@ -90,7 +92,7 @@ export function FeaturePanel({
   ...props
 }: ComponentProps<typeof Card>) {
   return (
-    <Card className={cn('@container overflow-hidden shadow-none', className)} {...props} />
+    <TelemetryWidget className={cn('@container overflow-hidden', className)} {...props} />
   );
 }
 
@@ -126,7 +128,7 @@ export function FeatureSidebar({
     <aside
       aria-label={title}
       className={cn(
-        'hidden min-h-0 shrink-0 flex-col border-r border-border bg-muted/30 md:flex',
+        'hidden min-h-0 shrink-0 flex-col border-r border-border bg-card md:flex',
         open ? 'w-64' : 'w-12',
       )}
     >

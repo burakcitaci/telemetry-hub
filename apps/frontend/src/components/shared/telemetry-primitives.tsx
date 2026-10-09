@@ -1,6 +1,7 @@
 import type { ComponentProps } from 'react';
 import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
+import { TelemetryWidget } from './telemetry-widget';
 
 export type TelemetryStatus = 'neutral' | 'success' | 'warning' | 'critical';
 
@@ -70,10 +71,10 @@ export function MetricCard({
   ...props
 }: ComponentProps<typeof Card>) {
   return (
-    <Card
+    <TelemetryWidget
       {...props}
       className={cn(
-        'min-w-0 rounded-xl border border-border/60 bg-muted/30 p-3 text-foreground shadow-none',
+        'min-w-0',
         className,
       )}
     />

@@ -88,11 +88,12 @@ export function LogsView({
             </Alert>
           )}
 
-          <FeaturePanel className="p-4">
+          <FeaturePanel>
             {loading && logs.length === 0 && !error ? (
               <FeatureLoading />
             ) : filteredLogs.length > 0 ? (
               <DataTable
+                density="telemetry"
                 columns={columns}
                 data={filteredLogs}
                 searchPlaceholder="Search recent logs…"

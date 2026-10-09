@@ -97,11 +97,12 @@ export function TracesView({
               </Alert>
             )}
 
-            <FeaturePanel className="p-4">
+          <FeaturePanel>
               {loading && traces.length === 0 && !error ? (
                 <FeatureLoading />
               ) : filteredTraces.length > 0 ? (
-                <DataTable
+              <DataTable
+                density="telemetry"
                   columns={columns}
                   data={filteredTraces}
                   searchPlaceholder="Search recent traces…"

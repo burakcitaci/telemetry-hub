@@ -3,6 +3,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
+import { TelemetryWidget } from './telemetry-widget';
 
 interface ViewSkeletonProps {
   variant?: 'cards' | 'list';
@@ -22,7 +23,7 @@ export function ViewSkeleton({
       role="status"
       aria-busy="true"
       className={cn(
-        'space-y-4 bg-background p-4 text-foreground lg:p-6',
+        'space-y-4 text-foreground',
         className,
       )}
     >
@@ -33,14 +34,13 @@ export function ViewSkeleton({
         )}
         <div
           className={cn(
-            'grid gap-4',
-            variant === 'cards' && 'sm:grid-cols-2 xl:grid-cols-4',
+            'grid grid-cols-1 gap-3',
+            variant === 'cards' && 'sm:grid-cols-2 lg:grid-cols-4',
           )}
         >
           {[0, 1, 2, 3].map((index) => (
-            <div
+            <TelemetryWidget
               key={index}
-              className="rounded-xl border border-border bg-card p-4"
             >
               <Skeleton
                 className={cn(
@@ -48,7 +48,7 @@ export function ViewSkeleton({
                   variant === 'cards' ? 'h-32' : 'h-6',
                 )}
               />
-            </div>
+            </TelemetryWidget>
           ))}
         </div>
       </div>

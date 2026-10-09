@@ -6,8 +6,8 @@ export function PageLayout({ className, ...props }: ComponentProps<'div'>) {
     <div
       {...props}
       className={cn(
-        'w-full min-w-0 space-y-6 bg-background p-4 text-foreground lg:p-6',
         className,
+        'p-3 lg:p-4 w-full min-w-0 space-y-4 bg-background min-h-screen text-foreground',
       )}
     />
   );

@@ -23,7 +23,7 @@ export const columns: ColumnDef<TraceSummary>[] = [
       <DataTableColumnHeader column={column} title="Timestamp" />
     ),
     cell: ({ row }) => (
-      <span className="whitespace-nowrap text-xs text-muted-foreground">
+      <span className="whitespace-nowrap font-mono text-xs tracking-tight text-muted-foreground">
         {formatTelemetryTimestamp(row.original.Timestamp)}
       </span>
     ),
@@ -44,7 +44,7 @@ export const columns: ColumnDef<TraceSummary>[] = [
     ),
     cell: ({ row }) => (
       <span
-        className="block max-w-xl truncate text-xs"
+        className="block max-w-xl truncate font-mono text-xs tracking-tight"
         title={row.original.SpanName}
       >
         {row.original.SpanName}

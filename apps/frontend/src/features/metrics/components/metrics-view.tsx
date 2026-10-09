@@ -1,4 +1,5 @@
 import { FeatureRefreshButton } from '@/shared/components/feature-actions';
+import { TelemetryGrid } from '@/components/shared/telemetry-widget';
 import { FeatureHeader } from '@/components/shared/feature-header';
 import { QueryError, ViewSkeleton } from '@/components/shared/view-skeleton';
 import {
@@ -210,9 +211,9 @@ export function MetricsView({
 
         {/* Main */}
         <FeatureContent>
-          <div className="min-w-0">
+          <div className="min-w-0 space-y-4">
             {/* Filters + group by */}
-            <FeaturePanel className="mb-4">
+            <FeaturePanel>
               <FeaturePanelHeader>
                 <CardTitle className="text-sm font-medium">Filters</CardTitle>
                 <span className="text-xs text-muted-foreground">
@@ -279,7 +280,7 @@ export function MetricsView({
 
             {/* Stats */}
             {summaryStats && (
-              <div className="mb-4 grid grid-cols-2 gap-3 md:grid-cols-4">
+              <TelemetryGrid>
                 <MetricStatCard
                   label="Current"
                   value={formatValue(summaryStats.latest, activeUnit)}
@@ -299,11 +300,11 @@ export function MetricsView({
                   value={formatValue(summaryStats.min, activeUnit)}
                   color="text-success dark:text-success"
                 />
-              </div>
+              </TelemetryGrid>
             )}
 
             {/* Chart */}
-            <FeaturePanel className="mb-4">
+            <FeaturePanel>
               <FeaturePanelHeader>
                 <CardTitle className="text-sm font-medium">
                   Time Series

@@ -3,6 +3,8 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { AppSidebar, MobileAppSidebar } from '@/app/components/app-sidebar';
 import { ThemeProvider } from '@/app/components/theme-provider';
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
+import { PageLayout } from '@/components/shared/page-layout';
+import { ViewSkeleton } from '@/components/shared/view-skeleton';
 
 const TracesPage = lazy(() => import('@/features/traces'));
 const LogsPage = lazy(() => import('@/features/logs'));
@@ -19,9 +21,7 @@ function AppRoutes() {
       <SidebarInset className="h-dvh w-0 min-w-0 flex-1 overflow-hidden">
         <div className="min-h-0 flex-1 overflow-auto">
         <Suspense fallback={(
-          <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-            Loading view…
-          </div>
+          <PageLayout><ViewSkeleton showHeader /></PageLayout>
         )}>
           <Routes>
             <Route path="/" element={<ServicesPage />} />

@@ -49,7 +49,6 @@ export function TelemetryActions({
         <Icon className={cn('size-4', connected && 'text-success')} />
         {connected ? 'Stream connected' : 'Stream disconnected'}
       </span>
-      {children}
       <Button
         variant="outline"
         size="sm"
@@ -61,6 +60,7 @@ export function TelemetryActions({
         {generating ? 'Generating…' : 'Generate telemetry'}
       </Button>
       <FeatureRefreshButton {...refresh} />
+      {children}
     </>
   );
 }

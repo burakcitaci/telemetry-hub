@@ -23,7 +23,7 @@ export const columns: ColumnDef<LogRecord>[] = [
       <DataTableColumnHeader column={column} title="Timestamp" />
     ),
     cell: ({ row }) => (
-      <span className="whitespace-nowrap text-xs text-muted-foreground">
+      <span className="whitespace-nowrap font-mono text-xs tracking-tight text-muted-foreground">
         {formatTelemetryTimestamp(row.original.Timestamp)}
       </span>
     ),
@@ -53,7 +53,7 @@ export const columns: ColumnDef<LogRecord>[] = [
     ),
     cell: ({ row }) => (
       <span
-        className="block max-w-xl truncate text-xs"
+        className="block max-w-xl truncate font-mono text-xs tracking-tight"
         title={row.original.Body}
       >
         {row.original.Body}
@@ -66,7 +66,7 @@ export const columns: ColumnDef<LogRecord>[] = [
       <DataTableColumnHeader column={column} title="Trace ID" />
     ),
     cell: ({ row }) => (
-      <code className="whitespace-nowrap text-xs text-muted-foreground">
+      <code className="whitespace-nowrap font-mono text-xs tracking-tight text-muted-foreground">
         {row.original.TraceId ? `${row.original.TraceId.slice(0, 10)}…` : 'N/A'}
       </code>
     ),

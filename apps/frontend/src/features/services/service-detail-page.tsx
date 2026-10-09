@@ -25,7 +25,6 @@ import {
 import { Link, useParams, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import {
-  Card,
   CardContent,
   CardDescription,
   CardHeader,
@@ -34,6 +33,7 @@ import {
 import { TimeRangePicker } from '@/app/components/timer-range.picker';
 import { QueryError, ViewSkeleton } from '@/components/shared/view-skeleton';
 import { PageLayout } from '@/components/shared/page-layout';
+import { TelemetryWidget as Card } from '@/components/shared/telemetry-widget';
 import {
   DataValue,
   MetricCard,
@@ -77,7 +77,7 @@ function ServiceDetailPage() {
   return (
     <PageLayout>
       {/* Header */}
-      <header className="flex flex-wrap items-start justify-between gap-3">
+      <header className="flex flex-wrap items-start justify-between gap-3 border-b border-border pb-3">
         <div className="space-y-2">
           <Button asChild variant="ghost" size="sm" className="-ml-3">
             <Link to={{ pathname: '/', search }}>
@@ -131,7 +131,7 @@ function ServiceDetailPage() {
       ) : metrics ? (
         <>
           {/* Metric cards */}
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             <MetricCard className="flex items-center gap-3">
               <Activity className="h-5 w-5 text-primary" />
               <div>
@@ -163,10 +163,19 @@ function ServiceDetailPage() {
                 </p>
               </div>
             </MetricCard>
+            <MetricCard className="flex items-center gap-3">
+              <Clock className="h-5 w-5 text-warning" />
+              <div>
+                <DataValue className="text-2xl font-bold">
+                  {formatDuration(metrics.p95_duration)}
+                </DataValue>
+                <p className="text-sm text-muted-foreground">P95 span duration</p>
+              </div>
+            </MetricCard>
           </div>
 
           {/* Charts + summary */}
-          <div className="grid gap-4 lg:grid-cols-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 [&>*]:lg:col-span-2">
             <Card>
               <CardHeader>
                 <CardTitle className="text-base">Latency percentiles</CardTitle>
@@ -248,7 +257,7 @@ function ServiceDetailPage() {
             </CardHeader>
             <CardContent>
               {hasMetadata ? (
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                   <MetadataField
                     icon={<Tag className="h-3 w-3" />}
                     label="Type"
