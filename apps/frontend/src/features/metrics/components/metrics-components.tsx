@@ -1,5 +1,8 @@
 import React from 'react';
-import { FeaturePanel } from '@/shared/components/feature-layout';
+import {
+  DataValue,
+  MetricCard,
+} from '@/components/shared/telemetry-primitives';
 import { Series, formatValue } from '@/features/metrics/model';
 
 export const MetricStatCard: React.FC<{
@@ -8,22 +11,24 @@ export const MetricStatCard: React.FC<{
   change?: number;
   color?: string;
 }> = ({ label, value, change, color = 'text-foreground' }) => (
-  <FeaturePanel className="p-4">
+  <MetricCard>
     <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
       {label}
     </p>
     <div className="mt-1 flex items-baseline gap-2">
-      <p className={`text-2xl font-semibold tabular-nums ${color}`}>{value}</p>
+      <DataValue className={`text-2xl font-semibold ${color}`}>
+        {value}
+      </DataValue>
       {change !== undefined && Number.isFinite(change) && (
-        <span
+        <DataValue
           className={`text-xs font-medium ${change >= 0 ? 'text-success' : 'text-destructive'}`}
         >
           {change >= 0 ? '+' : ''}
           {change.toFixed(2)}%
-        </span>
+        </DataValue>
       )}
     </div>
-  </FeaturePanel>
+  </MetricCard>
 );
 
 export const CustomTooltip: React.FC<any> = ({
@@ -48,11 +53,11 @@ export const CustomTooltip: React.FC<any> = ({
           <span className="text-muted-foreground truncate max-w-[200px]">
             {entry.name}:
           </span>
-          <span className="ml-auto font-medium tabular-nums">
+          <DataValue className="ml-auto font-medium">
             {entry.value === null || entry.value === undefined
               ? '—'
               : formatValue(Number(entry.value), unit)}
-          </span>
+          </DataValue>
         </div>
       ))}
     </div>

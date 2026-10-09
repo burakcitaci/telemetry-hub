@@ -1,4 +1,5 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, ServiceUnavailableException } from '@nestjs/common';
+import { context, trace } from '@opentelemetry/api';
 import { ClickhouseService } from './clickhouse.service';
 import type { TelemetryListOptions } from './clickhouse.service';
 import { metricTimeWindow, type TelemetryTimeWindow } from './telemetry-time-window';
@@ -178,9 +179,13 @@ export class MetricsService {
             const rows = await this.query<RawRow>(sql, { serviceName, metricName, limit, ...timeWindow.params });
             this.logger.log(`[getMetricDetail:${label}] ${rows.length} rows for ${serviceName}/${metricName}`);
             return rows;
-        } catch (error) {
-            this.logger.error(`[getMetricDetail:${label}] ${(error as Error).message}`);
-            return [];
+        } catch (cause) {
+            const traceId = trace.getSpan(context.active())?.spanContext().traceId;
+            throw new ServiceUnavailableException({
+                code: 'TELEMETRY_QUERY_FAILED',
+                message: 'Metrik-Daten sind momentan nicht verfügbar.',
+                ...(traceId ? { traceId } : {}),
+            }, { cause: cause instanceof Error ? cause : new Error(String(cause)) });
         }
     };
 

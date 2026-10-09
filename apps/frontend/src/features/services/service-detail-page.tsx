@@ -34,6 +34,10 @@ import {
 import { TimeRangePicker } from '@/app/components/timer-range.picker';
 import { QueryError, ViewSkeleton } from '@/components/shared/view-skeleton';
 import { PageLayout } from '@/components/shared/page-layout';
+import {
+  DataValue,
+  MetricCard,
+} from '@/components/shared/telemetry-primitives';
 import { formatDuration } from '@/shared/lib/telemetry';
 import { ServiceMetadataSheet } from './components/service-metadata-sheet';
 import { EMPTY_METADATA, type ServiceMetadata } from './types';
@@ -128,39 +132,37 @@ function ServiceDetailPage() {
         <>
           {/* Metric cards */}
           <div className="grid gap-4 md:grid-cols-3">
-            <Card>
-              <CardContent className="flex items-center gap-3 p-5">
-                <Activity className="h-5 w-5 text-primary" />
-                <div>
-                  <p className="text-2xl font-bold">{requestCount}</p>
-                  <p className="text-sm text-muted-foreground">
-                    Requests ({timeRange})
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="flex items-center gap-3 p-5">
-                <AlertTriangle className="h-5 w-5 text-destructive" />
-                <div>
-                  <p className="text-2xl font-bold">{errorRate.toFixed(2)}%</p>
-                  <p className="text-sm text-muted-foreground">Error rate</p>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="flex items-center gap-3 p-5">
-                <Clock className="h-5 w-5 text-success" />
-                <div>
-                  <p className="text-2xl font-bold">
-                    {formatDuration(metrics.avg_duration)}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    Average span duration
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+            <MetricCard className="flex items-center gap-3">
+              <Activity className="h-5 w-5 text-primary" />
+              <div>
+                <DataValue className="text-2xl font-bold">
+                  {requestCount}
+                </DataValue>
+                <p className="text-sm text-muted-foreground">
+                  Requests ({timeRange})
+                </p>
+              </div>
+            </MetricCard>
+            <MetricCard className="flex items-center gap-3">
+              <AlertTriangle className="h-5 w-5 text-destructive" />
+              <div>
+                <DataValue className="text-2xl font-bold">
+                  {errorRate.toFixed(2)}%
+                </DataValue>
+                <p className="text-sm text-muted-foreground">Error rate</p>
+              </div>
+            </MetricCard>
+            <MetricCard className="flex items-center gap-3">
+              <Clock className="h-5 w-5 text-success" />
+              <div>
+                <DataValue className="text-2xl font-bold">
+                  {formatDuration(metrics.avg_duration)}
+                </DataValue>
+                <p className="text-sm text-muted-foreground">
+                  Average span duration
+                </p>
+              </div>
+            </MetricCard>
           </div>
 
           {/* Charts + summary */}
@@ -218,7 +220,7 @@ function ServiceDetailPage() {
                     className="flex items-center justify-between px-4 py-3"
                   >
                     <span className="text-muted-foreground">{label}</span>
-                    <span className="font-medium">{value}</span>
+                    <DataValue className="font-medium">{value}</DataValue>
                   </div>
                 ))}
               </CardContent>

@@ -183,6 +183,29 @@ $env:PYTHONPATH = Join-Path (Get-Location) '.codex-tools/graphify'
 
 ## Datadog-UX – Header-Schnittstelle
 
+### TASK-BACKEND-1.1 – Metrics-Detailfehler sichtbar machen
+
+- [x] Separaten Backend-Graphen vor Änderung abgefragt; Frontend-Graph unverändert.
+- [x] getMetricDetail/runQuery wirft ServiceUnavailableException mit stabilem Code TELEMETRY_QUERY_FAILED und sicherer Meldung statt return []. Aktive Trace-ID wird über OpenTelemetry angehängt; interner Fehler bleibt als cause erhalten.
+- [x] Parallelität über bestehendes Promise.all und Success-Logging beibehalten; redundantes Fehlerlogging im lokalen Catch entfernt.
+- [x] Backend-Typecheck sowie Erfolg-/Fehlerprüfungen erfolgreich: alle drei Queries gestartet, 503 statt leerem Erfolg, Trace-ID mit aktivem Kontext, kein SQL-/Fehlerdetail im HTTP-Body.
+- [ ] Separater Katalog-Catch bleibt außerhalb dieses gezielten Auftrags und muss ebenfalls Fail-Closed migriert werden.
+
+### TASK-UX-3.2 – High-Density-Primitives in Features eingebunden
+
+- [x] Graphify-Abgleich der KPI-/Status-Komponenten vor Migration.
+- [x] Metrics-KPI-Karten nutzen MetricCard und DataValue; Tooltip-/Change-Werte ebenfalls Monospace. Bestehende Farbzuweisungen und Berechnungen unverändert.
+- [x] Drei Service-KPI-Karten von CardContent p-5 auf direkte MetricCard-Inhalte p-3 migriert; Summary-Zahlen verwenden DataValue. Keine erfundenen Gesundheits-/Warnschwellen.
+- [x] Bestehende Monitor-StatusBadge-Schnittstelle delegiert an globale Primitive: OK→success, Warn→warning, Alert→critical, No Data/neutral→neutral. Labels bleiben erhalten; No Data wird nicht als gesund dargestellt.
+- [x] Frontend-Typecheck, Primitive-/Metrics-Zustands-SSR-Checks sowie gezielte Density-/Status-Migrationschecks erfolgreich. Kein vollständiger visueller Regressionstest behauptet.
+
+### TASK-UX-3.1 – High-Density-Telemetrie-Primitives
+
+- [x] Graphify-Abgleich der vorhandenen Card-/Badge-/cn-Primitives; success/warning/destructive-Tokens direkt im CSS-Theme geprüft.
+- [x] telemetry-primitives.tsx mit DataValue (Monospace/Tabularzahlen), StatusBadge (kompakt, Textstatus statt reinem Farbsignal) und MetricCard (p-3, border-border/60, bg-muted/30). Keine neuen Dependencies oder CSS-Farben.
+- [x] Frontend-Typecheck und SSR-Prüfungen für Zustandsfarben, Standardstatus-Texte, native Props und kompaktes Card-Styling erfolgreich.
+- [ ] Bestehende Feature-Komponenten nicht automatisch migriert; Inhalte direkt in MetricCard platzieren, um zusätzliches CardContent-/CardHeader-Padding zu vermeiden.
+
 ### TASK-SERVICES-1.3 / 1.4 – Katalog bereinigt und Query-Navigation
 
 - [x] Graphify-Abgleich und Quellenprüfung vor Änderung. Attrappen-Sidebar mit statischen Facetten/Checkboxen, doppelte ungebundene Suchfelder, List/Map/Hide/All/Learn-More-Attrappen, statisches Datum und wirkungsloser Favoritenstern entfernt.

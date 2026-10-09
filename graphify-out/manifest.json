@@ -204,10 +204,10 @@
     "semantic_hash": "4eb94746b0ce44743a96ea51fb98eb35"
   },
   "apps/frontend/src/features/services/service-detail-page.tsx": {
-    "mtime": 1791531099.5891511,
-    "seen": 1791531213.9507828,
-    "ast_hash": "40d886a1f6c97fc84e0ea0ba3a08faa4",
-    "semantic_hash": "40d886a1f6c97fc84e0ea0ba3a08faa4"
+    "mtime": 1791532643.285275,
+    "seen": 1791532716.4075756,
+    "ast_hash": "8f29bb7cc08e700f7fa533a7214b8e37",
+    "semantic_hash": "8f29bb7cc08e700f7fa533a7214b8e37"
   },
   "apps/frontend/src/features/services/services-page.tsx": {
     "mtime": 1791494453.8754506,
@@ -384,10 +384,10 @@
     "semantic_hash": "4b2883dd3db4644ce721ac62ab350bf1"
   },
   "apps/frontend/src/features/metrics/components/metrics-components.tsx": {
-    "mtime": 1791496305.116559,
-    "seen": 1791496395.2150393,
-    "ast_hash": "21be386d1ed3977aa54ec1707b2b525f",
-    "semantic_hash": "21be386d1ed3977aa54ec1707b2b525f"
+    "mtime": 1791532643.1780345,
+    "seen": 1791532716.2863314,
+    "ast_hash": "a81fc17baf822657a353769fecd3d842",
+    "semantic_hash": "a81fc17baf822657a353769fecd3d842"
   },
   "apps/frontend/src/features/metrics/components/metrics-view.tsx": {
     "mtime": 1791530054.8163576,
@@ -408,10 +408,10 @@
     "semantic_hash": "4a6f1cf869165759691b88a245f36c4e"
   },
   "apps/frontend/src/features/monitors/components/monitors-components.tsx": {
-    "mtime": 1791496728.4635649,
-    "seen": 1791496759.4949527,
-    "ast_hash": "cee2664f8b78892601261f6791dc7d7b",
-    "semantic_hash": "cee2664f8b78892601261f6791dc7d7b"
+    "mtime": 1791532734.847019,
+    "seen": 1791532758.6298175,
+    "ast_hash": "60aeb660fed991482a2a0027aeaebef1",
+    "semantic_hash": "60aeb660fed991482a2a0027aeaebef1"
   },
   "apps/frontend/src/features/monitors/components/monitors-view.tsx": {
     "mtime": 1791496884.3365343,
@@ -550,5 +550,11 @@
     "seen": 1791531213.9395359,
     "ast_hash": "c43daaf948fe06c41470abb65d40d07c",
     "semantic_hash": "c43daaf948fe06c41470abb65d40d07c"
+  },
+  "apps/frontend/src/components/shared/telemetry-primitives.tsx": {
+    "mtime": 1791531701.765201,
+    "seen": 1791531747.5381746,
+    "ast_hash": "81d2428f8a4a68dd3e265307378e1401",
+    "semantic_hash": "81d2428f8a4a68dd3e265307378e1401"
   }
 }

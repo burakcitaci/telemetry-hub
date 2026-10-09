@@ -1,3 +1,4 @@
+import { StatusBadge as TelemetryStatusBadge } from '@/components/shared/telemetry-primitives';
 import React, { useMemo, useState } from 'react';
 import {
   Activity,
@@ -31,7 +32,6 @@ import {
   MonitorSeries,
   synthesizeSeries,
   MonitorEvent,
-  statusTone,
   statusBg,
   statusLabel,
   formatRelative,
@@ -56,27 +56,21 @@ export const StatusDot: React.FC<{
 
 export const StatusBadge: React.FC<{ status: MonitorStatus }> = ({
   status,
-}) => {
-  const tone = statusTone(status);
-  const cls =
-    tone === 'success'
-      ? 'bg-success/15 text-success dark:text-success border-success/30'
-      : tone === 'warning'
-        ? 'bg-warning/15 text-warning dark:text-warning border-warning/30'
-        : tone === 'error'
-          ? 'bg-destructive/15 text-destructive dark:text-destructive border-destructive/30'
-          : tone === 'info'
-            ? 'bg-primary/15 text-primary dark:text-primary border-primary/30'
-            : 'bg-muted/15 text-muted-foreground dark:text-muted-foreground border-border/30';
-  return (
-    <span
-      className={`inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-xs font-medium ${cls}`}
-    >
-      <span className={`h-1.5 w-1.5 rounded-full ${statusBg(status)}`} />
-      {statusLabel(status)}
-    </span>
-  );
-};
+}) => (
+  <TelemetryStatusBadge
+    status={
+      status === 'OK'
+        ? 'success'
+        : status === 'Warn'
+          ? 'warning'
+          : status === 'Alert'
+            ? 'critical'
+            : 'neutral'
+    }
+  >
+    {statusLabel(status)}
+  </TelemetryStatusBadge>
+);
 
 export const MutedBadge: React.FC = () => (
   <span className="inline-flex items-center gap-1 rounded-full border border-border/30 bg-muted/15 px-2 py-0.5 text-xs font-medium text-muted-foreground dark:text-muted-foreground">
