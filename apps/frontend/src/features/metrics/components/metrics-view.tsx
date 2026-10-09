@@ -1,8 +1,9 @@
-import { FeatureRefreshButton } from '@/shared/components/feature-actions';
-import { EnvironmentFilter } from '@/shared/components/environment-filter';
-import { TelemetryGrid } from '@/components/shared/telemetry-widget';
-import { FeatureHeader } from '@/components/shared/feature-header';
-import { QueryError, ViewSkeleton } from '@/components/shared/view-skeleton';
+import { FeatureRefreshButton } from "@/shared/components/feature-actions";
+import { useState } from "react";
+import { EnvironmentFilter } from "@/shared/components/environment-filter";
+import { TelemetryGrid } from "@/components/shared/telemetry-widget";
+import { FeatureHeader } from "@/components/shared/feature-header";
+import { QueryError, ViewSkeleton } from "@/components/shared/view-skeleton";
 import {
   FeaturePage,
   FeatureBody,
@@ -11,9 +12,9 @@ import {
   FeaturePanelHeader,
   FeatureSidebar,
   FeatureSearch,
-} from '@/shared/components/feature-layout';
-import type { useMetrics } from '../hooks/use-metrics';
-import { Checkbox } from '@/components/ui/checkbox';
+} from "@/shared/components/feature-layout";
+import type { useMetrics } from "../hooks/use-metrics";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   BarChart,
   Bar,
@@ -26,7 +27,7 @@ import {
   ResponsiveContainer,
   ComposedChart,
   Area,
-} from 'recharts';
+} from "recharts";
 import {
   AlertCircle,
   ArrowLeft,
@@ -35,19 +36,19 @@ import {
   Info,
   PanelLeft,
   RefreshCw,
-} from 'lucide-react';
-import { DataTable } from '@/shared/components/data-table';
-import { FacetQueryBar } from '@/shared/components/facet-query-bar';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
-import { CardContent, CardTitle } from '@/components/ui/card';
+} from "lucide-react";
+import { DataTable } from "@/shared/components/data-table";
+import { FacetQueryBar } from "@/shared/components/facet-query-bar";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { CardContent, CardTitle } from "@/components/ui/card";
 
-import { makeSeriesId, formatValue } from '@/features/metrics/model';
+import { makeSeriesId, formatValue } from "@/features/metrics/model";
 import {
   MetricStatCard,
   CustomTooltip,
   SeriesLegend,
-} from '@/features/metrics/components/metrics-components';
+} from "@/features/metrics/components/metrics-components";
 
 type MetricsViewProps = ReturnType<typeof useMetrics>;
 
@@ -94,18 +95,20 @@ export function MetricsView({
   selectedNotInCatalog,
   columns,
 }: MetricsViewProps) {
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const isLoading = catalogLoading || seriesLoading;
   const retryFetch = () => setRefreshTick((value) => value + 1);
   return (
     <FeaturePage>
       <FeatureHeader
         title="Metrics"
+        onFiltersOpen={() => setFiltersOpen(true)}
         timeRange={timeRange}
         onTimeRangeChange={setTimeRange}
-        description={<>{selectedMetric?.metricName ?? 'Select a metric'}</>}
+        description={<>{selectedMetric?.metricName ?? "Select a metric"}</>}
         children={
           <>
-            {' '}
+            {" "}
             <Button
               variant="ghost"
               size="icon"
@@ -118,28 +121,28 @@ export function MetricsView({
             <Button
               variant="ghost"
               size="icon"
-              className="shrink-0"
-              aria-label={sidebarOpen ? 'Hide sidebar' : 'Show sidebar'}
-              title={sidebarOpen ? 'Hide sidebar' : 'Show sidebar'}
+              className="hidden shrink-0 lg:inline-flex"
+              aria-label={sidebarOpen ? "Hide sidebar" : "Show sidebar"}
+              title={sidebarOpen ? "Hide sidebar" : "Show sidebar"}
               onClick={() => setSidebarOpen((v) => !v)}
             >
               <PanelLeft className="h-4 w-4" />
-            </Button>{' '}
+            </Button>{" "}
           </>
         }
         actions={
           <>
             <Button
-              variant={autoRefresh ? 'default' : 'outline'}
+              variant={autoRefresh ? "default" : "outline"}
               size="sm"
               onClick={() => setAutoRefresh((v) => !v)}
               className="gap-1.5"
             >
               <RefreshCw
-                className={`h-3.5 w-3.5 ${seriesLoading ? 'animate-spin' : ''}`}
+                className={`h-3.5 w-3.5 ${seriesLoading ? "animate-spin" : ""}`}
               />
               <span className="sr-only sm:not-sr-only">
-                {autoRefresh ? 'Auto' : 'Manual'}
+                {autoRefresh ? "Auto" : "Manual"}
               </span>
             </Button>
             <FeatureRefreshButton
@@ -154,6 +157,8 @@ export function MetricsView({
       <FeatureBody>
         {/* Metric catalog sidebar */}
         <FeatureSidebar
+          mobileOpen={filtersOpen}
+          onMobileOpenChange={setFiltersOpen}
           title="Metrics"
           open={sidebarOpen}
           onOpenChange={setSidebarOpen}
@@ -166,7 +171,7 @@ export function MetricsView({
           />
           <p className="my-3 text-xs text-muted-foreground">
             {filteredCatalog.length} metric
-            {filteredCatalog.length === 1 ? '' : 's'}
+            {filteredCatalog.length === 1 ? "" : "s"}
           </p>
           {catalogError && (
             <QueryError
@@ -190,19 +195,19 @@ export function MetricsView({
                   }}
                   className={`flex w-full items-center gap-2.5 rounded-md px-3 py-1.5 text-left transition-colors ${
                     isSelected
-                      ? 'bg-accent text-accent-foreground'
-                      : 'text-muted-foreground hover:bg-accent/50'
+                      ? "bg-accent text-accent-foreground"
+                      : "text-muted-foreground hover:bg-accent/50"
                   }`}
                 >
                   <span
-                    className={`h-2.5 w-2.5 shrink-0 rounded-full ${isSelected ? 'bg-primary' : 'bg-muted/60'}`}
+                    className={`h-2.5 w-2.5 shrink-0 rounded-full ${isSelected ? "bg-primary" : "bg-muted/60"}`}
                   />
                   <span className="min-w-0 flex-1">
                     <span className="block truncate font-mono text-xs">
                       {m.metricName}
                     </span>
                     <span className="block truncate text-[10px] opacity-70">
-                      {m.serviceName ?? '—'} · {m.metricType}
+                      {m.serviceName ?? "—"} · {m.metricType}
                     </span>
                   </span>
                 </button>
@@ -220,9 +225,9 @@ export function MetricsView({
                 <CardTitle className="text-sm font-medium">Filters</CardTitle>
                 <span className="text-xs text-muted-foreground">
                   {filteredRecords.length} of {records.length} records · grouped
-                  by{' '}
+                  by{" "}
                   <code className="font-mono">
-                    {groupBy.join(' + ') || 'nothing'}
+                    {groupBy.join(" + ") || "nothing"}
                   </code>
                 </span>
               </FeaturePanelHeader>
@@ -251,8 +256,8 @@ export function MetricsView({
                         }
                         className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs transition-colors ${
                           on
-                            ? 'border-transparent bg-accent text-accent-foreground'
-                            : 'border-muted-foreground/30 text-muted-foreground hover:border-muted-foreground/60'
+                            ? "border-transparent bg-accent text-accent-foreground"
+                            : "border-muted-foreground/30 text-muted-foreground hover:border-muted-foreground/60"
                         }`}
                       >
                         {facet.label}
@@ -273,7 +278,8 @@ export function MetricsView({
               <Alert variant="destructive" className="mb-4">
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription className="text-xs">
-                  There is no metric data available for <code>{selectedId}</code> within selected time range.
+                  There is no metric data available for{" "}
+                  <code>{selectedId}</code> within selected time range.
                 </AlertDescription>
               </Alert>
             )}
@@ -327,14 +333,14 @@ export function MetricsView({
                     {visibleSeries.length} of {series.length}
                   </span>
                   <div className="flex flex-wrap items-center gap-1 rounded-md border border-border p-0.5">
-                    {(['line', 'bar', 'area', 'composed'] as const).map((t) => (
+                    {(["line", "bar", "area", "composed"] as const).map((t) => (
                       <button
                         key={t}
                         onClick={() => setChartType(t)}
                         className={`rounded px-2.5 py-1 text-xs font-medium capitalize transition-colors ${
                           chartType === t
-                            ? 'bg-accent text-accent-foreground'
-                            : 'text-muted-foreground hover:text-foreground'
+                            ? "bg-accent text-accent-foreground"
+                            : "text-muted-foreground hover:text-foreground"
                         }`}
                       >
                         {t}
@@ -344,7 +350,7 @@ export function MetricsView({
                 </div>
               </FeaturePanelHeader>
               <CardContent className="pt-0">
-                <div className={isLoading ? 'w-full' : 'h-[220px] w-full'}>
+                <div className={isLoading ? "w-full" : "h-[220px] w-full"}>
                   {isLoading ? (
                     <ViewSkeleton
                       variant="cards"
@@ -361,8 +367,8 @@ export function MetricsView({
                   ) : visibleSeries.length === 0 ? (
                     <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
                       {series.length === 0
-                        ? 'No data for the current filters'
-                        : 'All series hidden — click a legend item below'}
+                        ? "No data for the current filters"
+                        : "All series hidden — click a legend item below"}
                     </div>
                   ) : chartData.length === 0 ? (
                     <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
@@ -370,7 +376,7 @@ export function MetricsView({
                     </div>
                   ) : (
                     <ResponsiveContainer width="100%" height="100%">
-                      {chartType === 'composed' ? (
+                      {chartType === "composed" ? (
                         <ComposedChart
                           data={chartData}
                           margin={{ top: 4, right: 8, left: 0, bottom: 0 }}
@@ -423,7 +429,7 @@ export function MetricsView({
                             ),
                           )}
                         </ComposedChart>
-                      ) : chartType === 'bar' ? (
+                      ) : chartType === "bar" ? (
                         <BarChart
                           data={chartData}
                           margin={{ top: 4, right: 8, left: 0, bottom: 0 }}
@@ -462,7 +468,7 @@ export function MetricsView({
                             />
                           ))}
                         </BarChart>
-                      ) : chartType === 'area' ? (
+                      ) : chartType === "area" ? (
                         <ComposedChart
                           data={chartData}
                           margin={{ top: 4, right: 8, left: 0, bottom: 0 }}
@@ -471,7 +477,7 @@ export function MetricsView({
                             {visibleSeries.map((s) => (
                               <linearGradient
                                 key={s.id}
-                                id={`g-${s.id.replace(/[^a-z0-9]/gi, '')}`}
+                                id={`g-${s.id.replace(/[^a-z0-9]/gi, "")}`}
                                 x1="0"
                                 y1="0"
                                 x2="0"
@@ -522,7 +528,7 @@ export function MetricsView({
                               name={s.label}
                               stroke={s.color}
                               strokeWidth={1.5}
-                              fill={`url(#g-${s.id.replace(/[^a-z0-9]/gi, '')})`}
+                              fill={`url(#g-${s.id.replace(/[^a-z0-9]/gi, "")})`}
                               connectNulls
                             />
                           ))}
@@ -605,13 +611,13 @@ export function MetricsView({
               <Alert className="mb-4">
                 <Info className="h-4 w-4" />
                 <AlertDescription className="font-mono text-xs break-all">
-                  {`${metricType}:${selectedMetric.metricName}{service:${selectedMetric.serviceName ?? '*'}}`}
+                  {`${metricType}:${selectedMetric.metricName}{service:${selectedMetric.serviceName ?? "*"}}`}
                   {Object.entries(facetSelection).length > 0 && (
                     <>
-                      {' · '}
+                      {" · "}
                       {Object.entries(facetSelection)
-                        .map(([k, v]) => `${k} in (${v.join(', ')})`)
-                        .join(' · ')}
+                        .map(([k, v]) => `${k} in (${v.join(", ")})`)
+                        .join(" · ")}
                     </>
                   )}
                 </AlertDescription>

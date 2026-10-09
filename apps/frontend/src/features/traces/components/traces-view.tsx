@@ -1,23 +1,23 @@
-import { TelemetryActions } from '@/shared/components/feature-actions';
+import { TelemetryActions } from "@/shared/components/feature-actions";
+import { useState } from "react";
+import { FeatureHeader } from "@/components/shared/feature-header";
 import {
   FeaturePage,
-  FeatureHeader,
   FeatureBody,
   FeatureContent,
   FeaturePanel,
   FeatureLoading,
   FeatureEmptyState,
-} from '@/shared/components/feature-layout';
-import type { useTraces } from '../hooks/use-traces';
-import { Activity } from 'lucide-react';
-import { TraceDetailSheet } from '@/features/traces/components/trace-detail-sheet';
-import { DataTable } from '@/shared/components/data-table';
-import { TelemetrySidebar } from '@/shared/components/telemetry-sidebar';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
-import { TELEMETRY_FETCH_LIMIT } from '@/shared/lib/telemetry';
-import { TimeRangePicker } from '@/app/components/timer-range.picker';
-import { columns } from '@/features/traces/components/traces-components';
+} from "@/shared/components/feature-layout";
+import type { useTraces } from "../hooks/use-traces";
+import { Activity } from "lucide-react";
+import { TraceDetailSheet } from "@/features/traces/components/trace-detail-sheet";
+import { DataTable } from "@/shared/components/data-table";
+import { TelemetrySidebar } from "@/shared/components/telemetry-sidebar";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { TELEMETRY_FETCH_LIMIT } from "@/shared/lib/telemetry";
+import { columns } from "@/features/traces/components/traces-components";
 
 type TracesViewProps = ReturnType<typeof useTraces>;
 
@@ -43,19 +43,22 @@ export function TracesView({
   facetOptions,
   filteredTraces,
 }: TracesViewProps) {
+  const [filtersOpen, setFiltersOpen] = useState(false);
   return (
     <FeaturePage>
       {/* ── Header ────────────────────────────────────────────────────────── */}
       <FeatureHeader
         title="Traces"
-        icon={Activity}
+        timeRange={timeRange}
+        onTimeRangeChange={setTimeRange}
+        onFiltersOpen={() => setFiltersOpen(true)}
         description={
           <>
-            {filteredTraces.length} visible from the latest {traces.length}{' '}
+            {filteredTraces.length} visible from the latest {traces.length}{" "}
             traces
             {traces.length === TELEMETRY_FETCH_LIMIT
               ? ` (capped at ${TELEMETRY_FETCH_LIMIT})`
-              : ''}
+              : ""}
           </>
         }
         actions={
@@ -66,9 +69,7 @@ export function TracesView({
             loading={loading}
             onRefresh={() => void loadTraces()}
             label="Refresh traces"
-          >
-            <TimeRangePicker value={timeRange} onChange={setTimeRange} />
-          </TelemetryActions>
+          ></TelemetryActions>
         }
       />
 
@@ -77,6 +78,8 @@ export function TracesView({
         {/* Sidebar wrapper — matches metrics page look:
             expanded = 256/288px, collapsed = 44px icon rail */}
         <TelemetrySidebar
+          mobileOpen={filtersOpen}
+          onMobileOpenChange={setFiltersOpen}
           environmentSource="traces"
           services={services}
           selectedServices={serviceFilters}
@@ -98,12 +101,12 @@ export function TracesView({
               </Alert>
             )}
 
-          <FeaturePanel>
+            <FeaturePanel>
               {loading && traces.length === 0 && !error ? (
                 <FeatureLoading />
               ) : filteredTraces.length > 0 ? (
-              <DataTable
-                density="telemetry"
+                <DataTable
+                  density="telemetry"
                   columns={columns}
                   data={filteredTraces}
                   searchPlaceholder="Search recent traces…"
@@ -120,8 +123,8 @@ export function TracesView({
                   <div className="max-w-md space-y-3">
                     <p className="text-sm text-muted-foreground">
                       {traces.length > 0
-                        ? 'No recent traces match the selected filters.'
-                        : 'No traces have been stored yet. Generate a request to exercise the instrumented backend.'}
+                        ? "No recent traces match the selected filters."
+                        : "No traces have been stored yet. Generate a request to exercise the instrumented backend."}
                     </p>
                     {traces.length === 0 && (
                       <Button
@@ -129,7 +132,7 @@ export function TracesView({
                         disabled={generating}
                       >
                         <Activity className="mr-2 h-4 w-4" />
-                        {generating ? 'Generating…' : 'Generate telemetry'}
+                        {generating ? "Generating…" : "Generate telemetry"}
                       </Button>
                     )}
                   </div>

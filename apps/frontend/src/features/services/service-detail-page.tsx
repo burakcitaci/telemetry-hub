@@ -33,7 +33,7 @@ import {
 import { TimeRangePicker } from '@/app/components/timer-range.picker';
 import { QueryError, ViewSkeleton } from '@/components/shared/view-skeleton';
 import { PageLayout } from '@/components/shared/page-layout';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { EnvironmentFilter } from '@/shared/components/environment-filter';
 import { TelemetryWidget as Card } from '@/components/shared/telemetry-widget';
 import {
   DataValue,
@@ -54,7 +54,7 @@ function numberValue(value: unknown): number {
 function ServiceDetailPage() {
   const { serviceName = '' } = useParams();
   const { search } = useLocation();
-  const { metrics, loading, error, timeRange, setTimeRange, env, setEnv, retry } =
+  const { metrics, loading, error, timeRange, setTimeRange, retry } =
     useServiceSummary(serviceName);
   const [sheetOpen, setSheetOpen] = useState(false);
 
@@ -100,16 +100,9 @@ function ServiceDetailPage() {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <Select value={env} onValueChange={setEnv}>
-            <SelectTrigger aria-label="Environment" className="h-9 w-36">
-              <SelectValue placeholder="Environment" />
-            </SelectTrigger>
-            <SelectContent>
-              {[...new Set(['production', 'staging', 'dev', env])].map((value) => (
-                <SelectItem key={value} value={value}>{value}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="w-52 max-w-full">
+            <EnvironmentFilter source="traces" />
+          </div>
           <TimeRangePicker value={timeRange} onChange={setTimeRange} />
           {/* Setup & Config tab-like button */}
           <Button

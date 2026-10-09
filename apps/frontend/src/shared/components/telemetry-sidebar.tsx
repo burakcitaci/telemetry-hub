@@ -1,7 +1,7 @@
-import { useState } from 'react';
-import { EnvironmentFilter } from './environment-filter';
-import type { EnvironmentSource } from '../hooks/use-environments';
-import { FeatureSidebar } from '@/shared/components/feature-layout';
+import { useId, useState } from "react";
+import { EnvironmentFilter } from "./environment-filter";
+import type { EnvironmentSource } from "../hooks/use-environments";
+import { FeatureSidebar } from "@/shared/components/feature-layout";
 import {
   AlertTriangle,
   CheckCircle,
@@ -11,26 +11,18 @@ import {
   Clock,
   Info,
   Server,
-} from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from '@/components/ui/sheet';
+} from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
 
 export interface FacetOption {
   value: string;
   label: string;
   count: number;
-  tone?: 'success' | 'warning' | 'error' | 'info' | 'neutral';
+  tone?: "success" | "warning" | "error" | "info" | "neutral";
 }
 
 interface TelemetrySidebarProps {
@@ -49,24 +41,26 @@ interface TelemetrySidebarProps {
   onCollapsedChange?: (collapsed: boolean) => void;
   /** Optional — uppercase label shown next to the collapse icon. Defaults to "Filters". */
   title?: string;
+  mobileOpen?: boolean;
+  onMobileOpenChange?: (open: boolean) => void;
 }
 
 const timeRanges = [
-  { value: '5m', label: 'Last 5 minutes' },
-  { value: '15m', label: 'Last 15 minutes' },
-  { value: '1h', label: 'Last hour' },
-  { value: '6h', label: 'Last 6 hours' },
-  { value: '24h', label: 'Last 24 hours' },
+  { value: "5m", label: "Last 5 minutes" },
+  { value: "15m", label: "Last 15 minutes" },
+  { value: "1h", label: "Last hour" },
+  { value: "6h", label: "Last 6 hours" },
+  { value: "24h", label: "Last 24 hours" },
 ];
 
-function FacetIcon({ tone }: { tone: FacetOption['tone'] }) {
-  if (tone === 'success')
+function FacetIcon({ tone }: { tone: FacetOption["tone"] }) {
+  if (tone === "success")
     return <CheckCircle className="h-3 w-3 text-success" />;
-  if (tone === 'warning')
+  if (tone === "warning")
     return <AlertTriangle className="h-3 w-3 text-warning" />;
-  if (tone === 'error')
+  if (tone === "error")
     return <AlertTriangle className="h-3 w-3 text-destructive" />;
-  if (tone === 'info') return <Info className="h-3 w-3 text-primary" />;
+  if (tone === "info") return <Info className="h-3 w-3 text-primary" />;
   return <Circle className="h-3 w-3 text-muted-foreground" />;
 }
 
@@ -83,6 +77,8 @@ function FilterPanel({
   idPrefix,
   environmentSource,
 }: TelemetrySidebarProps & { idPrefix: string }) {
+  const instanceId = useId();
+  idPrefix = `${idPrefix}-${instanceId}`;
   const [timeRangeExpanded, setTimeRangeExpanded] = useState(true);
   const [facetsExpanded, setFacetsExpanded] = useState(true);
   const [servicesExpanded, setServicesExpanded] = useState(true);
@@ -102,7 +98,7 @@ function FilterPanel({
 
   return (
     <ScrollArea className="min-h-0 flex-1">
-      <div className={idPrefix === 'desktop' ? 'space-y-2' : 'space-y-2 p-4'}>
+      <div className={idPrefix === "desktop" ? "space-y-2" : "space-y-2 p-4"}>
         {environmentSource && <EnvironmentFilter source={environmentSource} />}
         <section>
           <Button
@@ -239,8 +235,10 @@ export function TelemetrySidebar({
   onTimeRangeSelect,
   collapsed,
   onCollapsedChange,
-  title = 'Filters',
+  title = "Filters",
   environmentSource,
+  mobileOpen,
+  onMobileOpenChange,
 }: TelemetrySidebarProps) {
   const [internalCollapsed, setInternalCollapsed] = useState(false);
 
@@ -266,28 +264,10 @@ export function TelemetrySidebar({
 
   return (
     <>
-      {/* Mobile sheet (unchanged) */}
-      <Sheet>
-        <SheetTrigger asChild>
-          <span />
-        </SheetTrigger>
-        <SheetContent
-          side="left"
-          className="flex w-[min(20rem,calc(100vw-3rem))] flex-col gap-0 p-0"
-        >
-          <SheetHeader className="border-b border-border px-4 py-3 text-left">
-            <SheetTitle className="text-sm">Filters</SheetTitle>
-            <SheetDescription className="sr-only">
-              Filter telemetry by time range, {facetTitle.toLowerCase()}, and
-              service.
-            </SheetDescription>
-          </SheetHeader>
-          <FilterPanel {...filterProps} idPrefix="mobile" />
-        </SheetContent>
-      </Sheet>
-
       {/* Desktop sidebar — matches the metrics page visual style */}
       <FeatureSidebar
+        mobileOpen={mobileOpen}
+        onMobileOpenChange={onMobileOpenChange}
         title={title}
         open={!isCollapsed}
         onOpenChange={(open) => setCollapsed(!open)}

@@ -19,6 +19,22 @@
 
 ## Kontext
 
+### TASK-RESPONSIVE-UI-1.1 – Einheitliche Feature-Header und mobile Filter
+
+- [x] Graphify-Abgleich: zwei Header-Implementierungen, md-only Sidebar, leere SheetTrigger bei Logs/Traces und fehlender mobiler Toggle bei Metrics erkannt.
+- [x] Services/Logs/Traces/Metrics verwenden components/shared/feature-header mit integriertem TimeRangePicker und rahmenlosem lg:hidden Filter-Button.
+- [x] FeatureBody nutzt responsives zweispaltiges Grid; FeatureSidebar ist unter lg verborgen und enthält einen gesteuerten Shadcn-Sheet. Escape/Overlay schließen; Fokus kehrt zum Header-Button zurück. Beim Wechsel zu lg wird Sheet geschlossen. Desktop-Collapse bleibt unabhängig.
+- [x] EnvironmentFilter zuerst in allen vier Feature-Sidebars; Services-Selector aus Header in Sidebar verschoben. Light-Theme verwendet semantische Border-Farbe, Onyx-Kontur nur im Dark-Theme. Checkbox-IDs pro Sidebar-Instanz eindeutig.
+- [x] Frontend-Typecheck und bestehende URL-Regressionsprüfungen erfolgreich; Graphify code-only aktualisiert.
+- [ ] Visueller Browser-/Tastaturtest auf kleinen und großen Viewports.
+
+### TASK-SAAS-2.3 – Environment-Auswahl für Services
+
+- [x] Graphify-Abgleich: ServicesView hatte keinen Environment-Selector; ServiceDetailPage verwendete statische Optionen.
+- [x] Beide Views verwenden jetzt den gemeinsamen dynamischen EnvironmentFilter mit source=traces, entsprechend der Service-Katalog-/Summary-Datenquelle. URL env steuert weiterhin bestehende Fetches; globale Sidebar nicht verändert.
+- [x] Services-Beschreibung nennt die aktive Umgebung statt irreführendem full catalog. Route /?env=dev ist weiterhin korrekt; keine stillschweigende Umschaltung auf production.
+- [ ] Live-Browser-Prüfung der Auswahl in Übersicht und Detail.
+
 ### TASK-SAAS-BUG-1.2 – Environment-Discovery-Budget
 
 - [x] Live-Backend-Logs bestätigen TOO_MANY_ROWS: Discovery übersteigt Listen-Scanbudget von 200.000 Zeilen (221.440/221.560 gelesen).

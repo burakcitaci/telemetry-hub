@@ -1,24 +1,26 @@
-import type { ComponentProps, ReactNode } from 'react';
-import { PanelLeft, Search, type LucideIcon } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardHeader } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Skeleton } from '@/components/ui/skeleton';
-import { cn } from '@/lib/utils';
-import { PageLayout } from '@/components/shared/page-layout';
-import { TelemetryWidget } from '@/components/shared/telemetry-widget';
+import type { ComponentProps, ReactNode } from "react";
+import { useEffect } from "react";
+import { PanelLeft, Search, type LucideIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardHeader } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
+import { PageLayout } from "@/components/shared/page-layout";
+import { TelemetryWidget } from "@/components/shared/telemetry-widget";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from "@/components/ui/sheet";
 
-type LayoutProps = ComponentProps<'div'>;
+type LayoutProps = ComponentProps<"div">;
 
 export function FeaturePage({ className, ...props }: LayoutProps) {
   return (
-    <PageLayout
-      className={cn(
-        'flex min-w-0 flex-col',
-        className,
-      )}
-      {...props}
-    />
+    <PageLayout className={cn("flex min-w-0 flex-col", className)} {...props} />
   );
 }
 
@@ -65,7 +67,10 @@ export function FeatureHeader({
 export function FeatureBody({ className, ...props }: LayoutProps) {
   return (
     <div
-      className={cn('flex min-h-0 min-w-0 flex-1 gap-3', className)}
+      className={cn(
+        "grid min-h-0 min-w-0 flex-1 grid-cols-1 gap-3 lg:grid-cols-[auto_minmax(0,1fr)]",
+        className,
+      )}
       {...props}
     />
   );
@@ -74,12 +79,12 @@ export function FeatureBody({ className, ...props }: LayoutProps) {
 export function FeatureContent({
   className,
   ...props
-}: ComponentProps<'section'>) {
+}: ComponentProps<"section">) {
   return (
     <section
       data-slot="feature-content"
       className={cn(
-        'min-h-0 min-w-0 flex-1 space-y-4 overflow-auto',
+        "min-h-0 min-w-0 flex-1 space-y-4 overflow-auto",
         className,
       )}
       {...props}
@@ -92,7 +97,10 @@ export function FeaturePanel({
   ...props
 }: ComponentProps<typeof Card>) {
   return (
-    <TelemetryWidget className={cn('@container overflow-hidden', className)} {...props} />
+    <TelemetryWidget
+      className={cn("@container overflow-hidden", className)}
+      {...props}
+    />
   );
 }
 
@@ -101,6 +109,8 @@ type SidebarProps = {
   children: ReactNode;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  mobileOpen?: boolean;
+  onMobileOpenChange?: (open: boolean) => void;
 };
 
 export function FeaturePanelHeader({
@@ -110,7 +120,7 @@ export function FeaturePanelHeader({
   return (
     <CardHeader
       className={cn(
-        'flex flex-row flex-wrap items-center justify-between gap-3 space-y-0 pb-3',
+        "flex flex-row flex-wrap items-center justify-between gap-3 space-y-0 pb-3",
         className,
       )}
       {...props}
@@ -123,41 +133,82 @@ export function FeatureSidebar({
   children,
   open = true,
   onOpenChange,
+  mobileOpen = false,
+  onMobileOpenChange,
 }: SidebarProps) {
+  useEffect(() => {
+    const desktop = window.matchMedia("(min-width: 1024px)");
+    const closeOnDesktop = () => {
+      if (desktop.matches && mobileOpen) onMobileOpenChange?.(false);
+    };
+    closeOnDesktop();
+    desktop.addEventListener("change", closeOnDesktop);
+    return () => desktop.removeEventListener("change", closeOnDesktop);
+  }, [mobileOpen, onMobileOpenChange]);
   return (
-    <aside
-      aria-label={title}
-      className={cn(
-        'hidden min-h-0 shrink-0 flex-col border-r border-border bg-card md:flex',
-        open ? 'w-64' : 'w-12',
-      )}
-    >
-      <div
+    <>
+      <Sheet open={mobileOpen} onOpenChange={onMobileOpenChange}>
+        <SheetContent
+          side="left"
+          onCloseAutoFocus={(event) => {
+            if (window.matchMedia("(min-width: 1024px)").matches) return;
+            const trigger = document.querySelector<HTMLButtonElement>(
+              "[data-feature-filter-toggle]",
+            );
+            if (trigger) {
+              event.preventDefault();
+              trigger.focus();
+            }
+          }}
+          className="flex w-[min(20rem,calc(100vw-2rem))] flex-col border-r border-border dark:border-[#242936] bg-background p-0 lg:hidden"
+        >
+          <SheetHeader className="border-b border-border p-4">
+            <SheetTitle>{title}</SheetTitle>
+            <SheetDescription className="sr-only">
+              Filter and configure this feature.
+            </SheetDescription>
+          </SheetHeader>
+          <div className="min-h-0 flex-1 overflow-auto p-3">
+            {mobileOpen && children}
+          </div>
+        </SheetContent>
+      </Sheet>
+      <aside
+        aria-label={title}
         className={cn(
-          'flex h-11 shrink-0 items-center border-b border-border px-3',
-          open ? 'justify-between' : 'justify-center px-0',
+          "hidden min-h-0 shrink-0 flex-col border-r border-border dark:border-[#242936] bg-card lg:flex",
+          open ? "w-64" : "w-12",
         )}
       >
+        <div
+          className={cn(
+            "flex h-11 shrink-0 items-center border-b border-border px-3",
+            open ? "justify-between" : "justify-center px-0",
+          )}
+        >
+          {open && (
+            <h2 className="text-xs font-medium text-muted-foreground">
+              {title}
+            </h2>
+          )}
+          {onOpenChange && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-7"
+              aria-label={`${open ? "Hide" : "Show"} ${title}`}
+              aria-expanded={open}
+              onClick={() => onOpenChange(!open)}
+            >
+              <PanelLeft className="size-4" />
+            </Button>
+          )}
+        </div>
         {open && (
-          <h2 className="text-xs font-medium text-muted-foreground">{title}</h2>
+          <div className="min-h-0 flex-1 overflow-auto p-4">{children}</div>
         )}
-        {onOpenChange && (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="size-7"
-            aria-label={`${open ? 'Hide' : 'Show'} ${title}`}
-            aria-expanded={open}
-            onClick={() => onOpenChange(!open)}
-          >
-            <PanelLeft className="size-4" />
-          </Button>
-        )}
-      </div>
-      {open && (
-        <div className="min-h-0 flex-1 overflow-auto p-4">{children}</div>
-      )}
-    </aside>
+      </aside>
+    </>
   );
 }
 
@@ -191,8 +242,8 @@ export function FeatureSearch({
         aria-hidden="true"
       />
       <Input
-        aria-label={props['aria-label'] ?? props.placeholder ?? 'Search'}
-        className={cn('pl-9', className)}
+        aria-label={props["aria-label"] ?? props.placeholder ?? "Search"}
+        className={cn("pl-9", className)}
         {...props}
       />
     </div>

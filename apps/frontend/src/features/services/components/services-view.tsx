@@ -1,21 +1,24 @@
-import { Activity, Settings } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { QueryError, ViewSkeleton } from '@/components/shared/view-skeleton';
-import { DataTable } from '@/shared/components/data-table';
-import { FeatureRefreshButton } from '@/shared/components/feature-actions';
+import { Activity, Settings } from "lucide-react";
+import { useState } from "react";
+import { FeatureHeader } from "@/components/shared/feature-header";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { QueryError, ViewSkeleton } from "@/components/shared/view-skeleton";
+import { DataTable } from "@/shared/components/data-table";
+import { FeatureRefreshButton } from "@/shared/components/feature-actions";
 import {
   FeaturePage,
-  FeatureHeader,
+  FeatureSidebar,
+  FeatureSearch,
   FeatureBody,
   FeatureContent,
   FeaturePanel,
   FeatureEmptyState,
-} from '@/shared/components/feature-layout';
-import { columns } from './services-components';
-import type { useServices } from '../hooks/use-services';
-import { TimeRangePicker } from '@/app/components/timer-range.picker';
-import { useTelemetryQuery } from '@/shared/hooks/use-telemetry-query';
+} from "@/shared/components/feature-layout";
+import { columns } from "./services-components";
+import type { useServices } from "../hooks/use-services";
+import { useTelemetryQuery } from "@/shared/hooks/use-telemetry-query";
+import { EnvironmentFilter } from "@/shared/components/environment-filter";
 
 type ServicesViewProps = ReturnType<typeof useServices>;
 
@@ -30,13 +33,16 @@ export function ServicesView({
   searchQuery,
   setSearchQuery,
 }: ServicesViewProps) {
-  const { timeRange, setTimeRange } = useTelemetryQuery();
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const { timeRange, setTimeRange, env } = useTelemetryQuery();
   return (
     <FeaturePage>
       <FeatureHeader
         title="Services"
-        icon={Activity}
-        description={`${services.length} discovered services · full catalog`}
+        timeRange={timeRange}
+        onTimeRangeChange={setTimeRange}
+        onFiltersOpen={() => setFiltersOpen(true)}
+        description={`${services.length} discovered services · ${env}`}
         actions={
           <>
             <Button asChild variant="outline" size="sm">
@@ -49,11 +55,22 @@ export function ServicesView({
               onRefresh={() => void loadServices()}
               label="Refresh services"
             />
-            <TimeRangePicker value={timeRange} onChange={setTimeRange} />
           </>
         }
       />
       <FeatureBody>
+        <FeatureSidebar
+          title="Filters"
+          mobileOpen={filtersOpen}
+          onMobileOpenChange={setFiltersOpen}
+        >
+          <EnvironmentFilter source="traces" />
+          <FeatureSearch
+            placeholder="Search services…"
+            value={searchQuery}
+            onChange={(event) => setSearchQuery(event.target.value)}
+          />
+        </FeatureSidebar>
         <FeatureContent>
           <FeaturePanel>
             {loading && services.length === 0 ? (
@@ -94,7 +111,7 @@ export function ServicesView({
                   onClick={() => void generateAndRefresh()}
                   disabled={generating}
                 >
-                  {generating ? 'Generating…' : 'Generate telemetry'}
+                  {generating ? "Generating…" : "Generate telemetry"}
                 </Button>
               </FeatureEmptyState>
             )}

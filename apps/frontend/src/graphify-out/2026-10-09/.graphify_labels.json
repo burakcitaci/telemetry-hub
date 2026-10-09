@@ -4,6 +4,7 @@
   "2": "app-sidebar.tsx",
   "3": "metrics-view.tsx",
   "4": "service-detail-page.tsx",
-  "5": "services-view.tsx",
-  "6": "traces-components.tsx"
+  "5": "feature-layout.tsx",
+  "6": "traces-components.tsx",
+  "7": "facet-query-bar.tsx"
 }

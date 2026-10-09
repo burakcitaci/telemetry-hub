@@ -1,5 +1,6 @@
-import { TelemetryActions } from '@/shared/components/feature-actions';
-import { FeatureHeader } from '@/components/shared/feature-header';
+import { TelemetryActions } from "@/shared/components/feature-actions";
+import { useState } from "react";
+import { FeatureHeader } from "@/components/shared/feature-header";
 import {
   FeaturePage,
   FeatureBody,
@@ -7,16 +8,16 @@ import {
   FeaturePanel,
   FeatureLoading,
   FeatureEmptyState,
-} from '@/shared/components/feature-layout';
-import type { useLogs } from '../hooks/use-logs';
-import { Activity } from 'lucide-react';
-import { LogDetailSheet } from '@/features/logs/components/log-detail-sheet';
-import { DataTable } from '@/shared/components/data-table';
-import { TelemetrySidebar } from '@/shared/components/telemetry-sidebar';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
-import { TELEMETRY_FETCH_LIMIT } from '@/shared/lib/telemetry';
-import { columns } from '@/features/logs/components/logs-components';
+} from "@/shared/components/feature-layout";
+import type { useLogs } from "../hooks/use-logs";
+import { Activity } from "lucide-react";
+import { LogDetailSheet } from "@/features/logs/components/log-detail-sheet";
+import { DataTable } from "@/shared/components/data-table";
+import { TelemetrySidebar } from "@/shared/components/telemetry-sidebar";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { TELEMETRY_FETCH_LIMIT } from "@/shared/lib/telemetry";
+import { columns } from "@/features/logs/components/logs-components";
 
 type LogsViewProps = ReturnType<typeof useLogs>;
 
@@ -42,10 +43,12 @@ export function LogsView({
   facetOptions,
   filteredLogs,
 }: LogsViewProps) {
+  const [filtersOpen, setFiltersOpen] = useState(false);
   return (
     <FeaturePage>
       <FeatureHeader
         title="Logs"
+        onFiltersOpen={() => setFiltersOpen(true)}
         timeRange={timeRange}
         onTimeRangeChange={setTimeRange}
         description={
@@ -54,7 +57,7 @@ export function LogsView({
             selected period
             {logs.length === TELEMETRY_FETCH_LIMIT
               ? ` (capped at ${TELEMETRY_FETCH_LIMIT})`
-              : ''}
+              : ""}
           </>
         }
         actions={
@@ -70,6 +73,8 @@ export function LogsView({
       />
       <FeatureBody>
         <TelemetrySidebar
+          mobileOpen={filtersOpen}
+          onMobileOpenChange={setFiltersOpen}
           environmentSource="logs"
           services={services}
           selectedServices={serviceFilters}
@@ -111,8 +116,8 @@ export function LogsView({
                 <div className="max-w-md space-y-3">
                   <p className="text-sm text-muted-foreground">
                     {logs.length > 0
-                      ? 'No logs in this period match the selected filters.'
-                      : 'No logs found in the selected period. Choose another time range or generate telemetry.'}
+                      ? "No logs in this period match the selected filters."
+                      : "No logs found in the selected period. Choose another time range or generate telemetry."}
                   </p>
                   {logs.length === 0 && (
                     <Button
@@ -120,7 +125,7 @@ export function LogsView({
                       disabled={generating}
                     >
                       <Activity className="mr-2 h-4 w-4" />
-                      {generating ? 'Generating…' : 'Generate telemetry'}
+                      {generating ? "Generating…" : "Generate telemetry"}
                     </Button>
                   )}
                 </div>
