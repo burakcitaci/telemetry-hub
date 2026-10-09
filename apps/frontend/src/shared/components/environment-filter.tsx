@@ -16,7 +16,7 @@ export function EnvironmentFilter({ source }: { source: EnvironmentSource }) {
     return next;
   });
   return (
-    <section className="space-y-2 px-2 py-2" aria-busy={loading}>
+    <section className="space-y-2 px-0 py-2" aria-busy={loading}>
       <label htmlFor={id} className="text-xs font-medium">Environment</label>
       <Select value={env} onValueChange={setEnv} disabled={loading || error}>
         <SelectTrigger id={id} className="h-8 w-full text-xs"><SelectValue /></SelectTrigger>

@@ -171,7 +171,7 @@ export function DataTable<TData, TValue>({
         </div>
       )}
       <div className="min-w-0 max-w-full rounded-md border border-border">
-        <Table className={cn('table-fixed', density === 'telemetry' && 'font-mono text-xs tracking-tight')}>
+        <Table className={cn('table-fixed', density === 'telemetry' && 'text-xs tracking-tight')}>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id} className="h-8">

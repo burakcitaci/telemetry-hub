@@ -98,14 +98,14 @@ function FilterPanel({
 
   return (
     <ScrollArea className="min-h-0 flex-1">
-      <div className={idPrefix === "desktop" ? "space-y-2" : "space-y-2 p-4"}>
+      <div className={idPrefix === "desktop" ? "space-y-2" : "space-y-2 px-2"}>
         {environmentSource && <EnvironmentFilter source={environmentSource} />}
         <section>
           <Button
             variant="ghost"
             size="sm"
             onClick={() => setFacetsExpanded((value) => !value)}
-            className="h-auto w-full justify-between px-2 py-1.5"
+            className="h-auto w-full justify-between px-0 py-1.5"
             aria-expanded={facetsExpanded}
           >
             <span className="flex items-center gap-2 text-xs font-medium">
@@ -119,7 +119,7 @@ function FilterPanel({
             )}
           </Button>
           {facetsExpanded && (
-            <div className="ml-5 mt-1 space-y-1">
+            <div className="space-y-1 px-1">
               {facetOptions.map((option) => {
                 const id = `${idPrefix}-facet-${encodeURIComponent(option.value)}`;
                 return (
@@ -168,7 +168,7 @@ function FilterPanel({
             variant="ghost"
             size="sm"
             onClick={() => setServicesExpanded((value) => !value)}
-            className="h-auto w-full justify-between px-2 py-1.5"
+            className="h-auto w-full justify-between px-0 py-1.5"
             aria-expanded={servicesExpanded}
           >
             <span className="flex items-center gap-2 text-xs font-medium">
@@ -182,7 +182,7 @@ function FilterPanel({
             )}
           </Button>
           {servicesExpanded && (
-            <div className="ml-5 mt-1 space-y-1">
+            <div className="ml-5 mt-1 space-y-1 px-1">
               {services.length === 0 && (
                 <p className="py-1 text-xs text-muted-foreground">
                   No services loaded

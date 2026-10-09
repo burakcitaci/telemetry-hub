@@ -1,7 +1,7 @@
 import { Controller, Get } from '@nestjs/common';
 import { CentralLoggerService } from '../../../common/logger/central-logger.service';
 import { DataService } from '../services/data.service';
-import { trace, context, metrics } from '@opentelemetry/api';
+import { trace, context, metrics, SpanStatusCode } from '@opentelemetry/api';
 
 // ── Metrics instruments (created once) ───────────────────────────────────────
 const meter = metrics.getMeter('my-app', '1.0.0');
@@ -32,13 +32,13 @@ export class DataController {
 
   @Get('data')
   async getData() {
-    const tracer = trace.getTracer('backend-service');
+    const tracer = trace.getTracer(process.env.BACKEND_SERVICE_NAME);
     const span = tracer.startSpan('getData');
 
     try {
       this.logger.log('Processing data request', 'HealthDataController');
-
       this.logger.log('Fetching data from DataService', process.env.OTEL_SERVICE_NAME);
+
       const activeContext = trace.setSpan(context.active(), span);
 
       return await context.with(activeContext, async () => {
@@ -49,6 +49,9 @@ export class DataController {
           recordCount: processed.items.length,
         });
 
+        // ✅ Explicit success status
+        span.setStatus({ code: SpanStatusCode.OK });
+
         this.logger.log(
           `Request completed with ${processed.items.length} items`,
           'HealthDataController',
@@ -57,14 +60,16 @@ export class DataController {
         return processed;
       });
     } catch (error) {
-      span.recordException(error);
-      span.setStatus({ code: 2, message: error.message });
-      this.logger.error(
-        'Error processing request',
-        error.stack,
-        'HealthDataController',
-      );
-      throw error;
+      const err = error instanceof Error ? error : new Error(String(error));
+
+      span.recordException(err);                    // records type, message, stack
+      span.setStatus({
+        code: SpanStatusCode.ERROR,
+        message: err.message,
+      });
+
+      this.logger.error('Error processing request', err.stack, 'HealthDataController');
+      throw err;
     } finally {
       span.end();
     }

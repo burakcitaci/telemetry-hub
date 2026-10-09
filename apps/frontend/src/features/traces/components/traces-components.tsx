@@ -52,6 +52,17 @@ export const columns: ColumnDef<TraceSummary>[] = [
     ),
   },
   {
+    accessorKey: 'TraceId',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Trace ID" />
+    ),
+    cell: ({ row }) => (
+      <span className="block max-w-xl truncate font-mono text-xs tracking-tight">
+        {row.original.TraceId}
+      </span>
+    ),
+  },
+  {
     accessorKey: 'Duration',
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Duration" />
