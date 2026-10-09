@@ -19,6 +19,37 @@
 
 ## Kontext
 
+### TASK-SAAS-BUG-1.2 – Environment-Discovery-Budget
+
+- [x] Live-Backend-Logs bestätigen TOO_MANY_ROWS: Discovery übersteigt Listen-Scanbudget von 200.000 Zeilen (221.440/221.560 gelesen).
+- [x] Separate Discovery-Settings: keine Zeilen-/Byte-Scanobergrenze; vollständiger DISTINCT-Scan bei weiterhin 256 MiB Speicher-, 10 Sekunden Laufzeit- und 1.000 Ergebniszeilen-Grenze. Listenbudgets unverändert; keine Teilresultate.
+- [x] Query-Fehler werden als HTTP 503 mit ENVIRONMENT_DISCOVERY_FAILED übersetzt, technische Ursache bleibt serverseitig erhalten.
+- [ ] Aktualisierte Version im Cluster laden und Endpoint erneut prüfen. Bei weiterem Wachstum ist eine eigene Environment-Dimension/Materialized View statt wiederholter History-Scans erforderlich.
+
+### TASK-SAAS-2.2 – Dynamische Feature-Environment-Filter
+
+- [x] Graphify-Abgleich der Feature-Views und gemeinsamen Filter-Sidebar. Globale App-Sidebar unverändert.
+- [x] GET /api/environments?source=metrics|logs|traces: DISTINCT kanonische ResourceAttributes-Werte aus jeweiliger Quelle; Metrics kombiniert Gauge/Sum/Histogram. Tabellen-Allowlist im Controller, Query-Budgets mit throw statt stillen Teilresultaten.
+- [x] Gemeinsamer EnvironmentFilter/useEnvironments in lokalen Metrics-, Logs- und Traces-Sidebars; URL-Auswahl erhält übrige Query-Parameter und nutzt vorhandene env-Abfragen. Loading, Retry und fehlende aktuelle Auswahl explizit dargestellt; Abort bei Unmount.
+- [x] Metrics-Environment-Facet auf deployment.environment.name korrigiert. Frontend-/Backend-Typechecks und lokale SQL-/Controller-Regressionsprüfungen erfolgreich.
+- [ ] Live-Cluster-/Browser-Test nach Backend-Reload. Discovery durchsucht gespeicherte Daten unabhängig von ausgewähltem env/Zeitfenster; große Historien können Query-Budgets erreichen und zeigen dann einen Fehler, keine unvollständige Liste.
+
+### TASK-SAAS-BUG-1.1 – Strikter Environment-Filter
+
+- [x] Metrics-Detail-, Logs- und Traces-Controller reichen env bereits weiter; Backend-Graphify zur Prüfung genutzt.
+- [x] Gemeinsamer SQL-Filter verwendet ausschließlich ResourceAttributes['deployment.environment.name'] = {env:String}; Legacy-Fallback entfernt. Datensätze ohne kanonischen Key werden ausgeschlossen.
+- [x] Backend-Typecheck und lokale SQL-Regressionsprüfungen erfolgreich, einschließlich MetricsController → drei Detailtabellen mit env=dev ohne Zeitparameter.
+- [ ] Laufenden Backend-/ClickHouse-Endpunkt prüfen: Der vorherige lokale Filter hätte production mit kanonischem Key bereits ausgeschlossen; Ursache im laufenden Deployment ist damit noch nicht belegt.
+
+### TASK-SaaS-2.1 – Environment-Dimension
+
+- [x] Frontend- und Backend-Graphify-Abgleich vor/bei Refactoring. DTO env validiert Namen, Default production. Parametrisierte ResourceAttributes-Filter in Logs, Trace-Liste/Detail, Service-Katalog/KPIs sowie Metrics-Katalog/den drei Detailtabellen. Aktueller deployment.environment.name-Key hat Vorrang vor Legacy deployment.environment.
+- [x] Benannter Helm-Wert backend.deploymentEnvironment statt destruktivem backend.env-Listen-Override. DEPLOY_ENV-Fallback production; SDK schreibt OTel-Ressourcenattribut, NODE_ENV bleibt unabhängig. Root-Skript delegiert unverändert an deploy.sh, Init/Restart erben die Variable.
+- [x] URL env wird normalisiert, Default production explizit eingetragen; setEnv und API-Adapter ergänzt. Logs/Metrics/Traces/Service-Fetches reichen env weiter, Service-Details bieten Select neben dem Timepicker. Sidebar-Navigation erhält Environment. Veraltete Service-/Trace-Antworten abgewehrt; alte Logs/Detailauswahl bei Env-Wechsel geleert.
+- [x] Frontend-/Backend-Typechecks, Mock-Router-/SQL-Regressionsprüfungen, Helm-Lint und staging-Rendering erfolgreich. Ein bestehender Test wurde an den bereits vom Benutzer geänderten Zeitdefault angepasst, ohne diesen zurückzusetzen.
+- [x] Graphify inkrementell code-only aktualisiert, ohne semantische API-Kosten: Frontend 496 Knoten / 1.795 Kanten, Backend 303 Knoten / 644 Kanten.
+- [ ] Live-ClickHouse-/Browser-/Cluster-End-to-End-Prüfung. Alte Telemetrie ohne Environment-Attribut erscheint nicht im production-Filter. Legacy-Metrics-Spezialendpunkte und Monitors sind nicht als Tenant-isoliert zertifiziert; Environment ist kein Auth-/Tenant-Sicherheitsmechanismus.
+
 ### TASK-VITE-CACHE-1.1 – React-DOM-Portal-Dependency
 
 - [x] Nach neuem createPortal-Import meldete Vite 504 Outdated Optimize Dep für react-dom; bisher wurde react-dom/client separat geladen. Beide Einstiegspunkte und React-JSX-Runtimes explizit in optimizeDeps.include aufgenommen.

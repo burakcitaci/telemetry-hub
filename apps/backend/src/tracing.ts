@@ -29,7 +29,7 @@ const version = process.env.OTEL_SERVICE_VERSION || '1.0.0';
 const resource = resourceFromAttributes({
   [ATTR_SERVICE_NAME]: serviceName,
   [ATTR_SERVICE_VERSION]: version,
-  [ATTR_DEPLOYMENT_ENVIRONMENT_NAME]: process.env.NODE_ENV || 'development',
+  [ATTR_DEPLOYMENT_ENVIRONMENT_NAME]: process.env.DEPLOY_ENV || 'production',
   'host.name': os.hostname(),
 });
 

@@ -66,7 +66,7 @@ export function AppSidebar() {
                   <SidebarMenuItem key={item.path}>
                     <SidebarMenuButton asChild size="sm" isActive={active} tooltip={item.label}>
                       <Link
-                        to={item.path}
+                        to={{ pathname: item.path, search: `?env=${encodeURIComponent(new URLSearchParams(location.search).get('env') || 'production')}` }}
                         onClick={closeMobileSidebar}
                         aria-current={active ? 'page' : undefined}
                       >
@@ -118,7 +118,7 @@ export function MobileAppSidebar() {
           return (
             <Link
               key={item.path}
-              to={item.path}
+              to={{ pathname: item.path, search: `?env=${encodeURIComponent(new URLSearchParams(location.search).get('env') || 'production')}` }}
               className={cn(
                 'flex size-9 items-center justify-center rounded-md text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
                 active && 'bg-sidebar-accent text-sidebar-accent-foreground',

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { getTraces } from '@/features/traces/api';
 import type { TraceSummary } from '@/features/traces/types';
 import { type FacetOption } from '@/shared/components/telemetry-sidebar';
@@ -14,6 +14,7 @@ import type { TelemetryEvent } from '@/shared/types/telemetry';
 import { SIDEBAR_STORAGE_KEY } from '@/features/traces/model';
 
 export function useTraces() {
+  const requestId = useRef(0);
   const [traces, setTraces] = useState<TraceSummary[]>([]);
 
   const [loading, setLoading] = useState(true);
@@ -41,6 +42,7 @@ export function useTraces() {
   }, [sidebarOpen]);
 
   const {
+    env,
     serviceFilters,
     setServiceFilters,
     facetFilters: statusFilters,
@@ -50,13 +52,19 @@ export function useTraces() {
     searchQuery,
     setSearchQuery,
   } = useTelemetryViewParams({ facetParam: 'status' });
+  useEffect(() => { setSelectedTraceId(null); }, [env]);
 
   const loadTraces = useCallback(async () => {
+    const id = ++requestId.current;
     setLoading(true);
+    setTraces([]);
     try {
-      setTraces(await getTraces(TELEMETRY_FETCH_LIMIT));
+      const result = await getTraces(TELEMETRY_FETCH_LIMIT, undefined, env);
+      if (id !== requestId.current) return;
+      setTraces(result);
       setError(null);
     } catch (loadError) {
+      if (id !== requestId.current) return;
       setError(
         getErrorMessage(
           loadError,
@@ -64,12 +72,13 @@ export function useTraces() {
         ),
       );
     } finally {
-      setLoading(false);
+      if (id === requestId.current) setLoading(false);
     }
-  }, []);
+  }, [env]);
 
   useEffect(() => {
     void loadTraces();
+    return () => { requestId.current += 1; };
   }, [loadTraces]);
 
   const handleStreamEvent = useCallback(

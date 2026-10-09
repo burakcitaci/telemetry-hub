@@ -5,9 +5,10 @@ import {
   type ClickHouseClient,
   type ClickHouseSettings,
 } from '@clickhouse/client';
-import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import { Injectable, OnModuleDestroy, OnModuleInit, ServiceUnavailableException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { telemetryTimeWindow } from './telemetry-time-window';
+import { telemetryEnvironment } from './telemetry-environment';
 import type { ClickhouseConfig } from '../../../config/clickhouse.config';
 import { CentralLoggerService } from '../../../common/logger/central-logger.service';
 
@@ -25,7 +26,16 @@ const LIST_QUERY_SETTINGS: ClickHouseSettings = {
   timeout_overflow_mode: 'throw',
 };
 
+// DISTINCT discovery must inspect the full history, not a list-sized sample.
+const ENVIRONMENT_QUERY_SETTINGS: ClickHouseSettings = {
+  ...LIST_QUERY_SETTINGS,
+  max_rows_to_read: '0',
+  max_bytes_to_read: '0',
+  max_result_rows: '1000',
+};
+
 export interface TelemetryListOptions {
+  env?: string;
   limit?: number;
   offset?: number;
   service?: string;
@@ -94,12 +104,37 @@ export class ClickhouseService implements OnModuleInit, OnModuleDestroy {
     }
   }
 
+  async getEnvironments(source: 'metrics' | 'logs' | 'traces'): Promise<string[]> {
+    const tables = {
+      metrics: ['otel_metrics_gauge', 'otel_metrics_sum', 'otel_metrics_histogram'],
+      logs: ['otel_logs'],
+      traces: ['otel_traces'],
+    }[source];
+    const branches = tables.map((table) => `
+      SELECT DISTINCT ResourceAttributes['deployment.environment.name'] AS environment
+      FROM ${table} WHERE ResourceAttributes['deployment.environment.name'] != ''
+    `);
+    try {
+      const rows = await this.query<{ environment: string }>(
+        `SELECT DISTINCT environment FROM (${branches.join(' UNION ALL ')}) ORDER BY environment`,
+        {}, ENVIRONMENT_QUERY_SETTINGS,
+      );
+      return rows.map((row) => row.environment);
+    } catch (cause) {
+      throw new ServiceUnavailableException({
+        code: 'ENVIRONMENT_DISCOVERY_FAILED',
+        message: 'Environment-Optionen sind momentan nicht verfügbar.',
+      }, { cause });
+    }
+  }
+
   async getTraces(options: TelemetryListOptions = {}) {
     const { limit, offset } = this.normalizeListOptions(options);
+    const environment = telemetryEnvironment(options.env);
     const serviceFilter = options.service
       ? 'HAVING countIf(ServiceName = {service:String}) > 0'
       : '';
-    const queryParams: Record<string, unknown> = { limit, offset };
+    const queryParams: Record<string, unknown> = { limit, offset, ...environment.params };
 
     if (options.service) {
       queryParams.service = options.service;
@@ -135,6 +170,7 @@ export class ClickhouseService implements OnModuleInit, OnModuleDestroy {
           count() AS SpanCount,
           uniqExact(ServiceName) AS ServiceCount
         FROM otel_traces
+        ${environment.sql ? `WHERE ${environment.sql}` : ''}
         GROUP BY TraceId
         ${serviceFilter}
       )
@@ -145,7 +181,8 @@ export class ClickhouseService implements OnModuleInit, OnModuleDestroy {
     return this.query(query, queryParams, LIST_QUERY_SETTINGS);
   }
 
-  async getTraceById(traceId: string) {
+  async getTraceById(traceId: string, env?: string) {
+    const environment = telemetryEnvironment(env);
     const query = `
       SELECT
         TraceId,
@@ -162,17 +199,19 @@ export class ClickhouseService implements OnModuleInit, OnModuleDestroy {
         SpanAttributes
       FROM otel_traces
       WHERE TraceId = {traceId:String}
+        ${environment.sql ? `AND ${environment.sql}` : ''}
       ORDER BY Timestamp ASC
     `;
 
-    return this.query(query, { traceId });
+    return this.query(query, { traceId, ...environment.params });
   }
 
   async getLogs(options: LogsListOptions = {}) {
     const { limit, offset } = this.normalizeListOptions(options);
     const timeWindow = telemetryTimeWindow(options, 'Timestamp');
-    const predicates: string[] = [];
-    const queryParams: Record<string, unknown> = { limit, offset };
+    const environment = telemetryEnvironment(options.env);
+    const predicates: string[] = environment.sql ? [environment.sql] : [];
+    const queryParams: Record<string, unknown> = { limit, offset, ...environment.params };
 
     if (options.service) {
       predicates.push('ServiceName = {service:String}');
@@ -211,19 +250,22 @@ export class ClickhouseService implements OnModuleInit, OnModuleDestroy {
     return this.query(query, queryParams, LIST_QUERY_SETTINGS);
   }
 
-  async getServices() {
+  async getServices(env?: string) {
+    const environment = telemetryEnvironment(env);
     return this.query(`
       SELECT DISTINCT ServiceName
       FROM otel_traces
+      ${environment.sql ? `WHERE ${environment.sql}` : ''}
       ORDER BY ServiceName
-    `);
+    `, environment.params);
   }
 
   async getServiceMetrics(
     service: string,
-    window: { from: string; to: string },
+    window: { from: string; to: string; env?: string },
   ) {
     const timeWindow = telemetryTimeWindow(window, 'Timestamp', true);
+    const environment = telemetryEnvironment(window.env);
     const query = `
       SELECT
         count() AS request_count,
@@ -236,9 +278,10 @@ export class ClickhouseService implements OnModuleInit, OnModuleDestroy {
       WHERE ServiceName = {service:String}
         AND (ParentSpanId = '' OR lowerUTF8(SpanKind) = 'server')
         AND ${timeWindow.sql}
+        ${environment.sql ? `AND ${environment.sql}` : ''}
     `;
 
-    const result = await this.query(query, { service, ...timeWindow.params });
+    const result = await this.query(query, { service, ...timeWindow.params, ...environment.params });
     return result[0] || {};
   }
 

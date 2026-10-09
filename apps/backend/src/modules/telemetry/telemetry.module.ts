@@ -4,11 +4,12 @@ import { TracesController } from "./controllers/traces.controller";
 import { LogsController } from "./controllers/logs.controller";
 import { ServicesController } from "./controllers/services.controller";
 import { EventsController } from "./controllers/events.controller";
+import { EnvironmentsController } from './controllers/environments.controller';
 import { LoggerModule } from "../../common/logger/logger.module";
 
 @Module({
   imports: [LoggerModule],
-  controllers: [TracesController, LogsController, ServicesController, EventsController],
+  controllers: [TracesController, LogsController, ServicesController, EventsController, EnvironmentsController],
   providers: [ClickhouseService],
   exports: [ClickhouseService],
 })

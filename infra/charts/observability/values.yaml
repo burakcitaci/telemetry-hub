@@ -2,6 +2,7 @@ backend:
   name: backend
   replicaCount: 1
   otelServiceName: "backend-service"
+  deploymentEnvironment: "production"
 
   image:
     repository: local/backend

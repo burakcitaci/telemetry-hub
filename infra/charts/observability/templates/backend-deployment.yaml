@@ -44,6 +44,8 @@ spec:
             {{- end }}
             - name: OTEL_SERVICE_NAME
               value: {{ .Values.backend.otelServiceName | default "backend-service" | quote }}
+            - name: DEPLOY_ENV
+              value: {{ .Values.backend.deploymentEnvironment | default "production" | quote }}
           {{- with .Values.backend.livenessProbe }}
           livenessProbe:
             {{- toYaml . | nindent 12 }}

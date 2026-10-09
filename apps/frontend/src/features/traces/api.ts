@@ -31,17 +31,18 @@ function normalizeTrace(trace: TraceSummary & { Duration?: number | string }): T
   };
 }
 
-export async function getTraces(limit: number, service?: string): Promise<TraceSummary[]> {
+export async function getTraces(limit: number, service?: string, env = 'production'): Promise<TraceSummary[]> {
   const response = await api.get<ApiEnvelope<TraceSummary[]> | TraceSummary[]>('/traces', {
-    params: { limit, ...(service ? { service } : {}) },
+    params: { limit, env, ...(service ? { service } : {}) },
   });
 
   return unwrap(response.data).map(normalizeTrace);
 }
 
-export async function getTraceById(traceId: string): Promise<TraceSpan[]> {
+export async function getTraceById(traceId: string, env = 'production'): Promise<TraceSpan[]> {
   const response = await api.get<ApiEnvelope<TraceSpan[]> | TraceSpan[]>(
     `/traces/${encodeURIComponent(traceId)}`,
+    { params: { env } },
   );
 
   return unwrap(response.data).map(normalizeSpan);

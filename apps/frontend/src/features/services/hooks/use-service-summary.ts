@@ -12,9 +12,9 @@ interface SummaryState {
 }
 
 export function useServiceSummary(serviceName: string) {
-  const { timeRange, setTimeRange, getApiParams } = useTelemetryQuery();
+  const { timeRange, setTimeRange, env, setEnv, getApiParams } = useTelemetryQuery();
   const [refreshCount, setRefreshCount] = useState(0);
-  const key = JSON.stringify([serviceName, timeRange]);
+  const key = JSON.stringify([serviceName, timeRange, env]);
   const [state, setState] = useState<SummaryState>({
     key,
     data: null,
@@ -27,10 +27,10 @@ export function useServiceSummary(serviceName: string) {
     setState({ key, data: null, error: null, loading: true });
     async function load() {
       try {
-        const { from, to } = getApiParams();
+        const { from, to, env } = getApiParams();
         const data = await getServiceMetrics(
           serviceName,
-          { from, to },
+          { from, to, env },
           controller.signal,
         );
         if (!controller.signal.aborted)
@@ -56,6 +56,8 @@ export function useServiceSummary(serviceName: string) {
     state.key === key ? state : { data: null, error: null, loading: true };
   return {
     metrics: current.data,
+    env,
+    setEnv,
     error: current.error,
     loading: current.loading,
     timeRange,

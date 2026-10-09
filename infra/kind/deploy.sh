@@ -9,4 +9,5 @@ helm upgrade --install observability infra/charts/observability \
   --namespace telemetry-hub --create-namespace \
   --wait --timeout 5m --kube-context kind-observability \
   --set-string "backend.otelServiceName=${BACKEND_SERVICE_NAME:-backend-service}" \
+  --set-string "backend.deploymentEnvironment=${DEPLOY_ENV:-production}" \
   "$@"

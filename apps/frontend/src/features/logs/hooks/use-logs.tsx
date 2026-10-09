@@ -22,6 +22,7 @@ export function useLogs() {
   const [selectedLog, setSelectedLog] = useState<LogRecord | null>(null);
 
   const {
+    env,
     serviceFilters,
     setServiceFilters,
     facetFilters: severityFilters,
@@ -32,13 +33,17 @@ export function useLogs() {
     setSearchQuery,
     getApiParams,
   } = useTelemetryQuery({ facetParam: 'severity' });
+  useEffect(() => {
+    setLogs([]);
+    setSelectedLog(null);
+  }, [env]);
 
   const loadLogs = useCallback(async () => {
     const id = ++requestId.current;
     setLoading(true);
     try {
-      const { from, to, limit, offset } = getApiParams();
-      const result = await getLogs({ from, to, limit, offset });
+      const { from, to, limit, offset, env } = getApiParams();
+      const result = await getLogs({ from, to, limit, offset, env });
       if (id !== requestId.current) return;
       setLogs(result);
       setError(null);

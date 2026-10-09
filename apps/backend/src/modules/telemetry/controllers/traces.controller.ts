@@ -13,11 +13,12 @@ export class TracesController {
       limit: query.limit,
       offset: query.offset,
       service: query.service,
+      env: query.env,
     });
   }
 
   @Get(':traceId')
-  async getTrace(@Param() params: TraceIdParamDto) {
-    return this.clickhouse.getTraceById(params.traceId);
+  async getTrace(@Param() params: TraceIdParamDto, @Query() query: TelemetryQueryDto) {
+    return this.clickhouse.getTraceById(params.traceId, query.env);
   }
 }

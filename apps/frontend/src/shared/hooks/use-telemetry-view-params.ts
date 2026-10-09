@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import {
   DEFAULT_TELEMETRY_RANGE,
@@ -18,6 +18,23 @@ export function useTelemetryViewParams({
   facetParam,
 }: TelemetryViewParamsOptions = {}) {
   const [searchParams, setSearchParams] = useSearchParams();
+  const env = searchParams.get('env')?.trim() || 'production';
+  useEffect(() => {
+    if (searchParams.get('env') === env) return;
+    setSearchParams((current) => {
+      const next = new URLSearchParams(current);
+      next.set('env', env);
+      return next;
+    }, { replace: true });
+  }, [env, searchParams, setSearchParams]);
+  const setEnv = useCallback((value: string) => {
+    if (!/^[a-zA-Z0-9][a-zA-Z0-9._-]{0,63}$/.test(value)) throw new RangeError('Invalid environment');
+    setSearchParams((current) => {
+      const next = new URLSearchParams(current);
+      next.set('env', value);
+      return next;
+    });
+  }, [setSearchParams]);
 
   const serviceFilters = useMemo(
     () => uniqueValues(searchParams.getAll('service')),
@@ -103,6 +120,7 @@ export function useTelemetryViewParams({
         throw new RangeError('Invalid pagination');
       const { from, to } = resolveTelemetryRange(timeRange, now);
       return {
+        env,
         from: from.toISOString(),
         to: to.toISOString(),
         limit,
@@ -111,7 +129,7 @@ export function useTelemetryViewParams({
         ...(searchQuery ? { q: searchQuery } : {}),
       };
     },
-    [timeRange, filters, searchQuery],
+    [timeRange, filters, searchQuery, env],
   );
 
   const getApiSearchParams = useCallback(
@@ -128,6 +146,8 @@ export function useTelemetryViewParams({
   );
 
   return {
+    env,
+    setEnv,
     range: timeRange,
     time: timeRange,
     filters,

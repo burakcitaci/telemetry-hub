@@ -3,6 +3,7 @@ import type { ApiEnvelope } from '@/shared/types/telemetry';
 import type { LogRecord } from '@/features/logs/types';
 
 export interface LogsQueryParams {
+  env?: string;
   limit: number;
   offset?: number;
   from: string;

@@ -1,8 +1,10 @@
 import { BadRequestException } from '@nestjs/common';
+import { telemetryEnvironment } from './telemetry-environment';
 
 export interface TelemetryTimeWindow {
   from?: string;
   to?: string;
+  env?: string;
 }
 
 export function telemetryTimeWindow(
@@ -34,5 +36,10 @@ export function telemetryTimeWindow(
 }
 
 export function metricTimeWindow(window: TelemetryTimeWindow) {
-  return telemetryTimeWindow(window, 'TimeUnix');
+  const time = telemetryTimeWindow(window, 'TimeUnix');
+  const environment = telemetryEnvironment(window.env);
+  return {
+    sql: [time.sql, environment.sql].filter(Boolean).join(' AND '),
+    params: { ...time.params, ...environment.params },
+  };
 }

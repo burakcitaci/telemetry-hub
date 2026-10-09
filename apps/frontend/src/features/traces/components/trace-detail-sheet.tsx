@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Braces, ChevronDown, ChevronRight, Network, RefreshCw, X } from 'lucide-react';
 import { getTraceById } from '@/features/traces/api';
+import { useTelemetryQuery } from '@/shared/hooks/use-telemetry-query';
 import type { TraceSpan } from '@/features/traces/types';
 import { AttributeSection, CopyButton, DetailField, JsonPanel } from '@/shared/components/telemetry-detail';
 import { Badge } from '@/components/ui/badge';
@@ -31,6 +32,8 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 export function TraceDetailSheet({ traceId, isOpen, onClose }: TraceDetailSheetProps) {
+  const { env } = useTelemetryQuery();
+  const requestId = useRef(0);
   const [spans, setSpans] = useState<TraceSpan[]>([]);
   const [selectedSpanId, setSelectedSpanId] = useState<string | null>(null);
   const [expandedSpans, setExpandedSpans] = useState<Set<string>>(new Set());
@@ -38,6 +41,7 @@ export function TraceDetailSheet({ traceId, isOpen, onClose }: TraceDetailSheetP
   const [error, setError] = useState<string | null>(null);
 
   const loadTrace = useCallback(async (id: string) => {
+    const request = ++requestId.current;
     setLoading(true);
     setError(null);
     setSpans([]);
@@ -45,7 +49,8 @@ export function TraceDetailSheet({ traceId, isOpen, onClose }: TraceDetailSheetP
     setExpandedSpans(new Set());
 
     try {
-      const traceSpans = await getTraceById(id);
+      const traceSpans = await getTraceById(id, env);
+      if (request !== requestId.current) return;
       setSpans(traceSpans);
 
       if (traceSpans.length === 0) {
@@ -58,17 +63,19 @@ export function TraceDetailSheet({ traceId, isOpen, onClose }: TraceDetailSheetP
       setExpandedSpans(new Set(roots.map((span) => span.SpanId)));
       setSelectedSpanId((roots[0] || traceSpans[0]).SpanId);
     } catch (loadError) {
+      if (request !== requestId.current) return;
       setError(getErrorMessage(
         loadError,
         'Unable to load this trace. Verify the backend connection and try again.',
       ));
     } finally {
-      setLoading(false);
+      if (request === requestId.current) setLoading(false);
     }
-  }, []);
+  }, [env]);
 
   useEffect(() => {
     if (traceId && isOpen) void loadTrace(traceId);
+    return () => { requestId.current += 1; };
   }, [isOpen, loadTrace, traceId]);
 
   const selectedSpan = spans.find((span) => span.SpanId === selectedSpanId) || null;

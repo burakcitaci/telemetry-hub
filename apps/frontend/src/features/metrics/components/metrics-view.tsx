@@ -1,4 +1,5 @@
 import { FeatureRefreshButton } from '@/shared/components/feature-actions';
+import { EnvironmentFilter } from '@/shared/components/environment-filter';
 import { TelemetryGrid } from '@/components/shared/telemetry-widget';
 import { FeatureHeader } from '@/components/shared/feature-header';
 import { QueryError, ViewSkeleton } from '@/components/shared/view-skeleton';
@@ -157,6 +158,7 @@ export function MetricsView({
           open={sidebarOpen}
           onOpenChange={setSidebarOpen}
         >
+          <EnvironmentFilter source="metrics" />
           <FeatureSearch
             placeholder="Search metrics…"
             value={metricSearch}

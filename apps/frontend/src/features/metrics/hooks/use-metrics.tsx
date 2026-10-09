@@ -112,12 +112,13 @@ export function useMetrics() {
       setCatalogLoading(true);
       setCatalogError(null);
       try {
-        const { from, to, limit, offset } = getApiParams();
+        const { from, to, limit, offset, env } = getApiParams();
         const params = new URLSearchParams({
           from,
           to,
           limit: String(limit),
           offset: String(offset),
+          env,
         });
         const res = await fetch(`${API_BASE}/api/metrics?${params}`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -182,9 +183,10 @@ export function useMetrics() {
       }
 
       try {
-        const { from, to, limit } = getApiParams(DEFAULT_LIMIT);
+        const { from, to, limit, env } = getApiParams(DEFAULT_LIMIT);
         const params = new URLSearchParams({
           service: metric.serviceName,
+          env,
           metric: metric.metricName,
           limit: String(limit),
           from,

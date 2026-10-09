@@ -29,10 +29,10 @@ export const FACET_DEFS: FacetDefinition[] = [
     accessor: (r: any) => r.resourceAttributes?.['host.name'] ?? null,
   },
   {
-    key: 'deployment.environment',
+    key: 'deployment.environment.name',
     label: 'Environment',
     accessor: (r: any) =>
-      r.resourceAttributes?.['deployment.environment'] ?? null,
+      r.resourceAttributes?.['deployment.environment.name'] ?? null,
   },
   {
     key: 'service.version',

@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { EnvironmentFilter } from './environment-filter';
+import type { EnvironmentSource } from '../hooks/use-environments';
 import { FeatureSidebar } from '@/shared/components/feature-layout';
 import {
   AlertTriangle,
@@ -32,6 +34,7 @@ export interface FacetOption {
 }
 
 interface TelemetrySidebarProps {
+  environmentSource?: EnvironmentSource;
   services: string[];
   selectedServices: string[];
   onServicesSelect: (services: string[]) => void;
@@ -78,6 +81,7 @@ function FilterPanel({
   timeRange,
   onTimeRangeSelect,
   idPrefix,
+  environmentSource,
 }: TelemetrySidebarProps & { idPrefix: string }) {
   const [timeRangeExpanded, setTimeRangeExpanded] = useState(true);
   const [facetsExpanded, setFacetsExpanded] = useState(true);
@@ -99,6 +103,7 @@ function FilterPanel({
   return (
     <ScrollArea className="min-h-0 flex-1">
       <div className={idPrefix === 'desktop' ? 'space-y-2' : 'space-y-2 p-4'}>
+        {environmentSource && <EnvironmentFilter source={environmentSource} />}
         <section>
           <Button
             variant="ghost"
@@ -235,6 +240,7 @@ export function TelemetrySidebar({
   collapsed,
   onCollapsedChange,
   title = 'Filters',
+  environmentSource,
 }: TelemetrySidebarProps) {
   const [internalCollapsed, setInternalCollapsed] = useState(false);
 
@@ -246,6 +252,7 @@ export function TelemetrySidebar({
   };
 
   const filterProps = {
+    environmentSource,
     services,
     selectedServices,
     onServicesSelect,

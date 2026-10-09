@@ -70,6 +70,7 @@ export function LogsView({
       />
       <FeatureBody>
         <TelemetrySidebar
+          environmentSource="logs"
           services={services}
           selectedServices={serviceFilters}
           onServicesSelect={setServiceFilters}

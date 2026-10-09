@@ -77,6 +77,7 @@ export function TracesView({
         {/* Sidebar wrapper — matches metrics page look:
             expanded = 256/288px, collapsed = 44px icon rail */}
         <TelemetrySidebar
+          environmentSource="traces"
           services={services}
           selectedServices={serviceFilters}
           onServicesSelect={setServiceFilters}

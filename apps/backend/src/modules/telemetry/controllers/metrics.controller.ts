@@ -21,6 +21,7 @@ export class MetricsController {
       service: query.service,
       from: query.from,
       to: query.to,
+      env: query.env,
     });
   }
 
@@ -37,7 +38,7 @@ export class MetricsController {
       query.service || '',
       query.metric || '',
       query.limit ?? 1000,
-      { from: query.from, to: query.to },
+      { from: query.from, to: query.to, env: query.env },
     );
   }
   /**
