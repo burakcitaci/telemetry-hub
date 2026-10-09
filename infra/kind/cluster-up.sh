@@ -13,8 +13,8 @@ if ! kind get clusters | grep -Fxq "$CLUSTER_NAME"; then
   kind create cluster --name "$CLUSTER_NAME" --config infra/kind/kind-config.yaml
 fi
 
-yarn kind:load:backend
-yarn helm:deploy
+bash infra/kind/load-backend.sh
+yarn cluster:deploy
 
 # Loading a replacement image under the same local tag does not mutate the
 # Deployment, so explicitly restart it and wait for the new pod to be ready.

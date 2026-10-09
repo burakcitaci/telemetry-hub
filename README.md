@@ -54,7 +54,7 @@ yarn install --frozen-lockfile
 Start or update the cluster:
 
 ```bash
-yarn cluster:up
+yarn cluster:init
 ```
 
 This command creates the `observability` Kind cluster when necessary, builds and loads the backend image, deploys the self-contained Helm chart into the `telemetry-hub` namespace, restarts the backend with the loaded image, and waits for its rollout.
@@ -62,7 +62,7 @@ This command creates the `observability` Kind cluster when necessary, builds and
 In a second terminal, expose the backend:
 
 ```bash
-yarn port:backend
+yarn ports:backend
 ```
 
 In a third terminal, start the frontend:
@@ -86,14 +86,14 @@ The frontend accepts backend API calls from the common Vite fallback ports `5000
 | Task | Command |
 | --- | --- |
 | Build both apps | `yarn build` |
-| Type-check both apps | `yarn typecheck` |
-| Show cluster pods | `yarn status` |
+| Type-check both apps | `yarn check:all` |
+| Show cluster pods | `yarn cluster:status` |
 | Follow backend logs | `yarn logs:backend` |
 | Follow collector logs | `yarn logs:collector` |
-| Rebuild and roll out the backend | `yarn backend:reload` |
-| Apply Helm changes and reload the backend | `yarn cluster:restart` |
-| Forward ClickHouse HTTP to port 8123 | `yarn port:clickhouse` |
-| Delete the release and cluster | `yarn cluster:down` |
+| Rebuild and roll out the backend | `yarn cluster:reload-backend` |
+| Apply Helm changes and reload the backend | `yarn cluster:deploy && yarn cluster:reload-backend` |
+| Forward ClickHouse HTTP to port 8123 | `yarn ports:clickhouse` |
+| Delete the release and cluster | `yarn cluster:destroy` |
 
 See [DEPLOYMENT.md](DEPLOYMENT.md) for verification and troubleshooting.
 

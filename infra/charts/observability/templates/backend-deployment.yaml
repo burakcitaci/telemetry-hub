@@ -42,6 +42,8 @@ spec:
             - name: {{ .name }}
               value: {{ .value | quote }}
             {{- end }}
+            - name: OTEL_SERVICE_NAME
+              value: {{ .Values.backend.otelServiceName | default "backend-service" | quote }}
           {{- with .Values.backend.livenessProbe }}
           livenessProbe:
             {{- toYaml . | nindent 12 }}

@@ -1,6 +1,7 @@
 backend:
   name: backend
   replicaCount: 1
+  otelServiceName: "backend-service"
 
   image:
     repository: local/backend
@@ -45,8 +46,6 @@ backend:
       value: "default"
     - name: OTEL_EXPORTER_OTLP_ENDPOINT
       value: "http://opentelemetry-collector:4318"
-    - name: OTEL_SERVICE_NAME
-      value: "backend-service"
     - name: OTEL_SERVICE_VERSION
       value: "1.0.0"
 

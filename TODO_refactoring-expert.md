@@ -19,6 +19,25 @@
 
 ## Kontext
 
+### TASK-PLATFORM-1.3 – Helm-Array-Override korrigiert
+
+- [x] Index-Override backend.env[7].value entfernt: Helm ersetzte die Liste durch sparse Einträge und verursachte nil.name. Neuer skalarer Wert backend.otelServiceName mit Default backend-service; Template erzeugt OTEL_SERVICE_NAME separat und eindeutig.
+- [x] deploy.sh nutzt quoted --set-string backend.otelServiceName. cluster:init/restart bleiben über cluster:deploy angebunden; package.json unverändert.
+- [x] helm lint sowie helm template für Default und tenant-customer-heavy erfolgreich; alle neun Backend-Environment-Einträge erhalten. Kein Cluster-Deployment ausgeführt. Vorhandener Frontend-Graph modelliert diese Infrastruktur-Dateien nicht.
+
+### TASK-PLATFORM-1.2 – Dynamischer OTEL-Service-Name
+
+- [x] backend.env[7] als OTEL_SERVICE_NAME in values.yaml bestätigt. cluster:deploy delegiert an Bash-Helfer mit quoted --set und BACKEND_SERVICE_NAME-Fallback backend-service; Parameter bleiben als "$@" an Helm weiterleitbar.
+- [x] cluster:init verwendet bereits cluster:deploy und erbt die Umgebungsvariable. cluster:restart ergänzt als Deploy plus Image-Rebuild/Reload. Root-/Infrastruktur-Dateien sind vom bestehenden Frontend-Graph nicht modelliert; direkte Aufrufketten geprüft.
+- [x] Keine Deployment-/Cluster-Mutation während des Refactorings ausgeführt.
+
+### TASK-PLATFORM-1.1 – Root-Script-Namespaces
+
+- [x] Root-Skripte auf dev/build/check/cluster/ports/logs vereinheitlicht; graph:update exakt als graphify . --update ergänzt. Alte Aliase entfernt.
+- [x] Gemeinsamer Bash-Helfer load-backend.sh für Image-Build und Kind-Import verhindert rekursive oder doppelte Reload-Aufrufe. Cluster-Init und Backend-Reload verwenden diesen Helfer; Init ruft cluster:deploy auf.
+- [x] README/DEPLOYMENT-Verweise migriert. JSON und interne Yarn-Script-Verweise statisch geprüft; keine Docker-/Kind-/Helm-/Kubectl-Befehle ausgeführt.
+- [x] Bestehenden Graph read-only geprüft: frontend-only, keine Root-Script-/Infrastruktur-Knoten. Kein kostenpflichtiger semantischer Root-Rebuild für diese Namespace-Änderung gestartet.
+
 ### TASK-UI-TABLE-1.1 – Responsive DataTable
 
 - [x] Content-basiertes Auto-Layout durch table-fixed ersetzt; negative Header-Margins und calc-Überbreite entfernt. Werte dürfen innerhalb ihrer Zellen umbrechen, ohne Spalten auszublenden. Toolbar umbrechbar, Input schrumpfbar.

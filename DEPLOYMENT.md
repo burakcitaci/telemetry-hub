@@ -14,7 +14,7 @@ yarn install --frozen-lockfile
 Create or update the local stack:
 
 ```bash
-yarn cluster:up
+yarn cluster:init
 ```
 
 The command is safe to run when the Kind cluster already exists. Helm waits up to five minutes for the backend, collector, and ClickHouse Deployments, then the script restarts the backend so the newly loaded `local/backend:latest` image is actually used.
@@ -22,7 +22,7 @@ The command is safe to run when the Kind cluster already exists. Helm waits up t
 Check the result:
 
 ```bash
-yarn status
+yarn cluster:status
 kubectl --context kind-observability get services --namespace telemetry-hub
 ```
 
@@ -33,13 +33,13 @@ Expected workloads are `backend`, `clickhouse`, and `opentelemetry-collector`.
 Keep this command running in its own terminal:
 
 ```bash
-yarn port:backend
+yarn ports:backend
 ```
 
 The backend is now available at `http://localhost:3001`. ClickHouse does not need to be exposed for the application to work. For direct inspection, run this in another terminal:
 
 ```bash
-yarn port:clickhouse
+yarn ports:clickhouse
 ```
 
 Start the host-side frontend:
@@ -53,7 +53,7 @@ Vite prefers `http://localhost:5000`. If that port is already in use, Vite will 
 The backend CORS allow-list includes the common local Vite ports `5000`, `5001`, `5002`, and `5003` for both `localhost` and `127.0.0.1`. If Vite chooses a different port, add that origin in `apps/backend/src/config/cors.config.ts`, then run:
 
 ```bash
-yarn backend:reload
+yarn cluster:reload-backend
 ```
 
 ## Generate and verify telemetry
@@ -86,13 +86,13 @@ The repository does not collect OTLP metrics or expose a tasks API.
 After changing backend code, rebuild, load, restart, and wait for the new pod:
 
 ```bash
-yarn backend:reload
+yarn cluster:reload-backend
 ```
 
 After changing Helm templates or values, deploy the chart and reload the backend:
 
 ```bash
-yarn cluster:restart
+yarn cluster:deploy && yarn cluster:reload-backend
 ```
 
 ## Troubleshooting
@@ -115,7 +115,7 @@ kubectl --context kind-observability logs --namespace telemetry-hub --selector a
 If the backend image cannot be pulled, load it again and restart the Deployment:
 
 ```bash
-yarn backend:reload
+yarn cluster:reload-backend
 ```
 
 If telemetry is absent, verify the path in order:
@@ -139,7 +139,7 @@ helm template observability infra/charts/observability --namespace telemetry-hub
 Delete the Helm release and Kind cluster:
 
 ```bash
-yarn cluster:down
+yarn cluster:destroy
 ```
 
 This permanently removes the locally stored telemetry.
