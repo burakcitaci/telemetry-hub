@@ -126,9 +126,9 @@ export function DataTable<TData, TValue>({
   });
 
   return (
-    <div className={cn('w-full', density === 'telemetry' && 'font-mono text-xs tracking-tight')}>
+    <div className={cn('w-full min-w-0 max-w-full', density === 'telemetry' && 'font-mono text-xs tracking-tight')}>
       {enableSearch && (
-        <div className="flex items-center px-0 py-2">
+        <div className="flex min-w-0 flex-wrap items-center gap-2 px-0 py-2">
           <Input
             placeholder={searchPlaceholder}
             value={globalFilter ?? ''}
@@ -137,7 +137,7 @@ export function DataTable<TData, TValue>({
               if (onSearchChange) onSearchChange(value);
               else setInternalGlobalFilter(value);
             }}
-            className="max-w-sm rounded-md border-input focus-visible:ring-ring"
+            className="min-w-0 flex-1 basis-40 max-w-sm rounded-md border-input focus-visible:ring-ring"
           />
 
           {enableColumnVisibility && (
@@ -170,14 +170,14 @@ export function DataTable<TData, TValue>({
           )}
         </div>
       )}
-      <div className="overflow-x-auto rounded-md border border-border">
-        <Table className={density === 'telemetry' ? 'font-mono text-xs tracking-tight' : undefined}>
+      <div className="min-w-0 max-w-full rounded-md border border-border">
+        <Table className={cn('table-fixed', density === 'telemetry' && 'font-mono text-xs tracking-tight')}>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id} className="h-8">
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead key={header.id} className="px-2 py-0">
+                    <TableHead key={header.id} colSpan={header.colSpan} className="min-w-0 break-words px-2 py-0">
                       {header.isPlaceholder
                         ? null
                         : flexRender(
@@ -201,10 +201,12 @@ export function DataTable<TData, TValue>({
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id} className="px-2 py-1">
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
-                      )}
+                      <div className="min-w-0 max-w-full [overflow-wrap:anywhere] [&_*]:min-w-0 [&_*]:max-w-full [&_.whitespace-nowrap]:whitespace-normal">
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext(),
+                        )}
+                      </div>
                     </TableCell>
                   ))}
                 </TableRow>
@@ -212,7 +214,7 @@ export function DataTable<TData, TValue>({
             ) : (
               <TableRow>
                 <TableCell
-                  colSpan={columns.length}
+                  colSpan={Math.max(table.getVisibleLeafColumns().length, 1)}
                   className="h-24 text-center"
                 >
                   No results.
@@ -302,11 +304,11 @@ export function DataTableColumnHeader<TData, TValue>({
       variant="ghost"
       onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
       className={cn(
-        '-mx-3 h-8 w-[calc(100%+1.5rem)] justify-start rounded-none px-3 text-left font-semibold',
+        'h-auto min-h-8 w-full min-w-0 justify-start whitespace-normal rounded-none px-0 py-1 text-left text-xs font-semibold',
         className,
       )}
     >
-      {title}
+      <span className="min-w-0 [overflow-wrap:anywhere]">{title}</span>
       <ArrowUpDown className="ml-1.5 h-3.5 w-3.5 shrink-0" />
     </Button>
   );

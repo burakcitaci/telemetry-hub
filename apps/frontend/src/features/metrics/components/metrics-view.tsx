@@ -271,9 +271,7 @@ export function MetricsView({
               <Alert variant="destructive" className="mb-4">
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription className="text-xs">
-                  Metric <code>{selectedId}</code> isn't in the catalog. It may
-                  have been renamed or removed. Pick another metric from the
-                  sidebar.
+                  There is no metric data available for <code>{selectedId}</code> within selected time range.
                 </AlertDescription>
               </Alert>
             )}

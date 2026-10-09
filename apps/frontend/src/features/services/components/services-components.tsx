@@ -43,31 +43,6 @@ export const columns: ColumnDef<ServiceRow>[] = [
     ),
   },
   {
-    accessorKey: 'OnCall',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="ON-CALL" />
-    ),
-    cell: ({ row }) => (
-      <div className="flex justify-center">
-        <div className="h-5 w-5 rounded-full bg-muted flex items-center justify-center text-[10px] text-primary-foreground font-bold">
-          {row.original.Team?.charAt(0).toUpperCase() || '?'}
-        </div>
-      </div>
-    ),
-  },
-  {
-    accessorKey: 'Contact',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="CONTACT" />
-    ),
-    cell: () => (
-      <div className="flex gap-1">
-        <div className="h-4 w-4 bg-primary rounded-sm" />
-        <div className="h-4 w-4 bg-destructive rounded-sm" />
-      </div>
-    ),
-  },
-  {
     accessorKey: 'Repo',
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="REPO" />

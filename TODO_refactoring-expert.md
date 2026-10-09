@@ -19,6 +19,13 @@
 
 ## Kontext
 
+### TASK-UI-TABLE-1.1 – Responsive DataTable
+
+- [x] Content-basiertes Auto-Layout durch table-fixed ersetzt; negative Header-Margins und calc-Überbreite entfernt. Werte dürfen innerhalb ihrer Zellen umbrechen, ohne Spalten auszublenden. Toolbar umbrechbar, Input schrumpfbar.
+- [x] Nur noch ein horizontaler Scroll-Container im Table-Primitiv; Wrapper min-w-0/max-w-full. Empty-State-colSpan berücksichtigt sichtbare Spalten.
+- [x] Frontend-Typecheck und SSR-Regressionen für 1/2/6 Spalten sowie Onyx-Layout bestanden.
+- [ ] Browser-Geometrieprüfung: ursprüngliche Vorschau nicht aktiv, temporärer Vite-Start durch Windows EPERM beeinträchtigt. Keine visuelle Responsive-Prüfung behauptet.
+
 ### TASK-ONYX-1.6 – Theme-Toggle-Regression
 
 - [x] Erzwungene lokale dark-Klassen in PageLayout sowie Desktop-/Mobile-Sidebar entfernt. Flächen, Konturen und Zebra-Zeilen verwenden wieder Shadcn-Tokens; Onyx/Slate-Werte sind ausschließlich in den globalen Dark-Variablen definiert.
