@@ -1,106 +1,104 @@
 # Graph Report - src  (2026-10-09)
 
 ## Corpus Check
-- 94 files · ~31,065 words
+- 94 files · ~31,009 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 1 file(s) not represented in the graph (top: .css 1)
 
 ## Summary
-- 203 nodes · 455 edges · 8 communities (7 shown, 1 thin omitted)
+- 208 nodes · 481 edges · 7 communities
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `63d71919`
+- Built from commit: `b2e1cfb5`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
 - data-table.tsx
 - traces-view.tsx
-- app.tsx
+- app-sidebar.tsx
 - metrics-view.tsx
 - service-detail-page.tsx
 - services-view.tsx
-- feature-layout.tsx
-- app-sidebar.tsx
+- traces-components.tsx
 
 ## God Nodes (most connected - your core abstractions)
 1. `MetricsView()` - 16 edges
-2. `ServiceDetailPage()` - 13 edges
-3. `AppRoutes()` - 12 edges
-4. `ServicesView()` - 11 edges
-5. `ViewSkeleton()` - 10 edges
+2. `DataTable()` - 15 edges
+3. `ServiceDetailPage()` - 13 edges
+4. `AppRoutes()` - 12 edges
+5. `ServicesView()` - 11 edges
 6. `LogsView()` - 10 edges
 7. `TracesView()` - 10 edges
 8. `FeaturePage()` - 10 edges
-9. `FeaturePanel()` - 10 edges
-10. `DataTable()` - 9 edges
+9. `ViewSkeleton()` - 10 edges
+10. `FeaturePanel()` - 10 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `ServiceDetailPage()` --calls--> `PageLayout()`  [EXTRACTED]
-  features/services/service-detail-page.tsx → components/shared/page-layout.tsx
-- `FeaturePage()` --calls--> `PageLayout()`  [EXTRACTED]
-  shared/components/feature-layout.tsx → components/shared/page-layout.tsx
-- `ServiceDetailPage()` --calls--> `MetricCard()`  [EXTRACTED]
-  features/services/service-detail-page.tsx → components/shared/telemetry-primitives.tsx
 - `MetricsView()` --calls--> `TelemetryGrid()`  [EXTRACTED]
   features/metrics/components/metrics-view.tsx → components/shared/telemetry-widget.tsx
 - `MetricsView()` --calls--> `ViewSkeleton()`  [EXTRACTED]
   features/metrics/components/metrics-view.tsx → components/shared/view-skeleton.tsx
+- `MetricsView()` --calls--> `CardContent`  [EXTRACTED]
+  features/metrics/components/metrics-view.tsx → components/ui/card.tsx
+- `MetricsView()` --calls--> `CardTitle`  [EXTRACTED]
+  features/metrics/components/metrics-view.tsx → components/ui/card.tsx
+- `MetricsView()` --calls--> `DataTable()`  [EXTRACTED]
+  features/metrics/components/metrics-view.tsx → shared/components/data-table.tsx
 
 ## Import Cycles
 - None detected.
 
-## Communities (8 total, 1 thin omitted)
+## Communities (7 total, 0 thin omitted)
 
 ### Community 0 - "data-table.tsx"
-Cohesion: 0.06
-Nodes (4): columns, columns, DataTableColumnHeader(), DataTableProps
+Cohesion: 0.11
+Nodes (10): Table, TableBody, TableCaption, TableCell, TableFooter, TableHead, TableHeader, TableRow (+2 more)
 
 ### Community 1 - "traces-view.tsx"
-Cohesion: 0.14
-Nodes (19): FeatureHeader(), QueryError(), LogsView(), LogsViewProps, MetricsView(), ServicesView(), TracesView(), TracesViewProps (+11 more)
+Cohesion: 0.15
+Nodes (17): FeatureHeader(), QueryError(), LogsView(), LogsViewProps, MetricsView(), ServicesView(), TracesView(), TracesViewProps (+9 more)
 
-### Community 2 - "app.tsx"
-Cohesion: 0.13
-Nodes (12): App(), AppRoutes(), LogsPage, MetricsPage, MonitorsPage, ServiceDetailPage, ServicesPage, TracesPage (+4 more)
+### Community 2 - "app-sidebar.tsx"
+Cohesion: 0.07
+Nodes (13): App(), AppRoutes(), LogsPage, MetricsPage, MonitorsPage, ServiceDetailPage, ServicesPage, TracesPage (+5 more)
 
 ### Community 3 - "metrics-view.tsx"
 Cohesion: 0.09
-Nodes (3): QueryErrorProps, ViewSkeletonProps, MetricsViewProps
+Nodes (4): TelemetryGrid(), QueryErrorProps, ViewSkeletonProps, MetricsViewProps
 
 ### Community 4 - "service-detail-page.tsx"
-Cohesion: 0.13
-Nodes (11): DataValue(), Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, MetadataField() (+3 more)
+Cohesion: 0.09
+Nodes (23): badgeColors, DataValue(), MetricCard(), statusLabels, StatusSpanProps, TelemetryStatus, valueColors, TelemetryWidget() (+15 more)
 
 ### Community 5 - "services-view.tsx"
 Cohesion: 0.12
-Nodes (5): FeatureHeaderProps, TimeRangeProps, ServicesViewProps, RefreshProps, TelemetryActionsProps
+Nodes (6): FeatureHeaderProps, TimeRangeProps, columns, ServicesViewProps, RefreshProps, TelemetryActionsProps
 
-### Community 6 - "feature-layout.tsx"
-Cohesion: 0.14
-Nodes (12): badgeColors, MetricCard(), statusLabels, StatusSpanProps, TelemetryStatus, valueColors, TelemetryGrid(), TelemetryWidget() (+4 more)
+### Community 6 - "traces-components.tsx"
+Cohesion: 0.13
+Nodes (3): columns, columns, DataTableColumnHeader()
 
 ## Knowledge Gaps
-- **21 isolated node(s):** `navItems`, `TimeRangeProps`, `FeatureHeaderProps`, `TelemetryStatus`, `valueColors` (+16 more)
-  These have ≤1 connection - possible missing edges. (Counts symbols only; 112 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **1 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **23 isolated node(s):** `TableFooter`, `TableCaption`, `MetricsViewProps`, `DataTableProps`, `LogsViewProps` (+18 more)
+  These have ≤1 connection - possible missing edges. (Counts symbols only; 108 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `ViewSkeleton()` connect `app.tsx` to `traces-view.tsx`, `metrics-view.tsx`, `service-detail-page.tsx`, `services-view.tsx`, `feature-layout.tsx`?**
-  _High betweenness centrality (0.031) - this node is a cross-community bridge._
-- **What connects `navItems`, `TimeRangeProps`, `FeatureHeaderProps` to the rest of the system?**
-  _21 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Why does `ViewSkeleton()` connect `app-sidebar.tsx` to `traces-view.tsx`, `metrics-view.tsx`, `service-detail-page.tsx`, `services-view.tsx`?**
+  _High betweenness centrality (0.028) - this node is a cross-community bridge._
+- **What connects `TableFooter`, `TableCaption`, `MetricsViewProps` to the rest of the system?**
+  _23 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `data-table.tsx` be split into smaller, more focused modules?**
-  _Cohesion score 0.05647840531561462 - nodes in this community are weakly interconnected._
-- **Why does `PageLayout()` connect `app.tsx` to `traces-view.tsx`, `service-detail-page.tsx`, `feature-layout.tsx`?**
-  _High betweenness centrality (0.014) - this node is a cross-community bridge._
-- **Should `traces-view.tsx` be split into smaller, more focused modules?**
-  _Cohesion score 0.13709677419354838 - nodes in this community are weakly interconnected._
-- **Should `app.tsx` be split into smaller, more focused modules?**
-  _Cohesion score 0.13043478260869565 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.10826210826210826 - nodes in this community are weakly interconnected._
+- **Why does `DataTable()` connect `data-table.tsx` to `traces-view.tsx`, `metrics-view.tsx`, `services-view.tsx`?**
+  _High betweenness centrality (0.019) - this node is a cross-community bridge._
+- **Should `app-sidebar.tsx` be split into smaller, more focused modules?**
+  _Cohesion score 0.06794871794871794 - nodes in this community are weakly interconnected._
+- **Why does `PageLayout()` connect `app-sidebar.tsx` to `traces-view.tsx`, `service-detail-page.tsx`?**
+  _High betweenness centrality (0.013) - this node is a cross-community bridge._
 - **Should `metrics-view.tsx` be split into smaller, more focused modules?**
-  _Cohesion score 0.09420289855072464 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.08615384615384615 - nodes in this community are weakly interconnected._
