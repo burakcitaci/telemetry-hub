@@ -5,8 +5,10 @@ import { generateTelemetry } from '@/shared/api/telemetry-api';
 import { getErrorMessage } from '@/shared/lib/errors';
 import { useServiceMetadata } from '@/features/services/hooks/use-service-metadata';
 import { ServiceRow, mapServiceToRow } from '@/features/services/model';
+import { useTelemetryQuery } from '@/shared/hooks/use-telemetry-query';
 
 export function useServices() {
+  const { searchQuery, setSearchQuery } = useTelemetryQuery();
   const [services, setServices] = useState<ServiceSummary[]>([]);
 
   const [loading, setLoading] = useState(true);
@@ -61,6 +63,8 @@ export function useServices() {
     }
   };
   return {
+    searchQuery,
+    setSearchQuery,
     services,
     loading,
     generating,

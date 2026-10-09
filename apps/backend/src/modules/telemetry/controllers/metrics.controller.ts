@@ -1,6 +1,6 @@
 import { Controller, Get, Param, Query } from '@nestjs/common';
 import { MetricsService } from '../services/metrics.service';
-import { TelemetryQueryDto } from '../../../dto/query.dto';
+import { MetricsQueryDto } from '../../../dto/metrics-query.dto';
 
 @Controller('api/metrics')
 export class MetricsController {
@@ -13,11 +13,13 @@ export class MetricsController {
      * Get all metrics flattened for UI table with pagination
      */
     @Get()
-    async getAllMetricsFlattened(@Query() query: TelemetryQueryDto) {
+    async getAllMetricsFlattened(@Query() query: MetricsQueryDto) {
         return this.metricsService.getAllMetricsFlattened({
             limit: query.limit,
             offset: query.offset,
             service: query.service,
+            from: query.from,
+            to: query.to,
         });
     }
 
@@ -30,10 +32,9 @@ export class MetricsController {
      */
  @Get('detail')
 async getMetricDetail(
-    @Query('service') serviceName: string,
-    @Query('metric') metricName: string,
-    @Query('limit') limit?: string,
+    @Query() query: MetricsQueryDto,
 ) {
+    const { service: serviceName, metric: metricName, limit } = query;
     console.log('=== GET /api/metrics/detail ===');
     console.log({
         serviceName,
@@ -45,9 +46,10 @@ async getMetricDetail(
 
     try {
         const result = await this.metricsService.getMetricDetail(
-            serviceName,
-            metricName,
+            serviceName || '',
+            metricName || '',
             Number(limit) || 1000,
+            { from: query.from, to: query.to },
         );
 
         console.log('=== METRIC DETAIL SUCCESS ===');

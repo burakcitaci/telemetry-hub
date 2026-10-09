@@ -1,19 +1,16 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { getLogs } from '@/features/logs/api';
 import type { LogRecord } from '@/features/logs/types';
 import { type FacetOption } from '@/shared/components/telemetry-sidebar';
 import { generateTelemetry } from '@/shared/api/telemetry-api';
 import { useTelemetryStream } from '@/shared/hooks/use-telemetry-stream';
-import { useTelemetryViewParams } from '@/shared/hooks/use-telemetry-view-params';
+import { useTelemetryQuery } from '@/shared/hooks/use-telemetry-query';
 import { getErrorMessage } from '@/shared/lib/errors';
-import {
-  isWithinTimeRange,
-  TELEMETRY_FETCH_LIMIT,
-} from '@/shared/lib/telemetry';
 import type { TelemetryEvent } from '@/shared/types/telemetry';
 import { normalizeSeverity } from '@/features/logs/model';
 
 export function useLogs() {
+  const requestId = useRef(0);
   const [logs, setLogs] = useState<LogRecord[]>([]);
 
   const [loading, setLoading] = useState(true);
@@ -33,14 +30,21 @@ export function useLogs() {
     setTimeRange,
     searchQuery,
     setSearchQuery,
-  } = useTelemetryViewParams({ facetParam: 'severity' });
+    getApiParams,
+  } = useTelemetryQuery({ facetParam: 'severity' });
 
   const loadLogs = useCallback(async () => {
+    const id = ++requestId.current;
     setLoading(true);
     try {
-      setLogs(await getLogs(TELEMETRY_FETCH_LIMIT));
+      const { from, to, limit, offset } = getApiParams();
+      const result = await getLogs({ from, to, limit, offset });
+      if (id !== requestId.current) return;
+      setLogs(result);
       setError(null);
     } catch (loadError) {
+      if (id !== requestId.current) return;
+      setLogs([]);
       setError(
         getErrorMessage(
           loadError,
@@ -48,12 +52,15 @@ export function useLogs() {
         ),
       );
     } finally {
-      setLoading(false);
+      if (id === requestId.current) setLoading(false);
     }
-  }, []);
+  }, [getApiParams]);
 
   useEffect(() => {
     void loadLogs();
+    return () => {
+      requestId.current += 1;
+    };
   }, [loadLogs]);
 
   const handleStreamEvent = useCallback(
@@ -122,10 +129,9 @@ export function useLogs() {
           (serviceFilters.length === 0 ||
             serviceFilters.includes(log.ServiceName || 'Unknown service')) &&
           (severityFilters.length === 0 ||
-            severityFilters.includes(normalizeSeverity(log.SeverityText))) &&
-          isWithinTimeRange(log.Timestamp, timeRange),
+            severityFilters.includes(normalizeSeverity(log.SeverityText))),
       ),
-    [logs, serviceFilters, severityFilters, timeRange],
+    [logs, serviceFilters, severityFilters],
   );
   return {
     logs,

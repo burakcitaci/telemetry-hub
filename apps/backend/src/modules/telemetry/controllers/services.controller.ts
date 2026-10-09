@@ -1,4 +1,5 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Param, Query } from '@nestjs/common';
+import { ServiceSummaryQueryDto } from '../../../dto/service-summary-query.dto';
 import { ServiceParamDto } from '../../../dto/service.dto';
 import { ClickhouseService } from '../services/clickhouse.service';
 
@@ -12,7 +13,13 @@ export class ServicesController {
   }
 
   @Get(':service/metrics')
-  async getServiceMetrics(@Param() params: ServiceParamDto) {
-    return this.clickhouse.getServiceMetrics(params.service);
+  async getServiceMetrics(
+    @Param() params: ServiceParamDto,
+    @Query() query: ServiceSummaryQueryDto,
+  ) {
+    return this.clickhouse.getServiceMetrics(params.service, {
+      from: query.from,
+      to: query.to,
+    });
   }
 }

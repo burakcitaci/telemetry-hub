@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useState } from 'react';
 import {
   Activity,
   AlertTriangle,
@@ -22,10 +22,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import { Link, useParams } from 'react-router-dom';
-import { getServiceMetrics } from '@/features/services/api';
-import type { ServiceMetrics } from '@/features/services/types';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Link, useParams, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -34,12 +31,14 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
-import { getErrorMessage } from '@/shared/lib/errors';
+import { TimeRangePicker } from '@/app/components/timer-range.picker';
+import { QueryError, ViewSkeleton } from '@/components/shared/view-skeleton';
+import { PageLayout } from '@/components/shared/page-layout';
 import { formatDuration } from '@/shared/lib/telemetry';
 import { ServiceMetadataSheet } from './components/service-metadata-sheet';
 import { EMPTY_METADATA, type ServiceMetadata } from './types';
 import { useServiceMetadata } from './hooks/use-service-metadata';
+import { useServiceSummary } from './hooks/use-service-summary';
 
 function numberValue(value: unknown): number {
   if (typeof value !== 'string' && typeof value !== 'number') return 0;
@@ -49,37 +48,14 @@ function numberValue(value: unknown): number {
 
 function ServiceDetailPage() {
   const { serviceName = '' } = useParams();
-  const [metrics, setMetrics] = useState<ServiceMetrics | null>(null);
-  const [refreshCount, setRefreshCount] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { search } = useLocation();
+  const { metrics, loading, error, timeRange, setTimeRange, retry } =
+    useServiceSummary(serviceName);
   const [sheetOpen, setSheetOpen] = useState(false);
 
   const { metadata, saveForService } = useServiceMetadata();
   const currentMetadata: ServiceMetadata =
     metadata[serviceName] ?? EMPTY_METADATA(serviceName);
-
-  const loadMetrics = useCallback(async () => {
-    setLoading(true);
-    setMetrics(null);
-    try {
-      setMetrics(await getServiceMetrics(serviceName));
-      setError(null);
-    } catch (loadError) {
-      setError(
-        getErrorMessage(
-          loadError,
-          `Unable to load the one-hour summary for ${serviceName}.`,
-        ),
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [serviceName]);
-
-  useEffect(() => {
-    void loadMetrics();
-  }, [loadMetrics, refreshCount]);
 
   const requestCount = numberValue(metrics?.request_count);
   const errorCount = numberValue(metrics?.error_count);
@@ -95,12 +71,12 @@ function ServiceDetailPage() {
   const hasMetadata = Boolean(metadata[serviceName]);
 
   return (
-    <div className="mx-auto w-full max-w-7xl space-y-5 p-4 sm:p-6">
+    <PageLayout>
       {/* Header */}
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div className="space-y-2">
           <Button asChild variant="ghost" size="sm" className="-ml-3">
-            <Link to="/">
+            <Link to={{ pathname: '/', search }}>
               <ArrowLeft className="mr-2 h-4 w-4" />
               Services
             </Link>
@@ -113,12 +89,13 @@ function ServiceDetailPage() {
               </span>
             </div>
             <p className="text-sm text-muted-foreground">
-              One-hour performance summary
+              Performance summary · {timeRange}
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <TimeRangePicker value={timeRange} onChange={setTimeRange} />
           {/* Setup & Config tab-like button */}
           <Button
             variant={sheetOpen ? 'default' : 'outline'}
@@ -132,7 +109,7 @@ function ServiceDetailPage() {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setRefreshCount((c) => c + 1)}
+            onClick={retry}
             disabled={loading}
           >
             <RefreshCw
@@ -143,18 +120,10 @@ function ServiceDetailPage() {
         </div>
       </header>
 
-      {error && (
-        <Alert variant="destructive">
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
-
       {loading ? (
-        <div className="grid gap-4 md:grid-cols-3">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <Skeleton key={i} className="h-28 w-full" />
-          ))}
-        </div>
+        <ViewSkeleton showHeader={false} className="p-0 lg:p-0" />
+      ) : error ? (
+        <QueryError message={error} onRetry={retry} isRetrying={loading} />
       ) : metrics ? (
         <>
           {/* Metric cards */}
@@ -164,7 +133,9 @@ function ServiceDetailPage() {
                 <Activity className="h-5 w-5 text-primary" />
                 <div>
                   <p className="text-2xl font-bold">{requestCount}</p>
-                  <p className="text-sm text-muted-foreground">Requests (1h)</p>
+                  <p className="text-sm text-muted-foreground">
+                    Requests ({timeRange})
+                  </p>
                 </div>
               </CardContent>
             </Card>
@@ -228,7 +199,9 @@ function ServiceDetailPage() {
 
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">One-hour summary</CardTitle>
+                <CardTitle className="text-base">
+                  Summary · {timeRange}
+                </CardTitle>
                 <CardDescription>
                   Aggregated directly by the telemetry API.
                 </CardDescription>
@@ -340,7 +313,7 @@ function ServiceDetailPage() {
         metadata={metadata[serviceName] ?? null}
         onSave={saveForService}
       />
-    </div>
+    </PageLayout>
   );
 }
 

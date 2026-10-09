@@ -183,6 +183,63 @@ $env:PYTHONPATH = Join-Path (Get-Location) '.codex-tools/graphify'
 
 ## Datadog-UX – Header-Schnittstelle
 
+### TASK-SERVICES-1.3 / 1.4 – Katalog bereinigt und Query-Navigation
+
+- [x] Graphify-Abgleich und Quellenprüfung vor Änderung. Attrappen-Sidebar mit statischen Facetten/Checkboxen, doppelte ungebundene Suchfelder, List/Map/Hide/All/Learn-More-Attrappen, statisches Datum und wirkungsloser Favoritenstern entfernt.
+- [x] Eine kontrollierte DataTable-Suche nutzt q aus useTelemetryQuery; Detail-Link-Komponente übernimmt vollständiges location.search inklusive range/from/to. Service-Namen bleiben URL-encodiert.
+- [x] ServicesView nutzt ViewSkeleton und QueryError mit loadServices als Retry. ServiceDetailPage bereits mit PageLayout, ViewSkeleton und QueryError/retry migriert; keine redundante Neufassung erforderlich.
+- [x] Frontend-Typecheck, Primitive-/Hook-Checks und SSR-Linkprüfung erfolgreich. Kein Browser-E2E-Test behauptet.
+- [ ] Katalog weiterhin zeitlich unbegrenzte Service-Discovery; ausdrücklich als full catalog bezeichnet. from/to werden beim Navigieren erhalten, nicht als zusätzliche bisher unimplementierte URL-Zeitparser-Syntax behauptet.
+
+### TASK-SERVICES-1.1 / 1.2 – Service-Summary-Zeitfenster und Race-Schutz
+
+- [x] Graphify-Abgleich vor Implementierung; Backend-Controller/SQL direkt verifiziert.
+- [x] Service-Summary-Endpunkt verlangt ISO-from/to, validiert Zeitzone und Reihenfolge und reicht Grenzen an den Service weiter. Parametrisierte Timestamp-Grenzen ersetzen feste letzte Stunde; bestehende Root-/Server-Span-Semantik erhalten.
+- [x] useServiceSummary ergänzt: URL-Zeitraum und frische Adapter-Grenzen, AbortController, Key-Guard bei Service-/Zeitraumwechsel sowie Retry. API-Wrapper mit Params/Signal, Debug-Logging entfernt.
+- [x] ServiceDetailPage migriert: Picker, ViewSkeleton, QueryError mit Retry und dynamische Zeitbeschriftungen; PageLayout und bestehende Charts/Metadaten erhalten. Rücklink behält Search-Parameter.
+- [x] Frontend-/Backend-Typechecks, Mock-Hook-Prüfungen für Race/Zeitraumwechsel/Retry/Abort und Backend-Controller-/SQL-Prüfungen erfolgreich. Keine Live-ClickHouse-/Browser-E2E-Prüfung behauptet.
+- [ ] Service-Katalogliste, statisches Listendatum und Attrappenfilter bleiben Folgetasks; dieser Auftrag migriert den Summary-Endpunkt und die Detailansicht, nicht den gesamten Katalog.
+
+### TASK-UX-2.3 – Flexibler PageLayout-Rahmen
+
+- [x] Graphify-Abgleich und Quellenprüfung der Service-Detailseite vor der Änderung.
+- [x] PageLayout ergänzt: w-full min-w-0 space-y-6 p-4 lg:p-6 mit semantischen Hintergrund-/Textfarben; native Div-Props und zusätzliche Klassen unterstützt.
+- [x] Äußeren ServiceDetailPage-Wrapper ersetzt; max-w-7xl und mx-auto entfernt. Datenlogik, responsive Grids, Charts und Sheets unverändert.
+- [x] Frontend-Typecheck und SSR-Prop-/Layout-Checks erfolgreich; Vergleich gegen HEAD bestätigt ausschließlich Import-/Wrapper-Änderung der Detailseite. Graphify inkrementell Code-only aktualisiert, ohne semantische LLM-/API-Aufrufe.
+- [ ] Weitere Hauptansichten nicht automatisch migriert; PageLayout ist als gemeinsamer Standard verfügbar. Bestehende FeatureContent-Padding-Schicht bei Folgemigration beachten, um doppelte Abstände zu vermeiden.
+
+### TASK-UX-2.2-METRICS – Query-Zustände migriert
+
+- [x] Graphify-Abgleich und gezielte Prüfung der Metrics-Loading-/Fehlerzweige.
+- [x] Content-Spinner durch ViewSkeleton ohne doppelten Header ersetzt; variable Höhe für responsive Karten. isLoading kombiniert Katalog- und Detail-Ladezustand.
+- [x] Katalog-/Detail-Fetchfehler verwenden QueryError mit bestehendem Refresh-Zähler als Retry-Callback. Domainmeldung „Metrik nicht im Katalog“ sowie Refresh-Button-Indikatoren bleiben erhalten.
+- [x] Frontend-Typecheck sowie SSR-Prüfungen der Primitive und Metrics-Lade-/Fehlerzweige erfolgreich; kein Browser-E2E-Test behauptet.
+
+### TASK-UX-2.2 – Einheitliche Query-Zustände
+
+- [x] Graphify-Abgleich und gezielte Quellenprüfung: Content-Spinner in MetricsView und TraceDetailSheet; FeatureLoading in Logs/Traces/Services/Monitors, eigenes Skeleton in ServiceDetailPage.
+- [x] `components/shared/view-skeleton.tsx`: ViewSkeleton mit optionalem Header, vier responsiven Karten oder Listenbalken, Shadcn-Skeleton, semantischen Tokens und Reduced-Motion-Unterstützung. Vorhandenes Skeleton verwendet Pulse, kein neuer CSS-Shimmer implementiert.
+- [x] QueryError mit Shadcn-Alert, anpassbarer Meldung, Retry-Callback und kontrolliertem Retry-Status; keine eigene Daten-/Query-Logik.
+- [x] Frontend-Typecheck und SSR-Checks für Varianten, Status-/Alert-Semantik, Escaping und deaktivierten Retry erfolgreich.
+- [ ] Feature-Migration bleibt Folgeschritt; bestehende Loader/Fehleranzeigen und Refresh-Button-Indikatoren nicht verändert.
+
+### TASK-UX-2.1-METRICS – URL-Zeitbereich und Fetch-Adapter
+
+- [x] Graphify-Abgleich von Metrics-View, Query-Hook und Zeitpicker. Backend-Vertrag direkt geprüft (Frontend-Graph modelliert kein Backend).
+- [x] Lokalen 24h-State und URL-Sync-Effekt entfernt. useTelemetryQuery steuert Zeitraum; ausgewählte Metrik ebenfalls direkt aus URL, ohne doppelte Decodierung.
+- [x] Katalog und Detail-Fetch übertragen frische from/to-Grenzen. Effekte reagieren auf Query-Adapter und Refresh; bestehende Cancel-Guards ignorieren überholte Antworten.
+- [x] MetricsView nutzt gemeinsamen Header mit festem Picker; vorhandene Charts, Tabellen und Facetten bleiben erhalten. Facettenfilter weiterhin lokal, nicht als serverseitig migriert ausgewiesen.
+- [x] Backend-Katalog sowie Gauge-/Sum-/Histogram-Detailqueries nutzen validierte parametrisierte TimeUnix-Prädikate vor Limit. Historische Service-Aufrufe ohne Zeitraum bleiben kompatibel.
+- [x] Frontend-/Backend-Typecheck, deterministische URL-/Parser-Checks und SQL-Parameter-Checks erfolgreich. Kein Live-ClickHouse-/Browser-E2E-Test behauptet.
+
+### TASK-UX-2.1-LOGS – Wirksame Zeitsteuerung
+
+- [x] Graphify-Abgleich von Logs-View, Query-Hook und Zeitpicker; Backend-Vertrag direkt im Quellcode geprüft (nicht im Frontend-Graphen enthalten).
+- [x] LogsView nutzt gemeinsamen Drei-Zonen-Header mit TimeRangePicker; URL-Zustand über useTelemetryQuery. Sidebar-Zeitauswahl bleibt synchron.
+- [x] Fetch überträgt frische from/to-ISO-Grenzen; LogsQueryDto validiert Eingaben, Controller prüft vollständiges geordnetes Intervall mit Zeitzone. ClickHouse filtert parametrisiert vor Sortierung/Pagination. Alte Aufrufe ohne Zeitgrenzen bleiben kompatibel.
+- [x] Request-ID verhindert Überschreiben durch veraltete Antworten; redundanter lokaler Zeitfilter entfernt. Service-/Severity-Sidebarfilter bleiben lokal.
+- [x] Frontend-/Backend-Typecheck, Parser-/Mock-Router-Checks und Controller-/SQL-Parameter-Checks erfolgreich. Keine Live-ClickHouse-/Browser-E2E-Prüfung behauptet.
+
 ### TASK-UX-2.1 – URL-basierte Query-Basis
 
 - [x] Graphify-Abgleich vor Refactoring; vorhandenen Zeitparser wiederverwendet.

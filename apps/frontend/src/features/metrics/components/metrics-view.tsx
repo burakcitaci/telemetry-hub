@@ -1,7 +1,8 @@
 import { FeatureRefreshButton } from '@/shared/components/feature-actions';
+import { FeatureHeader } from '@/components/shared/feature-header';
+import { QueryError, ViewSkeleton } from '@/components/shared/view-skeleton';
 import {
   FeaturePage,
-  FeatureHeader,
   FeatureBody,
   FeatureContent,
   FeaturePanel,
@@ -25,7 +26,6 @@ import {
   Area,
 } from 'recharts';
 import {
-  Activity,
   AlertCircle,
   ArrowLeft,
   Download,
@@ -40,7 +40,6 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { CardContent, CardTitle } from '@/components/ui/card';
 
-import { TimeRangePicker } from '@/app/components/timer-range.picker';
 import { makeSeriesId, formatValue } from '@/features/metrics/model';
 import {
   MetricStatCard,
@@ -52,6 +51,7 @@ type MetricsViewProps = ReturnType<typeof useMetrics>;
 
 export function MetricsView({
   navigate,
+  catalogLoading,
   catalogError,
   metricSearch,
   setMetricSearch,
@@ -92,13 +92,16 @@ export function MetricsView({
   selectedNotInCatalog,
   columns,
 }: MetricsViewProps) {
+  const isLoading = catalogLoading || seriesLoading;
+  const retryFetch = () => setRefreshTick((value) => value + 1);
   return (
     <FeaturePage>
       <FeatureHeader
         title="Metrics"
-        icon={Activity}
+        timeRange={timeRange}
+        onTimeRangeChange={setTimeRange}
         description={<>{selectedMetric?.metricName ?? 'Select a metric'}</>}
-        leading={
+        children={
           <>
             {' '}
             <Button
@@ -124,7 +127,6 @@ export function MetricsView({
         }
         actions={
           <>
-            <TimeRangePicker value={timeRange} onChange={setTimeRange} />
             <Button
               variant={autoRefresh ? 'default' : 'outline'}
               size="sm"
@@ -164,12 +166,12 @@ export function MetricsView({
             {filteredCatalog.length === 1 ? '' : 's'}
           </p>
           {catalogError && (
-            <Alert variant="destructive" className="mb-2">
-              <AlertCircle className="h-3.5 w-3.5" />
-              <AlertDescription className="text-xs">
-                {catalogError}
-              </AlertDescription>
-            </Alert>
+            <QueryError
+              message={catalogError}
+              onRetry={retryFetch}
+              isRetrying={isLoading}
+              className="mb-2"
+            />
           )}
           <div className="space-y-0.5">
             {filteredCatalog.map((m) => {
@@ -275,15 +277,6 @@ export function MetricsView({
               </Alert>
             )}
 
-            {seriesError && !selectedNotInCatalog && (
-              <Alert variant="destructive" className="mb-4">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription className="text-xs">
-                  {seriesError}
-                </AlertDescription>
-              </Alert>
-            )}
-
             {/* Stats */}
             {summaryStats && (
               <div className="mb-4 grid grid-cols-2 gap-3 md:grid-cols-4">
@@ -350,12 +343,20 @@ export function MetricsView({
                 </div>
               </FeaturePanelHeader>
               <CardContent className="pt-0">
-                <div className="h-[220px] w-full">
-                  {seriesLoading ? (
-                    <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-                      <RefreshCw className="mr-2 h-4 w-4 animate-spin" />{' '}
-                      Loading…
-                    </div>
+                <div className={isLoading ? 'w-full' : 'h-[220px] w-full'}>
+                  {isLoading ? (
+                    <ViewSkeleton
+                      variant="cards"
+                      showHeader={false}
+                      label="Metrik-Daten werden geladen…"
+                      className="p-0 lg:p-0"
+                    />
+                  ) : seriesError && !selectedNotInCatalog ? (
+                    <QueryError
+                      message={seriesError}
+                      onRetry={retryFetch}
+                      isRetrying={isLoading}
+                    />
                   ) : visibleSeries.length === 0 ? (
                     <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
                       {series.length === 0

@@ -1,7 +1,7 @@
 import { TelemetryActions } from '@/shared/components/feature-actions';
+import { FeatureHeader } from '@/components/shared/feature-header';
 import {
   FeaturePage,
-  FeatureHeader,
   FeatureBody,
   FeatureContent,
   FeaturePanel,
@@ -46,11 +46,12 @@ export function LogsView({
     <FeaturePage>
       <FeatureHeader
         title="Logs"
-        icon={Activity}
+        timeRange={timeRange}
+        onTimeRangeChange={setTimeRange}
         description={
           <>
-            {filteredLogs.length} visible from the latest {logs.length} log
-            records
+            {filteredLogs.length} visible from {logs.length} log records in the
+            selected period
             {logs.length === TELEMETRY_FETCH_LIMIT
               ? ` (capped at ${TELEMETRY_FETCH_LIMIT})`
               : ''}
@@ -108,8 +109,8 @@ export function LogsView({
                 <div className="max-w-md space-y-3">
                   <p className="text-sm text-muted-foreground">
                     {logs.length > 0
-                      ? 'No recent logs match the selected filters.'
-                      : 'No log records have been stored yet. Generate a request to exercise the instrumented backend.'}
+                      ? 'No logs in this period match the selected filters.'
+                      : 'No logs found in the selected period. Choose another time range or generate telemetry.'}
                   </p>
                   {logs.length === 0 && (
                     <Button

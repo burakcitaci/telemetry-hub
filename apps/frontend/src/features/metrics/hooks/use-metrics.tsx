@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import type { ColumnDef } from '@tanstack/react-table';
 import { DataTableColumnHeader } from '@/shared/components/data-table';
-import { parseTimeRange, resolveTimeRange } from '@/shared/lib/time-range';
+import { useTelemetryQuery } from '@/shared/hooks/use-telemetry-query';
 import {
   buildFacet,
   FacetSelection,
@@ -31,6 +31,7 @@ export function useMetrics() {
   const navigate = useNavigate();
 
   const [searchParams, setSearchParams] = useSearchParams();
+  const { timeRange, setTimeRange, getApiParams } = useTelemetryQuery();
 
   const [metrics, setMetrics] = useState<ApiMetric[]>([]);
 
@@ -40,10 +41,18 @@ export function useMetrics() {
 
   const [metricSearch, setMetricSearch] = useState('');
 
-  const [selectedId, setSelectedId] = useState<string | null>(() => {
-    const raw = searchParams.get('metric');
-    return raw ? decodeURIComponent(raw) : null;
-  });
+  const selectedId = searchParams.get('metric');
+  const setSelectedId = useCallback(
+    (value: string | null) => {
+      setSearchParams((current) => {
+        const next = new URLSearchParams(current);
+        if (value) next.set('metric', value);
+        else next.delete('metric');
+        return next;
+      });
+    },
+    [setSearchParams],
+  );
 
   const [records, setRecords] = useState<RawRecord[]>([]);
 
@@ -66,8 +75,6 @@ export function useMetrics() {
   const [hideTransient, setHideTransient] = useState(false);
 
   const TRANSIENT_THRESHOLD = 3;
-
-  const [timeRange, setTimeRange] = useState('24h');
 
   const [chartType, setChartType] = useState<
     'line' | 'bar' | 'area' | 'composed'
@@ -92,15 +99,6 @@ export function useMetrics() {
   }, [sidebarOpen]);
 
   useEffect(() => {
-    const next = new URLSearchParams(searchParams);
-    if (selectedId) next.set('metric', selectedId);
-    else next.delete('metric');
-    next.set('time', timeRange);
-    setSearchParams(next, { replace: true });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedId, timeRange]);
-
-  useEffect(() => {
     setHiddenSeries(new Set());
   }, [selectedId]);
 
@@ -114,7 +112,14 @@ export function useMetrics() {
       setCatalogLoading(true);
       setCatalogError(null);
       try {
-        const res = await fetch(`${API_BASE}/api/metrics?limit=200&offset=0`);
+        const { from, to, limit, offset } = getApiParams();
+        const params = new URLSearchParams({
+          from,
+          to,
+          limit: String(limit),
+          offset: String(offset),
+        });
+        const res = await fetch(`${API_BASE}/api/metrics?${params}`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const raw = await res.json();
         if (cancelled) return;
@@ -122,13 +127,9 @@ export function useMetrics() {
           unwrap<{ metrics: ApiMetric[] }>(raw)?.metrics ?? [];
         setMetrics(list);
         // If nothing selected yet (first visit, no ?metric=), pick the first
-        setSelectedId((prev) => {
-          if (prev) return prev;
-          const first = list.find((m) => m.serviceName);
-          return first ? makeSeriesId(first) : null;
-        });
       } catch (err) {
         if (!cancelled) {
+          setMetrics([]);
           setCatalogError(
             err instanceof Error ? err.message : 'Failed to load metrics',
           );
@@ -140,16 +141,25 @@ export function useMetrics() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [getApiParams, refreshTick]);
+
+  useEffect(() => {
+    if (selectedId || !metrics.length) return;
+    const first = metrics.find((metric) => metric.serviceName);
+    if (first) setSelectedId(makeSeriesId(first));
+  }, [metrics, selectedId, setSelectedId]);
 
   useEffect(() => {
     if (!selectedId) {
       setRecords([]);
+      setSeriesLoading(false);
       return;
     }
 
     // Wait for the catalog so we can resolve serviceName + metricName
     if (metricsRef.current.length === 0) {
+      setRecords([]);
+      setSeriesLoading(false);
       return;
     }
 
@@ -172,10 +182,13 @@ export function useMetrics() {
       }
 
       try {
+        const { from, to, limit } = getApiParams(DEFAULT_LIMIT);
         const params = new URLSearchParams({
           service: metric.serviceName,
           metric: metric.metricName,
-          limit: String(DEFAULT_LIMIT),
+          limit: String(limit),
+          from,
+          to,
         });
         const res = await fetch(`${API_BASE}/api/metrics/detail?${params}`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -198,7 +211,7 @@ export function useMetrics() {
     return () => {
       cancelled = true;
     };
-  }, [selectedId, refreshTick, metrics.length]);
+  }, [selectedId, refreshTick, metrics, getApiParams]);
 
   useEffect(() => {
     if (!autoRefresh || !selectedId) return;
@@ -211,23 +224,9 @@ export function useMetrics() {
     [records],
   );
 
-  const resolvedRange = useMemo(() => {
-    const spec = parseTimeRange(timeRange);
-    return spec ? resolveTimeRange(spec) : null;
-  }, [timeRange]);
-
   const filteredRecords = useMemo(() => {
-    const inRange = (r: RawRecord) => {
-      if (!resolvedRange) return true;
-      const t = new Date(toIso(r.timeUnix)).getTime();
-      return (
-        t >= resolvedRange.from.getTime() && t <= resolvedRange.to.getTime()
-      );
-    };
-    return records.filter(
-      (r) => inRange(r) && matchesFacets(r, facets, facetSelection),
-    );
-  }, [records, facets, facetSelection, resolvedRange]);
+    return records.filter((r) => matchesFacets(r, facets, facetSelection));
+  }, [records, facets, facetSelection]);
 
   const allSeries: Series[] = useMemo(() => {
     const groups = groupByFacets(filteredRecords as any, facets, groupBy);
@@ -390,6 +389,7 @@ export function useMetrics() {
   );
   return {
     navigate,
+    catalogLoading,
     catalogError,
     metricSearch,
     setMetricSearch,

@@ -1,25 +1,10 @@
-import { Checkbox } from '@/components/ui/checkbox';
-import {
-  Activity,
-  Star,
-  LayoutList,
-  ExternalLink,
-  GitBranch,
-} from 'lucide-react';
+import { Activity, LayoutList, ExternalLink, GitBranch } from 'lucide-react';
 import type { ColumnDef } from '@tanstack/react-table';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { DataTableColumnHeader } from '@/shared/components/data-table';
 import { ServiceRow } from '@/features/services/model';
 
 export const columns: ColumnDef<ServiceRow>[] = [
-  {
-    id: 'favorite',
-    header: () => <Star className="h-4 w-4 text-muted-foreground" />,
-    cell: () => (
-      <Star className="h-4 w-4 text-muted-foreground hover:text-warning cursor-pointer" />
-    ),
-    size: 40,
-  },
   {
     accessorKey: 'Type',
     header: ({ column }) => (
@@ -41,12 +26,7 @@ export const columns: ColumnDef<ServiceRow>[] = [
     ),
     cell: ({ row }) => (
       <div className="flex items-center gap-2">
-        <Link
-          to={`/services/${encodeURIComponent(row.original.ServiceName)}`}
-          className="font-medium text-primary hover:underline"
-        >
-          {row.original.ServiceName}
-        </Link>
+        <ServiceDetailLink serviceName={row.original.ServiceName} />
         <ExternalLink className="h-3 w-3 text-muted-foreground opacity-50" />
       </div>
     ),
@@ -119,30 +99,14 @@ export const columns: ColumnDef<ServiceRow>[] = [
   },
 ];
 
-export const FacetSection = ({
-  title,
-  items,
-}: {
-  title: string;
-  items: { label: string; count: number }[];
-}) => (
-  <div className="mb-6">
-    <h3 className="mb-2 text-xs font-semibold uppercase text-muted-foreground">
-      {title}
-    </h3>
-    <div className="space-y-1.5">
-      {items.map((item) => (
-        <div
-          key={item.label}
-          className="flex items-center justify-between text-sm"
-        >
-          <label className="flex items-center gap-2 cursor-pointer">
-            <Checkbox />
-            <span>{item.label}</span>
-          </label>
-          <span className="text-xs text-muted-foreground">{item.count}</span>
-        </div>
-      ))}
-    </div>
-  </div>
-);
+function ServiceDetailLink({ serviceName }: { serviceName: string }) {
+  const { search } = useLocation();
+  return (
+    <Link
+      to={{ pathname: `/services/${encodeURIComponent(serviceName)}`, search }}
+      className="font-medium text-primary hover:underline"
+    >
+      {serviceName}
+    </Link>
+  );
+}

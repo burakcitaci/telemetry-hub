@@ -6,6 +6,7 @@ import {
 } from "@clickhouse/client";
 import { Injectable, OnModuleDestroy, OnModuleInit } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
+import { telemetryTimeWindow } from './telemetry-time-window';
 import type { ClickhouseConfig } from "../../../config/clickhouse.config";
 import { CentralLoggerService } from "../../../common/logger/central-logger.service";
 
@@ -16,6 +17,11 @@ export interface TelemetryListOptions {
   limit?: number;
   offset?: number;
   service?: string;
+}
+
+export interface LogsListOptions extends TelemetryListOptions {
+  from?: string;
+  to?: string;
 }
 
 export interface TelemetryStreamOptions {
@@ -150,16 +156,22 @@ export class ClickhouseService implements OnModuleInit, OnModuleDestroy {
     return this.query(query, { traceId });
   }
 
-  async getLogs(options: TelemetryListOptions = {}) {
+  async getLogs(options: LogsListOptions = {}) {
     const { limit, offset } = this.normalizeListOptions(options);
-    const serviceFilter = options.service
-      ? "WHERE ServiceName = {service:String}"
-      : "";
+    const predicates: string[] = [];
     const queryParams: Record<string, unknown> = { limit, offset };
 
     if (options.service) {
+      predicates.push('ServiceName = {service:String}');
       queryParams.service = options.service;
     }
+    if (options.from && options.to) {
+      predicates.push("Timestamp >= fromUnixTimestamp64Milli({from:Int64}, 'UTC')");
+      predicates.push("Timestamp <= fromUnixTimestamp64Milli({to:Int64}, 'UTC')");
+      queryParams.from = Date.parse(options.from);
+      queryParams.to = Date.parse(options.to);
+    }
+    const where = predicates.length ? `WHERE ${predicates.join(' AND ')}` : '';
 
     const query = `
       SELECT
@@ -180,7 +192,7 @@ export class ClickhouseService implements OnModuleInit, OnModuleDestroy {
         ScopeAttributes,
         LogAttributes
       FROM otel_logs
-      ${serviceFilter}
+      ${where}
       ORDER BY Timestamp DESC
       LIMIT {limit:UInt32} OFFSET {offset:UInt32}
     `;
@@ -196,7 +208,8 @@ export class ClickhouseService implements OnModuleInit, OnModuleDestroy {
     `);
   }
 
-  async getServiceMetrics(service: string) {
+  async getServiceMetrics(service: string, window: { from: string; to: string }) {
+    const timeWindow = telemetryTimeWindow(window, 'Timestamp', true);
     const query = `
       SELECT
         count() AS request_count,
@@ -208,10 +221,10 @@ export class ClickhouseService implements OnModuleInit, OnModuleDestroy {
       FROM otel_traces
       WHERE ServiceName = {service:String}
         AND (ParentSpanId = '' OR lowerUTF8(SpanKind) = 'server')
-        AND Timestamp > now() - toIntervalHour(1)
+        AND ${timeWindow.sql}
     `;
 
-    const result = await this.query(query, { service });
+    const result = await this.query(query, { service, ...timeWindow.params });
     return result[0] || {};
   }
 

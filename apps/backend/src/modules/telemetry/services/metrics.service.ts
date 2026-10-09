@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ClickhouseService } from './clickhouse.service';
 import type { TelemetryListOptions } from './clickhouse.service';
+import { metricTimeWindow, type TelemetryTimeWindow } from './telemetry-time-window';
 import { CentralLoggerService } from '../../../common/logger/central-logger.service';
 
 // ============= TYPES & INTERFACES =============
@@ -92,7 +93,9 @@ export class MetricsService {
     serviceName: string,
     metricName: string,
     limit: number = 1000,
+    window: TelemetryTimeWindow = {},
 ): Promise<MetricDetailResponse> {
+    const timeWindow = metricTimeWindow(window);
     // ── Table-specific queries, matching each real schema ─────────────────────
     const queries = {
         // Gauge table: Value only
@@ -109,6 +112,7 @@ export class MetricsService {
             FROM otel_metrics_gauge
             WHERE ServiceName = {serviceName:String}
               AND MetricName = {metricName:String}
+              ${timeWindow.sql ? `AND ${timeWindow.sql}` : ''}
             ORDER BY TimeUnix DESC
             LIMIT {limit:UInt32}
         `,
@@ -126,6 +130,7 @@ export class MetricsService {
             FROM otel_metrics_sum
             WHERE ServiceName = {serviceName:String}
               AND MetricName = {metricName:String}
+              ${timeWindow.sql ? `AND ${timeWindow.sql}` : ''}
             ORDER BY TimeUnix DESC
             LIMIT {limit:UInt32}
         `,
@@ -143,6 +148,7 @@ export class MetricsService {
             FROM otel_metrics_histogram
             WHERE ServiceName = {serviceName:String}
               AND MetricName = {metricName:String}
+              ${timeWindow.sql ? `AND ${timeWindow.sql}` : ''}
             ORDER BY TimeUnix DESC
             LIMIT {limit:UInt32}
         `,
@@ -169,7 +175,7 @@ export class MetricsService {
 
     const runQuery = async (sql: string, label: string): Promise<RawRow[]> => {
         try {
-            const rows = await this.query<RawRow>(sql, { serviceName, metricName, limit });
+            const rows = await this.query<RawRow>(sql, { serviceName, metricName, limit, ...timeWindow.params });
             this.logger.log(`[getMetricDetail:${label}] ${rows.length} rows for ${serviceName}/${metricName}`);
             return rows;
         } catch (error) {
@@ -326,12 +332,12 @@ export class MetricsService {
     /**
      * Get unique metric definitions from all tables - flattened for UI table display
      */
-    async getAllMetricsFlattened(options: TelemetryListOptions = {}) {
+    async getAllMetricsFlattened(options: TelemetryListOptions & TelemetryTimeWindow = {}) {
         const { limit, offset } = this.normalizeListOptions(options);
-        const serviceFilter = options.service
-            ? 'WHERE ServiceName = {service:String}'
-            : '';
-        const queryParams: Record<string, unknown> = { limit, offset };
+        const timeWindow = metricTimeWindow(options);
+        const predicates = [options.service ? 'ServiceName = {service:String}' : '', timeWindow.sql].filter(Boolean);
+        const serviceFilter = predicates.length ? `WHERE ${predicates.join(' AND ')}` : '';
+        const queryParams: Record<string, unknown> = { limit, offset, ...timeWindow.params };
 
         if (options.service) {
             queryParams.service = options.service;
