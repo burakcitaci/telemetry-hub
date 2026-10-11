@@ -1,42 +1,25 @@
-import { useEffect, useState } from 'react';
 import { useLocation, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/features/auth/auth-context';
-import { api, unwrap } from '@/shared/api/client';
 import { Button } from '@/components/ui/button';
 import { FilterMultiselect } from './filter-multiselect';
 import { readPlatformFilters } from '@/shared/lib/platform-filters';
-import { resolveTelemetryRange } from '@/shared/lib/telemetry';
+import { useFilterOptions } from '@/shared/hooks/use-filter-options';
+import type { FilterOptionsSource } from '@/shared/api/filter-options';
 
 const LABEL = 'text-[11px] font-bold uppercase tracking-wider text-muted-foreground';
-interface Options { services: string[]; environments: string[]; statuses: string[] }
-
 export function UnifiedFilterSidebar() {
   const { session } = useAuth();
   const [params, setParams] = useSearchParams();
   const selected = readPlatformFilters(params.toString());
   const { pathname } = useLocation();
-  const [options, setOptions] = useState<Options>({ services: [], environments: [], statuses: [] });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(false);
-  const [revision, retry] = useState(0);
   const range = params.get('range') || params.get('time') || '5m';
-  const source = pathname.split('/')[3] || 'all';
+  const source = (pathname.split('/')[3] || 'all') as FilterOptionsSource;
   const scopeKey = JSON.stringify([selected.team, selected.service, selected.env]);
-  useEffect(() => {
-    const controller = new AbortController();
-    const refresh = async () => {
-      setLoading(true);
-      try {
-        const { from, to } = resolveTelemetryRange(range);
-        const { data } = await api.get('/filters', { signal: controller.signal, params: { source, from: from.toISOString(), to: to.toISOString() } });
-        if (!controller.signal.aborted) { setOptions(unwrap<Options>(data)); setError(false); }
-      } catch { if (!controller.signal.aborted) { setError(true); setOptions({ services: [], environments: [], statuses: [] }); } }
-      finally { if (!controller.signal.aborted) setLoading(false); }
-    };
-    void refresh();
-    const timer = window.setInterval(() => void refresh(), 30_000);
-    return () => { controller.abort(); window.clearInterval(timer); };
-  }, [session?.tenantSlug, revision, source, range, scopeKey]);
+  const { options, loading, error, retry } = useFilterOptions(
+    source,
+    range,
+    `${session?.tenantSlug ?? ''}:${scopeKey}`,
+  );
   const choose = (key: string, values: string[]) => setParams(current => {
     const next = new URLSearchParams(current);
     next.delete(key); values.forEach(value => next.append(key, value));
@@ -56,7 +39,7 @@ export function UnifiedFilterSidebar() {
     <Button variant="ghost" size="sm" className="h-7 w-full text-xs" onClick={() => setParams(current => {
       const next = new URLSearchParams(current);['env', 'team', 'globalService', 'globalStatus', 'id'].forEach(key => next.delete(key)); return next;
     })}>Filter zurücksetzen</Button>
-    {error && <p role="alert" className="text-xs text-destructive">Filter-Optionen nicht verfügbar. <button className="underline" onClick={() => retry(value => value + 1)}>Erneut laden</button></p>}
+    {error && <p role="alert" className="text-xs text-destructive">Filter-Optionen nicht verfügbar. <button className="underline" onClick={retry}>Erneut laden</button></p>}
     </section>;
 }
 

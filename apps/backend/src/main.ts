@@ -13,6 +13,8 @@ import { CentralLoggerService } from './common/logger/central-logger.service';
 import { AppModule } from "./app.module";
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import type { SwaggerConfig } from "./config/swagger.config";
+import { raw } from 'express';
+import { IngestionMiddleware } from './modules/ingestion/ingestion.middleware';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -26,6 +28,9 @@ async function bootstrap() {
   app.enableShutdownHooks();
 
   // Middleware
+  // Register before Nest's JSON parser; OTLP responses must not use the API envelope.
+  const ingestion = app.get(IngestionMiddleware);
+  app.use('/api/ingest', ingestion.authenticate, raw({ type: () => true, limit: '8mb' }), ingestion.forward);
   app.use(new LoggerMiddleware(logger).use);
 
   // Global pipes

@@ -9,6 +9,7 @@ import { HealthModule } from "./modules/health/health.module";
 import { LoggerModule } from "./common/logger/logger.module";
 import { MetricsModule } from "./modules/telemetry/metrics.module";
 import { AuthModule } from "./modules/auth/auth.module";
+import { IngestionModule } from './modules/ingestion/ingestion.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { AuthModule } from "./modules/auth/auth.module";
     }),
     LoggerModule,
     AuthModule,
+    IngestionModule,
     TelemetryModule,
     MetricsModule,
     HealthModule,

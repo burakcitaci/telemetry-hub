@@ -1,3 +1,7 @@
+ingestion:
+  # Provision this Secret before deployment; do not commit plaintext API keys.
+  secretName: telemetry-ingestion
+
 backend:
   name: backend
   replicaCount: 1

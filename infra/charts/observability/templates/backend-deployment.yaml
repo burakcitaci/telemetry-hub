@@ -45,6 +45,18 @@ spec:
               containerPort: {{ .Values.backend.service.port }}
               protocol: TCP
           env:
+            - name: INGESTION_COLLECTOR_ENDPOINT
+              value: {{ printf "http://%s:4319" .Values.collector.name | quote }}
+            - name: INGESTION_COLLECTOR_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.ingestion.secretName | quote }}
+                  key: INGESTION_COLLECTOR_TOKEN
+            - name: INGESTION_KEYS_JSON
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.ingestion.secretName | quote }}
+                  key: INGESTION_KEYS_JSON
             - name: AUTH_DB_PATH
               value: /var/lib/telemetry-hub/platform.sqlite
             {{- range .Values.backend.env }}

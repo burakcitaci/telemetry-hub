@@ -26,10 +26,6 @@ export function TracesView({
   loading,
   generating,
   error,
-  serviceFilters,
-  setServiceFilters,
-  statusFilters,
-  setStatusFilters,
   timeRange,
   setTimeRange,
   searchQuery,
@@ -37,8 +33,6 @@ export function TracesView({
   loadTraces,
   connected,
   generateAndRefresh,
-  services,
-  facetOptions,
   filteredTraces,
 }: TracesViewProps) {
   const { openTrace } = useActiveTrace();
@@ -71,13 +65,6 @@ export function TracesView({
           mobileOpen={filtersOpen}
           onMobileOpenChange={setFiltersOpen}
           environmentSource="traces"
-          services={services}
-          selectedServices={serviceFilters}
-          onServicesSelect={setServiceFilters}
-          facetTitle="Status"
-          facetOptions={facetOptions}
-          selectedFacets={statusFilters}
-          onFacetsSelect={setStatusFilters}
           timeRange={timeRange}
           onTimeRangeSelect={setTimeRange}
         />

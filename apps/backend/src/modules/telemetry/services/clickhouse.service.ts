@@ -294,11 +294,20 @@ export class ClickhouseService implements OnModuleInit, OnModuleDestroy {
 
   async getServices(scope: TenantScope, env?: string) {
     const environment = telemetryEnvironment(env);
-    const isolation = this.buildTenantFilter(scope, environment.sql ? [environment.sql] : [], 'traces');
-    return this.executeTenantQuery(scope, `
-      SELECT DISTINCT ServiceName
-      FROM otel_traces
+    const discoveryScope = { ...scope, statusFilter: undefined };
+    const isolation = this.buildTenantFilter(
+      discoveryScope,
+      environment.sql ? [environment.sql] : [],
+    );
+    const branches = TENANT_TABLES.map((table) => `
+      SELECT ServiceName
+      FROM ${table}
       ${isolation.where}
+    `);
+    return this.executeTenantQuery(discoveryScope, `
+      SELECT DISTINCT ServiceName
+      FROM (${branches.join(' UNION ALL ')})
+      WHERE ServiceName != ''
       ORDER BY ServiceName
     `, { ...environment.params, ...isolation.params });
   }

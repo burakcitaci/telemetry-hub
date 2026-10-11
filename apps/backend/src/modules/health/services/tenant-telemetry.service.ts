@@ -70,7 +70,11 @@ export class TenantTelemetryService {
     const endpoint = this.config.get<string>('OTEL_EXPORTER_OTLP_ENDPOINT') || 'http://localhost:4318';
     try {
       const response = await fetch(`${endpoint.replace(/\/$/, '')}/v1/${signal}`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        method: 'POST', headers: {
+          'Content-Type': 'application/json',
+          ...(this.config.get<string>('INGESTION_COLLECTOR_TOKEN')
+            ? { Authorization: `Bearer ${this.config.get<string>('INGESTION_COLLECTOR_TOKEN')}` } : {}),
+        },
         body: JSON.stringify(payload), signal: AbortSignal.timeout(10_000),
       });
       if (!response.ok) throw new Error(`Collector returned ${response.status}`);

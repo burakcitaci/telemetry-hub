@@ -28,6 +28,11 @@ const OTEL_EXPORTER_OTLP_ENDPOINT =
 const otlpTracesUrl = `${OTEL_EXPORTER_OTLP_ENDPOINT}/v1/traces`;
 const otlpLogsUrl = `${OTEL_EXPORTER_OTLP_ENDPOINT}/v1/logs`;
 const otlpMetricsUrl = `${OTEL_EXPORTER_OTLP_ENDPOINT}/v1/metrics`;
+const exporterHeaders = {
+  'Content-Type': 'application/json',
+  ...(process.env.INGESTION_COLLECTOR_TOKEN
+    ? { Authorization: `Bearer ${process.env.INGESTION_COLLECTOR_TOKEN}` } : {}),
+};
 
 const serviceName = process.env.OTEL_SERVICE_NAME || 'backend-service';
 const version = process.env.OTEL_SERVICE_VERSION || '1.0.0';
@@ -56,7 +61,7 @@ class TenantMetricExporter extends OTLPMetricExporter {
 const metricReader = new PeriodicExportingMetricReader({
   exporter: new TenantMetricExporter({
     url: otlpMetricsUrl,
-    headers: { 'Content-Type': 'application/json' },
+    headers: exporterHeaders,
     timeoutMillis: 10000,
   }),
   exportIntervalMillis: 15000,   // flush every 15s — responsive without spamming
@@ -71,7 +76,7 @@ const loggerProvider = new LoggerProvider({
     new BatchLogRecordProcessor({
       exporter: new TenantLogExporter(new OTLPLogExporter({
         url: otlpLogsUrl,
-        headers: { 'Content-Type': 'application/json' },
+        headers: exporterHeaders,
       })),
       maxExportBatchSize: 10,
       maxQueueSize: 2000,
@@ -90,7 +95,7 @@ const sdk = new NodeSDK({
     new TenantSpanContextProcessor(),
     new BatchSpanProcessor(new TenantSpanExporter(new OTLPTraceExporter({
       url: otlpTracesUrl,
-      headers: { 'Content-Type': 'application/json' },
+      headers: exporterHeaders,
     }))),
   ],
   metricReaders: [metricReader],   // ← NodeSDK now owns the meter provider

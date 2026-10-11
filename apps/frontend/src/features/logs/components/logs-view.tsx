@@ -28,10 +28,6 @@ export function LogsView({
   error,
   selectedLog,
   setSelectedLog,
-  serviceFilters,
-  setServiceFilters,
-  severityFilters,
-  setSeverityFilters,
   timeRange,
   setTimeRange,
   searchQuery,
@@ -39,8 +35,6 @@ export function LogsView({
   loadLogs,
   connected,
   generateAndRefresh,
-  services,
-  facetOptions,
   filteredLogs,
 }: LogsViewProps) {
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -67,13 +61,6 @@ export function LogsView({
           mobileOpen={filtersOpen}
           onMobileOpenChange={setFiltersOpen}
           environmentSource="logs"
-          services={services}
-          selectedServices={serviceFilters}
-          onServicesSelect={setServiceFilters}
-          facetTitle="Status"
-          facetOptions={facetOptions}
-          selectedFacets={severityFilters}
-          onFacetsSelect={setSeverityFilters}
           timeRange={timeRange}
           onTimeRangeSelect={setTimeRange}
         />

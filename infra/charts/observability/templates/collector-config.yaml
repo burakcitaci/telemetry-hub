@@ -7,15 +7,42 @@ metadata:
     {{- include "observability.resourceLabels" (dict "root" . "name" .Values.collector.name "component" "collector") | nindent 4 }}
 data:
   config.yaml: |
+    extensions:
+      bearertokenauth/ingestion:
+        token: ${env:INGESTION_COLLECTOR_TOKEN}
+
     receivers:
       otlp:
         protocols:
           grpc:
             endpoint: 0.0.0.0:4317
+            auth:
+              authenticator: bearertokenauth/ingestion
           http:
             endpoint: 0.0.0.0:4318
+            auth:
+              authenticator: bearertokenauth/ingestion
+      otlp/ingestion:
+        protocols:
+          http:
+            endpoint: 0.0.0.0:4319
+            include_metadata: true
+            auth:
+              authenticator: bearertokenauth/ingestion
 
     processors:
+      resource/ingestion:
+        attributes:
+          - key: org.slug
+            action: delete
+          - key: team.id
+            action: delete
+          - key: org.slug
+            from_context: metadata.x-telemetry-org
+            action: upsert
+          - key: team.id
+            from_context: metadata.x-telemetry-team
+            action: upsert
       memory_limiter:
         check_interval: 1s
         limit_mib: 192
@@ -47,7 +74,20 @@ data:
         verbosity: basic
 
     service:
+      extensions: [bearertokenauth/ingestion]
       pipelines:
+        traces/ingestion:
+          receivers: [otlp/ingestion]
+          processors: [memory_limiter, resource/ingestion, batch]
+          exporters: [clickhouse]
+        logs/ingestion:
+          receivers: [otlp/ingestion]
+          processors: [memory_limiter, resource/ingestion, batch]
+          exporters: [clickhouse]
+        metrics/ingestion:
+          receivers: [otlp/ingestion]
+          processors: [memory_limiter, resource/ingestion, batch]
+          exporters: [clickhouse]
         traces:
           receivers: [otlp]
           processors: [memory_limiter, batch]
