@@ -10,9 +10,11 @@ import {
 } from '@opentelemetry/sdk-logs';
 import { PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics';
 import type { ResourceMetrics } from '@opentelemetry/sdk-metrics';
+import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base';
 import { ExportResultCode, type ExportResult } from '@opentelemetry/core';
 import { deploymentTenantAttributes, partitionTenantMetrics } from './common/telemetry/tenant-metrics';
 import { TenantLogContextProcessor, TenantLogExporter } from './common/telemetry/tenant-logs';
+import { TenantSpanContextProcessor, TenantSpanExporter } from './common/telemetry/tenant-traces';
 import {
   ATTR_SERVICE_NAME,
   ATTR_SERVICE_VERSION,
@@ -84,10 +86,13 @@ logs.setGlobalLoggerProvider(loggerProvider);
 // ── SDK (traces + metrics + logs) ────────────────────────────────────────────
 const sdk = new NodeSDK({
   resource,
-  traceExporter: new OTLPTraceExporter({
-    url: otlpTracesUrl,
-    headers: { 'Content-Type': 'application/json' },
-  }),
+  spanProcessors: [
+    new TenantSpanContextProcessor(),
+    new BatchSpanProcessor(new TenantSpanExporter(new OTLPTraceExporter({
+      url: otlpTracesUrl,
+      headers: { 'Content-Type': 'application/json' },
+    }))),
+  ],
   metricReaders: [metricReader],   // ← NodeSDK now owns the meter provider
   instrumentations: [getNodeAutoInstrumentations()],
 });

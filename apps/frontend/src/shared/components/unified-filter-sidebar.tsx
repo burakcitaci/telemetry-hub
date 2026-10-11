@@ -54,12 +54,10 @@ export function UnifiedFilterSidebar() {
     {pathname.includes('/metrics') && <p className="text-[11px] text-muted-foreground">Status does not apply to raw OTel metrics. The selection is retained for Logs, Traces and Monitors.</p>}
     {source === 'monitors' && <p className="text-[11px] text-muted-foreground">Monitor options reflect configurations updated in this range. Historical evaluation states are not recorded yet.</p>}
     <Button variant="ghost" size="sm" className="h-7 w-full text-xs" onClick={() => setParams(current => {
-      const next = new URLSearchParams(current); ['env', 'team', 'globalService', 'globalStatus', 'id'].forEach(key => next.delete(key)); return next;
+      const next = new URLSearchParams(current);['env', 'team', 'globalService', 'globalStatus', 'id'].forEach(key => next.delete(key)); return next;
     })}>Filter zurücksetzen</Button>
-    <Button variant="ghost" size="sm" className="h-7 w-full text-xs" onClick={() => retry(value => value + 1)}>Optionen aktualisieren</Button>
     {error && <p role="alert" className="text-xs text-destructive">Filter-Optionen nicht verfügbar. <button className="underline" onClick={() => retry(value => value + 1)}>Erneut laden</button></p>}
-    <p className="text-[11px] text-muted-foreground">Gilt für Metrics, Logs, Traces und Monitors. Ohne Auswahl: gesamte Organisation.</p>
-  </section>;
+    </section>;
 }
 
 function FilterSelect({ label, values, options, onChange }: {

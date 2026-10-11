@@ -202,21 +202,6 @@ export function AppFilterSidebar({
     <div className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
       <div className="w-full min-w-0 space-y-3 p-1">
         <UnifiedFilterSidebar />
-        {onServicesSelect && (
-          <ServiceSelector
-            services={services}
-            selectedServices={selectedServices}
-            onServicesSelect={onServicesSelect}
-          />
-        )}
-        {onFacetsSelect && facetTitle && (
-          <FacetSelector
-            title={facetTitle}
-            options={facetOptions}
-            selected={selectedFacets}
-            onChange={onFacetsSelect}
-          />
-        )}
         {children}
       </div>
     </div>
