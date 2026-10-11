@@ -4,7 +4,7 @@ import type { ResourceMetrics, MetricData } from '@opentelemetry/sdk-metrics';
 import type { TenantScope } from '../../modules/auth/auth.types';
 
 export function tenantAttributes(scope: TenantScope): Attributes {
-  const team = scope.role === 'admin' ? scope.teamFilter ?? scope.teamId : scope.teamId;
+  const team = scope.role === 'admin' ? singleFilter(scope.teamFilter) ?? scope.teamId : scope.teamId;
   return { 'org.slug': scope.tenantSlug, 'team.id': team ?? '' };
 }
 
@@ -59,3 +59,4 @@ function appendMetric(
   scoped.metrics.push({ ...metric, dataPoints: partition.points } as MetricData);
   groups.set(key, group);
 }
+import { singleFilter } from '../../modules/auth/platform-filters';

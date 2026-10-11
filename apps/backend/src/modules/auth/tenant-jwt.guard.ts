@@ -10,6 +10,7 @@ import type { TenantJwtPayload, TenantRequest } from './auth.types';
 import { PlatformStore } from './platform-store.service';
 import { ConfigService } from '@nestjs/config';
 import { ForbiddenException } from '@nestjs/common';
+import { authenticatedTelemetryScope } from '../../common/telemetry/tenant-context';
 
 export const AUTH_COOKIE = 'telemetry_session';
 const TENANT_PATTERN = /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/;
@@ -47,11 +48,13 @@ export class TenantJwtGuard implements CanActivate {
     request.authSubject = payload.sub;
     request.authVersion = payload.version;
     request.authExpiresAt = payload.exp;
+    authenticatedTelemetryScope(payload);
 
     // EventSource cannot send headers; accept the same filters as stream query parameters.
     request.teamFilter = this.filter(request.header('x-team-filter') ?? request.query.team, TEAM_PATTERN);
     request.serviceFilter = this.filter(request.header('x-service-filter') ?? request.query.globalService, /^\S.{0,254}$/);
     request.envFilter = this.filter(request.header('x-environment-filter') ?? request.query.globalEnv, TEAM_PATTERN);
+    request.statusFilter = this.filter(request.header('x-status-filter') ?? request.query.globalStatus, /^[A-Za-z0-9][A-Za-z0-9 ._-]{0,63}$/);
     return true;
   }
 
@@ -67,12 +70,17 @@ export class TenantJwtGuard implements CanActivate {
     }
   }
 
-  private filter(value: unknown, pattern: RegExp): string | undefined {
+  private filter(value: unknown, pattern: RegExp): string | string[] | undefined {
     if (value === undefined || value === '' || value === 'all') return undefined;
-    if (typeof value !== 'string' || !pattern.test(value)) {
+    if (typeof value === 'string' && value.startsWith('[')) {
+      try { value = JSON.parse(value); } catch { throw new BadRequestException('Invalid unified filter.'); }
+    }
+    const values = Array.isArray(value) ? value : [value];
+    if (values.length > 50 || values.some(item => typeof item !== 'string' || !pattern.test(item))) {
       throw new BadRequestException('Invalid unified filter.');
     }
-    return value;
+    const unique = [...new Set(values)] as string[];
+    return unique.length === 1 ? unique[0] : unique.length ? unique : undefined;
   }
 
   private cookie(header: string | undefined, name: string): string | undefined {

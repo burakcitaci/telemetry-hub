@@ -5,6 +5,8 @@ import { mkdirSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import type { TenantJwtPayload, UserRole } from './auth.types';
+import { filterValues, type FilterSelection } from './platform-filters';
+import { registerTelemetryOwnership } from '../../common/telemetry/tenant-context';
 
 export interface Identity {
   id: string; email: string; tenantSlug: string; role: UserRole;
@@ -16,6 +18,7 @@ export interface Team { id: string; name: string }
 @Injectable()
 export class PlatformStore implements OnModuleDestroy {
   private readonly db: DatabaseSync;
+  private readonly releaseOwnership: () => void;
 
   constructor(config: ConfigService) {
     const path = config.get<string>('AUTH_DB_PATH') ?? resolve('data/platform.sqlite');
@@ -27,10 +30,39 @@ export class PlatformStore implements OnModuleDestroy {
       CREATE TABLE IF NOT EXISTS teams (org TEXT, id TEXT, name TEXT NOT NULL, PRIMARY KEY(org,id));
       CREATE TABLE IF NOT EXISTS monitors (org TEXT, id TEXT, body TEXT NOT NULL, PRIMARY KEY(org,id));`);
     this.db.exec('CREATE TABLE IF NOT EXISTS bootstrap (org TEXT, email TEXT, PRIMARY KEY(org,email));');
+    this.db.exec('CREATE TABLE IF NOT EXISTS service_metadata (org TEXT, service TEXT, body TEXT NOT NULL, PRIMARY KEY(org,service));');
     this.seed(config.get<string>('AUTH_USERS_JSON'));
+    this.releaseOwnership = registerTelemetryOwnership((org, service) => this.serviceTeam(org, service));
   }
 
-  onModuleDestroy() { this.db.close(); }
+  onModuleDestroy() { this.releaseOwnership(); this.db.close(); }
+
+  serviceTeam(org: string, service: string): string | undefined {
+    const row = this.db.prepare('SELECT body FROM service_metadata WHERE org = ? AND service = ?').get(org, service);
+    const team = row ? JSON.parse(String(row.body)).team : undefined;
+    return typeof team === 'string' && team ? team : undefined;
+  }
+
+  serviceMetadata(org: string): Record<string, unknown>[] {
+    return this.db.prepare('SELECT body FROM service_metadata WHERE org = ? ORDER BY service')
+      .all(org).map(row => JSON.parse(String(row.body)));
+  }
+
+  serviceOwnership(org: string, team: FilterSelection) {
+    const teams = filterValues(team);
+    const rows = this.serviceMetadata(org).filter(row => typeof row.team === 'string' && row.team !== '');
+    return { assigned: rows.map(row => String(row.serviceName)),
+      owned: rows.filter(row => teams.includes(String(row.team))).map(row => String(row.serviceName)) };
+  }
+
+  saveServiceMetadata(org: string, service: string, metadata: Record<string, unknown>) {
+    this.db.prepare('INSERT INTO service_metadata VALUES (?, ?, ?) ON CONFLICT(org,service) DO UPDATE SET body=excluded.body')
+      .run(org, service, JSON.stringify(metadata));
+  }
+
+  deleteServiceMetadata(org: string, service: string) {
+    this.db.prepare('DELETE FROM service_metadata WHERE org = ? AND service = ?').run(org, service);
+  }
 
   isSessionActive(payload: TenantJwtPayload): boolean {
     const user = payload.sub ? this.user(payload.tenantSlug, payload.sub) : undefined;
@@ -84,6 +116,9 @@ export class PlatformStore implements OnModuleDestroy {
   }
 
   deleteTeam(org: string, id: string) {
+    if (this.serviceMetadata(org).some(metadata => metadata.team === id)) {
+      throw new ConflictException('Reassign services before deleting this team.');
+    }
     if (this.users(org).some(user => user.teamId === id)) {
       throw new ConflictException('Reassign team members before deleting this team.');
     }

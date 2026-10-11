@@ -14,11 +14,12 @@ test('all three signals enforce organization and user team, and honor admin sele
   };
   const service = new TenantTelemetryService(new ConfigService());
   const scopes: TenantScope[] = [
-    { tenantSlug: 'demo', role: 'admin' },
     { tenantSlug: 'demo', role: 'admin', teamFilter: 'platform' },
     { tenantSlug: 'other', role: 'user', teamId: 'backend', teamFilter: 'platform' },
   ];
   try {
+    await assert.rejects(service.generate({ tenantSlug: 'demo', role: 'admin' }), /Assign service/);
+    assert.equal(payloads.length, 0, 'missing ownership must not export any signal');
     for (const scope of scopes) {
       payloads.length = 0;
       await service.generate(scope);

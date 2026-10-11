@@ -6,7 +6,8 @@ export async function generateTelemetry(): Promise<void> {
 
 export function createEventSource(): EventSource {
   const filters = new URLSearchParams(window.location.search);
-  filters.set('globalEnv', filters.get('env') || 'all');
+  filters.delete('globalEnv');
+  filters.getAll('env').forEach(value => filters.append('globalEnv', value));
   return new EventSource(`${BACKEND_URL}/api/events/stream?${filters}`, {
     withCredentials: true,
   });

@@ -58,7 +58,7 @@ function ServiceDetailPage() {
     useServiceSummary(serviceName);
   const [sheetOpen, setSheetOpen] = useState(false);
 
-  const { metadata, saveForService } = useServiceMetadata();
+  const { metadata, saveForService, loading: metadataLoading, error: metadataError, reload: reloadMetadata } = useServiceMetadata();
   const currentMetadata: ServiceMetadata =
     metadata[serviceName] ?? EMPTY_METADATA(serviceName);
 
@@ -104,6 +104,7 @@ function ServiceDetailPage() {
               variant={sheetOpen ? 'secondary' : 'outline'}
               size="sm"
               onClick={() => setSheetOpen(true)}
+              disabled={metadataLoading || !!metadataError}
               className="gap-2"
             >
               <Settings className="h-4 w-4" />
@@ -287,6 +288,7 @@ function ServiceDetailPage() {
                 variant="ghost"
                 size="sm"
                 onClick={() => setSheetOpen(true)}
+                disabled={metadataLoading || !!metadataError}
                 className="-mr-2 h-8 gap-1 text-muted-foreground hover:text-foreground"
               >
                 <Pencil className="h-3 w-3" />
@@ -349,7 +351,7 @@ function ServiceDetailPage() {
                       Add ownership information to help your team manage this service.
                     </p>
                   </div>
-                  <Button size="sm" variant="secondary" onClick={() => setSheetOpen(true)}>
+                  <Button disabled={metadataLoading || !!metadataError} size="sm" variant="secondary" onClick={() => setSheetOpen(true)}>
                     Configure Metadata
                   </Button>
                 </div>
@@ -359,6 +361,8 @@ function ServiceDetailPage() {
         </div>
       ) : null}
 
+      {metadataLoading && <p role="status" className="text-xs text-muted-foreground">Loading service metadata…</p>}
+      {metadataError && <QueryError message={metadataError} onRetry={() => void reloadMetadata()} />}
       {/* Setup & Config sheet */}
       <ServiceMetadataSheet
         open={sheetOpen}

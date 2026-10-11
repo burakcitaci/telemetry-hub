@@ -6,6 +6,19 @@ import { TenantJwtGuard } from './tenant-jwt.guard';
 import { Tenant } from './tenant-request.decorator';
 import type { TenantScope } from './auth.types';
 import { MonitorDto } from './dto/monitor.dto';
+import { filterValues } from './platform-filters';
+
+export function listFilteredMonitors(store: PlatformStore, scope: TenantScope) {
+  const ownership = scope.teamFilter ? store.serviceOwnership(scope.tenantSlug, scope.teamFilter) : undefined;
+  const teams = filterValues(scope.teamFilter), services = filterValues(scope.serviceFilter), envs = filterValues(scope.envFilter);
+  const statuses = filterValues(scope.statusFilter);
+  return store.monitors(scope.tenantSlug).filter(m =>
+    (!teams.length || (ownership?.assigned.includes(m.service)
+      ? ownership.owned.includes(m.service) : teams.includes(m.teamId))) &&
+    (!services.length || services.includes(m.service)) &&
+    (!envs.length || envs.includes(m.env)) &&
+    (!statuses.length || statuses.includes(m.isMuted ? 'Muted' : m.status || 'Unknown')));
+}
 
 @Controller('api/monitors')
 @UseGuards(TenantJwtGuard)
@@ -13,10 +26,7 @@ export class MonitorsController {
   constructor(private readonly store: PlatformStore, private readonly admin: AdminService) {}
 
   @Get() list(@Tenant() scope: TenantScope) {
-    return this.store.monitors(scope.tenantSlug).filter(m =>
-      (!scope.teamFilter || m.teamId === scope.teamFilter) &&
-      (!scope.serviceFilter || m.service === scope.serviceFilter) &&
-      (!scope.envFilter || m.env === scope.envFilter));
+    return listFilteredMonitors(this.store, scope);
   }
 
   @Post() create(@Tenant() scope: TenantScope, @Body() dto: MonitorDto) {

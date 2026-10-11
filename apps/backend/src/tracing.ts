@@ -12,6 +12,7 @@ import { PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics';
 import type { ResourceMetrics } from '@opentelemetry/sdk-metrics';
 import { ExportResultCode, type ExportResult } from '@opentelemetry/core';
 import { deploymentTenantAttributes, partitionTenantMetrics } from './common/telemetry/tenant-metrics';
+import { TenantLogContextProcessor, TenantLogExporter } from './common/telemetry/tenant-logs';
 import {
   ATTR_SERVICE_NAME,
   ATTR_SERVICE_VERSION,
@@ -64,11 +65,12 @@ const metricReader = new PeriodicExportingMetricReader({
 const loggerProvider = new LoggerProvider({
   resource,
   processors: [
+    new TenantLogContextProcessor(),
     new BatchLogRecordProcessor({
-      exporter: new OTLPLogExporter({
+      exporter: new TenantLogExporter(new OTLPLogExporter({
         url: otlpLogsUrl,
         headers: { 'Content-Type': 'application/json' },
-      }),
+      })),
       maxExportBatchSize: 10,
       maxQueueSize: 2000,
       exportTimeoutMillis: 10000,

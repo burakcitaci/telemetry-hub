@@ -14,10 +14,10 @@ export class CentralLoggerService implements LoggerService, OnApplicationShutdow
    */
   private getLogger() {
     try {
-      const logger = logs.getLogger('backend-service');
+      const logger = logs.getLogger(process.env.OTEL_SERVICE_NAME || 'backend-service');
       if (!logger) {
         console.error('WARNING: logs.getLogger returned null/undefined');
-        return logs.getLogger('backend-service'); // Retry once
+        return logs.getLogger(process.env.OTEL_SERVICE_NAME || 'backend-service'); // Retry once
       }
       return logger;
     } catch (error) {

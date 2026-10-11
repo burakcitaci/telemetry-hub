@@ -11,6 +11,7 @@ export const Tenant = createParamDecorator(
       teamFilter: request.teamFilter,
       serviceFilter: request.serviceFilter,
       envFilter: request.envFilter,
+      statusFilter: request.statusFilter,
       sub: request.authSubject,
       version: request.authVersion,
       exp: request.authExpiresAt,

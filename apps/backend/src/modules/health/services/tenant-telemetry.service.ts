@@ -1,11 +1,12 @@
-import { Injectable, ServiceUnavailableException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, ServiceUnavailableException } from '@nestjs/common';
+import { PlatformStore } from '../../auth/platform-store.service';
 import { ConfigService } from '@nestjs/config';
 import { randomBytes } from 'node:crypto';
 import type { TenantScope } from '../../auth/auth.types';
 
 @Injectable()
 export class TenantTelemetryService {
-  constructor(private readonly config: ConfigService) {}
+  constructor(private readonly config: ConfigService, @Inject(PlatformStore) private readonly store?: PlatformStore) {}
 
   async generate(scope: TenantScope): Promise<void> {
     const resource = this.resource(scope);
@@ -29,12 +30,22 @@ export class TenantTelemetryService {
   }
 
   private resource(scope: TenantScope) {
-    const team = scope.role === 'admin' ? scope.teamFilter ?? scope.teamId : scope.teamId;
+    const service = singleFilter(scope.serviceFilter) || this.config.get<string>('OTEL_SERVICE_NAME') || 'backend-service';
+    const team = this.store?.serviceTeam(scope.tenantSlug, service)
+      ?? (scope.role === 'admin' ? singleFilter(scope.teamFilter) ?? scope.teamId : scope.teamId);
+    if (!team) {
+      throw new BadRequestException(
+        `Assign service "${service}" to a team in organization "${scope.tenantSlug}" before generating telemetry, or select one team.`,
+      );
+    }
+    if (this.store && !this.store.teams(scope.tenantSlug).some(candidate => candidate.id === team)) {
+      throw new BadRequestException('The telemetry team must belong to the authenticated organization.');
+    }
     const attributes = {
-      'service.name': scope.serviceFilter || this.config.get<string>('OTEL_SERVICE_NAME') || 'backend-service',
-      'deployment.environment.name': scope.envFilter || this.config.get<string>('DEPLOY_ENV') || 'production',
+      'service.name': service,
+      'deployment.environment.name': singleFilter(scope.envFilter) || this.config.get<string>('DEPLOY_ENV') || 'production',
       'org.slug': scope.tenantSlug,
-      ...(team ? { 'team.id': team } : {}),
+      'team.id': team,
     };
     return { attributes: Object.entries(attributes).map(([key, value]) => ({
       key, value: { stringValue: value },
@@ -70,3 +81,4 @@ export class TenantTelemetryService {
     }
   }
 }
+import { singleFilter } from '../../auth/platform-filters';

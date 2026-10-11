@@ -2,10 +2,38 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { platformFilterKey, platformFilterSearch, readPlatformFilters } from '../src/shared/lib/platform-filters';
 import { api } from '../src/shared/api/client';
+import { createEventSource } from '../src/shared/api/telemetry-api';
 
 test('no implicit team or environment boundary, and explorer facets do not become global service filters', () => {
-  assert.deepEqual(readPlatformFilters(''), { team: undefined, service: undefined, env: 'all' });
-  assert.deepEqual(readPlatformFilters('?service=local-service&env=all&team=all'), { team: undefined, service: undefined, env: 'all' });
+  assert.deepEqual(readPlatformFilters(''), { team: [], service: [], env: [], status: [] });
+  assert.deepEqual(readPlatformFilters('?service=local-service&env=all&team=all'), { team: [], service: [], env: [], status: [] });
+});
+
+test('multi-select values survive navigation with canonical keys and live streams', async () => {
+  const search = '?team=backend&team=frontend&team=backend&globalService=a%2Cb&globalService=api&env=dev&env=production&globalStatus=ERROR&globalStatus=WARN';
+  assert.deepEqual(readPlatformFilters(search), { team: ['backend', 'frontend'], service: ['a,b', 'api'], env: ['dev', 'production'], status: ['ERROR', 'WARN'] });
+  assert.deepEqual(readPlatformFilters(platformFilterSearch(search)), readPlatformFilters(search));
+  assert.equal(platformFilterKey(search), platformFilterKey('?env=production&env=dev&team=frontend&team=backend&globalService=api&globalService=a%2Cb&globalStatus=WARN&globalStatus=ERROR'));
+  const previousWindow = globalThis.window, previousAdapter = api.defaults.adapter;
+  const previousEventSource = globalThis.EventSource;
+  globalThis.window = { location: { search, pathname: '/org/demo/logs' } } as any;
+  api.defaults.adapter = async config => {
+    assert.deepEqual(JSON.parse(String(config.headers.get('X-Team-Filter'))), ['backend', 'frontend']);
+    assert.deepEqual(JSON.parse(String(config.headers.get('X-Status-Filter'))), ['ERROR', 'WARN']);
+    assert.equal(config.params.env, 'all');
+    return { data: [], status: 200, statusText: 'OK', headers: {}, config };
+  };
+  globalThis.EventSource = class {
+    constructor(url: string, options: any) {
+      const query = new URL(url).searchParams;
+      assert.deepEqual(query.getAll('team'), ['backend', 'frontend', 'backend']);
+      assert.deepEqual(query.getAll('globalEnv'), ['dev', 'production']);
+      assert.deepEqual(query.getAll('globalStatus'), ['ERROR', 'WARN']);
+      assert.equal(options.withCredentials, true);
+    }
+  } as any;
+  try { await api.get('/logs'); createEventSource(); }
+  finally { api.defaults.adapter = previousAdapter; globalThis.window = previousWindow; globalThis.EventSource = previousEventSource; }
 });
 
 test('navigation preserves unified filters, drops page-local state and encodes special characters', () => {

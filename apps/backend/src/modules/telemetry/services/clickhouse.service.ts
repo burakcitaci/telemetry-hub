@@ -7,6 +7,7 @@ import {
 } from '@clickhouse/client';
 import {
   Injectable,
+  Inject,
   OnModuleDestroy,
   OnModuleInit,
   ServiceUnavailableException,
@@ -18,6 +19,8 @@ import { telemetryEnvironment } from './telemetry-environment';
 import type { ClickhouseConfig } from '../../../config/clickhouse.config';
 import { CentralLoggerService } from '../../../common/logger/central-logger.service';
 import type { TenantScope } from '../../auth/auth.types';
+import { PlatformStore } from '../../auth/platform-store.service';
+import { filterValues } from '../../auth/platform-filters';
 
 const DEFAULT_LIMIT = 100;
 const MAX_LIMIT = 500;
@@ -73,7 +76,7 @@ export interface TelemetryChangeSignal {
 export interface TenantQueryFilter {
   predicate: string;
   where: string;
-  params: Record<string, string>;
+  params: Record<string, string | string[]>;
 }
 
 @Injectable()
@@ -85,6 +88,7 @@ export class ClickhouseService implements OnModuleInit, OnModuleDestroy {
   constructor(
     private readonly logger: CentralLoggerService,
     private readonly configService: ConfigService,
+    @Inject(PlatformStore) private readonly platformStore?: PlatformStore,
   ) {}
 
   async onModuleInit(): Promise<void> {
@@ -131,7 +135,7 @@ export class ClickhouseService implements OnModuleInit, OnModuleDestroy {
   ): Promise<string[]> {
     const isolation = this.buildTenantFilter(scope, [
       "ResourceAttributes['deployment.environment.name'] != ''",
-    ]);
+    ], source === 'metrics' ? undefined : source);
     const tables = {
       metrics: ['otel_metrics_gauge', 'otel_metrics_sum', 'otel_metrics_histogram'],
       logs: ['otel_logs'],
@@ -162,7 +166,7 @@ export class ClickhouseService implements OnModuleInit, OnModuleDestroy {
     const serviceFilter = options.service
       ? 'HAVING countIf(ServiceName = {service:String}) > 0'
       : '';
-    const isolation = this.buildTenantFilter(scope, environment.sql ? [environment.sql] : []);
+    const isolation = this.buildTenantFilter({ ...scope, statusFilter: undefined }, environment.sql ? [environment.sql] : []);
     const queryParams: Record<string, unknown> = {
       limit, offset, ...environment.params, ...isolation.params,
     };
@@ -205,6 +209,7 @@ export class ClickhouseService implements OnModuleInit, OnModuleDestroy {
         GROUP BY TraceId
         ${serviceFilter}
       )
+      ${filterValues(scope.statusFilter).length ? `WHERE ${this.statusPredicate('traces')}` : ''}
       ORDER BY Timestamp DESC
       LIMIT {limit:UInt32} OFFSET {offset:UInt32}
     `;
@@ -217,7 +222,7 @@ export class ClickhouseService implements OnModuleInit, OnModuleDestroy {
     const isolation = this.buildTenantFilter(scope, [
       'TraceId = {traceId:String}',
       ...(environment.sql ? [environment.sql] : []),
-    ]);
+    ], 'traces');
     const query = `
       SELECT
         TraceId,
@@ -257,7 +262,7 @@ export class ClickhouseService implements OnModuleInit, OnModuleDestroy {
       predicates.push(timeWindow.sql);
       Object.assign(queryParams, timeWindow.params);
     }
-    const isolation = this.buildTenantFilter(scope, predicates);
+    const isolation = this.buildTenantFilter(scope, predicates, 'logs');
     Object.assign(queryParams, isolation.params);
 
     const query = `
@@ -289,7 +294,7 @@ export class ClickhouseService implements OnModuleInit, OnModuleDestroy {
 
   async getServices(scope: TenantScope, env?: string) {
     const environment = telemetryEnvironment(env);
-    const isolation = this.buildTenantFilter(scope, environment.sql ? [environment.sql] : []);
+    const isolation = this.buildTenantFilter(scope, environment.sql ? [environment.sql] : [], 'traces');
     return this.executeTenantQuery(scope, `
       SELECT DISTINCT ServiceName
       FROM otel_traces
@@ -310,7 +315,7 @@ export class ClickhouseService implements OnModuleInit, OnModuleDestroy {
       "(ParentSpanId = '' OR lowerUTF8(SpanKind) = 'server')",
       timeWindow.sql,
       ...(environment.sql ? [environment.sql] : []),
-    ]);
+    ], 'traces');
     const query = `
       SELECT
         count() AS request_count,
@@ -333,7 +338,7 @@ export class ClickhouseService implements OnModuleInit, OnModuleDestroy {
     scope: TenantScope,
     options: TelemetryStreamOptions,
   ): Promise<TelemetryChangeSignal> {
-    const isolation = this.buildTenantFilter(scope);
+    const isolation = this.buildTenantFilter(scope, [], 'traces');
     const query = `
       WITH [
         '/api/traces',
@@ -406,7 +411,7 @@ export class ClickhouseService implements OnModuleInit, OnModuleDestroy {
     scope: TenantScope,
     options: TelemetryStreamOptions,
   ): Promise<TelemetryChangeSignal> {
-    const isolation = this.buildTenantFilter(scope);
+    const isolation = this.buildTenantFilter(scope, [], 'logs');
     const query = `
       WITH [
         '/api/traces',
@@ -502,7 +507,11 @@ export class ClickhouseService implements OnModuleInit, OnModuleDestroy {
     params: Record<string, unknown> = {},
     settings?: ClickHouseSettings,
   ): Promise<T[]> {
-    const isolation = this.buildTenantFilter(scope);
+    const source = /\bFROM\s+otel_logs\b/i.test(sql) ? 'logs' : /\bFROM\s+otel_traces\b/i.test(sql) ? 'traces' : undefined;
+    const isolation = this.buildTenantFilter(scope, [], source);
+    if (source && filterValues(scope.statusFilter).length && !sql.includes(this.statusPredicate(source))) {
+      throw new Error('Blocked query without selected status filter.');
+    }
     this.assertTenantIsolation(sql, isolation, scope);
     await this.ensureTenantSchema();
     return this.query<T>(sql, { ...params, ...isolation.params }, settings);
@@ -521,21 +530,43 @@ export class ClickhouseService implements OnModuleInit, OnModuleDestroy {
   buildTenantFilter(
     scope: TenantScope,
     predicates: string[] = [],
+    source?: 'logs' | 'traces',
   ): TenantQueryFilter {
     // Membership identifies the user, not their read boundary. Org isolation is mandatory.
-    const effectiveTeam = scope.teamFilter;
+    const teams = filterValues(scope.teamFilter), services = filterValues(scope.serviceFilter), envs = filterValues(scope.envFilter);
+    const effectiveTeam = teams.length ? teams : undefined;
     const tenantPredicates = ['org_slug = {tenant:String}'];
-    if (effectiveTeam) tenantPredicates.push('team_id = {teamId:String}');
-    if (scope.serviceFilter) tenantPredicates.push('ServiceName = {filterService:String}');
-    if (scope.envFilter) tenantPredicates.push("ResourceAttributes['deployment.environment.name'] = {filterEnv:String}");
+    const params: Record<string, string | string[]> = { tenant: scope.tenantSlug };
+    const selection = (column: string, key: string, values: string[]) => {
+      params[key] = values.length === 1 ? values[0] : values;
+      return values.length === 1 ? `${column} = {${key}:String}` : `${column} IN {${key}:Array(String)}`;
+    };
+    const ownership = effectiveTeam ? this.platformStore?.serviceOwnership(scope.tenantSlug, effectiveTeam) : undefined;
+    if (effectiveTeam) tenantPredicates.push(ownership?.assigned.length
+      ? `(ServiceName IN {ownedServices:Array(String)} OR (${selection('team_id', 'teamId', teams)} AND ServiceName NOT IN {assignedServices:Array(String)}))`
+      : selection('team_id', 'teamId', teams));
+    if (services.length) tenantPredicates.push(selection('ServiceName', 'filterService', services));
+    if (envs.length) tenantPredicates.push(selection("ResourceAttributes['deployment.environment.name']", 'filterEnv', envs));
+    if (source && filterValues(scope.statusFilter).length) {
+      tenantPredicates.push(this.statusPredicate(source)); params.filterStatuses = filterValues(scope.statusFilter);
+    }
     const allPredicates = [...tenantPredicates, ...predicates.filter(Boolean)];
     return {
       predicate: tenantPredicates.join(' AND '),
       where: `WHERE ${allPredicates.join(' AND ')}`,
-      params: { tenant: scope.tenantSlug, ...(effectiveTeam ? { teamId: effectiveTeam } : {}),
-        ...(scope.serviceFilter ? { filterService: scope.serviceFilter } : {}),
-        ...(scope.envFilter ? { filterEnv: scope.envFilter } : {}) },
+      params: { ...params,
+        ...(ownership?.assigned.length ? { ownedServices: ownership.owned, assignedServices: ownership.assigned } : {}),
+      },
     };
+  }
+
+  private statusPredicate(source: 'traces' | 'logs'): string {
+    return `${this.statusColumn(source)} IN {filterStatuses:Array(String)}`;
+  }
+
+  statusColumn(source: 'traces' | 'logs'): string {
+    return source === 'traces' ? "if(StatusCode = '', 'UNKNOWN', upperUTF8(StatusCode))"
+      : "if(SeverityText = '', if(SeverityNumber = 0, 'UNKNOWN', toString(SeverityNumber)), upperUTF8(SeverityText))";
   }
 
   private async query<T = Record<string, unknown>>(
@@ -601,15 +632,20 @@ export class ClickhouseService implements OnModuleInit, OnModuleDestroy {
     if (!sql.includes('org_slug = {tenant:String}')) {
       throw new Error('Blocked ClickHouse query without organization isolation.');
     }
-    const requiresTeam = Boolean(scope.teamFilter);
-    if (requiresTeam && !sql.includes('team_id = {teamId:String}')) {
+    const requiresTeam = filterValues(scope.teamFilter).length > 0;
+    if (requiresTeam && !sql.includes(filterValues(scope.teamFilter).length > 1 ? 'team_id IN {teamId:Array(String)}' : 'team_id = {teamId:String}')) {
       throw new Error('Blocked ClickHouse query without required team isolation.');
     }
+    const teamPredicate = filterValues(scope.teamFilter).length > 1 ? 'team_id IN {teamId:Array(String)}' : 'team_id = {teamId:String}';
+    if (isolation.params.assignedServices && !sql.includes(
+      `(ServiceName IN {ownedServices:Array(String)} OR (${teamPredicate} AND ServiceName NOT IN {assignedServices:Array(String)}))`)) {
+      throw new Error('Blocked ClickHouse query without service ownership filter.');
+    }
     if (!isolation.params.tenant) throw new Error('Tenant scope is empty.');
-    if (scope.serviceFilter && !sql.includes('ServiceName = {filterService:String}')) {
+    if (filterValues(scope.serviceFilter).length && !sql.includes(filterValues(scope.serviceFilter).length > 1 ? 'ServiceName IN {filterService:Array(String)}' : 'ServiceName = {filterService:String}')) {
       throw new Error('Blocked query without selected service filter.');
     }
-    if (scope.envFilter && !sql.includes("ResourceAttributes['deployment.environment.name'] = {filterEnv:String}")) {
+    if (filterValues(scope.envFilter).length && !sql.includes(filterValues(scope.envFilter).length > 1 ? "ResourceAttributes['deployment.environment.name'] IN {filterEnv:Array(String)}" : "ResourceAttributes['deployment.environment.name'] = {filterEnv:String}")) {
       throw new Error('Blocked query without selected environment filter.');
     }
   }

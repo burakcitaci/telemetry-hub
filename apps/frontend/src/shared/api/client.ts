@@ -12,16 +12,18 @@ export const api = axios.create({
 
 // One filter source for every explorer. Auth/admin requests never inherit telemetry filters.
 api.interceptors.request.use(config => {
-  if (!/^\/(metrics|logs|traces|services|monitors|events|data)(?:[/?]|$)/.test(config.url ?? '')) return config;
-  const { team, service, env } = readPlatformFilters(window.location.search);
-  config.headers.set('X-Team-Filter', team || 'all');
-  config.headers.set('X-Service-Filter', service || 'all');
-  config.headers.set('X-Environment-Filter', env);
+  if (!/^\/(metrics|logs|traces|services|monitors|events|data|filters)(?:[/?]|$)/.test(config.url ?? '')) return config;
+  const { team, service, env, status } = readPlatformFilters(window.location.search);
+  const encode = (values: string[]) => values.length > 1 ? JSON.stringify(values) : values[0] || 'all';
+  config.headers.set('X-Team-Filter', encode(team));
+  config.headers.set('X-Service-Filter', encode(service));
+  config.headers.set('X-Environment-Filter', encode(env));
+  config.headers.set('X-Status-Filter', encode(status));
   const [path, query] = (config.url ?? '').split('?');
   const params = new URLSearchParams(query);
   params.delete('env');
   config.url = path + (params.size ? `?${params}` : '');
-  config.params = { ...config.params, env };
+  config.params = { ...config.params, env: env.length === 1 ? env[0] : 'all' };
   return config;
 });
 

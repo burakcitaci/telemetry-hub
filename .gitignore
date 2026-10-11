@@ -12,6 +12,7 @@ build/
 .idea/
 coverage/
 data/*.sqlite*
+data/platform-backups/
 *.tgz
 
 # Tool caches

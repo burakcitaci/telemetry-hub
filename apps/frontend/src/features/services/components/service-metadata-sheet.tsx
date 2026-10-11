@@ -30,13 +30,14 @@ import {
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
 import { EMPTY_METADATA, type ServiceMetadata } from '../types';
+import { api, unwrap } from '@/shared/api/client';
 
 type Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   serviceName: string;
   metadata: ServiceMetadata | null;
-  onSave: (metadata: ServiceMetadata) => void;
+  onSave: (metadata: ServiceMetadata) => Promise<void>;
 };
 
 export function ServiceMetadataSheet({
@@ -46,12 +47,29 @@ export function ServiceMetadataSheet({
   metadata,
   onSave,
 }: Props) {
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string>();
+  const [teams, setTeams] = useState<{ id: string; name: string }[]>([]);
+  const [teamsLoading, setTeamsLoading] = useState(false);
+  const [teamsError, setTeamsError] = useState<string>();
+
+  useEffect(() => {
+    if (!open) return;
+    const controller = new AbortController();
+    setTeamsLoading(true);
+    setTeamsError(undefined);
+    api.get('/service-metadata/teams', { signal: controller.signal })
+      .then(({ data }) => { if (!controller.signal.aborted) setTeams(unwrap(data)); })
+      .catch(() => { if (!controller.signal.aborted) setTeamsError('Could not load organization teams. Close and reopen to retry.'); })
+      .finally(() => { if (!controller.signal.aborted) setTeamsLoading(false); });
+    return () => controller.abort();
+  }, [open]);
   const [draft, setDraft] = useState<ServiceMetadata>(
     metadata ?? EMPTY_METADATA(serviceName),
   );
 
   useEffect(() => {
-    if (open) setDraft(metadata ?? EMPTY_METADATA(serviceName));
+    if (open) { setDraft(metadata ?? EMPTY_METADATA(serviceName)); setSaveError(undefined); }
   }, [open, metadata, serviceName]);
 
   const update = <K extends keyof ServiceMetadata>(
@@ -59,9 +77,15 @@ export function ServiceMetadataSheet({
     value: ServiceMetadata[K],
   ) => setDraft((prev) => ({ ...prev, [field]: value }));
 
-  const handleSave = () => {
-    onSave(draft);
-    onOpenChange(false);
+  const handleSave = async () => {
+    setSaving(true);
+    setSaveError(undefined);
+    try {
+      await onSave(draft);
+      onOpenChange(false);
+    } catch {
+      setSaveError('Could not save metadata. Check your connection and field lengths, then retry.');
+    } finally { setSaving(false); }
   };
 
   return (
@@ -85,7 +109,8 @@ export function ServiceMetadataSheet({
           </AlertDescription>
         </Alert>
 
-        <div className="space-y-4">
+        {saveError && <p role="alert" className="mb-4 text-sm text-destructive">{saveError}</p>}
+        <fieldset disabled={saving} className="space-y-4">
           <div className="space-y-1">
             <Label className="text-xs flex items-center gap-1 text-muted-foreground">
               <Tag className="h-3 w-3" /> Type
@@ -121,11 +146,18 @@ export function ServiceMetadataSheet({
             <Label className="text-xs flex items-center gap-1 text-muted-foreground">
               <Users className="h-3 w-3" /> Team
             </Label>
-            <Input
-              placeholder="e.g. transactions"
-              value={draft.team}
-              onChange={(e) => update('team', e.target.value)}
-            />
+            <Select value={draft.team || '__unassigned__'} disabled={teamsLoading || !!teamsError || saving}
+              onValueChange={value => update('team', value === '__unassigned__' ? '' : value)}>
+              <SelectTrigger aria-label="Team"><SelectValue placeholder="Select team" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__unassigned__">Unassigned</SelectItem>
+                {draft.team && !teams.some(team => team.id === draft.team) &&
+                  <SelectItem value={draft.team} disabled>Unavailable team: {draft.team}</SelectItem>}
+                {teams.map(team => <SelectItem key={team.id} value={team.id}>{team.name}</SelectItem>)}
+              </SelectContent>
+            </Select>
+            {teamsLoading && <p role="status" className="text-xs text-muted-foreground">Loading teams…</p>}
+            {teamsError && <p role="alert" className="text-xs text-destructive">{teamsError}</p>}
           </div>
 
           <div className="grid grid-cols-2 gap-3">
@@ -184,14 +216,14 @@ export function ServiceMetadataSheet({
               </SelectContent>
             </Select>
           </div>
-        </div>
+        </fieldset>
 
         <div className="sticky bottom-0 mt-6 flex justify-end gap-2 border-t bg-background pt-4">
           <SheetClose asChild>
             <Button variant="outline">Cancel</Button>
           </SheetClose>
-          <Button onClick={handleSave} className="gap-1">
-            <Save className="h-4 w-4" /> Save
+          <Button disabled={saving || teamsLoading || !!teamsError} onClick={handleSave} className="gap-1">
+            <Save className="h-4 w-4" /> {saving ? 'Saving…' : 'Save'}
           </Button>
         </div>
       </SheetContent>

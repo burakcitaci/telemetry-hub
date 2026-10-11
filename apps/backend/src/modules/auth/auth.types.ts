@@ -1,4 +1,5 @@
 import type { Request } from 'express';
+import type { FilterSelection } from './platform-filters';
 
 export type UserRole = 'admin' | 'user';
 
@@ -12,18 +13,20 @@ export interface TenantJwtPayload {
 }
 
 export interface TenantScope extends TenantJwtPayload {
-  teamFilter?: string;
-  serviceFilter?: string;
-  envFilter?: string;
+  teamFilter?: FilterSelection;
+  serviceFilter?: FilterSelection;
+  envFilter?: FilterSelection;
+  statusFilter?: FilterSelection;
 }
 
 export interface TenantRequest extends Request {
   tenant: string;
   userRole: UserRole;
   userTeam?: string;
-  teamFilter?: string;
-  serviceFilter?: string;
-  envFilter?: string;
+  teamFilter?: FilterSelection;
+  serviceFilter?: FilterSelection;
+  envFilter?: FilterSelection;
+  statusFilter?: FilterSelection;
   authSubject?: string;
   authVersion?: number;
   authExpiresAt?: number;

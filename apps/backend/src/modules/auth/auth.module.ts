@@ -8,6 +8,7 @@ import { PlatformStore } from './platform-store.service';
 import { AdminController } from './admin.controller';
 import { AdminService, OrgAdminGuard } from './admin.service';
 import { MonitorsController } from './monitors.controller';
+import { ServiceMetadataController } from './service-metadata.controller';
 
 @Module({
   imports: [
@@ -26,7 +27,7 @@ import { MonitorsController } from './monitors.controller';
       },
     }),
   ],
-  controllers: [AuthController, AdminController, MonitorsController],
+  controllers: [AuthController, AdminController, MonitorsController, ServiceMetadataController],
   providers: [PlatformStore, AuthService, TenantJwtGuard, AdminService, OrgAdminGuard],
   exports: [JwtModule, TenantJwtGuard, PlatformStore],
 })
