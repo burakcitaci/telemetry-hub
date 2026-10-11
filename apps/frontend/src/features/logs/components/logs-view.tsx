@@ -13,7 +13,7 @@ import type { useLogs } from "../hooks/use-logs";
 import { Activity } from "lucide-react";
 import { LogDetailSheet } from "@/features/logs/components/log-detail-sheet";
 import { DataTable } from "@/shared/components/data-table";
-import { TelemetrySidebar } from "@/shared/components/telemetry-sidebar";
+import { AppFilterSidebar } from "@/components/shared/app-filter-sidebar";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { TELEMETRY_FETCH_LIMIT } from "@/shared/lib/telemetry";
@@ -51,15 +51,6 @@ export function LogsView({
         onFiltersOpen={() => setFiltersOpen(true)}
         timeRange={timeRange}
         onTimeRangeChange={setTimeRange}
-        description={
-          <>
-            {filteredLogs.length} visible from {logs.length} log records in the
-            selected period
-            {logs.length === TELEMETRY_FETCH_LIMIT
-              ? ` (capped at ${TELEMETRY_FETCH_LIMIT})`
-              : ""}
-          </>
-        }
         actions={
           <TelemetryActions
             connected={connected}
@@ -72,14 +63,14 @@ export function LogsView({
         }
       />
       <FeatureBody>
-        <TelemetrySidebar
+        <AppFilterSidebar
           mobileOpen={filtersOpen}
           onMobileOpenChange={setFiltersOpen}
           environmentSource="logs"
           services={services}
           selectedServices={serviceFilters}
           onServicesSelect={setServiceFilters}
-          facetTitle="Severity"
+          facetTitle="Status"
           facetOptions={facetOptions}
           selectedFacets={severityFilters}
           onFacetsSelect={setSeverityFilters}

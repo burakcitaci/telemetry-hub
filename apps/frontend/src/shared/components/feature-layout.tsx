@@ -1,6 +1,5 @@
 import type { ComponentProps, ReactNode } from "react";
-import { useEffect } from "react";
-import { PanelLeft, Search, type LucideIcon } from "lucide-react";
+import { Search, type LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -8,13 +7,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { PageLayout } from "@/components/shared/page-layout";
 import { TelemetryWidget } from "@/components/shared/telemetry-widget";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-} from "@/components/ui/sheet";
 
 type LayoutProps = ComponentProps<"div">;
 
@@ -68,7 +60,7 @@ export function FeatureBody({ className, ...props }: LayoutProps) {
   return (
     <div
       className={cn(
-        "grid min-h-0 min-w-0 flex-1 grid-cols-1 gap-3 lg:grid-cols-[auto_minmax(0,1fr)]",
+        "grid min-h-0 min-w-0 flex-1 grid-cols-1 gap-3 lg:grid-cols-[16rem_minmax(0,1fr)]",
         className,
       )}
       {...props}
@@ -84,7 +76,7 @@ export function FeatureContent({
     <section
       data-slot="feature-content"
       className={cn(
-        "min-h-0 min-w-0 flex-1 space-y-4 overflow-auto",
+        "box-border min-h-0 min-w-0 w-full max-w-full space-y-4 overflow-x-hidden overflow-y-auto",
         className,
       )}
       {...props}
@@ -98,20 +90,14 @@ export function FeaturePanel({
 }: ComponentProps<typeof Card>) {
   return (
     <TelemetryWidget
-      className={cn("@container overflow-hidden", className)}
+      className={cn(
+        "@container box-border w-full max-w-full min-w-0 overflow-x-hidden overflow-y-visible",
+        className,
+      )}
       {...props}
     />
   );
 }
-
-type SidebarProps = {
-  title: string;
-  children: ReactNode;
-  open?: boolean;
-  onOpenChange?: (open: boolean) => void;
-  mobileOpen?: boolean;
-  onMobileOpenChange?: (open: boolean) => void;
-};
 
 export function FeaturePanelHeader({
   className,
@@ -120,7 +106,7 @@ export function FeaturePanelHeader({
   return (
     <CardHeader
       className={cn(
-        "flex flex-row flex-wrap items-center justify-between gap-3 space-y-0 pb-3",
+        "flex min-w-0 flex-row flex-wrap items-center justify-between gap-3 space-y-0 pb-3 [&>*]:min-w-0",
         className,
       )}
       {...props}
@@ -128,7 +114,8 @@ export function FeaturePanelHeader({
   );
 }
 
-export function FeatureSidebar({
+/* FeatureSidebar was consolidated into AppFilterSidebar. */
+/* export function FeatureSidebar({
   title,
   children,
   open = true,
@@ -183,7 +170,7 @@ export function FeatureSidebar({
       </aside>
     </>
   );
-}
+} */
 
 export function FeatureLoading() {
   return (

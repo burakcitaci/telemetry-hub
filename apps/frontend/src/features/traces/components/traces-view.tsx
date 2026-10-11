@@ -13,7 +13,7 @@ import type { useTraces } from "../hooks/use-traces";
 import { Activity } from "lucide-react";
 import { useActiveTrace } from "@/shared/hooks/use-active-trace";
 import { DataTable } from "@/shared/components/data-table";
-import { TelemetrySidebar } from "@/shared/components/telemetry-sidebar";
+import { AppFilterSidebar } from "@/components/shared/app-filter-sidebar";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { TELEMETRY_FETCH_LIMIT } from "@/shared/lib/telemetry";
@@ -51,15 +51,6 @@ export function TracesView({
         timeRange={timeRange}
         onTimeRangeChange={setTimeRange}
         onFiltersOpen={() => setFiltersOpen(true)}
-        description={
-          <>
-            {filteredTraces.length} visible from the latest {traces.length}{" "}
-            traces
-            {traces.length === TELEMETRY_FETCH_LIMIT
-              ? ` (capped at ${TELEMETRY_FETCH_LIMIT})`
-              : ""}
-          </>
-        }
         actions={
           <TelemetryActions
             connected={connected}
@@ -76,7 +67,7 @@ export function TracesView({
       <FeatureBody>
         {/* Sidebar wrapper — matches metrics page look:
             expanded = 256/288px, collapsed = 44px icon rail */}
-        <TelemetrySidebar
+        <AppFilterSidebar
           mobileOpen={filtersOpen}
           onMobileOpenChange={setFiltersOpen}
           environmentSource="traces"

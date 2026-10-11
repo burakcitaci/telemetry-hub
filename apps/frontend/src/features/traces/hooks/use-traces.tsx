@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { getTraces } from '@/features/traces/api';
 import type { TraceSummary } from '@/features/traces/types';
-import { type FacetOption } from '@/shared/components/telemetry-sidebar';
+import { type FacetOption } from '@/components/shared/app-filter-sidebar';
 import { generateTelemetry } from '@/shared/api/telemetry-api';
 import { useTelemetryStream } from '@/shared/hooks/use-telemetry-stream';
 import { useTelemetryViewParams } from '@/shared/hooks/use-telemetry-view-params';

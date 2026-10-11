@@ -126,7 +126,7 @@ export function DataTable<TData, TValue>({
   });
 
   return (
-    <div className={cn('w-full min-w-0 max-w-full', density === 'telemetry' && 'font-mono text-xs tracking-tight')}>
+    <div className={cn('w-full min-w-0 max-w-full', density === 'telemetry' && 'text-xs tracking-tight')}>
       {enableSearch && (
         <div className="flex min-w-0 flex-wrap items-center gap-2 px-0 py-2">
           <Input

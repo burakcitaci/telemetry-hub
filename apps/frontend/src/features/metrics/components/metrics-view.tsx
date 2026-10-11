@@ -1,6 +1,5 @@
 import { FeatureRefreshButton } from "@/shared/components/feature-actions";
 import { useState } from "react";
-import { EnvironmentFilter } from "@/shared/components/environment-filter";
 import { TelemetryGrid } from "@/components/shared/telemetry-widget";
 import { FeatureHeader } from "@/components/shared/feature-header";
 import { QueryError, ViewSkeleton } from "@/components/shared/view-skeleton";
@@ -10,9 +9,9 @@ import {
   FeatureContent,
   FeaturePanel,
   FeaturePanelHeader,
-  FeatureSidebar,
   FeatureSearch,
 } from "@/shared/components/feature-layout";
+import { AppFilterSidebar } from "@/components/shared/app-filter-sidebar";
 import type { useMetrics } from "../hooks/use-metrics";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -105,29 +104,10 @@ export function MetricsView({
         onFiltersOpen={() => setFiltersOpen(true)}
         timeRange={timeRange}
         onTimeRangeChange={setTimeRange}
-        description={<>{selectedMetric?.metricName ?? "Select a metric"}</>}
+        description={<></>}
         children={
           <>
-            {" "}
-            <Button
-              variant="ghost"
-              size="icon"
-              aria-label="Go back"
-              onClick={() => navigate(-1)}
-              className="shrink-0"
-            >
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="hidden shrink-0 lg:inline-flex"
-              aria-label={sidebarOpen ? "Hide sidebar" : "Show sidebar"}
-              title={sidebarOpen ? "Hide sidebar" : "Show sidebar"}
-              onClick={() => setSidebarOpen((v) => !v)}
-            >
-              <PanelLeft className="h-4 w-4" />
-            </Button>{" "}
+            
           </>
         }
         actions={
@@ -156,14 +136,14 @@ export function MetricsView({
 
       <FeatureBody>
         {/* Metric catalog sidebar */}
-        <FeatureSidebar
+        <AppFilterSidebar
+          environmentSource="metrics"
           mobileOpen={filtersOpen}
           onMobileOpenChange={setFiltersOpen}
           title="Metrics"
           open={sidebarOpen}
           onOpenChange={setSidebarOpen}
         >
-          <EnvironmentFilter source="metrics" />
           <FeatureSearch
             placeholder="Search metrics…"
             value={metricSearch}
@@ -199,9 +179,6 @@ export function MetricsView({
                       : "text-muted-foreground hover:bg-accent/50"
                   }`}
                 >
-                  <span
-                    className={`h-2.5 w-2.5 shrink-0 rounded-full ${isSelected ? "bg-primary" : "bg-muted/60"}`}
-                  />
                   <span className="min-w-0 flex-1">
                     <span className="block truncate font-mono text-xs">
                       {m.metricName}
@@ -214,16 +191,16 @@ export function MetricsView({
               );
             })}
           </div>
-        </FeatureSidebar>
+        </AppFilterSidebar>
 
         {/* Main */}
         <FeatureContent>
-          <div className="min-w-0 space-y-4">
+          <div>
             {/* Filters + group by */}
             <FeaturePanel>
               <FeaturePanelHeader>
                 <CardTitle className="text-sm font-medium">Filters</CardTitle>
-                <span className="text-xs text-muted-foreground">
+                <span className="min-w-0 max-w-full text-xs text-muted-foreground">
                   {filteredRecords.length} of {records.length} records · grouped
                   by{" "}
                   <code className="font-mono">

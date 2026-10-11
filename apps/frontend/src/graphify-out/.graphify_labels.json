@@ -1,10 +1,11 @@
 {
   "0": "data-table.tsx",
-  "1": "feature-layout.tsx",
-  "2": "app-sidebar.tsx",
-  "3": "trace-detail-sheet.tsx",
-  "4": "metrics-view.tsx",
+  "1": "metrics-view.tsx",
+  "2": "app.tsx",
+  "3": "shared/trace-detail-sheet.tsx",
+  "4": "service-detail-page.tsx",
   "5": "telemetry-sidebar.tsx",
   "6": "use-traces.tsx",
-  "7": "use-metrics.tsx"
+  "7": "use-metrics.tsx",
+  "8": "facet-query-bar.tsx"
 }

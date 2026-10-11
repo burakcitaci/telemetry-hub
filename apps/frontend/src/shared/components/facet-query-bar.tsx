@@ -1,9 +1,15 @@
-import React, { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
-import { X } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { Facet, FacetSelection } from '../lib/facet';
-
+import React, {
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { createPortal } from "react-dom";
+import { X } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Facet, FacetSelection } from "../lib/facet";
 
 interface FacetQueryBarProps {
   facets: Facet[];
@@ -37,8 +43,12 @@ const FacetPill: React.FC<{
   </span>
 );
 
-export function FacetQueryBar({ facets, selection, onChange }: FacetQueryBarProps) {
-  const [query, setQuery] = useState('');
+export function FacetQueryBar({
+  facets,
+  selection,
+  onChange,
+}: FacetQueryBarProps) {
+  const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const [highlighted, setHighlighted] = useState(0);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -73,13 +83,19 @@ export function FacetQueryBar({ facets, selection, onChange }: FacetQueryBarProp
     const q = query.trim().toLowerCase();
     // Hide values that are already selected
     const selectedSet = new Set(
-      Object.entries(selection).flatMap(([k, vs]) => vs.map((v) => `${k}::${v}`)),
+      Object.entries(selection).flatMap(([k, vs]) =>
+        vs.map((v) => `${k}::${v}`),
+      ),
     );
-    const pool = allSuggestions.filter((s) => !selectedSet.has(`${s.key}::${s.value}`));
+    const pool = allSuggestions.filter(
+      (s) => !selectedSet.has(`${s.key}::${s.value}`),
+    );
     if (!q) return pool.slice(0, 12);
     return pool
-      .filter((s) =>
-        s.label.toLowerCase().includes(q) || s.value.toLowerCase().includes(q),
+      .filter(
+        (s) =>
+          s.label.toLowerCase().includes(q) ||
+          s.value.toLowerCase().includes(q),
       )
       .slice(0, 12);
   }, [allSuggestions, query, selection]);
@@ -89,15 +105,19 @@ export function FacetQueryBar({ facets, selection, onChange }: FacetQueryBarProp
     if (!open) return;
     const outside = (e: Event) => {
       const target = e.target as Node | null;
-      if (target && !rootRef.current?.contains(target) && !dropdownRef.current?.contains(target)) {
+      if (
+        target &&
+        !rootRef.current?.contains(target) &&
+        !dropdownRef.current?.contains(target)
+      ) {
         setOpen(false);
       }
     };
-    document.addEventListener('pointerdown', outside);
-    document.addEventListener('focusin', outside);
+    document.addEventListener("pointerdown", outside);
+    document.addEventListener("focusin", outside);
     return () => {
-      document.removeEventListener('pointerdown', outside);
-      document.removeEventListener('focusin', outside);
+      document.removeEventListener("pointerdown", outside);
+      document.removeEventListener("focusin", outside);
     };
   }, [open]);
 
@@ -124,12 +144,12 @@ export function FacetQueryBar({ facets, selection, onChange }: FacetQueryBarProp
     update();
     const observer = new ResizeObserver(update);
     if (rootRef.current) observer.observe(rootRef.current);
-    window.addEventListener('resize', update);
-    window.addEventListener('scroll', update, true);
+    window.addEventListener("resize", update);
+    window.addEventListener("scroll", update, true);
     return () => {
       observer.disconnect();
-      window.removeEventListener('resize', update);
-      window.removeEventListener('scroll', update, true);
+      window.removeEventListener("resize", update);
+      window.removeEventListener("scroll", update, true);
     };
   }, [open, suggestions.length]);
 
@@ -139,7 +159,7 @@ export function FacetQueryBar({ facets, selection, onChange }: FacetQueryBarProp
     const existing = selection[s.key] ?? [];
     if (existing.includes(s.value)) return;
     onChange({ ...selection, [s.key]: [...existing, s.value] });
-    setQuery('');
+    setQuery("");
     setOpen(false);
     inputRef.current?.focus();
   };
@@ -154,19 +174,22 @@ export function FacetQueryBar({ facets, selection, onChange }: FacetQueryBarProp
   };
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'ArrowDown') {
+    if (e.key === "ArrowDown") {
       e.preventDefault();
-      setHighlighted((h) => open ? Math.max(0, Math.min(h + 1, suggestions.length - 1)) : 0);
+      setHighlighted((h) =>
+        open ? Math.max(0, Math.min(h + 1, suggestions.length - 1)) : 0,
+      );
       setOpen(true);
-    } else if (e.key === 'ArrowUp') {
+    } else if (e.key === "ArrowUp") {
       e.preventDefault();
       setHighlighted((h) => Math.max(h - 1, 0));
-    } else if (e.key === 'Enter') {
+    } else if (e.key === "Enter") {
       e.preventDefault();
-      if (open && suggestions[highlighted]) addSelection(suggestions[highlighted]);
-    } else if (e.key === 'Escape') {
+      if (open && suggestions[highlighted])
+        addSelection(suggestions[highlighted]);
+    } else if (e.key === "Escape") {
       setOpen(false);
-    } else if (e.key === 'Backspace' && query === '') {
+    } else if (e.key === "Backspace" && query === "") {
       // Backspace on empty input pops the last chip
       const entries = Object.entries(selection);
       const last = entries[entries.length - 1];
@@ -181,9 +204,9 @@ export function FacetQueryBar({ facets, selection, onChange }: FacetQueryBarProp
   });
 
   return (
-    <div ref={rootRef} className="relative">
+    <div ref={rootRef} className="relative w-full min-w-0 max-w-full">
       <div
-        className="flex min-h-9 flex-wrap items-center gap-1.5 rounded-md border bg-background px-2 py-1.5 focus-within:ring-1 focus-within:ring-ring"
+        className="flex min-h-9 w-full min-w-0 max-w-full flex-wrap items-center gap-1.5 rounded-md border bg-background px-2 py-1.5 focus-within:ring-1 focus-within:ring-ring"
         onClick={() => inputRef.current?.focus()}
       >
         {activeChips.map(({ facet, value }) => (
@@ -194,7 +217,7 @@ export function FacetQueryBar({ facets, selection, onChange }: FacetQueryBarProp
             onRemove={() => removeSelection(facet.key, value)}
           />
         ))}
-        <div className="relative flex flex-1 items-center gap-1.5 min-w-[140px]">
+        <div className="relative flex min-w-0 flex-1 items-center gap-1.5">
           <Input
             ref={inputRef}
             role="combobox"
@@ -202,53 +225,73 @@ export function FacetQueryBar({ facets, selection, onChange }: FacetQueryBarProp
             aria-autocomplete="list"
             aria-expanded={open && suggestions.length > 0}
             aria-controls={open && suggestions.length > 0 ? listId : undefined}
-            aria-activedescendant={open && suggestions[highlighted] ? `${listId}-${highlighted}` : undefined}
+            aria-activedescendant={
+              open && suggestions[highlighted]
+                ? `${listId}-${highlighted}`
+                : undefined
+            }
             value={query}
-            onChange={(e) => { setQuery(e.target.value); setOpen(true); }}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              setOpen(true);
+            }}
             onFocus={() => setOpen(true)}
             onKeyDown={onKeyDown}
-            placeholder={activeChips.length ? 'Add filter…' : 'Filter by host, service, environment…'}
+            placeholder={
+              activeChips.length
+                ? "Add filter…"
+                : "Filter by host, service, environment…"
+            }
             className="h-7 border-0 bg-transparent px-1 text-xs shadow-none focus-visible:ring-0"
           />
         </div>
       </div>
 
-      {open && suggestions.length > 0 && position && createPortal(
-        <div
-          ref={dropdownRef}
-          id={listId}
-          role="listbox"
-          aria-label="Telemetry filter suggestions"
-          style={position}
-          className="fixed z-[50] overflow-y-auto rounded-md border bg-popover text-popover-foreground shadow-lg"
-        >
-          {suggestions.map((s, i) => (
-            <button
-              key={`${s.key}::${s.value}`}
-              type="button"
-              id={`${listId}-${i}`}
-              role="option"
-              aria-selected={i === highlighted}
-              tabIndex={-1}
-              onMouseDown={(e) => e.preventDefault()}
-              onMouseEnter={() => setHighlighted(i)}
-              onClick={() => addSelection(s)}
-              className={`flex w-full items-center justify-between px-3 py-1.5 text-left text-xs ${
-                i === highlighted ? 'bg-accent text-accent-foreground' : 'hover:bg-accent/50'
-              }`}
-            >
-              <span className="flex min-w-0 items-center gap-2">
-                <span className="text-[10px] uppercase tracking-wide text-muted-foreground">
-                  {s.key}
+      {open &&
+        suggestions.length > 0 &&
+        position &&
+        createPortal(
+          <div
+            ref={dropdownRef}
+            id={listId}
+            role="listbox"
+            aria-label="Telemetry filter suggestions"
+            style={position}
+            className="fixed z-[50] overflow-y-auto rounded-md border bg-popover text-popover-foreground shadow-lg"
+          >
+            {suggestions.map((s, i) => (
+              <button
+                key={`${s.key}::${s.value}`}
+                type="button"
+                id={`${listId}-${i}`}
+                role="option"
+                aria-selected={i === highlighted}
+                tabIndex={-1}
+                onMouseDown={(e) => e.preventDefault()}
+                onMouseEnter={() => setHighlighted(i)}
+                onClick={() => addSelection(s)}
+                className={`flex w-full items-center justify-between px-3 py-1.5 text-left text-xs ${
+                  i === highlighted
+                    ? "bg-accent text-accent-foreground"
+                    : "hover:bg-accent/50"
+                }`}
+              >
+                <span className="flex min-w-0 items-center gap-2">
+                  <span className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                    {s.key}
+                  </span>
+                  <span className="min-w-0 font-mono [overflow-wrap:anywhere]">
+                    {s.value}
+                  </span>
                 </span>
-                <span className="min-w-0 font-mono [overflow-wrap:anywhere]">{s.value}</span>
-              </span>
-              <span className="text-[10px] text-muted-foreground">{s.count}</span>
-            </button>
-          ))}
-        </div>,
-        document.body,
-      )}
+                <span className="text-[10px] text-muted-foreground">
+                  {s.count}
+                </span>
+              </button>
+            ))}
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }

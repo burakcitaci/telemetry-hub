@@ -8,17 +8,16 @@ import { DataTable } from "@/shared/components/data-table";
 import { FeatureRefreshButton } from "@/shared/components/feature-actions";
 import {
   FeaturePage,
-  FeatureSidebar,
   FeatureSearch,
   FeatureBody,
   FeatureContent,
   FeaturePanel,
   FeatureEmptyState,
 } from "@/shared/components/feature-layout";
+import { AppFilterSidebar } from '@/components/shared/app-filter-sidebar';
 import { columns } from "./services-components";
 import type { useServices } from "../hooks/use-services";
 import { useTelemetryQuery } from "@/shared/hooks/use-telemetry-query";
-import { EnvironmentFilter } from "@/shared/components/environment-filter";
 
 type ServicesViewProps = ReturnType<typeof useServices>;
 
@@ -42,7 +41,6 @@ export function ServicesView({
         timeRange={timeRange}
         onTimeRangeChange={setTimeRange}
         onFiltersOpen={() => setFiltersOpen(true)}
-        description={`${services.length} discovered services · ${env}`}
         actions={
           <>
             <FeatureRefreshButton
@@ -54,18 +52,18 @@ export function ServicesView({
         }
       />
       <FeatureBody>
-        <FeatureSidebar
+        <AppFilterSidebar
+          environmentSource="traces"
           title="Filters"
           mobileOpen={filtersOpen}
           onMobileOpenChange={setFiltersOpen}
         >
-          <EnvironmentFilter source="traces" />
           <FeatureSearch
             placeholder="Search services…"
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
           />
-        </FeatureSidebar>
+        </AppFilterSidebar>
         <FeatureContent>
           <FeaturePanel>
             {loading && services.length === 0 ? (

@@ -23,7 +23,7 @@ export const columns: ColumnDef<TraceSummary>[] = [
       <DataTableColumnHeader column={column} title="Timestamp" />
     ),
     cell: ({ row }) => (
-      <span className="whitespace-nowrap font-mono text-xs tracking-tight text-muted-foreground">
+      <span className="whitespace-nowrap text-xs tracking-tight text-muted-foreground">
         {formatTelemetryTimestamp(row.original.Timestamp)}
       </span>
     ),
@@ -44,7 +44,7 @@ export const columns: ColumnDef<TraceSummary>[] = [
     ),
     cell: ({ row }) => (
       <span
-        className="block max-w-xl truncate font-mono text-xs tracking-tight"
+        className="block max-w-xl truncate text-xs tracking-tight"
         title={row.original.SpanName}
       >
         {row.original.SpanName}
@@ -57,7 +57,7 @@ export const columns: ColumnDef<TraceSummary>[] = [
       <DataTableColumnHeader column={column} title="Trace ID" />
     ),
     cell: ({ row }) => (
-      <span className="block max-w-xl truncate font-mono text-xs tracking-tight">
+      <span className="block max-w-xl truncate text-xs tracking-tight">
         {row.original.TraceId}
       </span>
     ),
@@ -144,7 +144,7 @@ export const TracesSidebarShell: React.FC<{
         </Button>
       </div>
 
-      {/* Hide TelemetrySidebar's own internal header row so we don't
+      {/* Keep the compact table header row aligned with the shared filter layout; we don't
           duplicate the title. This targets the first child block inside
           its scroll container. */}
       <div className="traces-sidebar-body min-h-0 flex-1 overflow-y-auto [&>*:first-child>div:first-child]:hidden">

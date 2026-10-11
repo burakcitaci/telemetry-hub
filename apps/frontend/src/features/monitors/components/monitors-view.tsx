@@ -5,11 +5,11 @@ import {
   FeatureBody,
   FeatureContent,
   FeaturePanel,
-  FeatureSidebar,
   FeatureSearch,
   FeatureLoading,
   FeatureEmptyState,
 } from '@/shared/components/feature-layout';
+import { AppFilterSidebar } from '@/components/shared/app-filter-sidebar';
 import type { useMonitors } from '../hooks/use-monitors';
 import {
   AlertCircle,
@@ -142,7 +142,7 @@ export function MonitorsView({
 
       <FeatureBody>
         {/* Sidebar */}
-        <FeatureSidebar
+        <AppFilterSidebar
           title="Filters"
           open={sidebarOpen}
           onOpenChange={setSidebarOpen}
@@ -214,7 +214,7 @@ export function MonitorsView({
               })}
             </div>
           </div>
-        </FeatureSidebar>
+        </AppFilterSidebar>
 
         {/* List (full width) + Sheet */}
         <FeatureContent>

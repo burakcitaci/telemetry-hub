@@ -44,7 +44,7 @@ export function TelemetryActions({
     <>
       <span
         role="status"
-        className="flex items-center gap-1.5 text-xs text-muted-foreground"
+        className="hidden flex items-center gap-1.5 text-xs text-muted-foreground"
       >
         <Icon className={cn('size-4', connected && 'text-success')} />
         {connected ? 'Stream connected' : 'Stream disconnected'}

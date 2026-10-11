@@ -19,6 +19,15 @@
 
 ## Kontext
 
+### TASK-SIDEBAR-1.1 – Zentrale AppFilterSidebar
+
+- [x] Graphify-Abgleich der Sidebar-God-Nodes: TelemetrySidebar und FeatureSidebar zusammengeführt.
+- [x] Neue `components/shared/app-filter-sidebar.tsx` kapselt Environment-Discovery, Service-Auswahl, Desktop-Sidebar (`lg:w-64`) und mobiles Shadcn-Sheet; `children` bleibt Slot für feature-spezifische Filter.
+- [x] Metrics, Logs, Traces und Services migriert; Monitors ebenfalls migriert, damit die alte FeatureSidebar vollständig entfallen kann.
+- [x] Alte `telemetry-sidebar.tsx` gelöscht; FeatureSidebar-Implementierung aus `feature-layout.tsx` entfernt. Frontend-Typecheck und URL-Regressionstests bestanden.
+- [x] Graphify code-only aktualisiert (506 Knoten / 1.852 Kanten); keine semantischen API-Kosten.
+- [ ] Visueller Browser-/Mobile-Test der vier Filter-Sheets.
+
 ### TASK-TRACING-1.1 – Log-to-Trace-Drilldown
 
 - [x] Graphify-Abgleich: bestehender hierarchischer Viewer und /api/traces/:traceId gefunden. Viewer nach components/shared verschoben; alter Importpfad reexportiert kompatibel.

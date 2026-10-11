@@ -14,7 +14,7 @@ function LogTraceLink({ traceId }: { traceId: string }) {
       type="button"
       title={traceId}
       aria-label={`Open trace ${traceId}`}
-      className="whitespace-nowrap rounded-sm font-mono text-xs tracking-tight text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      className="whitespace-nowrap rounded-sm text-xs tracking-tight text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       onClick={(event) => {
         event.stopPropagation();
         openTrace(traceId);
@@ -28,13 +28,13 @@ function LogTraceLink({ traceId }: { traceId: string }) {
 export function severityBadge(severity: string) {
   const normalized = severity.toUpperCase();
   if (normalized === "ERROR" || normalized === "FATAL") {
-    return <Badge variant="destructive">{normalized}</Badge>;
+    return <Badge className="rotate-90" variant="destructive"></Badge>;
   }
   if (normalized === "WARN" || normalized === "WARNING") {
-    return <Badge variant="warning">WARN</Badge>;
+    return <Badge className="rotate-90" variant="warning"></Badge>;
   }
-  if (normalized === "INFO") return <Badge variant="info">INFO</Badge>;
-  return <Badge variant="secondary">{normalized || "UNSET"}</Badge>;
+  if (normalized === "INFO") return <Badge className="rotate-90" variant="info"></Badge>;
+  return <Badge className="rotate-90" variant="secondary"></Badge>;
 }
 
 export const columns: ColumnDef<LogRecord>[] = [
@@ -44,17 +44,13 @@ export const columns: ColumnDef<LogRecord>[] = [
       <DataTableColumnHeader column={column} title="Timestamp" />
     ),
     cell: ({ row }) => (
-      <span className="whitespace-nowrap font-mono text-xs tracking-tight text-muted-foreground">
-        {formatTelemetryTimestamp(row.original.Timestamp)}
-      </span>
+      <div className="flex items-center gap-2">
+        {severityBadge(row.original.SeverityText)}
+        <span className="whitespace-nowrap text-xs tracking-tight text-muted-foreground">
+          {formatTelemetryTimestamp(row.original.Timestamp)}
+        </span>
+      </div>
     ),
-  },
-  {
-    accessorKey: "SeverityText",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Severity" />
-    ),
-    cell: ({ row }) => severityBadge(row.original.SeverityText),
   },
   {
     accessorKey: "ServiceName",
@@ -74,7 +70,7 @@ export const columns: ColumnDef<LogRecord>[] = [
     ),
     cell: ({ row }) => (
       <span
-        className="block max-w-xl truncate font-mono text-xs tracking-tight"
+        className="block max-w-xl truncate text-xs tracking-tight"
         title={row.original.Body}
       >
         {row.original.Body}
