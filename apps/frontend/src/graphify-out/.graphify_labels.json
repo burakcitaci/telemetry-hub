@@ -4,8 +4,6 @@
   "2": "app.tsx",
   "3": "shared/trace-detail-sheet.tsx",
   "4": "service-detail-page.tsx",
-  "5": "telemetry-sidebar.tsx",
   "6": "use-traces.tsx",
-  "7": "use-metrics.tsx",
-  "8": "facet-query-bar.tsx"
+  "7": "use-metrics.tsx"
 }

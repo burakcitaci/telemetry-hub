@@ -20,32 +20,6 @@
       "source_location": "L46"
     },
     {
-      "id": "components_shared_feature_header_featureheaderprops",
-      "label": "FeatureHeaderProps",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "metrics-view.tsx",
-      "file_type": "code",
-      "norm_label": "featureheaderprops",
-      "source_file": "components/shared/feature-header.tsx",
-      "source_location": "L9"
-    },
-    {
-      "id": "components_shared_feature_header_timerangeprops",
-      "label": "TimeRangeProps",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "metrics-view.tsx",
-      "file_type": "code",
-      "norm_label": "timerangeprops",
-      "source_file": "components/shared/feature-header.tsx",
-      "source_location": "L7"
-    },
-    {
       "id": "components_shared_view_skeleton_queryerrorprops",
       "label": "QueryErrorProps",
       "_callable": true,
@@ -95,7 +69,20 @@
       "file_type": "code",
       "norm_label": "metricsviewprops",
       "source_file": "features/metrics/components/metrics-view.tsx",
-      "source_location": "L53"
+      "source_location": "L52"
+    },
+    {
+      "id": "features_monitors_components_monitors_view_monitorsviewprops",
+      "label": "MonitorsViewProps",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "metrics-view.tsx",
+      "file_type": "code",
+      "norm_label": "monitorsviewprops",
+      "source_file": "features/monitors/components/monitors-view.tsx",
+      "source_location": "L45"
     },
     {
       "id": "features_services_components_services_view_servicesviewprops",
@@ -108,7 +95,7 @@
       "file_type": "code",
       "norm_label": "servicesviewprops",
       "source_file": "features/services/components/services-view.tsx",
-      "source_location": "L23"
+      "source_location": "L22"
     },
     {
       "id": "features_traces_components_traces_view_tracesviewprops",
@@ -160,7 +147,7 @@
       "file_type": "code",
       "norm_label": "headerprops",
       "source_file": "shared/components/feature-layout.tsx",
-      "source_location": "L27"
+      "source_location": "L19"
     },
     {
       "id": "shared_components_feature_layout_layoutprops",
@@ -173,20 +160,33 @@
       "file_type": "code",
       "norm_label": "layoutprops",
       "source_file": "shared/components/feature-layout.tsx",
-      "source_location": "L19"
+      "source_location": "L11"
     },
     {
-      "id": "shared_components_feature_layout_sidebarprops",
-      "label": "SidebarProps",
+      "id": "components_shared_app_filter_sidebar_appfacetoption",
+      "label": "AppFacetOption",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
-      "community": 1,
-      "community_name": "metrics-view.tsx",
+      "community": 3,
+      "community_name": "shared/trace-detail-sheet.tsx",
       "file_type": "code",
-      "norm_label": "sidebarprops",
-      "source_file": "shared/components/feature-layout.tsx",
-      "source_location": "L107"
+      "norm_label": "appfacetoption",
+      "source_file": "components/shared/app-filter-sidebar.tsx",
+      "source_location": "L16"
+    },
+    {
+      "id": "components_shared_app_filter_sidebar_appfiltersidebarprops",
+      "label": "AppFilterSidebarProps",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "shared/trace-detail-sheet.tsx",
+      "file_type": "code",
+      "norm_label": "appfiltersidebarprops",
+      "source_file": "components/shared/app-filter-sidebar.tsx",
+      "source_location": "L24"
     },
     {
       "id": "components_shared_trace_detail_sheet_tracedetailsheetprops",
@@ -202,6 +202,19 @@
       "source_location": "L46"
     },
     {
+      "id": "components_ui_badge_badgeprops",
+      "label": "BadgeProps",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "shared/trace-detail-sheet.tsx",
+      "file_type": "code",
+      "norm_label": "badgeprops",
+      "source_file": "components/ui/badge.tsx",
+      "source_location": "L31"
+    },
+    {
       "id": "shared_hooks_use_active_trace_activetracecontextvalue",
       "label": "ActiveTraceContextValue",
       "_callable": true,
@@ -215,17 +228,43 @@
       "source_location": "L12"
     },
     {
-      "id": "shared_hooks_use_telemetry_view_params_telemetryviewparamsoptions",
-      "label": "TelemetryViewParamsOptions",
+      "id": "shared_hooks_use_environments_environmentsource",
+      "label": "EnvironmentSource",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 3,
       "community_name": "shared/trace-detail-sheet.tsx",
       "file_type": "code",
-      "norm_label": "telemetryviewparamsoptions",
-      "source_file": "shared/hooks/use-telemetry-view-params.ts",
+      "norm_label": "environmentsource",
+      "source_file": "shared/hooks/use-environments.ts",
+      "source_location": "L5"
+    },
+    {
+      "id": "components_shared_feature_header_featureheaderprops",
+      "label": "FeatureHeaderProps",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "service-detail-page.tsx",
+      "file_type": "code",
+      "norm_label": "featureheaderprops",
+      "source_file": "components/shared/feature-header.tsx",
       "source_location": "L9"
+    },
+    {
+      "id": "components_shared_feature_header_timerangeprops",
+      "label": "TimeRangeProps",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "service-detail-page.tsx",
+      "file_type": "code",
+      "norm_label": "timerangeprops",
+      "source_file": "components/shared/feature-header.tsx",
+      "source_location": "L7"
     },
     {
       "id": "components_shared_telemetry_primitives_statusspanprops",
@@ -254,30 +293,17 @@
       "source_location": "L6"
     },
     {
-      "id": "shared_components_telemetry_sidebar_telemetrysidebarprops",
-      "label": "TelemetrySidebarProps",
+      "id": "components_shared_app_filter_sidebar_facetoption",
+      "label": "FacetOption",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
-      "community": 5,
-      "community_name": "telemetry-sidebar.tsx",
+      "community": 6,
+      "community_name": "use-traces.tsx",
       "file_type": "code",
-      "norm_label": "telemetrysidebarprops",
-      "source_file": "shared/components/telemetry-sidebar.tsx",
-      "source_location": "L28"
-    },
-    {
-      "id": "shared_hooks_use_environments_environmentsource",
-      "label": "EnvironmentSource",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "telemetry-sidebar.tsx",
-      "file_type": "code",
-      "norm_label": "environmentsource",
-      "source_file": "shared/hooks/use-environments.ts",
-      "source_location": "L5"
+      "norm_label": "facetoption",
+      "source_file": "components/shared/app-filter-sidebar.tsx",
+      "source_location": "L22"
     },
     {
       "id": "features_logs_api_logsqueryparams",
@@ -306,17 +332,17 @@
       "source_location": "L7"
     },
     {
-      "id": "shared_components_telemetry_sidebar_facetoption",
-      "label": "FacetOption",
+      "id": "shared_hooks_use_telemetry_view_params_telemetryviewparamsoptions",
+      "label": "TelemetryViewParamsOptions",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 6,
       "community_name": "use-traces.tsx",
       "file_type": "code",
-      "norm_label": "facetoption",
-      "source_file": "shared/components/telemetry-sidebar.tsx",
-      "source_location": "L21"
+      "norm_label": "telemetryviewparamsoptions",
+      "source_file": "shared/hooks/use-telemetry-view-params.ts",
+      "source_location": "L9"
     },
     {
       "id": "features_metrics_model_apimetric",
@@ -389,12 +415,12 @@
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
-      "community": 8,
-      "community_name": "facet-query-bar.tsx",
+      "community": 7,
+      "community_name": "use-metrics.tsx",
       "file_type": "code",
       "norm_label": "facetquerybarprops",
       "source_file": "shared/components/facet-query-bar.tsx",
-      "source_location": "L8"
+      "source_location": "L14"
     },
     {
       "id": "shared_components_facet_query_bar_suggestion",
@@ -402,12 +428,12 @@
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
-      "community": 8,
-      "community_name": "facet-query-bar.tsx",
+      "community": 7,
+      "community_name": "use-metrics.tsx",
       "file_type": "code",
       "norm_label": "suggestion",
       "source_file": "shared/components/facet-query-bar.tsx",
-      "source_location": "L14"
+      "source_location": "L20"
     },
     {
       "id": "shared_components_data_table_datatable",
@@ -434,6 +460,42 @@
       "source_location": "L318"
     },
     {
+      "id": "shared_components_environment_filter_environmentfilter",
+      "label": "EnvironmentFilter()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "data-table.tsx",
+      "file_type": "code",
+      "norm_label": "environmentfilter()",
+      "source_file": "shared/components/environment-filter.tsx",
+      "source_location": "L7"
+    },
+    {
+      "id": "shared_hooks_use_environments_useenvironments",
+      "label": "useEnvironments()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "data-table.tsx",
+      "file_type": "code",
+      "norm_label": "useenvironments()",
+      "source_file": "shared/hooks/use-environments.ts",
+      "source_location": "L7"
+    },
+    {
+      "id": "components_shared_app_filter_sidebar_appfiltersidebar",
+      "label": "AppFilterSidebar()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "metrics-view.tsx",
+      "file_type": "code",
+      "norm_label": "appfiltersidebar()",
+      "source_file": "components/shared/app-filter-sidebar.tsx",
+      "source_location": "L186"
+    },
+    {
       "id": "components_shared_feature_header_featureheader",
       "label": "FeatureHeader()",
       "_callable": true,
@@ -446,40 +508,16 @@
       "source_location": "L20"
     },
     {
-      "id": "components_shared_telemetry_widget_telemetrygrid",
-      "label": "TelemetryGrid()",
+      "id": "components_shared_view_skeleton_queryerror",
+      "label": "QueryError()",
       "_callable": true,
       "_origin": "ast",
       "community": 1,
       "community_name": "metrics-view.tsx",
       "file_type": "code",
-      "norm_label": "telemetrygrid()",
-      "source_file": "components/shared/telemetry-widget.tsx",
-      "source_location": "L17"
-    },
-    {
-      "id": "components_shared_telemetry_widget_telemetrywidget",
-      "label": "TelemetryWidget()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "metrics-view.tsx",
-      "file_type": "code",
-      "norm_label": "telemetrywidget()",
-      "source_file": "components/shared/telemetry-widget.tsx",
-      "source_location": "L4"
-    },
-    {
-      "id": "components_shared_view_skeleton_viewskeleton",
-      "label": "ViewSkeleton()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "metrics-view.tsx",
-      "file_type": "code",
-      "norm_label": "viewskeleton()",
+      "norm_label": "queryerror()",
       "source_file": "components/shared/view-skeleton.tsx",
-      "source_location": "L15"
+      "source_location": "L68"
     },
     {
       "id": "features_logs_components_logs_view_logsview",
@@ -503,7 +541,31 @@
       "file_type": "code",
       "norm_label": "metricsview()",
       "source_file": "features/metrics/components/metrics-view.tsx",
-      "source_location": "L55"
+      "source_location": "L54"
+    },
+    {
+      "id": "features_monitors_components_monitors_view_monitorsview",
+      "label": "MonitorsView()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "metrics-view.tsx",
+      "file_type": "code",
+      "norm_label": "monitorsview()",
+      "source_file": "features/monitors/components/monitors-view.tsx",
+      "source_location": "L47"
+    },
+    {
+      "id": "features_services_components_services_components_servicedetaillink",
+      "label": "ServiceDetailLink()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "metrics-view.tsx",
+      "file_type": "code",
+      "norm_label": "servicedetaillink()",
+      "source_file": "features/services/components/services-components.tsx",
+      "source_location": "L77"
     },
     {
       "id": "features_services_components_services_view_servicesview",
@@ -515,7 +577,19 @@
       "file_type": "code",
       "norm_label": "servicesview()",
       "source_file": "features/services/components/services-view.tsx",
-      "source_location": "L25"
+      "source_location": "L24"
+    },
+    {
+      "id": "features_traces_components_traces_components_tracessidebarshell",
+      "label": "TracesSidebarShell()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "metrics-view.tsx",
+      "file_type": "code",
+      "norm_label": "tracessidebarshell()",
+      "source_file": "features/traces/components/traces-components.tsx",
+      "source_location": "L107"
     },
     {
       "id": "features_traces_components_traces_view_tracesview",
@@ -563,7 +637,7 @@
       "file_type": "code",
       "norm_label": "featurebody()",
       "source_file": "shared/components/feature-layout.tsx",
-      "source_location": "L67"
+      "source_location": "L59"
     },
     {
       "id": "shared_components_feature_layout_featurecontent",
@@ -575,7 +649,7 @@
       "file_type": "code",
       "norm_label": "featurecontent()",
       "source_file": "shared/components/feature-layout.tsx",
-      "source_location": "L79"
+      "source_location": "L71"
     },
     {
       "id": "shared_components_feature_layout_featureemptystate",
@@ -587,7 +661,7 @@
       "file_type": "code",
       "norm_label": "featureemptystate()",
       "source_file": "shared/components/feature-layout.tsx",
-      "source_location": "L199"
+      "source_location": "L186"
     },
     {
       "id": "shared_components_feature_layout_featureheader",
@@ -599,7 +673,7 @@
       "file_type": "code",
       "norm_label": "featureheader()",
       "source_file": "shared/components/feature-layout.tsx",
-      "source_location": "L35"
+      "source_location": "L27"
     },
     {
       "id": "shared_components_feature_layout_featureloading",
@@ -611,7 +685,7 @@
       "file_type": "code",
       "norm_label": "featureloading()",
       "source_file": "shared/components/feature-layout.tsx",
-      "source_location": "L188"
+      "source_location": "L175"
     },
     {
       "id": "shared_components_feature_layout_featurepage",
@@ -623,7 +697,7 @@
       "file_type": "code",
       "norm_label": "featurepage()",
       "source_file": "shared/components/feature-layout.tsx",
-      "source_location": "L21"
+      "source_location": "L13"
     },
     {
       "id": "shared_components_feature_layout_featurepanel",
@@ -635,7 +709,7 @@
       "file_type": "code",
       "norm_label": "featurepanel()",
       "source_file": "shared/components/feature-layout.tsx",
-      "source_location": "L95"
+      "source_location": "L87"
     },
     {
       "id": "shared_components_feature_layout_featurepanelheader",
@@ -647,7 +721,7 @@
       "file_type": "code",
       "norm_label": "featurepanelheader()",
       "source_file": "shared/components/feature-layout.tsx",
-      "source_location": "L116"
+      "source_location": "L102"
     },
     {
       "id": "shared_components_feature_layout_featuresearch",
@@ -659,31 +733,7 @@
       "file_type": "code",
       "norm_label": "featuresearch()",
       "source_file": "shared/components/feature-layout.tsx",
-      "source_location": "L207"
-    },
-    {
-      "id": "shared_components_feature_layout_featuresidebar",
-      "label": "FeatureSidebar()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "metrics-view.tsx",
-      "file_type": "code",
-      "norm_label": "featuresidebar()",
-      "source_file": "shared/components/feature-layout.tsx",
-      "source_location": "L131"
-    },
-    {
-      "id": "shared_components_telemetry_sidebar_telemetrysidebar",
-      "label": "TelemetrySidebar()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "metrics-view.tsx",
-      "file_type": "code",
-      "norm_label": "telemetrysidebar()",
-      "source_file": "shared/components/telemetry-sidebar.tsx",
-      "source_location": "L226"
+      "source_location": "L194"
     },
     {
       "id": "app_app_app",
@@ -719,7 +769,7 @@
       "file_type": "code",
       "norm_label": "appsidebar()",
       "source_file": "app/components/app-sidebar.tsx",
-      "source_location": "L30"
+      "source_location": "L29"
     },
     {
       "id": "app_components_app_sidebar_mobileappsidebar",
@@ -731,7 +781,7 @@
       "file_type": "code",
       "norm_label": "mobileappsidebar()",
       "source_file": "app/components/app-sidebar.tsx",
-      "source_location": "L98"
+      "source_location": "L97"
     },
     {
       "id": "components_shared_page_layout_pagelayout",
@@ -758,6 +808,30 @@
       "source_location": "L19"
     },
     {
+      "id": "components_shared_app_filter_sidebar_facetselector",
+      "label": "FacetSelector()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "shared/trace-detail-sheet.tsx",
+      "file_type": "code",
+      "norm_label": "facetselector()",
+      "source_file": "components/shared/app-filter-sidebar.tsx",
+      "source_location": "L110"
+    },
+    {
+      "id": "components_shared_app_filter_sidebar_serviceselector",
+      "label": "ServiceSelector()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "shared/trace-detail-sheet.tsx",
+      "file_type": "code",
+      "norm_label": "serviceselector()",
+      "source_file": "components/shared/app-filter-sidebar.tsx",
+      "source_location": "L43"
+    },
+    {
       "id": "components_shared_trace_detail_sheet_statusbadge",
       "label": "StatusBadge()",
       "_callable": true,
@@ -782,16 +856,16 @@
       "source_location": "L60"
     },
     {
-      "id": "components_shared_view_skeleton_queryerror",
-      "label": "QueryError()",
+      "id": "components_ui_badge_badge",
+      "label": "Badge()",
       "_callable": true,
       "_origin": "ast",
       "community": 3,
       "community_name": "shared/trace-detail-sheet.tsx",
       "file_type": "code",
-      "norm_label": "queryerror()",
-      "source_file": "components/shared/view-skeleton.tsx",
-      "source_location": "L68"
+      "norm_label": "badge()",
+      "source_file": "components/ui/badge.tsx",
+      "source_location": "L35"
     },
     {
       "id": "features_logs_components_logs_components_logtracelink",
@@ -818,6 +892,30 @@
       "source_location": "L28"
     },
     {
+      "id": "features_traces_api_gettracebyid",
+      "label": "getTraceById()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "shared/trace-detail-sheet.tsx",
+      "file_type": "code",
+      "norm_label": "gettracebyid()",
+      "source_file": "features/traces/api.ts",
+      "source_location": "L53"
+    },
+    {
+      "id": "features_traces_api_normalizespan",
+      "label": "normalizeSpan()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "shared/trace-detail-sheet.tsx",
+      "file_type": "code",
+      "norm_label": "normalizespan()",
+      "source_file": "features/traces/api.ts",
+      "source_location": "L5"
+    },
+    {
       "id": "features_traces_components_traces_components_statusbadge",
       "label": "statusBadge()",
       "_callable": true,
@@ -830,30 +928,6 @@
       "source_location": "L12"
     },
     {
-      "id": "features_traces_components_traces_components_tracessidebarshell",
-      "label": "TracesSidebarShell()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "shared/trace-detail-sheet.tsx",
-      "file_type": "code",
-      "norm_label": "tracessidebarshell()",
-      "source_file": "features/traces/components/traces-components.tsx",
-      "source_location": "L107"
-    },
-    {
-      "id": "features_traces_hooks_use_traces_usetraces",
-      "label": "useTraces()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "shared/trace-detail-sheet.tsx",
-      "file_type": "code",
-      "norm_label": "usetraces()",
-      "source_file": "features/traces/hooks/use-traces.tsx",
-      "source_location": "L16"
-    },
-    {
       "id": "shared_hooks_use_active_trace_useactivetrace",
       "label": "useActiveTrace()",
       "_callable": true,
@@ -864,102 +938,6 @@
       "norm_label": "useactivetrace()",
       "source_file": "shared/hooks/use-active-trace.tsx",
       "source_location": "L56"
-    },
-    {
-      "id": "shared_hooks_use_telemetry_view_params_uniquevalues",
-      "label": "uniqueValues()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "shared/trace-detail-sheet.tsx",
-      "file_type": "code",
-      "norm_label": "uniquevalues()",
-      "source_file": "shared/hooks/use-telemetry-view-params.ts",
-      "source_location": "L13"
-    },
-    {
-      "id": "shared_hooks_use_telemetry_view_params_usetelemetryviewparams",
-      "label": "useTelemetryViewParams()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "shared/trace-detail-sheet.tsx",
-      "file_type": "code",
-      "norm_label": "usetelemetryviewparams()",
-      "source_file": "shared/hooks/use-telemetry-view-params.ts",
-      "source_location": "L17"
-    },
-    {
-      "id": "shared_lib_telemetry_formatduration",
-      "label": "formatDuration()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "shared/trace-detail-sheet.tsx",
-      "file_type": "code",
-      "norm_label": "formatduration()",
-      "source_file": "shared/lib/telemetry.ts",
-      "source_location": "L47"
-    },
-    {
-      "id": "shared_lib_telemetry_formattelemetrytimestamp",
-      "label": "formatTelemetryTimestamp()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "shared/trace-detail-sheet.tsx",
-      "file_type": "code",
-      "norm_label": "formattelemetrytimestamp()",
-      "source_file": "shared/lib/telemetry.ts",
-      "source_location": "L40"
-    },
-    {
-      "id": "shared_lib_telemetry_gettelemetrytimestampms",
-      "label": "getTelemetryTimestampMs()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "shared/trace-detail-sheet.tsx",
-      "file_type": "code",
-      "norm_label": "gettelemetrytimestampms()",
-      "source_file": "shared/lib/telemetry.ts",
-      "source_location": "L36"
-    },
-    {
-      "id": "shared_lib_telemetry_iswithintimerange",
-      "label": "isWithinTimeRange()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "shared/trace-detail-sheet.tsx",
-      "file_type": "code",
-      "norm_label": "iswithintimerange()",
-      "source_file": "shared/lib/telemetry.ts",
-      "source_location": "L62"
-    },
-    {
-      "id": "shared_lib_telemetry_parsetelemetrytimestamp",
-      "label": "parseTelemetryTimestamp()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "shared/trace-detail-sheet.tsx",
-      "file_type": "code",
-      "norm_label": "parsetelemetrytimestamp()",
-      "source_file": "shared/lib/telemetry.ts",
-      "source_location": "L23"
-    },
-    {
-      "id": "shared_lib_telemetry_resolvetelemetryrange",
-      "label": "resolveTelemetryRange()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "shared/trace-detail-sheet.tsx",
-      "file_type": "code",
-      "norm_label": "resolvetelemetryrange()",
-      "source_file": "shared/lib/telemetry.ts",
-      "source_location": "L6"
     },
     {
       "id": "shared_lib_trace_waterfall_spanwaterfall",
@@ -1010,6 +988,42 @@
       "source_location": "L48"
     },
     {
+      "id": "components_shared_telemetry_widget_telemetrygrid",
+      "label": "TelemetryGrid()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "service-detail-page.tsx",
+      "file_type": "code",
+      "norm_label": "telemetrygrid()",
+      "source_file": "components/shared/telemetry-widget.tsx",
+      "source_location": "L17"
+    },
+    {
+      "id": "components_shared_telemetry_widget_telemetrywidget",
+      "label": "TelemetryWidget()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "service-detail-page.tsx",
+      "file_type": "code",
+      "norm_label": "telemetrywidget()",
+      "source_file": "components/shared/telemetry-widget.tsx",
+      "source_location": "L4"
+    },
+    {
+      "id": "components_shared_view_skeleton_viewskeleton",
+      "label": "ViewSkeleton()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "service-detail-page.tsx",
+      "file_type": "code",
+      "norm_label": "viewskeleton()",
+      "source_file": "components/shared/view-skeleton.tsx",
+      "source_location": "L15"
+    },
+    {
       "id": "features_services_service_detail_page_metadatafield",
       "label": "MetadataField()",
       "_callable": true,
@@ -1046,40 +1060,16 @@
       "source_location": "L54"
     },
     {
-      "id": "shared_components_environment_filter_environmentfilter",
-      "label": "EnvironmentFilter()",
+      "id": "shared_lib_telemetry_formatduration",
+      "label": "formatDuration()",
       "_callable": true,
       "_origin": "ast",
       "community": 4,
       "community_name": "service-detail-page.tsx",
       "file_type": "code",
-      "norm_label": "environmentfilter()",
-      "source_file": "shared/components/environment-filter.tsx",
-      "source_location": "L7"
-    },
-    {
-      "id": "shared_components_telemetry_sidebar_faceticon",
-      "label": "FacetIcon()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "telemetry-sidebar.tsx",
-      "file_type": "code",
-      "norm_label": "faceticon()",
-      "source_file": "shared/components/telemetry-sidebar.tsx",
-      "source_location": "L56"
-    },
-    {
-      "id": "shared_components_telemetry_sidebar_filterpanel",
-      "label": "FilterPanel()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "telemetry-sidebar.tsx",
-      "file_type": "code",
-      "norm_label": "filterpanel()",
-      "source_file": "shared/components/telemetry-sidebar.tsx",
-      "source_location": "L67"
+      "norm_label": "formatduration()",
+      "source_file": "shared/lib/telemetry.ts",
+      "source_location": "L47"
     },
     {
       "id": "features_logs_api_getlogs",
@@ -1130,18 +1120,6 @@
       "source_location": "L5"
     },
     {
-      "id": "features_services_components_services_components_servicedetaillink",
-      "label": "ServiceDetailLink()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 6,
-      "community_name": "use-traces.tsx",
-      "file_type": "code",
-      "norm_label": "servicedetaillink()",
-      "source_file": "features/services/components/services-components.tsx",
-      "source_location": "L77"
-    },
-    {
       "id": "features_services_hooks_use_service_summary_useservicesummary",
       "label": "useServiceSummary()",
       "_callable": true,
@@ -1178,18 +1156,6 @@
       "source_location": "L10"
     },
     {
-      "id": "features_traces_api_gettracebyid",
-      "label": "getTraceById()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 6,
-      "community_name": "use-traces.tsx",
-      "file_type": "code",
-      "norm_label": "gettracebyid()",
-      "source_file": "features/traces/api.ts",
-      "source_location": "L53"
-    },
-    {
       "id": "features_traces_api_gettraces",
       "label": "getTraces()",
       "_callable": true,
@@ -1200,18 +1166,6 @@
       "norm_label": "gettraces()",
       "source_file": "features/traces/api.ts",
       "source_location": "L38"
-    },
-    {
-      "id": "features_traces_api_normalizespan",
-      "label": "normalizeSpan()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 6,
-      "community_name": "use-traces.tsx",
-      "file_type": "code",
-      "norm_label": "normalizespan()",
-      "source_file": "features/traces/api.ts",
-      "source_location": "L5"
     },
     {
       "id": "features_traces_api_normalizetrace",
@@ -1226,16 +1180,100 @@
       "source_location": "L21"
     },
     {
-      "id": "shared_hooks_use_environments_useenvironments",
-      "label": "useEnvironments()",
+      "id": "features_traces_hooks_use_traces_usetraces",
+      "label": "useTraces()",
       "_callable": true,
       "_origin": "ast",
       "community": 6,
       "community_name": "use-traces.tsx",
       "file_type": "code",
-      "norm_label": "useenvironments()",
-      "source_file": "shared/hooks/use-environments.ts",
-      "source_location": "L7"
+      "norm_label": "usetraces()",
+      "source_file": "features/traces/hooks/use-traces.tsx",
+      "source_location": "L16"
+    },
+    {
+      "id": "shared_hooks_use_telemetry_view_params_uniquevalues",
+      "label": "uniqueValues()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "use-traces.tsx",
+      "file_type": "code",
+      "norm_label": "uniquevalues()",
+      "source_file": "shared/hooks/use-telemetry-view-params.ts",
+      "source_location": "L13"
+    },
+    {
+      "id": "shared_hooks_use_telemetry_view_params_usetelemetryviewparams",
+      "label": "useTelemetryViewParams()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "use-traces.tsx",
+      "file_type": "code",
+      "norm_label": "usetelemetryviewparams()",
+      "source_file": "shared/hooks/use-telemetry-view-params.ts",
+      "source_location": "L17"
+    },
+    {
+      "id": "shared_lib_telemetry_formattelemetrytimestamp",
+      "label": "formatTelemetryTimestamp()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "use-traces.tsx",
+      "file_type": "code",
+      "norm_label": "formattelemetrytimestamp()",
+      "source_file": "shared/lib/telemetry.ts",
+      "source_location": "L40"
+    },
+    {
+      "id": "shared_lib_telemetry_gettelemetrytimestampms",
+      "label": "getTelemetryTimestampMs()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "use-traces.tsx",
+      "file_type": "code",
+      "norm_label": "gettelemetrytimestampms()",
+      "source_file": "shared/lib/telemetry.ts",
+      "source_location": "L36"
+    },
+    {
+      "id": "shared_lib_telemetry_iswithintimerange",
+      "label": "isWithinTimeRange()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "use-traces.tsx",
+      "file_type": "code",
+      "norm_label": "iswithintimerange()",
+      "source_file": "shared/lib/telemetry.ts",
+      "source_location": "L62"
+    },
+    {
+      "id": "shared_lib_telemetry_parsetelemetrytimestamp",
+      "label": "parseTelemetryTimestamp()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "use-traces.tsx",
+      "file_type": "code",
+      "norm_label": "parsetelemetrytimestamp()",
+      "source_file": "shared/lib/telemetry.ts",
+      "source_location": "L23"
+    },
+    {
+      "id": "shared_lib_telemetry_resolvetelemetryrange",
+      "label": "resolveTelemetryRange()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "use-traces.tsx",
+      "file_type": "code",
+      "norm_label": "resolvetelemetryrange()",
+      "source_file": "shared/lib/telemetry.ts",
+      "source_location": "L6"
     },
     {
       "id": "features_metrics_hooks_use_metrics_usemetrics",
@@ -1362,35 +1400,24 @@
       "label": "FacetPill()",
       "_callable": true,
       "_origin": "ast",
-      "community": 8,
-      "community_name": "facet-query-bar.tsx",
+      "community": 7,
+      "community_name": "use-metrics.tsx",
       "file_type": "code",
       "norm_label": "facetpill()",
       "source_file": "shared/components/facet-query-bar.tsx",
-      "source_location": "L21"
+      "source_location": "L27"
     },
     {
       "id": "shared_components_facet_query_bar_facetquerybar",
       "label": "FacetQueryBar()",
       "_callable": true,
       "_origin": "ast",
-      "community": 8,
-      "community_name": "facet-query-bar.tsx",
+      "community": 7,
+      "community_name": "use-metrics.tsx",
       "file_type": "code",
       "norm_label": "facetquerybar()",
       "source_file": "shared/components/facet-query-bar.tsx",
-      "source_location": "L40"
-    },
-    {
-      "id": "components_shared_page_layout",
-      "label": "page-layout.tsx",
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "data-table.tsx",
-      "file_type": "code",
-      "norm_label": "page-layout.tsx",
-      "source_file": "components/shared/page-layout.tsx",
-      "source_location": "L1"
+      "source_location": "L46"
     },
     {
       "id": "components_ui_table",
@@ -1514,28 +1541,6 @@
       "source_location": "L1"
     },
     {
-      "id": "components_shared_feature_header",
-      "label": "feature-header.tsx",
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "metrics-view.tsx",
-      "file_type": "code",
-      "norm_label": "feature-header.tsx",
-      "source_file": "components/shared/feature-header.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "components_shared_telemetry_widget",
-      "label": "telemetry-widget.tsx",
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "metrics-view.tsx",
-      "file_type": "code",
-      "norm_label": "telemetry-widget.tsx",
-      "source_file": "components/shared/telemetry-widget.tsx",
-      "source_location": "L1"
-    },
-    {
       "id": "components_shared_view_skeleton",
       "label": "view-skeleton.tsx",
       "_origin": "ast",
@@ -1569,6 +1574,39 @@
       "source_location": "L1"
     },
     {
+      "id": "features_monitors_components_monitors_view",
+      "label": "monitors-view.tsx",
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "metrics-view.tsx",
+      "file_type": "code",
+      "norm_label": "monitors-view.tsx",
+      "source_file": "features/monitors/components/monitors-view.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "features_services_components_services_components",
+      "label": "services-components.tsx",
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "metrics-view.tsx",
+      "file_type": "code",
+      "norm_label": "services-components.tsx",
+      "source_file": "features/services/components/services-components.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "features_services_components_services_components_columns",
+      "label": "columns",
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "metrics-view.tsx",
+      "file_type": "code",
+      "norm_label": "columns",
+      "source_file": "features/services/components/services-components.tsx",
+      "source_location": "L7"
+    },
+    {
       "id": "features_services_components_services_view",
       "label": "services-view.tsx",
       "_origin": "ast",
@@ -1578,6 +1616,28 @@
       "norm_label": "services-view.tsx",
       "source_file": "features/services/components/services-view.tsx",
       "source_location": "L1"
+    },
+    {
+      "id": "features_traces_components_traces_components",
+      "label": "traces-components.tsx",
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "metrics-view.tsx",
+      "file_type": "code",
+      "norm_label": "traces-components.tsx",
+      "source_file": "features/traces/components/traces-components.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "features_traces_components_traces_components_columns",
+      "label": "columns",
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "metrics-view.tsx",
+      "file_type": "code",
+      "norm_label": "columns",
+      "source_file": "features/traces/components/traces-components.tsx",
+      "source_location": "L19"
     },
     {
       "id": "features_traces_components_traces_view",
@@ -1611,17 +1671,6 @@
       "norm_label": "feature-layout.tsx",
       "source_file": "shared/components/feature-layout.tsx",
       "source_location": "L1"
-    },
-    {
-      "id": "shared_lib_telemetry_telemetry_fetch_limit",
-      "label": "TELEMETRY_FETCH_LIMIT",
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "metrics-view.tsx",
-      "file_type": "code",
-      "norm_label": "telemetry_fetch_limit",
-      "source_file": "shared/lib/telemetry.ts",
-      "source_location": "L18"
     },
     {
       "id": "app_app",
@@ -1723,6 +1772,28 @@
       "source_location": "L21"
     },
     {
+      "id": "components_shared_page_layout",
+      "label": "page-layout.tsx",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "app.tsx",
+      "file_type": "code",
+      "norm_label": "page-layout.tsx",
+      "source_file": "components/shared/page-layout.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "components_shared_app_filter_sidebar",
+      "label": "app-filter-sidebar.tsx",
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "shared/trace-detail-sheet.tsx",
+      "file_type": "code",
+      "norm_label": "app-filter-sidebar.tsx",
+      "source_file": "components/shared/app-filter-sidebar.tsx",
+      "source_location": "L1"
+    },
+    {
       "id": "components_shared_trace_detail_sheet",
       "label": "shared/trace-detail-sheet.tsx",
       "_origin": "ast",
@@ -1732,6 +1803,28 @@
       "norm_label": "shared/trace-detail-sheet.tsx",
       "source_file": "components/shared/trace-detail-sheet.tsx",
       "source_location": "L1"
+    },
+    {
+      "id": "components_ui_badge",
+      "label": "badge.tsx",
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "shared/trace-detail-sheet.tsx",
+      "file_type": "code",
+      "norm_label": "badge.tsx",
+      "source_file": "components/ui/badge.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "components_ui_badge_badgevariants",
+      "label": "badgeVariants",
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "shared/trace-detail-sheet.tsx",
+      "file_type": "code",
+      "norm_label": "badgevariants",
+      "source_file": "components/ui/badge.tsx",
+      "source_location": "L6"
     },
     {
       "id": "features_logs_components_logs_components",
@@ -1767,28 +1860,6 @@
       "source_location": "L1"
     },
     {
-      "id": "features_traces_components_traces_components",
-      "label": "traces-components.tsx",
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "shared/trace-detail-sheet.tsx",
-      "file_type": "code",
-      "norm_label": "traces-components.tsx",
-      "source_file": "features/traces/components/traces-components.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "features_traces_components_traces_components_columns",
-      "label": "columns",
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "shared/trace-detail-sheet.tsx",
-      "file_type": "code",
-      "norm_label": "columns",
-      "source_file": "features/traces/components/traces-components.tsx",
-      "source_location": "L19"
-    },
-    {
       "id": "shared_hooks_use_active_trace",
       "label": "use-active-trace.tsx",
       "_origin": "ast",
@@ -1811,39 +1882,6 @@
       "source_location": "L17"
     },
     {
-      "id": "shared_hooks_use_telemetry_view_params",
-      "label": "use-telemetry-view-params.ts",
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "shared/trace-detail-sheet.tsx",
-      "file_type": "code",
-      "norm_label": "use-telemetry-view-params.ts",
-      "source_file": "shared/hooks/use-telemetry-view-params.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "shared_lib_telemetry",
-      "label": "telemetry.ts",
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "shared/trace-detail-sheet.tsx",
-      "file_type": "code",
-      "norm_label": "telemetry.ts",
-      "source_file": "shared/lib/telemetry.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "shared_lib_telemetry_default_telemetry_range",
-      "label": "DEFAULT_TELEMETRY_RANGE",
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "shared/trace-detail-sheet.tsx",
-      "file_type": "code",
-      "norm_label": "default_telemetry_range",
-      "source_file": "shared/lib/telemetry.ts",
-      "source_location": "L4"
-    },
-    {
       "id": "shared_lib_trace_waterfall",
       "label": "trace-waterfall.ts",
       "_origin": "ast",
@@ -1852,6 +1890,17 @@
       "file_type": "code",
       "norm_label": "trace-waterfall.ts",
       "source_file": "shared/lib/trace-waterfall.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "components_shared_feature_header",
+      "label": "feature-header.tsx",
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "service-detail-page.tsx",
+      "file_type": "code",
+      "norm_label": "feature-header.tsx",
+      "source_file": "components/shared/feature-header.tsx",
       "source_location": "L1"
     },
     {
@@ -1897,6 +1946,17 @@
       "norm_label": "valuecolors",
       "source_file": "components/shared/telemetry-primitives.tsx",
       "source_location": "L8"
+    },
+    {
+      "id": "components_shared_telemetry_widget",
+      "label": "telemetry-widget.tsx",
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "service-detail-page.tsx",
+      "file_type": "code",
+      "norm_label": "telemetry-widget.tsx",
+      "source_file": "components/shared/telemetry-widget.tsx",
+      "source_location": "L1"
     },
     {
       "id": "components_ui_card",
@@ -1987,28 +2047,6 @@
       "source_location": "L1"
     },
     {
-      "id": "shared_components_telemetry_sidebar",
-      "label": "telemetry-sidebar.tsx",
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "telemetry-sidebar.tsx",
-      "file_type": "code",
-      "norm_label": "telemetry-sidebar.tsx",
-      "source_file": "shared/components/telemetry-sidebar.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "shared_components_telemetry_sidebar_timeranges",
-      "label": "timeRanges",
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "telemetry-sidebar.tsx",
-      "file_type": "code",
-      "norm_label": "timeranges",
-      "source_file": "shared/components/telemetry-sidebar.tsx",
-      "source_location": "L48"
-    },
-    {
       "id": "features_logs_api",
       "label": "logs/api.ts",
       "_origin": "ast",
@@ -2040,28 +2078,6 @@
       "norm_label": "services/api.ts",
       "source_file": "features/services/api.ts",
       "source_location": "L1"
-    },
-    {
-      "id": "features_services_components_services_components",
-      "label": "services-components.tsx",
-      "_origin": "ast",
-      "community": 6,
-      "community_name": "use-traces.tsx",
-      "file_type": "code",
-      "norm_label": "services-components.tsx",
-      "source_file": "features/services/components/services-components.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "features_services_components_services_components_columns",
-      "label": "columns",
-      "_origin": "ast",
-      "community": 6,
-      "community_name": "use-traces.tsx",
-      "file_type": "code",
-      "norm_label": "columns",
-      "source_file": "features/services/components/services-components.tsx",
-      "source_location": "L7"
     },
     {
       "id": "features_services_hooks_use_service_summary",
@@ -2117,6 +2133,50 @@
       "norm_label": "use-environments.ts",
       "source_file": "shared/hooks/use-environments.ts",
       "source_location": "L1"
+    },
+    {
+      "id": "shared_hooks_use_telemetry_view_params",
+      "label": "use-telemetry-view-params.ts",
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "use-traces.tsx",
+      "file_type": "code",
+      "norm_label": "use-telemetry-view-params.ts",
+      "source_file": "shared/hooks/use-telemetry-view-params.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "shared_lib_telemetry",
+      "label": "telemetry.ts",
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "use-traces.tsx",
+      "file_type": "code",
+      "norm_label": "telemetry.ts",
+      "source_file": "shared/lib/telemetry.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "shared_lib_telemetry_default_telemetry_range",
+      "label": "DEFAULT_TELEMETRY_RANGE",
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "use-traces.tsx",
+      "file_type": "code",
+      "norm_label": "default_telemetry_range",
+      "source_file": "shared/lib/telemetry.ts",
+      "source_location": "L4"
+    },
+    {
+      "id": "shared_lib_telemetry_telemetry_fetch_limit",
+      "label": "TELEMETRY_FETCH_LIMIT",
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "use-traces.tsx",
+      "file_type": "code",
+      "norm_label": "telemetry_fetch_limit",
+      "source_file": "shared/lib/telemetry.ts",
+      "source_location": "L18"
     },
     {
       "id": "features_metrics_hooks_use_metrics",
@@ -2210,8 +2270,8 @@
       "id": "shared_components_facet_query_bar",
       "label": "facet-query-bar.tsx",
       "_origin": "ast",
-      "community": 8,
-      "community_name": "facet-query-bar.tsx",
+      "community": 7,
+      "community_name": "use-metrics.tsx",
       "file_type": "code",
       "norm_label": "facet-query-bar.tsx",
       "source_file": "shared/components/facet-query-bar.tsx",
@@ -2372,39 +2432,6 @@
       "type": "external"
     },
     {
-      "id": "lib_utils",
-      "label": "lib_utils",
-      "community": 0,
-      "community_name": "data-table.tsx",
-      "external": true,
-      "file_type": "concept",
-      "norm_label": "lib_utils",
-      "source_file": "",
-      "type": "external"
-    },
-    {
-      "id": "lib_utils_cn",
-      "label": "lib_utils_cn",
-      "community": 0,
-      "community_name": "data-table.tsx",
-      "external": true,
-      "file_type": "concept",
-      "norm_label": "lib_utils_cn",
-      "source_file": "",
-      "type": "external"
-    },
-    {
-      "id": "ref_react",
-      "label": "ref_react",
-      "community": 0,
-      "community_name": "data-table.tsx",
-      "external": true,
-      "file_type": "concept",
-      "norm_label": "ref_react",
-      "source_file": "",
-      "type": "external"
-    },
-    {
       "id": "components_ui_alert",
       "label": "components_ui_alert",
       "community": 1,
@@ -2471,68 +2498,13 @@
       "type": "external"
     },
     {
-      "id": "components_ui_sheet",
-      "label": "components_ui_sheet",
+      "id": "components_ui_checkbox",
+      "label": "components_ui_checkbox",
       "community": 1,
       "community_name": "metrics-view.tsx",
       "external": true,
       "file_type": "concept",
-      "norm_label": "components_ui_sheet",
-      "source_file": "",
-      "type": "external"
-    },
-    {
-      "id": "components_ui_sheet_sheet",
-      "label": "components_ui_sheet_sheet",
-      "community": 1,
-      "community_name": "metrics-view.tsx",
-      "external": true,
-      "file_type": "concept",
-      "norm_label": "components_ui_sheet_sheet",
-      "source_file": "",
-      "type": "external"
-    },
-    {
-      "id": "components_ui_sheet_sheetcontent",
-      "label": "components_ui_sheet_sheetcontent",
-      "community": 1,
-      "community_name": "metrics-view.tsx",
-      "external": true,
-      "file_type": "concept",
-      "norm_label": "components_ui_sheet_sheetcontent",
-      "source_file": "",
-      "type": "external"
-    },
-    {
-      "id": "components_ui_sheet_sheetdescription",
-      "label": "components_ui_sheet_sheetdescription",
-      "community": 1,
-      "community_name": "metrics-view.tsx",
-      "external": true,
-      "file_type": "concept",
-      "norm_label": "components_ui_sheet_sheetdescription",
-      "source_file": "",
-      "type": "external"
-    },
-    {
-      "id": "components_ui_sheet_sheetheader",
-      "label": "components_ui_sheet_sheetheader",
-      "community": 1,
-      "community_name": "metrics-view.tsx",
-      "external": true,
-      "file_type": "concept",
-      "norm_label": "components_ui_sheet_sheetheader",
-      "source_file": "",
-      "type": "external"
-    },
-    {
-      "id": "components_ui_sheet_sheettitle",
-      "label": "components_ui_sheet_sheettitle",
-      "community": 1,
-      "community_name": "metrics-view.tsx",
-      "external": true,
-      "file_type": "concept",
-      "norm_label": "components_ui_sheet_sheettitle",
+      "norm_label": "components_ui_checkbox",
       "source_file": "",
       "type": "external"
     },
@@ -2625,6 +2597,138 @@
       "type": "external"
     },
     {
+      "id": "features_monitors_components_monitors_components",
+      "label": "features_monitors_components_monitors_components",
+      "community": 1,
+      "community_name": "metrics-view.tsx",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "features_monitors_components_monitors_components",
+      "source_file": "",
+      "type": "external"
+    },
+    {
+      "id": "features_monitors_components_monitors_components_monitordetail",
+      "label": "features_monitors_components_monitors_components_monitordetail",
+      "community": 1,
+      "community_name": "metrics-view.tsx",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "features_monitors_components_monitors_components_monitordetail",
+      "source_file": "",
+      "type": "external"
+    },
+    {
+      "id": "features_monitors_components_monitors_components_monitorform",
+      "label": "features_monitors_components_monitors_components_monitorform",
+      "community": 1,
+      "community_name": "metrics-view.tsx",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "features_monitors_components_monitors_components_monitorform",
+      "source_file": "",
+      "type": "external"
+    },
+    {
+      "id": "features_monitors_components_monitors_components_monitorrow",
+      "label": "features_monitors_components_monitors_components_monitorrow",
+      "community": 1,
+      "community_name": "metrics-view.tsx",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "features_monitors_components_monitors_components_monitorrow",
+      "source_file": "",
+      "type": "external"
+    },
+    {
+      "id": "features_monitors_components_monitors_components_typeicon",
+      "label": "features_monitors_components_monitors_components_typeicon",
+      "community": 1,
+      "community_name": "metrics-view.tsx",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "features_monitors_components_monitors_components_typeicon",
+      "source_file": "",
+      "type": "external"
+    },
+    {
+      "id": "features_monitors_hooks_use_monitors",
+      "label": "features_monitors_hooks_use_monitors",
+      "community": 1,
+      "community_name": "metrics-view.tsx",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "features_monitors_hooks_use_monitors",
+      "source_file": "",
+      "type": "external"
+    },
+    {
+      "id": "features_monitors_hooks_use_monitors_usemonitors",
+      "label": "features_monitors_hooks_use_monitors_usemonitors",
+      "community": 1,
+      "community_name": "metrics-view.tsx",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "features_monitors_hooks_use_monitors_usemonitors",
+      "source_file": "",
+      "type": "external"
+    },
+    {
+      "id": "features_monitors_model",
+      "label": "features_monitors_model",
+      "community": 1,
+      "community_name": "metrics-view.tsx",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "features_monitors_model",
+      "source_file": "",
+      "type": "external"
+    },
+    {
+      "id": "features_monitors_model_monitortype",
+      "label": "features_monitors_model_monitortype",
+      "community": 1,
+      "community_name": "metrics-view.tsx",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "features_monitors_model_monitortype",
+      "source_file": "",
+      "type": "external"
+    },
+    {
+      "id": "features_monitors_model_status_filters",
+      "label": "features_monitors_model_status_filters",
+      "community": 1,
+      "community_name": "metrics-view.tsx",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "features_monitors_model_status_filters",
+      "source_file": "",
+      "type": "external"
+    },
+    {
+      "id": "features_monitors_model_statusbg",
+      "label": "features_monitors_model_statusbg",
+      "community": 1,
+      "community_name": "metrics-view.tsx",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "features_monitors_model_statusbg",
+      "source_file": "",
+      "type": "external"
+    },
+    {
+      "id": "features_monitors_model_statuslabel",
+      "label": "features_monitors_model_statuslabel",
+      "community": 1,
+      "community_name": "metrics-view.tsx",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "features_monitors_model_statuslabel",
+      "source_file": "",
+      "type": "external"
+    },
+    {
       "id": "ref_lucide_react",
       "label": "ref_lucide_react",
       "community": 1,
@@ -2632,6 +2736,39 @@
       "external": true,
       "file_type": "concept",
       "norm_label": "ref_lucide_react",
+      "source_file": "",
+      "type": "external"
+    },
+    {
+      "id": "ref_react_router_dom",
+      "label": "ref_react_router_dom",
+      "community": 1,
+      "community_name": "metrics-view.tsx",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "ref_react_router_dom",
+      "source_file": "",
+      "type": "external"
+    },
+    {
+      "id": "ref_recharts",
+      "label": "ref_recharts",
+      "community": 1,
+      "community_name": "metrics-view.tsx",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "ref_recharts",
+      "source_file": "",
+      "type": "external"
+    },
+    {
+      "id": "ref_tanstack_react_table",
+      "label": "ref_tanstack_react_table",
+      "community": 1,
+      "community_name": "metrics-view.tsx",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "ref_tanstack_react_table",
       "source_file": "",
       "type": "external"
     },
@@ -2911,24 +3048,101 @@
       "type": "external"
     },
     {
-      "id": "components_ui_badge",
-      "label": "components_ui_badge",
+      "id": "components_ui_checkbox_checkbox",
+      "label": "components_ui_checkbox_checkbox",
       "community": 3,
       "community_name": "shared/trace-detail-sheet.tsx",
       "external": true,
       "file_type": "concept",
-      "norm_label": "components_ui_badge",
+      "norm_label": "components_ui_checkbox_checkbox",
       "source_file": "",
       "type": "external"
     },
     {
-      "id": "components_ui_badge_badge",
-      "label": "components_ui_badge_badge",
+      "id": "components_ui_scroll_area",
+      "label": "components_ui_scroll_area",
       "community": 3,
       "community_name": "shared/trace-detail-sheet.tsx",
       "external": true,
       "file_type": "concept",
-      "norm_label": "components_ui_badge_badge",
+      "norm_label": "components_ui_scroll_area",
+      "source_file": "",
+      "type": "external"
+    },
+    {
+      "id": "components_ui_scroll_area_scrollarea",
+      "label": "components_ui_scroll_area_scrollarea",
+      "community": 3,
+      "community_name": "shared/trace-detail-sheet.tsx",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "components_ui_scroll_area_scrollarea",
+      "source_file": "",
+      "type": "external"
+    },
+    {
+      "id": "components_ui_sheet",
+      "label": "components_ui_sheet",
+      "community": 3,
+      "community_name": "shared/trace-detail-sheet.tsx",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "components_ui_sheet",
+      "source_file": "",
+      "type": "external"
+    },
+    {
+      "id": "components_ui_sheet_sheet",
+      "label": "components_ui_sheet_sheet",
+      "community": 3,
+      "community_name": "shared/trace-detail-sheet.tsx",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "components_ui_sheet_sheet",
+      "source_file": "",
+      "type": "external"
+    },
+    {
+      "id": "components_ui_sheet_sheetcontent",
+      "label": "components_ui_sheet_sheetcontent",
+      "community": 3,
+      "community_name": "shared/trace-detail-sheet.tsx",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "components_ui_sheet_sheetcontent",
+      "source_file": "",
+      "type": "external"
+    },
+    {
+      "id": "components_ui_sheet_sheetdescription",
+      "label": "components_ui_sheet_sheetdescription",
+      "community": 3,
+      "community_name": "shared/trace-detail-sheet.tsx",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "components_ui_sheet_sheetdescription",
+      "source_file": "",
+      "type": "external"
+    },
+    {
+      "id": "components_ui_sheet_sheetheader",
+      "label": "components_ui_sheet_sheetheader",
+      "community": 3,
+      "community_name": "shared/trace-detail-sheet.tsx",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "components_ui_sheet_sheetheader",
+      "source_file": "",
+      "type": "external"
+    },
+    {
+      "id": "components_ui_sheet_sheettitle",
+      "label": "components_ui_sheet_sheettitle",
+      "community": 3,
+      "community_name": "shared/trace-detail-sheet.tsx",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "components_ui_sheet_sheettitle",
       "source_file": "",
       "type": "external"
     },
@@ -2988,24 +3202,24 @@
       "type": "external"
     },
     {
-      "id": "features_traces_types_tracesummary",
-      "label": "features_traces_types_tracesummary",
+      "id": "features_logs_types_logrecord",
+      "label": "features_logs_types_logrecord",
       "community": 3,
       "community_name": "shared/trace-detail-sheet.tsx",
       "external": true,
       "file_type": "concept",
-      "norm_label": "features_traces_types_tracesummary",
+      "norm_label": "features_logs_types_logrecord",
       "source_file": "",
       "type": "external"
     },
     {
-      "id": "ref_date_fns",
-      "label": "ref_date_fns",
+      "id": "ref_class_variance_authority",
+      "label": "ref_class_variance_authority",
       "community": 3,
       "community_name": "shared/trace-detail-sheet.tsx",
       "external": true,
       "file_type": "concept",
-      "norm_label": "ref_date_fns",
+      "norm_label": "ref_class_variance_authority",
       "source_file": "",
       "type": "external"
     },
@@ -3061,61 +3275,6 @@
       "external": true,
       "file_type": "concept",
       "norm_label": "shared_components_telemetry_detail_jsonpanel",
-      "source_file": "",
-      "type": "external"
-    },
-    {
-      "id": "shared_hooks_use_telemetry_query",
-      "label": "shared_hooks_use_telemetry_query",
-      "community": 3,
-      "community_name": "shared/trace-detail-sheet.tsx",
-      "external": true,
-      "file_type": "concept",
-      "norm_label": "shared_hooks_use_telemetry_query",
-      "source_file": "",
-      "type": "external"
-    },
-    {
-      "id": "shared_hooks_use_telemetry_query_usetelemetryquery",
-      "label": "shared_hooks_use_telemetry_query_usetelemetryquery",
-      "community": 3,
-      "community_name": "shared/trace-detail-sheet.tsx",
-      "external": true,
-      "file_type": "concept",
-      "norm_label": "shared_hooks_use_telemetry_query_usetelemetryquery",
-      "source_file": "",
-      "type": "external"
-    },
-    {
-      "id": "shared_lib_time_range",
-      "label": "shared_lib_time_range",
-      "community": 3,
-      "community_name": "shared/trace-detail-sheet.tsx",
-      "external": true,
-      "file_type": "concept",
-      "norm_label": "shared_lib_time_range",
-      "source_file": "",
-      "type": "external"
-    },
-    {
-      "id": "shared_lib_time_range_parsetimerange",
-      "label": "shared_lib_time_range_parsetimerange",
-      "community": 3,
-      "community_name": "shared/trace-detail-sheet.tsx",
-      "external": true,
-      "file_type": "concept",
-      "norm_label": "shared_lib_time_range_parsetimerange",
-      "source_file": "",
-      "type": "external"
-    },
-    {
-      "id": "shared_lib_time_range_resolvetimerange",
-      "label": "shared_lib_time_range_resolvetimerange",
-      "community": 3,
-      "community_name": "shared/trace-detail-sheet.tsx",
-      "external": true,
-      "file_type": "concept",
-      "norm_label": "shared_lib_time_range_resolvetimerange",
       "source_file": "",
       "type": "external"
     },
@@ -3186,79 +3345,35 @@
       "type": "external"
     },
     {
-      "id": "ref_recharts",
-      "label": "ref_recharts",
+      "id": "lib_utils",
+      "label": "lib_utils",
       "community": 4,
       "community_name": "service-detail-page.tsx",
       "external": true,
       "file_type": "concept",
-      "norm_label": "ref_recharts",
+      "norm_label": "lib_utils",
       "source_file": "",
       "type": "external"
     },
     {
-      "id": "components_ui_checkbox",
-      "label": "components_ui_checkbox",
-      "community": 5,
-      "community_name": "telemetry-sidebar.tsx",
+      "id": "lib_utils_cn",
+      "label": "lib_utils_cn",
+      "community": 4,
+      "community_name": "service-detail-page.tsx",
       "external": true,
       "file_type": "concept",
-      "norm_label": "components_ui_checkbox",
+      "norm_label": "lib_utils_cn",
       "source_file": "",
       "type": "external"
     },
     {
-      "id": "components_ui_checkbox_checkbox",
-      "label": "components_ui_checkbox_checkbox",
-      "community": 5,
-      "community_name": "telemetry-sidebar.tsx",
+      "id": "ref_react",
+      "label": "ref_react",
+      "community": 4,
+      "community_name": "service-detail-page.tsx",
       "external": true,
       "file_type": "concept",
-      "norm_label": "components_ui_checkbox_checkbox",
-      "source_file": "",
-      "type": "external"
-    },
-    {
-      "id": "components_ui_scroll_area",
-      "label": "components_ui_scroll_area",
-      "community": 5,
-      "community_name": "telemetry-sidebar.tsx",
-      "external": true,
-      "file_type": "concept",
-      "norm_label": "components_ui_scroll_area",
-      "source_file": "",
-      "type": "external"
-    },
-    {
-      "id": "components_ui_scroll_area_scrollarea",
-      "label": "components_ui_scroll_area_scrollarea",
-      "community": 5,
-      "community_name": "telemetry-sidebar.tsx",
-      "external": true,
-      "file_type": "concept",
-      "norm_label": "components_ui_scroll_area_scrollarea",
-      "source_file": "",
-      "type": "external"
-    },
-    {
-      "id": "components_ui_separator",
-      "label": "components_ui_separator",
-      "community": 5,
-      "community_name": "telemetry-sidebar.tsx",
-      "external": true,
-      "file_type": "concept",
-      "norm_label": "components_ui_separator",
-      "source_file": "",
-      "type": "external"
-    },
-    {
-      "id": "components_ui_separator_separator",
-      "label": "components_ui_separator_separator",
-      "community": 5,
-      "community_name": "telemetry-sidebar.tsx",
-      "external": true,
-      "file_type": "concept",
-      "norm_label": "components_ui_separator_separator",
+      "norm_label": "ref_react",
       "source_file": "",
       "type": "external"
     },
@@ -3292,17 +3407,6 @@
       "external": true,
       "file_type": "concept",
       "norm_label": "features_logs_types",
-      "source_file": "",
-      "type": "external"
-    },
-    {
-      "id": "features_logs_types_logrecord",
-      "label": "features_logs_types_logrecord",
-      "community": 6,
-      "community_name": "use-traces.tsx",
-      "external": true,
-      "file_type": "concept",
-      "norm_label": "features_logs_types_logrecord",
       "source_file": "",
       "type": "external"
     },
@@ -3439,24 +3543,24 @@
       "type": "external"
     },
     {
-      "id": "ref_react_router_dom",
-      "label": "ref_react_router_dom",
+      "id": "features_traces_types_tracesummary",
+      "label": "features_traces_types_tracesummary",
       "community": 6,
       "community_name": "use-traces.tsx",
       "external": true,
       "file_type": "concept",
-      "norm_label": "ref_react_router_dom",
+      "norm_label": "features_traces_types_tracesummary",
       "source_file": "",
       "type": "external"
     },
     {
-      "id": "ref_tanstack_react_table",
-      "label": "ref_tanstack_react_table",
+      "id": "ref_date_fns",
+      "label": "ref_date_fns",
       "community": 6,
       "community_name": "use-traces.tsx",
       "external": true,
       "file_type": "concept",
-      "norm_label": "ref_tanstack_react_table",
+      "norm_label": "ref_date_fns",
       "source_file": "",
       "type": "external"
     },
@@ -3527,6 +3631,28 @@
       "type": "external"
     },
     {
+      "id": "shared_hooks_use_telemetry_query",
+      "label": "shared_hooks_use_telemetry_query",
+      "community": 6,
+      "community_name": "use-traces.tsx",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "shared_hooks_use_telemetry_query",
+      "source_file": "",
+      "type": "external"
+    },
+    {
+      "id": "shared_hooks_use_telemetry_query_usetelemetryquery",
+      "label": "shared_hooks_use_telemetry_query_usetelemetryquery",
+      "community": 6,
+      "community_name": "use-traces.tsx",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "shared_hooks_use_telemetry_query_usetelemetryquery",
+      "source_file": "",
+      "type": "external"
+    },
+    {
       "id": "shared_hooks_use_telemetry_stream",
       "label": "shared_hooks_use_telemetry_stream",
       "community": 6,
@@ -3571,6 +3697,39 @@
       "type": "external"
     },
     {
+      "id": "shared_lib_time_range",
+      "label": "shared_lib_time_range",
+      "community": 6,
+      "community_name": "use-traces.tsx",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "shared_lib_time_range",
+      "source_file": "",
+      "type": "external"
+    },
+    {
+      "id": "shared_lib_time_range_parsetimerange",
+      "label": "shared_lib_time_range_parsetimerange",
+      "community": 6,
+      "community_name": "use-traces.tsx",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "shared_lib_time_range_parsetimerange",
+      "source_file": "",
+      "type": "external"
+    },
+    {
+      "id": "shared_lib_time_range_resolvetimerange",
+      "label": "shared_lib_time_range_resolvetimerange",
+      "community": 6,
+      "community_name": "use-traces.tsx",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "shared_lib_time_range_resolvetimerange",
+      "source_file": "",
+      "type": "external"
+    },
+    {
       "id": "shared_types_telemetry",
       "label": "shared_types_telemetry",
       "community": 6,
@@ -3604,6 +3763,39 @@
       "type": "external"
     },
     {
+      "id": "components_ui_input",
+      "label": "components_ui_input",
+      "community": 7,
+      "community_name": "use-metrics.tsx",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "components_ui_input",
+      "source_file": "",
+      "type": "external"
+    },
+    {
+      "id": "components_ui_input_input",
+      "label": "components_ui_input_input",
+      "community": 7,
+      "community_name": "use-metrics.tsx",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "components_ui_input_input",
+      "source_file": "",
+      "type": "external"
+    },
+    {
+      "id": "ref_react_dom",
+      "label": "ref_react_dom",
+      "community": 7,
+      "community_name": "use-metrics.tsx",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "ref_react_dom",
+      "source_file": "",
+      "type": "external"
+    },
+    {
       "id": "shared_lib_facet",
       "label": "shared_lib_facet",
       "community": 7,
@@ -3626,6 +3818,17 @@
       "type": "external"
     },
     {
+      "id": "shared_lib_facet_facet",
+      "label": "shared_lib_facet_facet",
+      "community": 7,
+      "community_name": "use-metrics.tsx",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "shared_lib_facet_facet",
+      "source_file": "",
+      "type": "external"
+    },
+    {
       "id": "shared_lib_facet_facetdefinition",
       "label": "shared_lib_facet_facetdefinition",
       "community": 7,
@@ -3633,6 +3836,17 @@
       "external": true,
       "file_type": "concept",
       "norm_label": "shared_lib_facet_facetdefinition",
+      "source_file": "",
+      "type": "external"
+    },
+    {
+      "id": "shared_lib_facet_facetselection",
+      "label": "shared_lib_facet_facetselection",
+      "community": 7,
+      "community_name": "use-metrics.tsx",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "shared_lib_facet_facetselection",
       "source_file": "",
       "type": "external"
     },
@@ -3655,61 +3869,6 @@
       "external": true,
       "file_type": "concept",
       "norm_label": "shared_lib_facet_matchesfacets",
-      "source_file": "",
-      "type": "external"
-    },
-    {
-      "id": "components_ui_input",
-      "label": "components_ui_input",
-      "community": 8,
-      "community_name": "facet-query-bar.tsx",
-      "external": true,
-      "file_type": "concept",
-      "norm_label": "components_ui_input",
-      "source_file": "",
-      "type": "external"
-    },
-    {
-      "id": "components_ui_input_input",
-      "label": "components_ui_input_input",
-      "community": 8,
-      "community_name": "facet-query-bar.tsx",
-      "external": true,
-      "file_type": "concept",
-      "norm_label": "components_ui_input_input",
-      "source_file": "",
-      "type": "external"
-    },
-    {
-      "id": "ref_react_dom",
-      "label": "ref_react_dom",
-      "community": 8,
-      "community_name": "facet-query-bar.tsx",
-      "external": true,
-      "file_type": "concept",
-      "norm_label": "ref_react_dom",
-      "source_file": "",
-      "type": "external"
-    },
-    {
-      "id": "shared_lib_facet_facet",
-      "label": "shared_lib_facet_facet",
-      "community": 8,
-      "community_name": "facet-query-bar.tsx",
-      "external": true,
-      "file_type": "concept",
-      "norm_label": "shared_lib_facet_facet",
-      "source_file": "",
-      "type": "external"
-    },
-    {
-      "id": "shared_lib_facet_facetselection",
-      "label": "shared_lib_facet_facetselection",
-      "community": 8,
-      "community_name": "facet-query-bar.tsx",
-      "external": true,
-      "file_type": "concept",
-      "norm_label": "shared_lib_facet_facetselection",
       "source_file": "",
       "type": "external"
     }
@@ -3860,6 +4019,54 @@
       "weight": 1.0
     },
     {
+      "source": "components_shared_app_filter_sidebar_appfiltersidebar",
+      "target": "shared_components_environment_filter_environmentfilter",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "components/shared/app-filter-sidebar.tsx",
+      "source_location": "L205",
+      "weight": 1.0
+    },
+    {
+      "source": "components_shared_app_filter_sidebar_appfiltersidebar",
+      "target": "components_shared_app_filter_sidebar_serviceselector",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "components/shared/app-filter-sidebar.tsx",
+      "source_location": "L207",
+      "weight": 1.0
+    },
+    {
+      "source": "components_shared_app_filter_sidebar_appfiltersidebar",
+      "target": "components_shared_app_filter_sidebar_facetselector",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "components/shared/app-filter-sidebar.tsx",
+      "source_location": "L214",
+      "weight": 1.0
+    },
+    {
+      "source": "components_shared_app_filter_sidebar_facetselector",
+      "target": "components_ui_badge_badge",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "components/shared/app-filter-sidebar.tsx",
+      "source_location": "L171",
+      "weight": 1.0
+    },
+    {
       "source": "components_shared_telemetry_primitives_metriccard",
       "target": "components_shared_telemetry_widget_telemetrywidget",
       "relation": "calls",
@@ -3980,6 +4187,18 @@
       "weight": 1.0
     },
     {
+      "source": "components_ui_badge_badge",
+      "target": "components_ui_badge_badgevariants",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "components/ui/badge.tsx",
+      "source_location": "L37",
+      "weight": 1.0
+    },
+    {
       "source": "features_logs_components_logs_components_logtracelink",
       "target": "shared_hooks_use_active_trace_useactivetrace",
       "relation": "calls",
@@ -3992,15 +4211,15 @@
       "weight": 1.0
     },
     {
-      "source": "features_logs_components_logs_view_logsview",
-      "target": "shared_components_data_table_datatable",
+      "source": "features_logs_components_logs_components_severitybadge",
+      "target": "components_ui_badge_badge",
       "relation": "calls",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "context": "call",
-      "source_file": "features/logs/components/logs-view.tsx",
-      "source_location": "L101",
+      "source_file": "features/logs/components/logs-components.tsx",
+      "source_location": "L31",
       "weight": 1.0
     },
     {
@@ -4012,7 +4231,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "features/logs/components/logs-view.tsx",
-      "source_location": "L115",
+      "source_location": "L106",
       "weight": 1.0
     },
     {
@@ -4048,7 +4267,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "features/logs/components/logs-view.tsx",
-      "source_location": "L64",
+      "source_location": "L55",
       "weight": 1.0
     },
     {
@@ -4060,19 +4279,19 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "features/logs/components/logs-view.tsx",
-      "source_location": "L74",
+      "source_location": "L65",
       "weight": 1.0
     },
     {
       "source": "features_logs_components_logs_view_logsview",
-      "target": "shared_components_telemetry_sidebar_telemetrysidebar",
+      "target": "components_shared_app_filter_sidebar_appfiltersidebar",
       "relation": "calls",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "features/logs/components/logs-view.tsx",
-      "source_location": "L75",
+      "source_location": "L66",
       "weight": 1.0
     },
     {
@@ -4084,7 +4303,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "features/logs/components/logs-view.tsx",
-      "source_location": "L90",
+      "source_location": "L81",
       "weight": 1.0
     },
     {
@@ -4096,7 +4315,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "features/logs/components/logs-view.tsx",
-      "source_location": "L97",
+      "source_location": "L88",
       "weight": 1.0
     },
     {
@@ -4108,7 +4327,19 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "features/logs/components/logs-view.tsx",
-      "source_location": "L99",
+      "source_location": "L90",
+      "weight": 1.0
+    },
+    {
+      "source": "features_logs_components_logs_view_logsview",
+      "target": "shared_components_data_table_datatable",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "features/logs/components/logs-view.tsx",
+      "source_location": "L92",
       "weight": 1.0
     },
     {
@@ -4132,7 +4363,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "features/metrics/components/metrics-view.tsx",
-      "source_location": "L102",
+      "source_location": "L101",
       "weight": 1.0
     },
     {
@@ -4144,7 +4375,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "features/metrics/components/metrics-view.tsx",
-      "source_location": "L103",
+      "source_location": "L102",
       "weight": 1.0
     },
     {
@@ -4156,7 +4387,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "features/metrics/components/metrics-view.tsx",
-      "source_location": "L148",
+      "source_location": "L128",
       "weight": 1.0
     },
     {
@@ -4168,31 +4399,19 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "features/metrics/components/metrics-view.tsx",
-      "source_location": "L157",
+      "source_location": "L137",
       "weight": 1.0
     },
     {
       "source": "features_metrics_components_metrics_view_metricsview",
-      "target": "shared_components_feature_layout_featuresidebar",
+      "target": "components_shared_app_filter_sidebar_appfiltersidebar",
       "relation": "calls",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "features/metrics/components/metrics-view.tsx",
-      "source_location": "L159",
-      "weight": 1.0
-    },
-    {
-      "source": "features_metrics_components_metrics_view_metricsview",
-      "target": "shared_components_environment_filter_environmentfilter",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "features/metrics/components/metrics-view.tsx",
-      "source_location": "L166",
+      "source_location": "L139",
       "weight": 1.0
     },
     {
@@ -4204,7 +4423,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "features/metrics/components/metrics-view.tsx",
-      "source_location": "L167",
+      "source_location": "L147",
       "weight": 1.0
     },
     {
@@ -4216,7 +4435,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "features/metrics/components/metrics-view.tsx",
-      "source_location": "L177",
+      "source_location": "L157",
       "weight": 1.0
     },
     {
@@ -4228,7 +4447,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "features/metrics/components/metrics-view.tsx",
-      "source_location": "L186",
+      "source_location": "L166",
       "weight": 1.0
     },
     {
@@ -4240,7 +4459,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "features/metrics/components/metrics-view.tsx",
-      "source_location": "L220",
+      "source_location": "L197",
       "weight": 1.0
     },
     {
@@ -4252,7 +4471,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "features/metrics/components/metrics-view.tsx",
-      "source_location": "L223",
+      "source_location": "L200",
       "weight": 1.0
     },
     {
@@ -4264,7 +4483,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "features/metrics/components/metrics-view.tsx",
-      "source_location": "L224",
+      "source_location": "L201",
       "weight": 1.0
     },
     {
@@ -4276,7 +4495,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "features/metrics/components/metrics-view.tsx",
-      "source_location": "L225",
+      "source_location": "L202",
       "weight": 1.0
     },
     {
@@ -4288,7 +4507,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "features/metrics/components/metrics-view.tsx",
-      "source_location": "L234",
+      "source_location": "L211",
       "weight": 1.0
     },
     {
@@ -4300,7 +4519,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "features/metrics/components/metrics-view.tsx",
-      "source_location": "L235",
+      "source_location": "L212",
       "weight": 1.0
     },
     {
@@ -4312,7 +4531,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "features/metrics/components/metrics-view.tsx",
-      "source_location": "L289",
+      "source_location": "L266",
       "weight": 1.0
     },
     {
@@ -4324,7 +4543,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "features/metrics/components/metrics-view.tsx",
-      "source_location": "L292",
+      "source_location": "L269",
       "weight": 1.0
     },
     {
@@ -4336,7 +4555,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "features/metrics/components/metrics-view.tsx",
-      "source_location": "L355",
+      "source_location": "L332",
       "weight": 1.0
     },
     {
@@ -4348,7 +4567,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "features/metrics/components/metrics-view.tsx",
-      "source_location": "L646",
+      "source_location": "L623",
       "weight": 1.0
     },
     {
@@ -4472,6 +4691,126 @@
       "weight": 1.0
     },
     {
+      "source": "features_monitors_components_monitors_view_monitorsview",
+      "target": "shared_components_feature_actions_featurerefreshbutton",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "features/monitors/components/monitors-view.tsx",
+      "source_location": "L134",
+      "weight": 1.0
+    },
+    {
+      "source": "features_monitors_components_monitors_view_monitorsview",
+      "target": "shared_components_feature_layout_featurebody",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "features/monitors/components/monitors-view.tsx",
+      "source_location": "L143",
+      "weight": 1.0
+    },
+    {
+      "source": "features_monitors_components_monitors_view_monitorsview",
+      "target": "components_shared_app_filter_sidebar_appfiltersidebar",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "features/monitors/components/monitors-view.tsx",
+      "source_location": "L145",
+      "weight": 1.0
+    },
+    {
+      "source": "features_monitors_components_monitors_view_monitorsview",
+      "target": "shared_components_feature_layout_featuresearch",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "features/monitors/components/monitors-view.tsx",
+      "source_location": "L150",
+      "weight": 1.0
+    },
+    {
+      "source": "features_monitors_components_monitors_view_monitorsview",
+      "target": "shared_components_feature_layout_featurecontent",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "features/monitors/components/monitors-view.tsx",
+      "source_location": "L220",
+      "weight": 1.0
+    },
+    {
+      "source": "features_monitors_components_monitors_view_monitorsview",
+      "target": "shared_components_feature_layout_featurepanel",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "features/monitors/components/monitors-view.tsx",
+      "source_location": "L221",
+      "weight": 1.0
+    },
+    {
+      "source": "features_monitors_components_monitors_view_monitorsview",
+      "target": "shared_components_feature_layout_featureloading",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "features/monitors/components/monitors-view.tsx",
+      "source_location": "L251",
+      "weight": 1.0
+    },
+    {
+      "source": "features_monitors_components_monitors_view_monitorsview",
+      "target": "shared_components_feature_layout_featureemptystate",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "features/monitors/components/monitors-view.tsx",
+      "source_location": "L253",
+      "weight": 1.0
+    },
+    {
+      "source": "features_monitors_components_monitors_view_monitorsview",
+      "target": "shared_components_feature_layout_featurepage",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "features/monitors/components/monitors-view.tsx",
+      "source_location": "L80",
+      "weight": 1.0
+    },
+    {
+      "source": "features_monitors_components_monitors_view_monitorsview",
+      "target": "shared_components_feature_layout_featureheader",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "features/monitors/components/monitors-view.tsx",
+      "source_location": "L82",
+      "weight": 1.0
+    },
+    {
       "source": "features_services_components_services_view_servicesview",
       "target": "shared_components_feature_layout_featurepage",
       "relation": "calls",
@@ -4480,7 +4819,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "features/services/components/services-view.tsx",
-      "source_location": "L39",
+      "source_location": "L38",
       "weight": 1.0
     },
     {
@@ -4492,7 +4831,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "features/services/components/services-view.tsx",
-      "source_location": "L40",
+      "source_location": "L39",
       "weight": 1.0
     },
     {
@@ -4504,7 +4843,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "features/services/components/services-view.tsx",
-      "source_location": "L48",
+      "source_location": "L46",
       "weight": 1.0
     },
     {
@@ -4516,31 +4855,19 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "features/services/components/services-view.tsx",
-      "source_location": "L56",
+      "source_location": "L54",
       "weight": 1.0
     },
     {
       "source": "features_services_components_services_view_servicesview",
-      "target": "shared_components_feature_layout_featuresidebar",
+      "target": "components_shared_app_filter_sidebar_appfiltersidebar",
       "relation": "calls",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "features/services/components/services-view.tsx",
-      "source_location": "L57",
-      "weight": 1.0
-    },
-    {
-      "source": "features_services_components_services_view_servicesview",
-      "target": "shared_components_environment_filter_environmentfilter",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "features/services/components/services-view.tsx",
-      "source_location": "L62",
+      "source_location": "L55",
       "weight": 1.0
     },
     {
@@ -4552,7 +4879,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "features/services/components/services-view.tsx",
-      "source_location": "L63",
+      "source_location": "L61",
       "weight": 1.0
     },
     {
@@ -4564,7 +4891,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "features/services/components/services-view.tsx",
-      "source_location": "L69",
+      "source_location": "L67",
       "weight": 1.0
     },
     {
@@ -4576,7 +4903,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "features/services/components/services-view.tsx",
-      "source_location": "L70",
+      "source_location": "L68",
       "weight": 1.0
     },
     {
@@ -4588,7 +4915,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "features/services/components/services-view.tsx",
-      "source_location": "L72",
+      "source_location": "L70",
       "weight": 1.0
     },
     {
@@ -4600,7 +4927,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "features/services/components/services-view.tsx",
-      "source_location": "L78",
+      "source_location": "L76",
       "weight": 1.0
     },
     {
@@ -4612,7 +4939,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "features/services/components/services-view.tsx",
-      "source_location": "L84",
+      "source_location": "L82",
       "weight": 1.0
     },
     {
@@ -4624,7 +4951,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "features/services/components/services-view.tsx",
-      "source_location": "L96",
+      "source_location": "L94",
       "weight": 1.0
     },
     {
@@ -4844,39 +5171,15 @@
       "weight": 1.0
     },
     {
-      "source": "features_traces_components_traces_view_tracesview",
-      "target": "shared_components_feature_layout_featurepanel",
+      "source": "features_traces_components_traces_components_statusbadge",
+      "target": "components_ui_badge_badge",
       "relation": "calls",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "context": "call",
-      "source_file": "features/traces/components/traces-view.tsx",
-      "source_location": "L103",
-      "weight": 1.0
-    },
-    {
-      "source": "features_traces_components_traces_view_tracesview",
-      "target": "shared_components_feature_layout_featureloading",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "features/traces/components/traces-view.tsx",
-      "source_location": "L105",
-      "weight": 1.0
-    },
-    {
-      "source": "features_traces_components_traces_view_tracesview",
-      "target": "shared_components_data_table_datatable",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "features/traces/components/traces-view.tsx",
-      "source_location": "L107",
+      "source_file": "features/traces/components/traces-components.tsx",
+      "source_location": "L14",
       "weight": 1.0
     },
     {
@@ -4888,7 +5191,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "features/traces/components/traces-view.tsx",
-      "source_location": "L121",
+      "source_location": "L112",
       "weight": 1.0
     },
     {
@@ -4936,7 +5239,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "features/traces/components/traces-view.tsx",
-      "source_location": "L64",
+      "source_location": "L55",
       "weight": 1.0
     },
     {
@@ -4948,19 +5251,19 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "features/traces/components/traces-view.tsx",
-      "source_location": "L76",
+      "source_location": "L67",
       "weight": 1.0
     },
     {
       "source": "features_traces_components_traces_view_tracesview",
-      "target": "shared_components_telemetry_sidebar_telemetrysidebar",
+      "target": "components_shared_app_filter_sidebar_appfiltersidebar",
       "relation": "calls",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "features/traces/components/traces-view.tsx",
-      "source_location": "L79",
+      "source_location": "L70",
       "weight": 1.0
     },
     {
@@ -4972,7 +5275,43 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "features/traces/components/traces-view.tsx",
-      "source_location": "L95",
+      "source_location": "L86",
+      "weight": 1.0
+    },
+    {
+      "source": "features_traces_components_traces_view_tracesview",
+      "target": "shared_components_feature_layout_featurepanel",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "features/traces/components/traces-view.tsx",
+      "source_location": "L94",
+      "weight": 1.0
+    },
+    {
+      "source": "features_traces_components_traces_view_tracesview",
+      "target": "shared_components_feature_layout_featureloading",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "features/traces/components/traces-view.tsx",
+      "source_location": "L96",
+      "weight": 1.0
+    },
+    {
+      "source": "features_traces_components_traces_view_tracesview",
+      "target": "shared_components_data_table_datatable",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "features/traces/components/traces-view.tsx",
+      "source_location": "L98",
       "weight": 1.0
     },
     {
@@ -5104,7 +5443,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "shared/components/facet-query-bar.tsx",
-      "source_location": "L190",
+      "source_location": "L213",
       "weight": 1.0
     },
     {
@@ -5128,7 +5467,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "shared/components/feature-layout.tsx",
-      "source_location": "L23",
+      "source_location": "L15",
       "weight": 1.0
     },
     {
@@ -5140,7 +5479,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "shared/components/feature-layout.tsx",
-      "source_location": "L100",
+      "source_location": "L92",
       "weight": 1.0
     },
     {
@@ -5152,55 +5491,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "shared/components/feature-layout.tsx",
-      "source_location": "L121",
-      "weight": 1.0
-    },
-    {
-      "source": "shared_components_telemetry_sidebar_filterpanel",
-      "target": "shared_components_environment_filter_environmentfilter",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "shared/components/telemetry-sidebar.tsx",
-      "source_location": "L102",
-      "weight": 1.0
-    },
-    {
-      "source": "shared_components_telemetry_sidebar_filterpanel",
-      "target": "shared_components_telemetry_sidebar_faceticon",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "shared/components/telemetry-sidebar.tsx",
-      "source_location": "L147",
-      "weight": 1.0
-    },
-    {
-      "source": "shared_components_telemetry_sidebar_telemetrysidebar",
-      "target": "shared_components_feature_layout_featuresidebar",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "shared/components/telemetry-sidebar.tsx",
-      "source_location": "L268",
-      "weight": 1.0
-    },
-    {
-      "source": "shared_components_telemetry_sidebar_telemetrysidebar",
-      "target": "shared_components_telemetry_sidebar_filterpanel",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "shared/components/telemetry-sidebar.tsx",
-      "source_location": "L275",
+      "source_location": "L107",
       "weight": 1.0
     },
     {
@@ -5312,15 +5603,15 @@
       "weight": 1.0
     },
     {
-      "source": "shared_components_telemetry_sidebar_telemetrysidebarprops",
+      "source": "components_shared_app_filter_sidebar_appfiltersidebarprops",
       "target": "shared_hooks_use_environments_environmentsource",
       "relation": "references",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "context": "field",
-      "source_file": "shared/components/telemetry-sidebar.tsx",
-      "source_location": "L29",
+      "source_file": "components/shared/app-filter-sidebar.tsx",
+      "source_location": "L26",
       "weight": 1.0
     },
     {
@@ -5675,6 +5966,126 @@
       "context": "import",
       "source_file": "app/components/app-sidebar.tsx",
       "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "components_shared_app_filter_sidebar",
+      "target": "shared_components_environment_filter_environmentfilter",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "components/shared/app-filter-sidebar.tsx",
+      "source_location": "L13",
+      "weight": 1.0
+    },
+    {
+      "source": "components_shared_app_filter_sidebar",
+      "target": "shared_hooks_use_environments_environmentsource",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "components/shared/app-filter-sidebar.tsx",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "components_shared_app_filter_sidebar",
+      "target": "components_ui_badge_badge",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "components/shared/app-filter-sidebar.tsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "components_shared_app_filter_sidebar",
+      "target": "components_ui_button_button",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "components/shared/app-filter-sidebar.tsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "components_shared_app_filter_sidebar",
+      "target": "components_ui_checkbox_checkbox",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "components/shared/app-filter-sidebar.tsx",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "components_shared_app_filter_sidebar",
+      "target": "components_ui_sheet_sheet",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "components/shared/app-filter-sidebar.tsx",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "components_shared_app_filter_sidebar",
+      "target": "components_ui_sheet_sheetcontent",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "components/shared/app-filter-sidebar.tsx",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "components_shared_app_filter_sidebar",
+      "target": "components_ui_sheet_sheetdescription",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "components/shared/app-filter-sidebar.tsx",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "components_shared_app_filter_sidebar",
+      "target": "components_ui_sheet_sheetheader",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "components/shared/app-filter-sidebar.tsx",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "components_shared_app_filter_sidebar",
+      "target": "components_ui_sheet_sheettitle",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "components/shared/app-filter-sidebar.tsx",
+      "source_location": "L6",
       "weight": 1.0
     },
     {
@@ -6170,6 +6581,18 @@
       "weight": 1.0
     },
     {
+      "source": "components_ui_badge",
+      "target": "lib_utils_cn",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "components/ui/badge.tsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
       "source": "components_ui_card",
       "target": "lib_utils_cn",
       "relation": "imports",
@@ -6351,7 +6774,7 @@
     },
     {
       "source": "features_logs_components_logs_view",
-      "target": "shared_components_telemetry_sidebar_telemetrysidebar",
+      "target": "components_shared_app_filter_sidebar_appfiltersidebar",
       "relation": "imports",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -6543,7 +6966,7 @@
     },
     {
       "source": "features_logs_hooks_use_logs",
-      "target": "shared_components_telemetry_sidebar_facetoption",
+      "target": "components_shared_app_filter_sidebar_facetoption",
       "relation": "imports",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -6627,6 +7050,18 @@
     },
     {
       "source": "features_metrics_components_metrics_view",
+      "target": "components_shared_app_filter_sidebar_appfiltersidebar",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "features/metrics/components/metrics-view.tsx",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "features_metrics_components_metrics_view",
       "target": "features_metrics_hooks_use_metrics_usemetrics",
       "relation": "imports",
       "_origin": "ast",
@@ -6634,7 +7069,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "features/metrics/components/metrics-view.tsx",
-      "source_location": "L16",
+      "source_location": "L15",
       "weight": 1.0
     },
     {
@@ -6646,19 +7081,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "features/metrics/components/metrics-view.tsx",
-      "source_location": "L17",
-      "weight": 1.0
-    },
-    {
-      "source": "features_metrics_components_metrics_view",
-      "target": "shared_components_environment_filter_environmentfilter",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "features/metrics/components/metrics-view.tsx",
-      "source_location": "L3",
+      "source_location": "L16",
       "weight": 1.0
     },
     {
@@ -6670,7 +7093,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "features/metrics/components/metrics-view.tsx",
-      "source_location": "L4",
+      "source_location": "L3",
       "weight": 1.0
     },
     {
@@ -6682,139 +7105,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "features/metrics/components/metrics-view.tsx",
-      "source_location": "L40",
-      "weight": 1.0
-    },
-    {
-      "source": "features_metrics_components_metrics_view",
-      "target": "shared_components_facet_query_bar_facetquerybar",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "features/metrics/components/metrics-view.tsx",
-      "source_location": "L41",
-      "weight": 1.0
-    },
-    {
-      "source": "features_metrics_components_metrics_view",
-      "target": "components_ui_alert_alert",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "features/metrics/components/metrics-view.tsx",
-      "source_location": "L42",
-      "weight": 1.0
-    },
-    {
-      "source": "features_metrics_components_metrics_view",
-      "target": "components_ui_alert_alertdescription",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "features/metrics/components/metrics-view.tsx",
-      "source_location": "L42",
-      "weight": 1.0
-    },
-    {
-      "source": "features_metrics_components_metrics_view",
-      "target": "components_ui_button_button",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "features/metrics/components/metrics-view.tsx",
-      "source_location": "L43",
-      "weight": 1.0
-    },
-    {
-      "source": "features_metrics_components_metrics_view",
-      "target": "components_ui_card_cardcontent",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "features/metrics/components/metrics-view.tsx",
-      "source_location": "L44",
-      "weight": 1.0
-    },
-    {
-      "source": "features_metrics_components_metrics_view",
-      "target": "components_ui_card_cardtitle",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "features/metrics/components/metrics-view.tsx",
-      "source_location": "L44",
-      "weight": 1.0
-    },
-    {
-      "source": "features_metrics_components_metrics_view",
-      "target": "features_metrics_model_formatvalue",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "features/metrics/components/metrics-view.tsx",
-      "source_location": "L46",
-      "weight": 1.0
-    },
-    {
-      "source": "features_metrics_components_metrics_view",
-      "target": "features_metrics_model_makeseriesid",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "features/metrics/components/metrics-view.tsx",
-      "source_location": "L46",
-      "weight": 1.0
-    },
-    {
-      "source": "features_metrics_components_metrics_view",
-      "target": "features_metrics_components_metrics_components_customtooltip",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "features/metrics/components/metrics-view.tsx",
-      "source_location": "L47",
-      "weight": 1.0
-    },
-    {
-      "source": "features_metrics_components_metrics_view",
-      "target": "features_metrics_components_metrics_components_metricstatcard",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "features/metrics/components/metrics-view.tsx",
-      "source_location": "L47",
-      "weight": 1.0
-    },
-    {
-      "source": "features_metrics_components_metrics_view",
-      "target": "features_metrics_components_metrics_components_serieslegend",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "features/metrics/components/metrics-view.tsx",
-      "source_location": "L47",
+      "source_location": "L39",
       "weight": 1.0
     },
     {
@@ -6826,7 +7117,139 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "features/metrics/components/metrics-view.tsx",
-      "source_location": "L5",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "features_metrics_components_metrics_view",
+      "target": "shared_components_facet_query_bar_facetquerybar",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "features/metrics/components/metrics-view.tsx",
+      "source_location": "L40",
+      "weight": 1.0
+    },
+    {
+      "source": "features_metrics_components_metrics_view",
+      "target": "components_ui_alert_alert",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "features/metrics/components/metrics-view.tsx",
+      "source_location": "L41",
+      "weight": 1.0
+    },
+    {
+      "source": "features_metrics_components_metrics_view",
+      "target": "components_ui_alert_alertdescription",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "features/metrics/components/metrics-view.tsx",
+      "source_location": "L41",
+      "weight": 1.0
+    },
+    {
+      "source": "features_metrics_components_metrics_view",
+      "target": "components_ui_button_button",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "features/metrics/components/metrics-view.tsx",
+      "source_location": "L42",
+      "weight": 1.0
+    },
+    {
+      "source": "features_metrics_components_metrics_view",
+      "target": "components_ui_card_cardcontent",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "features/metrics/components/metrics-view.tsx",
+      "source_location": "L43",
+      "weight": 1.0
+    },
+    {
+      "source": "features_metrics_components_metrics_view",
+      "target": "components_ui_card_cardtitle",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "features/metrics/components/metrics-view.tsx",
+      "source_location": "L43",
+      "weight": 1.0
+    },
+    {
+      "source": "features_metrics_components_metrics_view",
+      "target": "features_metrics_model_formatvalue",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "features/metrics/components/metrics-view.tsx",
+      "source_location": "L45",
+      "weight": 1.0
+    },
+    {
+      "source": "features_metrics_components_metrics_view",
+      "target": "features_metrics_model_makeseriesid",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "features/metrics/components/metrics-view.tsx",
+      "source_location": "L45",
+      "weight": 1.0
+    },
+    {
+      "source": "features_metrics_components_metrics_view",
+      "target": "features_metrics_components_metrics_components_customtooltip",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "features/metrics/components/metrics-view.tsx",
+      "source_location": "L46",
+      "weight": 1.0
+    },
+    {
+      "source": "features_metrics_components_metrics_view",
+      "target": "features_metrics_components_metrics_components_metricstatcard",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "features/metrics/components/metrics-view.tsx",
+      "source_location": "L46",
+      "weight": 1.0
+    },
+    {
+      "source": "features_metrics_components_metrics_view",
+      "target": "features_metrics_components_metrics_components_serieslegend",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "features/metrics/components/metrics-view.tsx",
+      "source_location": "L46",
       "weight": 1.0
     },
     {
@@ -6838,7 +7261,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "features/metrics/components/metrics-view.tsx",
-      "source_location": "L6",
+      "source_location": "L5",
       "weight": 1.0
     },
     {
@@ -6850,7 +7273,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "features/metrics/components/metrics-view.tsx",
-      "source_location": "L6",
+      "source_location": "L5",
       "weight": 1.0
     },
     {
@@ -6862,7 +7285,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "features/metrics/components/metrics-view.tsx",
-      "source_location": "L7",
+      "source_location": "L6",
       "weight": 1.0
     },
     {
@@ -6874,7 +7297,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "features/metrics/components/metrics-view.tsx",
-      "source_location": "L7",
+      "source_location": "L6",
       "weight": 1.0
     },
     {
@@ -6886,7 +7309,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "features/metrics/components/metrics-view.tsx",
-      "source_location": "L7",
+      "source_location": "L6",
       "weight": 1.0
     },
     {
@@ -6898,7 +7321,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "features/metrics/components/metrics-view.tsx",
-      "source_location": "L7",
+      "source_location": "L6",
       "weight": 1.0
     },
     {
@@ -6910,7 +7333,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "features/metrics/components/metrics-view.tsx",
-      "source_location": "L7",
+      "source_location": "L6",
       "weight": 1.0
     },
     {
@@ -6922,19 +7345,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "features/metrics/components/metrics-view.tsx",
-      "source_location": "L7",
-      "weight": 1.0
-    },
-    {
-      "source": "features_metrics_components_metrics_view",
-      "target": "shared_components_feature_layout_featuresidebar",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "features/metrics/components/metrics-view.tsx",
-      "source_location": "L7",
+      "source_location": "L6",
       "weight": 1.0
     },
     {
@@ -7202,6 +7613,342 @@
       "weight": 1.0
     },
     {
+      "source": "features_monitors_components_monitors_view",
+      "target": "shared_components_feature_actions_featurerefreshbutton",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "features/monitors/components/monitors-view.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "features_monitors_components_monitors_view",
+      "target": "components_shared_app_filter_sidebar_appfiltersidebar",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "features/monitors/components/monitors-view.tsx",
+      "source_location": "L12",
+      "weight": 1.0
+    },
+    {
+      "source": "features_monitors_components_monitors_view",
+      "target": "features_monitors_hooks_use_monitors_usemonitors",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "features/monitors/components/monitors-view.tsx",
+      "source_location": "L13",
+      "weight": 1.0
+    },
+    {
+      "source": "features_monitors_components_monitors_view",
+      "target": "shared_components_feature_layout_featurebody",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "features/monitors/components/monitors-view.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "features_monitors_components_monitors_view",
+      "target": "shared_components_feature_layout_featurecontent",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "features/monitors/components/monitors-view.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "features_monitors_components_monitors_view",
+      "target": "shared_components_feature_layout_featureemptystate",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "features/monitors/components/monitors-view.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "features_monitors_components_monitors_view",
+      "target": "shared_components_feature_layout_featureheader",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "features/monitors/components/monitors-view.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "features_monitors_components_monitors_view",
+      "target": "shared_components_feature_layout_featureloading",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "features/monitors/components/monitors-view.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "features_monitors_components_monitors_view",
+      "target": "shared_components_feature_layout_featurepage",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "features/monitors/components/monitors-view.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "features_monitors_components_monitors_view",
+      "target": "shared_components_feature_layout_featurepanel",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "features/monitors/components/monitors-view.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "features_monitors_components_monitors_view",
+      "target": "shared_components_feature_layout_featuresearch",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "features/monitors/components/monitors-view.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "features_monitors_components_monitors_view",
+      "target": "components_ui_alert_alert",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "features/monitors/components/monitors-view.tsx",
+      "source_location": "L21",
+      "weight": 1.0
+    },
+    {
+      "source": "features_monitors_components_monitors_view",
+      "target": "components_ui_alert_alertdescription",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "features/monitors/components/monitors-view.tsx",
+      "source_location": "L21",
+      "weight": 1.0
+    },
+    {
+      "source": "features_monitors_components_monitors_view",
+      "target": "components_ui_button_button",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "features/monitors/components/monitors-view.tsx",
+      "source_location": "L22",
+      "weight": 1.0
+    },
+    {
+      "source": "features_monitors_components_monitors_view",
+      "target": "components_ui_sheet_sheet",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "features/monitors/components/monitors-view.tsx",
+      "source_location": "L24",
+      "weight": 1.0
+    },
+    {
+      "source": "features_monitors_components_monitors_view",
+      "target": "components_ui_sheet_sheetcontent",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "features/monitors/components/monitors-view.tsx",
+      "source_location": "L24",
+      "weight": 1.0
+    },
+    {
+      "source": "features_monitors_components_monitors_view",
+      "target": "components_ui_sheet_sheetdescription",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "features/monitors/components/monitors-view.tsx",
+      "source_location": "L24",
+      "weight": 1.0
+    },
+    {
+      "source": "features_monitors_components_monitors_view",
+      "target": "components_ui_sheet_sheetheader",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "features/monitors/components/monitors-view.tsx",
+      "source_location": "L24",
+      "weight": 1.0
+    },
+    {
+      "source": "features_monitors_components_monitors_view",
+      "target": "components_ui_sheet_sheettitle",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "features/monitors/components/monitors-view.tsx",
+      "source_location": "L24",
+      "weight": 1.0
+    },
+    {
+      "source": "features_monitors_components_monitors_view",
+      "target": "app_components_timer_range_picker_timerangepicker",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "features/monitors/components/monitors-view.tsx",
+      "source_location": "L31",
+      "weight": 1.0
+    },
+    {
+      "source": "features_monitors_components_monitors_view",
+      "target": "features_monitors_model_monitortype",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "features/monitors/components/monitors-view.tsx",
+      "source_location": "L32",
+      "weight": 1.0
+    },
+    {
+      "source": "features_monitors_components_monitors_view",
+      "target": "features_monitors_model_status_filters",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "features/monitors/components/monitors-view.tsx",
+      "source_location": "L32",
+      "weight": 1.0
+    },
+    {
+      "source": "features_monitors_components_monitors_view",
+      "target": "features_monitors_model_statusbg",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "features/monitors/components/monitors-view.tsx",
+      "source_location": "L32",
+      "weight": 1.0
+    },
+    {
+      "source": "features_monitors_components_monitors_view",
+      "target": "features_monitors_model_statuslabel",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "features/monitors/components/monitors-view.tsx",
+      "source_location": "L32",
+      "weight": 1.0
+    },
+    {
+      "source": "features_monitors_components_monitors_view",
+      "target": "features_monitors_components_monitors_components_monitordetail",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "features/monitors/components/monitors-view.tsx",
+      "source_location": "L38",
+      "weight": 1.0
+    },
+    {
+      "source": "features_monitors_components_monitors_view",
+      "target": "features_monitors_components_monitors_components_monitorform",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "features/monitors/components/monitors-view.tsx",
+      "source_location": "L38",
+      "weight": 1.0
+    },
+    {
+      "source": "features_monitors_components_monitors_view",
+      "target": "features_monitors_components_monitors_components_monitorrow",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "features/monitors/components/monitors-view.tsx",
+      "source_location": "L38",
+      "weight": 1.0
+    },
+    {
+      "source": "features_monitors_components_monitors_view",
+      "target": "features_monitors_components_monitors_components_typeicon",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "features/monitors/components/monitors-view.tsx",
+      "source_location": "L38",
+      "weight": 1.0
+    },
+    {
       "source": "features_services_api",
       "target": "shared_api_client_api",
       "relation": "imports",
@@ -7287,6 +8034,18 @@
     },
     {
       "source": "features_services_components_services_view",
+      "target": "components_shared_app_filter_sidebar_appfiltersidebar",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "features/services/components/services-view.tsx",
+      "source_location": "L17",
+      "weight": 1.0
+    },
+    {
+      "source": "features_services_components_services_view",
       "target": "features_services_components_services_components_columns",
       "relation": "imports",
       "_origin": "ast",
@@ -7319,18 +8078,6 @@
       "context": "import",
       "source_file": "features/services/components/services-view.tsx",
       "source_location": "L20",
-      "weight": 1.0
-    },
-    {
-      "source": "features_services_components_services_view",
-      "target": "shared_components_environment_filter_environmentfilter",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "features/services/components/services-view.tsx",
-      "source_location": "L21",
       "weight": 1.0
     },
     {
@@ -7468,18 +8215,6 @@
     {
       "source": "features_services_components_services_view",
       "target": "shared_components_feature_layout_featuresearch",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "features/services/components/services-view.tsx",
-      "source_location": "L9",
-      "weight": 1.0
-    },
-    {
-      "source": "features_services_components_services_view",
-      "target": "shared_components_feature_layout_featuresidebar",
       "relation": "imports",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -8055,7 +8790,7 @@
     },
     {
       "source": "features_traces_components_traces_view",
-      "target": "shared_components_telemetry_sidebar_telemetrysidebar",
+      "target": "components_shared_app_filter_sidebar_appfiltersidebar",
       "relation": "imports",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -8259,7 +8994,7 @@
     },
     {
       "source": "features_traces_hooks_use_traces",
-      "target": "shared_components_telemetry_sidebar_facetoption",
+      "target": "components_shared_app_filter_sidebar_facetoption",
       "relation": "imports",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -8698,7 +9433,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "shared/components/facet-query-bar.tsx",
-      "source_location": "L4",
+      "source_location": "L11",
       "weight": 1.0
     },
     {
@@ -8710,7 +9445,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "shared/components/facet-query-bar.tsx",
-      "source_location": "L5",
+      "source_location": "L12",
       "weight": 1.0
     },
     {
@@ -8722,7 +9457,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "shared/components/facet-query-bar.tsx",
-      "source_location": "L5",
+      "source_location": "L12",
       "weight": 1.0
     },
     {
@@ -8751,78 +9486,6 @@
     },
     {
       "source": "shared_components_feature_layout",
-      "target": "components_shared_telemetry_widget_telemetrywidget",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "shared/components/feature-layout.tsx",
-      "source_location": "L10",
-      "weight": 1.0
-    },
-    {
-      "source": "shared_components_feature_layout",
-      "target": "components_ui_sheet_sheet",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "shared/components/feature-layout.tsx",
-      "source_location": "L11",
-      "weight": 1.0
-    },
-    {
-      "source": "shared_components_feature_layout",
-      "target": "components_ui_sheet_sheetcontent",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "shared/components/feature-layout.tsx",
-      "source_location": "L11",
-      "weight": 1.0
-    },
-    {
-      "source": "shared_components_feature_layout",
-      "target": "components_ui_sheet_sheetdescription",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "shared/components/feature-layout.tsx",
-      "source_location": "L11",
-      "weight": 1.0
-    },
-    {
-      "source": "shared_components_feature_layout",
-      "target": "components_ui_sheet_sheetheader",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "shared/components/feature-layout.tsx",
-      "source_location": "L11",
-      "weight": 1.0
-    },
-    {
-      "source": "shared_components_feature_layout",
-      "target": "components_ui_sheet_sheettitle",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "shared/components/feature-layout.tsx",
-      "source_location": "L11",
-      "weight": 1.0
-    },
-    {
-      "source": "shared_components_feature_layout",
       "target": "components_ui_button_button",
       "relation": "imports",
       "_origin": "ast",
@@ -8830,7 +9493,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "shared/components/feature-layout.tsx",
-      "source_location": "L4",
+      "source_location": "L3",
       "weight": 1.0
     },
     {
@@ -8842,7 +9505,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "shared/components/feature-layout.tsx",
-      "source_location": "L5",
+      "source_location": "L4",
       "weight": 1.0
     },
     {
@@ -8854,7 +9517,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "shared/components/feature-layout.tsx",
-      "source_location": "L5",
+      "source_location": "L4",
       "weight": 1.0
     },
     {
@@ -8866,7 +9529,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "shared/components/feature-layout.tsx",
-      "source_location": "L6",
+      "source_location": "L5",
       "weight": 1.0
     },
     {
@@ -8878,7 +9541,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "shared/components/feature-layout.tsx",
-      "source_location": "L7",
+      "source_location": "L6",
       "weight": 1.0
     },
     {
@@ -8890,7 +9553,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "shared/components/feature-layout.tsx",
-      "source_location": "L8",
+      "source_location": "L7",
       "weight": 1.0
     },
     {
@@ -8902,103 +9565,19 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "shared/components/feature-layout.tsx",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "shared_components_feature_layout",
+      "target": "components_shared_telemetry_widget_telemetrywidget",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "shared/components/feature-layout.tsx",
       "source_location": "L9",
-      "weight": 1.0
-    },
-    {
-      "source": "shared_components_telemetry_sidebar",
-      "target": "components_ui_badge_badge",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "shared/components/telemetry-sidebar.tsx",
-      "source_location": "L15",
-      "weight": 1.0
-    },
-    {
-      "source": "shared_components_telemetry_sidebar",
-      "target": "components_ui_button_button",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "shared/components/telemetry-sidebar.tsx",
-      "source_location": "L16",
-      "weight": 1.0
-    },
-    {
-      "source": "shared_components_telemetry_sidebar",
-      "target": "components_ui_checkbox_checkbox",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "shared/components/telemetry-sidebar.tsx",
-      "source_location": "L17",
-      "weight": 1.0
-    },
-    {
-      "source": "shared_components_telemetry_sidebar",
-      "target": "components_ui_scroll_area_scrollarea",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "shared/components/telemetry-sidebar.tsx",
-      "source_location": "L18",
-      "weight": 1.0
-    },
-    {
-      "source": "shared_components_telemetry_sidebar",
-      "target": "components_ui_separator_separator",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "shared/components/telemetry-sidebar.tsx",
-      "source_location": "L19",
-      "weight": 1.0
-    },
-    {
-      "source": "shared_components_telemetry_sidebar",
-      "target": "shared_components_environment_filter_environmentfilter",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "shared/components/telemetry-sidebar.tsx",
-      "source_location": "L2",
-      "weight": 1.0
-    },
-    {
-      "source": "shared_components_telemetry_sidebar",
-      "target": "shared_hooks_use_environments_environmentsource",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "shared/components/telemetry-sidebar.tsx",
-      "source_location": "L3",
-      "weight": 1.0
-    },
-    {
-      "source": "shared_components_telemetry_sidebar",
-      "target": "shared_components_feature_layout_featuresidebar",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "shared/components/telemetry-sidebar.tsx",
-      "source_location": "L4",
       "weight": 1.0
     },
     {
@@ -9275,6 +9854,103 @@
       "context": "import",
       "source_file": "app/components/app-sidebar.tsx",
       "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "components_shared_app_filter_sidebar",
+      "target": "ref_react",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "components/shared/app-filter-sidebar.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "components_shared_app_filter_sidebar",
+      "target": "shared_components_environment_filter",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "components/shared/app-filter-sidebar.tsx",
+      "source_location": "L13",
+      "weight": 1.0
+    },
+    {
+      "source": "components_shared_app_filter_sidebar",
+      "target": "shared_hooks_use_environments",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "components/shared/app-filter-sidebar.tsx",
+      "source_location": "L14",
+      "type_only": true,
+      "weight": 1.0
+    },
+    {
+      "source": "components_shared_app_filter_sidebar",
+      "target": "ref_lucide_react",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "components/shared/app-filter-sidebar.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "components_shared_app_filter_sidebar",
+      "target": "components_ui_badge",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "components/shared/app-filter-sidebar.tsx",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "components_shared_app_filter_sidebar",
+      "target": "components_ui_button",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "components/shared/app-filter-sidebar.tsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "components_shared_app_filter_sidebar",
+      "target": "components_ui_checkbox",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "components/shared/app-filter-sidebar.tsx",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
+      "source": "components_shared_app_filter_sidebar",
+      "target": "components_ui_sheet",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "components/shared/app-filter-sidebar.tsx",
+      "source_location": "L6",
       "weight": 1.0
     },
     {
@@ -9703,6 +10379,42 @@
       "weight": 1.0
     },
     {
+      "source": "components_ui_badge",
+      "target": "ref_react",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "components/ui/badge.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "components_ui_badge",
+      "target": "ref_class_variance_authority",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "components/ui/badge.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "components_ui_badge",
+      "target": "lib_utils",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "components/ui/badge.tsx",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
       "source": "components_ui_card",
       "target": "ref_react",
       "relation": "imports_from",
@@ -9925,7 +10637,7 @@
     },
     {
       "source": "features_logs_components_logs_view",
-      "target": "shared_components_telemetry_sidebar",
+      "target": "components_shared_app_filter_sidebar",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -10070,7 +10782,7 @@
     },
     {
       "source": "features_logs_hooks_use_logs",
-      "target": "shared_components_telemetry_sidebar",
+      "target": "components_shared_app_filter_sidebar",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -10155,6 +10867,18 @@
     },
     {
       "source": "features_metrics_components_metrics_view",
+      "target": "components_shared_app_filter_sidebar",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "features/metrics/components/metrics-view.tsx",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "features_metrics_components_metrics_view",
       "target": "features_metrics_hooks_use_metrics",
       "relation": "imports_from",
       "_origin": "ast",
@@ -10162,7 +10886,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "features/metrics/components/metrics-view.tsx",
-      "source_location": "L16",
+      "source_location": "L15",
       "type_only": true,
       "weight": 1.0
     },
@@ -10175,7 +10899,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "features/metrics/components/metrics-view.tsx",
-      "source_location": "L17",
+      "source_location": "L16",
       "weight": 1.0
     },
     {
@@ -10187,7 +10911,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "features/metrics/components/metrics-view.tsx",
-      "source_location": "L18",
+      "source_location": "L17",
       "weight": 1.0
     },
     {
@@ -10204,7 +10928,7 @@
     },
     {
       "source": "features_metrics_components_metrics_view",
-      "target": "shared_components_environment_filter",
+      "target": "components_shared_telemetry_widget",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -10223,19 +10947,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "features/metrics/components/metrics-view.tsx",
-      "source_location": "L31",
-      "weight": 1.0
-    },
-    {
-      "source": "features_metrics_components_metrics_view",
-      "target": "components_shared_telemetry_widget",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "features/metrics/components/metrics-view.tsx",
-      "source_location": "L4",
+      "source_location": "L30",
       "weight": 1.0
     },
     {
@@ -10247,79 +10959,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "features/metrics/components/metrics-view.tsx",
-      "source_location": "L40",
-      "weight": 1.0
-    },
-    {
-      "source": "features_metrics_components_metrics_view",
-      "target": "shared_components_facet_query_bar",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "features/metrics/components/metrics-view.tsx",
-      "source_location": "L41",
-      "weight": 1.0
-    },
-    {
-      "source": "features_metrics_components_metrics_view",
-      "target": "components_ui_alert",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "features/metrics/components/metrics-view.tsx",
-      "source_location": "L42",
-      "weight": 1.0
-    },
-    {
-      "source": "features_metrics_components_metrics_view",
-      "target": "components_ui_button",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "features/metrics/components/metrics-view.tsx",
-      "source_location": "L43",
-      "weight": 1.0
-    },
-    {
-      "source": "features_metrics_components_metrics_view",
-      "target": "components_ui_card",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "features/metrics/components/metrics-view.tsx",
-      "source_location": "L44",
-      "weight": 1.0
-    },
-    {
-      "source": "features_metrics_components_metrics_view",
-      "target": "features_metrics_model",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "features/metrics/components/metrics-view.tsx",
-      "source_location": "L46",
-      "weight": 1.0
-    },
-    {
-      "source": "features_metrics_components_metrics_view",
-      "target": "features_metrics_components_metrics_components",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "features/metrics/components/metrics-view.tsx",
-      "source_location": "L47",
+      "source_location": "L39",
       "weight": 1.0
     },
     {
@@ -10331,7 +10971,79 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "features/metrics/components/metrics-view.tsx",
-      "source_location": "L5",
+      "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "features_metrics_components_metrics_view",
+      "target": "shared_components_facet_query_bar",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "features/metrics/components/metrics-view.tsx",
+      "source_location": "L40",
+      "weight": 1.0
+    },
+    {
+      "source": "features_metrics_components_metrics_view",
+      "target": "components_ui_alert",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "features/metrics/components/metrics-view.tsx",
+      "source_location": "L41",
+      "weight": 1.0
+    },
+    {
+      "source": "features_metrics_components_metrics_view",
+      "target": "components_ui_button",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "features/metrics/components/metrics-view.tsx",
+      "source_location": "L42",
+      "weight": 1.0
+    },
+    {
+      "source": "features_metrics_components_metrics_view",
+      "target": "components_ui_card",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "features/metrics/components/metrics-view.tsx",
+      "source_location": "L43",
+      "weight": 1.0
+    },
+    {
+      "source": "features_metrics_components_metrics_view",
+      "target": "features_metrics_model",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "features/metrics/components/metrics-view.tsx",
+      "source_location": "L45",
+      "weight": 1.0
+    },
+    {
+      "source": "features_metrics_components_metrics_view",
+      "target": "features_metrics_components_metrics_components",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "features/metrics/components/metrics-view.tsx",
+      "source_location": "L46",
       "weight": 1.0
     },
     {
@@ -10343,7 +11055,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "features/metrics/components/metrics-view.tsx",
-      "source_location": "L6",
+      "source_location": "L5",
       "weight": 1.0
     },
     {
@@ -10355,7 +11067,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "features/metrics/components/metrics-view.tsx",
-      "source_location": "L7",
+      "source_location": "L6",
       "weight": 1.0
     },
     {
@@ -10453,6 +11165,139 @@
       "context": "import",
       "source_file": "features/metrics/model.ts",
       "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "features_monitors_components_monitors_view",
+      "target": "shared_components_feature_actions",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "features/monitors/components/monitors-view.tsx",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "features_monitors_components_monitors_view",
+      "target": "components_shared_app_filter_sidebar",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "features/monitors/components/monitors-view.tsx",
+      "source_location": "L12",
+      "weight": 1.0
+    },
+    {
+      "source": "features_monitors_components_monitors_view",
+      "target": "features_monitors_hooks_use_monitors",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "features/monitors/components/monitors-view.tsx",
+      "source_location": "L13",
+      "type_only": true,
+      "weight": 1.0
+    },
+    {
+      "source": "features_monitors_components_monitors_view",
+      "target": "ref_lucide_react",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "features/monitors/components/monitors-view.tsx",
+      "source_location": "L14",
+      "weight": 1.0
+    },
+    {
+      "source": "features_monitors_components_monitors_view",
+      "target": "shared_components_feature_layout",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "features/monitors/components/monitors-view.tsx",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "features_monitors_components_monitors_view",
+      "target": "components_ui_alert",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "features/monitors/components/monitors-view.tsx",
+      "source_location": "L21",
+      "weight": 1.0
+    },
+    {
+      "source": "features_monitors_components_monitors_view",
+      "target": "components_ui_button",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "features/monitors/components/monitors-view.tsx",
+      "source_location": "L22",
+      "weight": 1.0
+    },
+    {
+      "source": "features_monitors_components_monitors_view",
+      "target": "components_ui_sheet",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "features/monitors/components/monitors-view.tsx",
+      "source_location": "L24",
+      "weight": 1.0
+    },
+    {
+      "source": "features_monitors_components_monitors_view",
+      "target": "app_components_timer_range_picker",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "features/monitors/components/monitors-view.tsx",
+      "source_location": "L31",
+      "weight": 1.0
+    },
+    {
+      "source": "features_monitors_components_monitors_view",
+      "target": "features_monitors_model",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "features/monitors/components/monitors-view.tsx",
+      "source_location": "L32",
+      "weight": 1.0
+    },
+    {
+      "source": "features_monitors_components_monitors_view",
+      "target": "features_monitors_components_monitors_components",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "features/monitors/components/monitors-view.tsx",
+      "source_location": "L38",
       "weight": 1.0
     },
     {
@@ -10568,6 +11413,18 @@
     },
     {
       "source": "features_services_components_services_view",
+      "target": "components_shared_app_filter_sidebar",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "features/services/components/services-view.tsx",
+      "source_location": "L17",
+      "weight": 1.0
+    },
+    {
+      "source": "features_services_components_services_view",
       "target": "features_services_components_services_components",
       "relation": "imports_from",
       "_origin": "ast",
@@ -10613,18 +11470,6 @@
       "context": "import",
       "source_file": "features/services/components/services-view.tsx",
       "source_location": "L20",
-      "weight": 1.0
-    },
-    {
-      "source": "features_services_components_services_view",
-      "target": "shared_components_environment_filter",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "features/services/components/services-view.tsx",
-      "source_location": "L21",
       "weight": 1.0
     },
     {
@@ -11260,7 +12105,7 @@
     },
     {
       "source": "features_traces_components_traces_view",
-      "target": "shared_components_telemetry_sidebar",
+      "target": "components_shared_app_filter_sidebar",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -11418,7 +12263,7 @@
     },
     {
       "source": "features_traces_hooks_use_traces",
-      "target": "shared_components_telemetry_sidebar",
+      "target": "components_shared_app_filter_sidebar",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -11670,18 +12515,6 @@
     },
     {
       "source": "shared_components_facet_query_bar",
-      "target": "ref_react_dom",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "shared/components/facet-query-bar.tsx",
-      "source_location": "L2",
-      "weight": 1.0
-    },
-    {
-      "source": "shared_components_facet_query_bar",
       "target": "ref_lucide_react",
       "relation": "imports_from",
       "_origin": "ast",
@@ -11689,7 +12522,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "shared/components/facet-query-bar.tsx",
-      "source_location": "L3",
+      "source_location": "L10",
       "weight": 1.0
     },
     {
@@ -11701,7 +12534,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "shared/components/facet-query-bar.tsx",
-      "source_location": "L4",
+      "source_location": "L11",
       "weight": 1.0
     },
     {
@@ -11713,7 +12546,19 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "shared/components/facet-query-bar.tsx",
-      "source_location": "L5",
+      "source_location": "L12",
+      "weight": 1.0
+    },
+    {
+      "source": "shared_components_facet_query_bar",
+      "target": "ref_react_dom",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "shared/components/facet-query-bar.tsx",
+      "source_location": "L9",
       "weight": 1.0
     },
     {
@@ -11767,30 +12612,6 @@
     },
     {
       "source": "shared_components_feature_layout",
-      "target": "components_shared_telemetry_widget",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "shared/components/feature-layout.tsx",
-      "source_location": "L10",
-      "weight": 1.0
-    },
-    {
-      "source": "shared_components_feature_layout",
-      "target": "components_ui_sheet",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "shared/components/feature-layout.tsx",
-      "source_location": "L11",
-      "weight": 1.0
-    },
-    {
-      "source": "shared_components_feature_layout",
       "target": "ref_react",
       "relation": "imports_from",
       "_origin": "ast",
@@ -11798,7 +12619,8 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "shared/components/feature-layout.tsx",
-      "source_location": "L2",
+      "source_location": "L1",
+      "type_only": true,
       "weight": 1.0
     },
     {
@@ -11810,7 +12632,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "shared/components/feature-layout.tsx",
-      "source_location": "L3",
+      "source_location": "L2",
       "weight": 1.0
     },
     {
@@ -11822,7 +12644,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "shared/components/feature-layout.tsx",
-      "source_location": "L4",
+      "source_location": "L3",
       "weight": 1.0
     },
     {
@@ -11834,7 +12656,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "shared/components/feature-layout.tsx",
-      "source_location": "L5",
+      "source_location": "L4",
       "weight": 1.0
     },
     {
@@ -11846,7 +12668,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "shared/components/feature-layout.tsx",
-      "source_location": "L6",
+      "source_location": "L5",
       "weight": 1.0
     },
     {
@@ -11858,7 +12680,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "shared/components/feature-layout.tsx",
-      "source_location": "L7",
+      "source_location": "L6",
       "weight": 1.0
     },
     {
@@ -11870,7 +12692,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "shared/components/feature-layout.tsx",
-      "source_location": "L8",
+      "source_location": "L7",
       "weight": 1.0
     },
     {
@@ -11882,128 +12704,19 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "shared/components/feature-layout.tsx",
+      "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "shared_components_feature_layout",
+      "target": "components_shared_telemetry_widget",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "shared/components/feature-layout.tsx",
       "source_location": "L9",
-      "weight": 1.0
-    },
-    {
-      "source": "shared_components_telemetry_sidebar",
-      "target": "ref_react",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "shared/components/telemetry-sidebar.tsx",
-      "source_location": "L1",
-      "weight": 1.0
-    },
-    {
-      "source": "shared_components_telemetry_sidebar",
-      "target": "components_ui_badge",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "shared/components/telemetry-sidebar.tsx",
-      "source_location": "L15",
-      "weight": 1.0
-    },
-    {
-      "source": "shared_components_telemetry_sidebar",
-      "target": "components_ui_button",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "shared/components/telemetry-sidebar.tsx",
-      "source_location": "L16",
-      "weight": 1.0
-    },
-    {
-      "source": "shared_components_telemetry_sidebar",
-      "target": "components_ui_checkbox",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "shared/components/telemetry-sidebar.tsx",
-      "source_location": "L17",
-      "weight": 1.0
-    },
-    {
-      "source": "shared_components_telemetry_sidebar",
-      "target": "components_ui_scroll_area",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "shared/components/telemetry-sidebar.tsx",
-      "source_location": "L18",
-      "weight": 1.0
-    },
-    {
-      "source": "shared_components_telemetry_sidebar",
-      "target": "components_ui_separator",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "shared/components/telemetry-sidebar.tsx",
-      "source_location": "L19",
-      "weight": 1.0
-    },
-    {
-      "source": "shared_components_telemetry_sidebar",
-      "target": "shared_components_environment_filter",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "shared/components/telemetry-sidebar.tsx",
-      "source_location": "L2",
-      "weight": 1.0
-    },
-    {
-      "source": "shared_components_telemetry_sidebar",
-      "target": "shared_hooks_use_environments",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "shared/components/telemetry-sidebar.tsx",
-      "source_location": "L3",
-      "type_only": true,
-      "weight": 1.0
-    },
-    {
-      "source": "shared_components_telemetry_sidebar",
-      "target": "shared_components_feature_layout",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "shared/components/telemetry-sidebar.tsx",
-      "source_location": "L4",
-      "weight": 1.0
-    },
-    {
-      "source": "shared_components_telemetry_sidebar",
-      "target": "ref_lucide_react",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "shared/components/telemetry-sidebar.tsx",
-      "source_location": "L5",
       "weight": 1.0
     },
     {
@@ -12258,7 +12971,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "app/components/app-sidebar.tsx",
-      "source_location": "L30",
+      "source_location": "L29",
       "weight": 1.0
     },
     {
@@ -12269,7 +12982,73 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "app/components/app-sidebar.tsx",
-      "source_location": "L98",
+      "source_location": "L97",
+      "weight": 1.0
+    },
+    {
+      "source": "components_shared_app_filter_sidebar",
+      "target": "components_shared_app_filter_sidebar_facetselector",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "components/shared/app-filter-sidebar.tsx",
+      "source_location": "L110",
+      "weight": 1.0
+    },
+    {
+      "source": "components_shared_app_filter_sidebar",
+      "target": "components_shared_app_filter_sidebar_appfacetoption",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "components/shared/app-filter-sidebar.tsx",
+      "source_location": "L16",
+      "weight": 1.0
+    },
+    {
+      "source": "components_shared_app_filter_sidebar",
+      "target": "components_shared_app_filter_sidebar_appfiltersidebar",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "components/shared/app-filter-sidebar.tsx",
+      "source_location": "L186",
+      "weight": 1.0
+    },
+    {
+      "source": "components_shared_app_filter_sidebar",
+      "target": "components_shared_app_filter_sidebar_facetoption",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "components/shared/app-filter-sidebar.tsx",
+      "source_location": "L22",
+      "weight": 1.0
+    },
+    {
+      "source": "components_shared_app_filter_sidebar",
+      "target": "components_shared_app_filter_sidebar_appfiltersidebarprops",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "components/shared/app-filter-sidebar.tsx",
+      "source_location": "L24",
+      "weight": 1.0
+    },
+    {
+      "source": "components_shared_app_filter_sidebar",
+      "target": "components_shared_app_filter_sidebar_serviceselector",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "components/shared/app-filter-sidebar.tsx",
+      "source_location": "L43",
       "weight": 1.0
     },
     {
@@ -12501,6 +13280,39 @@
       "confidence_score": 1.0,
       "source_file": "components/shared/view-skeleton.tsx",
       "source_location": "L8",
+      "weight": 1.0
+    },
+    {
+      "source": "components_ui_badge",
+      "target": "components_ui_badge_badgeprops",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "components/ui/badge.tsx",
+      "source_location": "L31",
+      "weight": 1.0
+    },
+    {
+      "source": "components_ui_badge",
+      "target": "components_ui_badge_badge",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "components/ui/badge.tsx",
+      "source_location": "L35",
+      "weight": 1.0
+    },
+    {
+      "source": "components_ui_badge",
+      "target": "components_ui_badge_badgevariants",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "components/ui/badge.tsx",
+      "source_location": "L6",
       "weight": 1.0
     },
     {
@@ -12753,7 +13565,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "features/metrics/components/metrics-view.tsx",
-      "source_location": "L53",
+      "source_location": "L52",
       "weight": 1.0
     },
     {
@@ -12764,7 +13576,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "features/metrics/components/metrics-view.tsx",
-      "source_location": "L55",
+      "source_location": "L54",
       "weight": 1.0
     },
     {
@@ -12988,6 +13800,28 @@
       "weight": 1.0
     },
     {
+      "source": "features_monitors_components_monitors_view",
+      "target": "features_monitors_components_monitors_view_monitorsviewprops",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "features/monitors/components/monitors-view.tsx",
+      "source_location": "L45",
+      "weight": 1.0
+    },
+    {
+      "source": "features_monitors_components_monitors_view",
+      "target": "features_monitors_components_monitors_view_monitorsview",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "features/monitors/components/monitors-view.tsx",
+      "source_location": "L47",
+      "weight": 1.0
+    },
+    {
       "source": "features_services_api",
       "target": "features_services_api_getservicemetrics",
       "relation": "contains",
@@ -13039,7 +13873,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "features/services/components/services-view.tsx",
-      "source_location": "L23",
+      "source_location": "L22",
       "weight": 1.0
     },
     {
@@ -13050,7 +13884,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "features/services/components/services-view.tsx",
-      "source_location": "L25",
+      "source_location": "L24",
       "weight": 1.0
     },
     {
@@ -13286,7 +14120,7 @@
     },
     {
       "source": "shared_components_facet_query_bar",
-      "target": "shared_components_facet_query_bar_suggestion",
+      "target": "shared_components_facet_query_bar_facetquerybarprops",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -13297,13 +14131,24 @@
     },
     {
       "source": "shared_components_facet_query_bar",
+      "target": "shared_components_facet_query_bar_suggestion",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "shared/components/facet-query-bar.tsx",
+      "source_location": "L20",
+      "weight": 1.0
+    },
+    {
+      "source": "shared_components_facet_query_bar",
       "target": "shared_components_facet_query_bar_facetpill",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "shared/components/facet-query-bar.tsx",
-      "source_location": "L21",
+      "source_location": "L27",
       "weight": 1.0
     },
     {
@@ -13314,18 +14159,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "shared/components/facet-query-bar.tsx",
-      "source_location": "L40",
-      "weight": 1.0
-    },
-    {
-      "source": "shared_components_facet_query_bar",
-      "target": "shared_components_facet_query_bar_facetquerybarprops",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "shared/components/facet-query-bar.tsx",
-      "source_location": "L8",
+      "source_location": "L46",
       "weight": 1.0
     },
     {
@@ -13374,46 +14208,13 @@
     },
     {
       "source": "shared_components_feature_layout",
-      "target": "shared_components_feature_layout_sidebarprops",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "shared/components/feature-layout.tsx",
-      "source_location": "L107",
-      "weight": 1.0
-    },
-    {
-      "source": "shared_components_feature_layout",
       "target": "shared_components_feature_layout_featurepanelheader",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "shared/components/feature-layout.tsx",
-      "source_location": "L116",
-      "weight": 1.0
-    },
-    {
-      "source": "shared_components_feature_layout",
-      "target": "shared_components_feature_layout_featuresidebar",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "shared/components/feature-layout.tsx",
-      "source_location": "L131",
-      "weight": 1.0
-    },
-    {
-      "source": "shared_components_feature_layout",
-      "target": "shared_components_feature_layout_featureloading",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "shared/components/feature-layout.tsx",
-      "source_location": "L188",
+      "source_location": "L102",
       "weight": 1.0
     },
     {
@@ -13424,29 +14225,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "shared/components/feature-layout.tsx",
-      "source_location": "L19",
-      "weight": 1.0
-    },
-    {
-      "source": "shared_components_feature_layout",
-      "target": "shared_components_feature_layout_featureemptystate",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "shared/components/feature-layout.tsx",
-      "source_location": "L199",
-      "weight": 1.0
-    },
-    {
-      "source": "shared_components_feature_layout",
-      "target": "shared_components_feature_layout_featuresearch",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "shared/components/feature-layout.tsx",
-      "source_location": "L207",
+      "source_location": "L11",
       "weight": 1.0
     },
     {
@@ -13457,7 +14236,29 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "shared/components/feature-layout.tsx",
-      "source_location": "L21",
+      "source_location": "L13",
+      "weight": 1.0
+    },
+    {
+      "source": "shared_components_feature_layout",
+      "target": "shared_components_feature_layout_featureloading",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "shared/components/feature-layout.tsx",
+      "source_location": "L175",
+      "weight": 1.0
+    },
+    {
+      "source": "shared_components_feature_layout",
+      "target": "shared_components_feature_layout_featureemptystate",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "shared/components/feature-layout.tsx",
+      "source_location": "L186",
       "weight": 1.0
     },
     {
@@ -13468,7 +14269,18 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "shared/components/feature-layout.tsx",
-      "source_location": "L27",
+      "source_location": "L19",
+      "weight": 1.0
+    },
+    {
+      "source": "shared_components_feature_layout",
+      "target": "shared_components_feature_layout_featuresearch",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "shared/components/feature-layout.tsx",
+      "source_location": "L194",
       "weight": 1.0
     },
     {
@@ -13479,7 +14291,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "shared/components/feature-layout.tsx",
-      "source_location": "L35",
+      "source_location": "L27",
       "weight": 1.0
     },
     {
@@ -13490,7 +14302,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "shared/components/feature-layout.tsx",
-      "source_location": "L67",
+      "source_location": "L59",
       "weight": 1.0
     },
     {
@@ -13501,7 +14313,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "shared/components/feature-layout.tsx",
-      "source_location": "L79",
+      "source_location": "L71",
       "weight": 1.0
     },
     {
@@ -13512,73 +14324,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "shared/components/feature-layout.tsx",
-      "source_location": "L95",
-      "weight": 1.0
-    },
-    {
-      "source": "shared_components_telemetry_sidebar",
-      "target": "shared_components_telemetry_sidebar_facetoption",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "shared/components/telemetry-sidebar.tsx",
-      "source_location": "L21",
-      "weight": 1.0
-    },
-    {
-      "source": "shared_components_telemetry_sidebar",
-      "target": "shared_components_telemetry_sidebar_telemetrysidebar",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "shared/components/telemetry-sidebar.tsx",
-      "source_location": "L226",
-      "weight": 1.0
-    },
-    {
-      "source": "shared_components_telemetry_sidebar",
-      "target": "shared_components_telemetry_sidebar_telemetrysidebarprops",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "shared/components/telemetry-sidebar.tsx",
-      "source_location": "L28",
-      "weight": 1.0
-    },
-    {
-      "source": "shared_components_telemetry_sidebar",
-      "target": "shared_components_telemetry_sidebar_timeranges",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "shared/components/telemetry-sidebar.tsx",
-      "source_location": "L48",
-      "weight": 1.0
-    },
-    {
-      "source": "shared_components_telemetry_sidebar",
-      "target": "shared_components_telemetry_sidebar_faceticon",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "shared/components/telemetry-sidebar.tsx",
-      "source_location": "L56",
-      "weight": 1.0
-    },
-    {
-      "source": "shared_components_telemetry_sidebar",
-      "target": "shared_components_telemetry_sidebar_filterpanel",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "shared/components/telemetry-sidebar.tsx",
-      "source_location": "L67",
+      "source_location": "L87",
       "weight": 1.0
     },
     {
@@ -13859,5 +14605,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "fedb487336e7e6026717c8f1c63900262ae632e3"
+  "built_at_commit": "b41e7ce762dc3f1996a8f706408c080d4601d08c"
 }
