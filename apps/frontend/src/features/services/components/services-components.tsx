@@ -3,6 +3,7 @@ import type { ColumnDef } from '@tanstack/react-table';
 import { Link, useLocation } from 'react-router-dom';
 import { DataTableColumnHeader } from '@/shared/components/data-table';
 import { ServiceRow } from '@/features/services/model';
+import { useAuth } from '@/features/auth/auth-context';
 
 export const columns: ColumnDef<ServiceRow>[] = [
   {
@@ -76,9 +77,10 @@ export const columns: ColumnDef<ServiceRow>[] = [
 
 function ServiceDetailLink({ serviceName }: { serviceName: string }) {
   const { search } = useLocation();
+  const { session } = useAuth();
   return (
     <Link
-      to={{ pathname: `/services/${encodeURIComponent(serviceName)}`, search }}
+      to={{ pathname: `/org/${session?.tenantSlug}/services/${encodeURIComponent(serviceName)}`, search }}
       className="font-medium text-primary hover:underline"
     >
       {serviceName}

@@ -1,15 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { api, unwrap } from '@/shared/api/client';
 import {
-  DatadogMonitorOverallState,
-  DATADOG_MONITORS,
   MonitorType,
   MonitorStatus,
   MonitorView,
-  mapOverallState,
-  toMonitorViews,
   MonitorSeries,
-  synthesizeSeries,
   SIDEBAR_STORAGE_KEY,
   MonitorEvent,
 } from '@/features/monitors/model';
@@ -19,11 +15,11 @@ export function useMonitors() {
 
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const [monitors, setMonitors] = useState<MonitorView[]>(() =>
-    toMonitorViews(DATADOG_MONITORS),
-  );
+  const [monitors, setMonitors] = useState<MonitorView[]>([]);
 
   const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [revision, setRevision] = useState(0);
 
   const [error, setError] = useState<string | null>(null);
 
@@ -68,14 +64,9 @@ export function useMonitors() {
     (async () => {
       setLoading(true);
       try {
-        // TODO: GET /api/v1/monitors
-        // const res = await fetch(`${API_BASE}/api/v1/monitors`);
-        // if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        // const json: DatadogMonitor[] = await res.json();
-        // if (cancelled) return;
-        // setMonitors(toMonitorViews(json));
-        await new Promise((r) => setTimeout(r, 250));
+        const { data } = await api.get('/monitors');
         if (cancelled) return;
+        setMonitors(unwrap<MonitorView[]>(data));
         setError(null);
       } catch (err) {
         if (!cancelled)
@@ -89,40 +80,12 @@ export function useMonitors() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [revision]);
 
-  const events = useMemo<Record<string, MonitorEvent[]>>(() => {
-    const out: Record<string, MonitorEvent[]> = {};
-    for (const m of DATADOG_MONITORS) {
-      const groups = m.state?.groups ?? {};
-      out[String(m.id)] = Object.entries(groups)
-        .filter(
-          ([, g]) =>
-            g.last_triggered_ts || g.last_resolved_ts || g.last_nodata_ts,
-        )
-        .map(([groupName, g], idx) => {
-          const ts =
-            g.last_triggered_ts ?? g.last_resolved_ts ?? g.last_nodata_ts ?? 0;
-          const status = mapOverallState(
-            g.status as DatadogMonitorOverallState,
-          );
-          return {
-            id: `${m.id}-${idx}`,
-            monitorId: String(m.id),
-            at: new Date(ts * 1000).toISOString(),
-            status,
-            message: groupName,
-          };
-        })
-        .sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime());
-    }
-    return out;
-  }, []);
+  const events = useMemo<Record<string, MonitorEvent[]>>(() => ({}), []);
 
   const seriesById = useMemo<Record<string, MonitorSeries>>(() => {
-    const out: Record<string, MonitorSeries> = {};
-    for (const m of DATADOG_MONITORS) out[String(m.id)] = synthesizeSeries(m);
-    return out;
+    return {};
   }, []);
 
   const filtered = useMemo(() => {
@@ -171,27 +134,30 @@ export function useMonitors() {
     });
   };
 
-  const handleToggleMute = (id: string) => {
+  const handleToggleMute = async (id: string) => {
     const target = monitors.find((m) => m.id === id);
-    setMonitors((prev) =>
-      prev.map((m) => (m.id === id ? { ...m, isMuted: !m.isMuted } : m)),
-    );
-    if (target?.isMuted) {
-      // TODO: POST /api/v1/monitors/{id}/unmute
-    } else {
-      // TODO: POST /api/v1/monitors/{id}/mute
-    }
+    if (!target) return;
+    try {
+      const { data } = await api.put(`/monitors/${id}`, { ...target, isMuted: !target.isMuted });
+      const updated = unwrap<MonitorView>(data);
+      setMonitors(prev => prev.map(m => m.id === id ? updated : m)); setError(null);
+    } catch { setError('Monitor konnte nicht aktualisiert werden.'); }
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (!confirm('Delete this monitor?')) return;
-    setMonitors((prev) => prev.filter((m) => m.id !== id));
-    if (openId === id) setOpenId(null);
-    // TODO: DELETE /api/v1/monitors/{id}
+    try {
+      await api.delete(`/monitors/${id}`);
+      setMonitors(prev => prev.filter(m => m.id !== id));
+      if (openId === id) setOpenId(null); setError(null);
+    } catch { setError('Monitor konnte nicht gelöscht werden.'); }
   };
 
-  const handleSave = (draft: Partial<MonitorView>) => {
-    if (creating) {
+  const handleSave = async (draft: Partial<MonitorView>) => {
+    if (saving) return;
+    setSaving(true);
+    try {
+    if (creating && !openId) {
       const now = new Date().toISOString();
       const created: MonitorView = {
         id: `mon-${Math.random().toString(36).slice(2, 8)}`,
@@ -217,29 +183,32 @@ export function useMonitors() {
         status: 'OK',
         isMuted: false,
       };
-      setMonitors((prev) => [created, ...prev]);
+      created.teamId = draft.teamId || undefined;
+      created.service = draft.service || undefined;
+      created.env = draft.env || undefined;
+      const { data } = await api.post('/monitors', created);
+      const saved = unwrap<MonitorView>(data);
+      setMonitors((prev) => [saved, ...prev]);
       setCreating(false);
-      setOpenId(created.id);
-      // TODO: POST /api/v1/monitors
+      setOpenId(saved.id);
     } else if (openId) {
-      setMonitors((prev) =>
-        prev.map((m) =>
-          m.id === openId
-            ? { ...m, ...draft, updatedAt: new Date().toISOString() }
-            : m,
-        ),
-      );
-      // TODO: PUT /api/v1/monitors/{id}
+      const original = monitors.find(m => m.id === openId);
+      const { data } = await api.put(`/monitors/${openId}`, { ...original, ...draft });
+      const saved = unwrap<MonitorView>(data);
+      setMonitors(prev => prev.map(m => m.id === openId ? saved : m));
+      setCreating(false);
     }
+    setError(null);
+    setRevision(value => value + 1);
+    } catch { setError('Monitor konnte nicht gespeichert werden. Bitte Eingaben prüfen.'); }
+    finally { setSaving(false); }
   };
 
   const openMonitor = openId
     ? (monitors.find((m) => m.id === openId) ?? null)
     : null;
 
-  const datadogForOpen = openMonitor
-    ? DATADOG_MONITORS.find((d) => String(d.id) === openMonitor.id)
-    : undefined;
+  const datadogForOpen = undefined;
 
   const detailVisible = creating || !!openMonitor;
   return {
@@ -247,6 +216,8 @@ export function useMonitors() {
     monitors,
     setMonitors,
     loading,
+    saving,
+    refresh: () => setRevision(value => value + 1),
     error,
     search,
     setSearch,

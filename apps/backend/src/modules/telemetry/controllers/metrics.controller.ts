@@ -1,9 +1,13 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
+import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
 import { MetricsService } from '../services/metrics.service';
 import { MetricsQueryDto } from '../../../dto/metrics-query.dto';
 import { TelemetryTimeWindowPipe } from '../../../common/pipes/telemetry-time-window.pipe';
+import { TenantJwtGuard } from '../../auth/tenant-jwt.guard';
+import { Tenant } from '../../auth/tenant-request.decorator';
+import type { TenantScope } from '../../auth/auth.types';
 
 @Controller('api/metrics')
+@UseGuards(TenantJwtGuard)
 export class MetricsController {
   constructor(private readonly metricsService: MetricsService) {}
 
@@ -14,8 +18,11 @@ export class MetricsController {
    * Get all metrics flattened for UI table with pagination
    */
   @Get()
-  async getAllMetricsFlattened(@Query(TelemetryTimeWindowPipe) query: MetricsQueryDto) {
-    return this.metricsService.getAllMetricsFlattened({
+  async getAllMetricsFlattened(
+    @Tenant() tenant: TenantScope,
+    @Query(TelemetryTimeWindowPipe) query: MetricsQueryDto,
+  ) {
+    return this.metricsService.getAllMetricsFlattened(tenant, {
       limit: query.limit,
       offset: query.offset,
       service: query.service,
@@ -33,8 +40,12 @@ export class MetricsController {
    * Must be BEFORE :serviceName route
    */
   @Get('detail')
-  async getMetricDetail(@Query(TelemetryTimeWindowPipe) query: MetricsQueryDto) {
+  async getMetricDetail(
+    @Tenant() tenant: TenantScope,
+    @Query(TelemetryTimeWindowPipe) query: MetricsQueryDto,
+  ) {
     return this.metricsService.getMetricDetail(
+      tenant,
       query.service || '',
       query.metric || '',
       query.limit ?? 1000,
@@ -48,13 +59,14 @@ export class MetricsController {
    */
   @Get('statistics')
   async getMetricStatistics(
+    @Tenant() tenant: TenantScope,
     @Query('service') serviceName: string,
     @Query('metric') metricName: string,
   ) {
     if (!serviceName || !metricName) {
       throw new Error('Missing required parameters: service, metric');
     }
-    return this.metricsService.getMetricStatistics(serviceName, metricName);
+    return this.metricsService.getMetricStatistics(tenant, serviceName, metricName);
   }
 
   // ============= DISCOVERY ENDPOINTS =============
@@ -65,8 +77,8 @@ export class MetricsController {
    * Must be BEFORE :serviceName route
    */
   @Get('discovery/metric-names')
-  async getAllMetricNames() {
-    return this.metricsService.getAllMetricNames();
+  async getAllMetricNames(@Tenant() tenant: TenantScope) {
+    return this.metricsService.getAllMetricNames(tenant);
   }
 
   /**
@@ -75,8 +87,8 @@ export class MetricsController {
    * Must be BEFORE :serviceName route
    */
   @Get('discovery/services-overview')
-  async getServicesWithMetricCounts() {
-    return this.metricsService.getServicesWithMetricCounts();
+  async getServicesWithMetricCounts(@Tenant() tenant: TenantScope) {
+    return this.metricsService.getServicesWithMetricCounts(tenant);
   }
 
   // ============= SERVICE-LEVEL ENDPOINTS =============
@@ -87,11 +99,12 @@ export class MetricsController {
    */
   @Get(':serviceName')
   async getMetricsByService(
+    @Tenant() tenant: TenantScope,
     @Param('serviceName') serviceName: string,
     @Query('limit') limit?: number,
     @Query('offset') offset?: number,
   ) {
-    return this.metricsService.getMetricsByService(serviceName, {
+    return this.metricsService.getMetricsByService(tenant, serviceName, {
       limit,
       offset,
     });
@@ -103,8 +116,11 @@ export class MetricsController {
    * Must be BEFORE :serviceName/:metricName route
    */
   @Get(':serviceName/available')
-  async getAvailableMetrics(@Param('serviceName') serviceName: string) {
-    return this.metricsService.getAvailableMetrics(serviceName);
+  async getAvailableMetrics(
+    @Tenant() tenant: TenantScope,
+    @Param('serviceName') serviceName: string,
+  ) {
+    return this.metricsService.getAvailableMetrics(tenant, serviceName);
   }
 
   /**
@@ -114,11 +130,12 @@ export class MetricsController {
    */
   @Get(':serviceName/http/summary')
   async getHttpMetrics(
+    @Tenant() tenant: TenantScope,
     @Param('serviceName') serviceName: string,
     @Query('type') type?: 'client' | 'server',
     @Query('limit') limit?: number,
   ) {
-    return this.metricsService.getHttpMetrics(serviceName, { type, limit });
+    return this.metricsService.getHttpMetrics(tenant, serviceName, { type, limit });
   }
 
   /**
@@ -127,8 +144,11 @@ export class MetricsController {
    * Must be BEFORE :serviceName/:metricName route
    */
   @Get(':serviceName/gc')
-  async getGcMetrics(@Param('serviceName') serviceName: string) {
-    return this.metricsService.getGcMetrics(serviceName);
+  async getGcMetrics(
+    @Tenant() tenant: TenantScope,
+    @Param('serviceName') serviceName: string,
+  ) {
+    return this.metricsService.getGcMetrics(tenant, serviceName);
   }
 
   /**
@@ -137,8 +157,11 @@ export class MetricsController {
    * Must be BEFORE :serviceName/:metricName route
    */
   @Get(':serviceName/memory')
-  async getMemoryMetrics(@Param('serviceName') serviceName: string) {
-    return this.metricsService.getMemoryMetrics(serviceName);
+  async getMemoryMetrics(
+    @Tenant() tenant: TenantScope,
+    @Param('serviceName') serviceName: string,
+  ) {
+    return this.metricsService.getMemoryMetrics(tenant, serviceName);
   }
 
   /**
@@ -147,8 +170,11 @@ export class MetricsController {
    * Must be BEFORE :serviceName/:metricName route
    */
   @Get(':serviceName/statistics')
-  async getMetricsStatistics(@Param('serviceName') serviceName: string) {
-    return this.metricsService.getMetricsStatistics(serviceName);
+  async getMetricsStatistics(
+    @Tenant() tenant: TenantScope,
+    @Param('serviceName') serviceName: string,
+  ) {
+    return this.metricsService.getMetricsStatistics(tenant, serviceName);
   }
 
   /**
@@ -157,8 +183,11 @@ export class MetricsController {
    * Must be BEFORE :serviceName/:metricName route
    */
   @Get(':serviceName/scope')
-  async getMetricsByScope(@Param('serviceName') serviceName: string) {
-    return this.metricsService.getMetricsByScope(serviceName);
+  async getMetricsByScope(
+    @Tenant() tenant: TenantScope,
+    @Param('serviceName') serviceName: string,
+  ) {
+    return this.metricsService.getMetricsByScope(tenant, serviceName);
   }
 
   // ============= METRIC-LEVEL ENDPOINTS =============
@@ -169,10 +198,11 @@ export class MetricsController {
    */
   @Get(':serviceName/:metricName')
   async getMetricByName(
+    @Tenant() tenant: TenantScope,
     @Param('serviceName') serviceName: string,
     @Param('metricName') metricName: string,
   ) {
-    return this.metricsService.getMetricByName(serviceName, metricName);
+    return this.metricsService.getMetricByName(tenant, serviceName, metricName);
   }
 
   /**
@@ -181,11 +211,13 @@ export class MetricsController {
    */
   @Get(':serviceName/:metricName/compare')
   async compareMetrics(
+    @Tenant() tenant: TenantScope,
     @Param('serviceName') serviceName: string,
     @Param('metricName') metricName: string,
     @Query('period') period?: 'hour' | 'day',
   ) {
     return this.metricsService.compareMetrics(
+      tenant,
       serviceName,
       metricName,
       period || 'hour',

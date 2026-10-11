@@ -60,7 +60,7 @@ export function FeatureBody({ className, ...props }: LayoutProps) {
   return (
     <div
       className={cn(
-        "grid min-h-0 min-w-0 flex-1 grid-cols-1 gap-3 lg:grid-cols-[16rem_minmax(0,1fr)]",
+        "flex min-h-0 min-w-0 flex-1 gap-3",
         className,
       )}
       {...props}
@@ -76,7 +76,7 @@ export function FeatureContent({
     <section
       data-slot="feature-content"
       className={cn(
-        "box-border min-h-0 min-w-0 w-full max-w-full space-y-4 overflow-x-hidden overflow-y-auto",
+        "box-border min-h-0 min-w-0 flex-1 max-w-full space-y-4 overflow-x-hidden overflow-y-auto",
         className,
       )}
       {...props}

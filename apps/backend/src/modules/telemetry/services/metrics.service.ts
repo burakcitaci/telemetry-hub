@@ -4,6 +4,7 @@ import { ClickhouseService } from './clickhouse.service';
 import type { TelemetryListOptions } from './clickhouse.service';
 import { metricTimeWindow, type TelemetryTimeWindow } from './telemetry-time-window';
 import { CentralLoggerService } from '../../../common/logger/central-logger.service';
+import type { TenantScope } from '../../auth/auth.types';
 
 // ============= TYPES & INTERFACES =============
 
@@ -91,12 +92,18 @@ export class MetricsService {
      * Used by the detail page to display charts and tables
      */
  async getMetricDetail(
+    scope: TenantScope,
     serviceName: string,
     metricName: string,
     limit: number = 1000,
     window: TelemetryTimeWindow = {},
 ): Promise<MetricDetailResponse> {
     const timeWindow = metricTimeWindow(window);
+    const isolation = this.clickhouseService.buildTenantFilter(scope, [
+        'ServiceName = {serviceName:String}',
+        'MetricName = {metricName:String}',
+        ...(timeWindow.sql ? [timeWindow.sql] : []),
+    ]);
     // ── Table-specific queries, matching each real schema ─────────────────────
     const queries = {
         // Gauge table: Value only
@@ -111,9 +118,7 @@ export class MetricsService {
                 [] AS BucketCounts, [] AS ExplicitBounds,
                 0 AS AggregationTemporality
             FROM otel_metrics_gauge
-            WHERE ServiceName = {serviceName:String}
-              AND MetricName = {metricName:String}
-              ${timeWindow.sql ? `AND ${timeWindow.sql}` : ''}
+            ${isolation.where}
             ORDER BY TimeUnix DESC
             LIMIT {limit:UInt32}
         `,
@@ -129,9 +134,7 @@ export class MetricsService {
                 [] AS BucketCounts, [] AS ExplicitBounds,
                 AggregationTemporality
             FROM otel_metrics_sum
-            WHERE ServiceName = {serviceName:String}
-              AND MetricName = {metricName:String}
-              ${timeWindow.sql ? `AND ${timeWindow.sql}` : ''}
+            ${isolation.where}
             ORDER BY TimeUnix DESC
             LIMIT {limit:UInt32}
         `,
@@ -147,9 +150,7 @@ export class MetricsService {
                 BucketCounts, ExplicitBounds,
                 AggregationTemporality
             FROM otel_metrics_histogram
-            WHERE ServiceName = {serviceName:String}
-              AND MetricName = {metricName:String}
-              ${timeWindow.sql ? `AND ${timeWindow.sql}` : ''}
+            ${isolation.where}
             ORDER BY TimeUnix DESC
             LIMIT {limit:UInt32}
         `,
@@ -176,7 +177,9 @@ export class MetricsService {
 
     const runQuery = async (sql: string, label: string): Promise<RawRow[]> => {
         try {
-            const rows = await this.query<RawRow>(sql, { serviceName, metricName, limit, ...timeWindow.params });
+            const rows = await this.query<RawRow>(scope, sql, {
+                serviceName, metricName, limit, ...timeWindow.params,
+            });
             this.logger.log(`[getMetricDetail:${label}] ${rows.length} rows for ${serviceName}/${metricName}`);
             return rows;
         } catch (cause) {
@@ -255,11 +258,12 @@ export class MetricsService {
      * Calculates percentiles, standard deviation, etc.
      */
     async getMetricStatistics(
+        scope: TenantScope,
         serviceName: string,
         metricName: string,
     ): Promise<MetricStatistics> {
         // First get all records
-        const detail = await this.getMetricDetail(serviceName, metricName, 10000);
+        const detail = await this.getMetricDetail(scope, serviceName, metricName, 10000);
 
         if (detail.records.length === 0) {
             return {
@@ -337,11 +341,14 @@ export class MetricsService {
     /**
      * Get unique metric definitions from all tables - flattened for UI table display
      */
-    async getAllMetricsFlattened(options: TelemetryListOptions & TelemetryTimeWindow = {}) {
+    async getAllMetricsFlattened(
+        scope: TenantScope,
+        options: TelemetryListOptions & TelemetryTimeWindow = {},
+    ) {
         const { limit, offset } = this.normalizeListOptions(options);
         const timeWindow = metricTimeWindow(options);
         const predicates = [options.service ? 'ServiceName = {service:String}' : '', timeWindow.sql].filter(Boolean);
-        const serviceFilter = predicates.length ? `WHERE ${predicates.join(' AND ')}` : '';
+        const isolation = this.clickhouseService.buildTenantFilter(scope, predicates);
         const queryParams: Record<string, unknown> = { limit, offset, ...timeWindow.params };
 
         if (options.service) {
@@ -365,7 +372,7 @@ export class MetricsService {
           ServiceName,
           MetricName
         FROM ${table.table_name}
-        ${serviceFilter}
+        ${isolation.where}
         ORDER BY ServiceName, MetricName
       `;
 
@@ -373,7 +380,7 @@ export class MetricsService {
                 const rows = await this.query<{
                     ServiceName: string;
                     MetricName: string;
-                }>(query, queryParams);
+                }>(scope, query, queryParams);
 
                 rows.forEach((row) => {
                     allMetrics.push({
@@ -406,6 +413,7 @@ export class MetricsService {
      * Get all metrics for a specific service
      */
     async getMetricsByService(
+        scope: TenantScope,
         serviceName: string,
         options: TelemetryListOptions = {},
     ) {
@@ -426,7 +434,7 @@ export class MetricsService {
         ExplicitBounds,
         toString(TimeUnix) AS TimeUnix
       FROM otel_metrics_histogram
-      WHERE ServiceName = {serviceName:String}
+      ${this.clickhouseService.buildTenantFilter(scope, ['ServiceName = {serviceName:String}']).where}
       ORDER BY TimeUnix DESC
       LIMIT {limit:UInt32} OFFSET {offset:UInt32}
     `;
@@ -444,7 +452,7 @@ export class MetricsService {
             BucketCounts: number[];
             ExplicitBounds: number[];
             TimeUnix: string;
-        }>(query, { serviceName, limit, offset });
+        }>(scope, query, { serviceName, limit, offset });
 
         return results.map((row) => this.normalizeMetric(row));
     }
@@ -452,7 +460,7 @@ export class MetricsService {
     /**
      * Get specific metric by name for a service
      */
-    async getMetricByName(serviceName: string, metricName: string) {
+    async getMetricByName(scope: TenantScope, serviceName: string, metricName: string) {
         const query = `
       SELECT
         MetricName,
@@ -468,19 +476,21 @@ export class MetricsService {
         ExplicitBounds,
         toString(TimeUnix) AS TimeUnix
       FROM otel_metrics_histogram
-      WHERE ServiceName = {serviceName:String}
-        AND MetricName = {metricName:String}
+      ${this.clickhouseService.buildTenantFilter(scope, [
+          'ServiceName = {serviceName:String}',
+          'MetricName = {metricName:String}',
+      ]).where}
       ORDER BY TimeUnix DESC
       LIMIT 100
     `;
 
-        return this.query(query, { serviceName, metricName });
+        return this.query(scope, query, { serviceName, metricName });
     }
 
     /**
      * Get metrics aggregated by scope
      */
-    async getMetricsByScope(serviceName: string) {
+    async getMetricsByScope(scope: TenantScope, serviceName: string) {
         const query = `
       SELECT
         ScopeName,
@@ -499,17 +509,18 @@ export class MetricsService {
           groupArray(MetricName)
         ) AS metrics
       FROM otel_metrics_histogram
-      WHERE ServiceName = {serviceName:String}
+      ${this.clickhouseService.buildTenantFilter(scope, ['ServiceName = {serviceName:String}']).where}
       GROUP BY ScopeName, ScopeVersion
     `;
 
-        return this.query(query, { serviceName });
+        return this.query(scope, query, { serviceName });
     }
 
     /**
      * Get HTTP metrics (client and server)
      */
     async getHttpMetrics(
+        scope: TenantScope,
         serviceName: string,
         options: { type?: 'client' | 'server'; limit?: number } = {},
     ) {
@@ -537,21 +548,23 @@ export class MetricsService {
         ExplicitBounds,
         toString(TimeUnix) AS TimeUnix
       FROM otel_metrics_histogram
-      WHERE ServiceName = {serviceName:String}
-        AND (MetricName LIKE 'http.%')
-        ${typeFilter}
+      ${this.clickhouseService.buildTenantFilter(scope, [
+          'ServiceName = {serviceName:String}',
+          "(MetricName LIKE 'http.%')",
+          typeFilter.replace(/^AND\s+/, ''),
+      ]).where}
       ORDER BY TimeUnix DESC
       LIMIT {limit:UInt32}
     `;
 
-        const results = await this.query(query, { serviceName, limit });
+        const results = await this.query(scope, query, { serviceName, limit });
         return results.map((row) => this.normalizeMetric(row));
     }
 
     /**
      * Get garbage collection metrics
      */
-    async getGcMetrics(serviceName: string) {
+    async getGcMetrics(scope: TenantScope, serviceName: string) {
         const query = `
       SELECT
         MetricName,
@@ -568,20 +581,22 @@ export class MetricsService {
         ExplicitBounds,
         toString(TimeUnix) AS TimeUnix
       FROM otel_metrics_histogram
-      WHERE ServiceName = {serviceName:String}
-        AND MetricName LIKE '%gc%'
+      ${this.clickhouseService.buildTenantFilter(scope, [
+          'ServiceName = {serviceName:String}',
+          "MetricName LIKE '%gc%'",
+      ]).where}
       ORDER BY TimeUnix DESC
       LIMIT 100
     `;
 
-        const results = await this.query(query, { serviceName });
+        const results = await this.query(scope, query, { serviceName });
         return results.map((row) => this.normalizeMetric(row));
     }
 
     /**
      * Get memory metrics
      */
-    async getMemoryMetrics(serviceName: string) {
+    async getMemoryMetrics(scope: TenantScope, serviceName: string) {
         const query = `
       SELECT
         MetricName,
@@ -598,20 +613,22 @@ export class MetricsService {
         ExplicitBounds,
         toString(TimeUnix) AS TimeUnix
       FROM otel_metrics_histogram
-      WHERE ServiceName = {serviceName:String}
-        AND (MetricName LIKE '%memory%' OR MetricName LIKE '%heap%')
+      ${this.clickhouseService.buildTenantFilter(scope, [
+          'ServiceName = {serviceName:String}',
+          "(MetricName LIKE '%memory%' OR MetricName LIKE '%heap%')",
+      ]).where}
       ORDER BY TimeUnix DESC
       LIMIT 100
     `;
 
-        const results = await this.query(query, { serviceName });
+        const results = await this.query(scope, query, { serviceName });
         return results.map((row) => this.normalizeMetric(row));
     }
 
     /**
      * Get metric statistics summary for a service
      */
-    async getMetricsStatistics(serviceName: string) {
+    async getMetricsStatistics(scope: TenantScope, serviceName: string) {
         const query = `
       SELECT
         count(DISTINCT MetricName) AS total_metrics,
@@ -621,7 +638,7 @@ export class MetricsService {
         max(TimeUnix) AS latest_timestamp,
         avg(Sum / Count) AS overall_avg_value
       FROM otel_metrics_histogram
-      WHERE ServiceName = {serviceName:String}
+      ${this.clickhouseService.buildTenantFilter(scope, ['ServiceName = {serviceName:String}']).where}
     `;
 
         const [result] = await this.query<{
@@ -631,7 +648,7 @@ export class MetricsService {
             earliest_timestamp: string;
             latest_timestamp: string;
             overall_avg_value: number;
-        }>(query, { serviceName });
+        }>(scope, query, { serviceName });
 
         return result || {};
     }
@@ -639,54 +656,56 @@ export class MetricsService {
     /**
      * Get metric names available for a service
      */
-    async getAvailableMetrics(serviceName: string) {
+    async getAvailableMetrics(scope: TenantScope, serviceName: string) {
         const query = `
       SELECT DISTINCT
         MetricName,
         MetricDescription,
         MetricUnit
       FROM otel_metrics_histogram
-      WHERE ServiceName = {serviceName:String}
+      ${this.clickhouseService.buildTenantFilter(scope, ['ServiceName = {serviceName:String}']).where}
       ORDER BY MetricName
     `;
 
-        return this.query(query, { serviceName });
+        return this.query(scope, query, { serviceName });
     }
 
     /**
      * Get all service names that have metrics
      */
-    async getServiceNames() {
+    async getServiceNames(scope: TenantScope) {
         const query = `
       SELECT DISTINCT ServiceName
       FROM otel_metrics_histogram
+      ${this.clickhouseService.buildTenantFilter(scope).where}
       ORDER BY ServiceName
     `;
 
-        const results = await this.query<{ ServiceName: string }>(query);
+        const results = await this.query<{ ServiceName: string }>(scope, query);
         return results.map((row) => row.ServiceName);
     }
 
     /**
      * Get all metric names globally
      */
-    async getAllMetricNames() {
+    async getAllMetricNames(scope: TenantScope) {
         const query = `
       SELECT DISTINCT
         MetricName,
         MetricDescription,
         MetricUnit
       FROM otel_metrics_histogram
+      ${this.clickhouseService.buildTenantFilter(scope).where}
       ORDER BY MetricName
     `;
 
-        return this.query(query);
+        return this.query(scope, query);
     }
 
     /**
      * Get services with their metric counts
      */
-    async getServicesWithMetricCounts() {
+    async getServicesWithMetricCounts(scope: TenantScope) {
         const query = `
       SELECT
         ServiceName,
@@ -694,6 +713,7 @@ export class MetricsService {
         count() AS total_measurements,
         max(TimeUnix) AS latest_timestamp
       FROM otel_metrics_histogram
+      ${this.clickhouseService.buildTenantFilter(scope).where}
       GROUP BY ServiceName
       ORDER BY ServiceName
     `;
@@ -703,7 +723,7 @@ export class MetricsService {
             metric_count: number;
             total_measurements: number;
             latest_timestamp: string;
-        }>(query);
+        }>(scope, query);
     }
 
     /**
@@ -721,7 +741,7 @@ export class MetricsService {
       ORDER BY name
     `;
 
-        return this.query<{
+        return this.systemQuery<{
             table_name: string;
             engine: string;
             total_bytes: number;
@@ -744,7 +764,7 @@ export class MetricsService {
       ORDER BY name
     `;
 
-        return this.query<{
+        return this.systemQuery<{
             table_name: string;
             engine: string;
             total_bytes: number;
@@ -755,7 +775,7 @@ export class MetricsService {
     /**
      * Get service names and metric names from all metric tables
      */
-    async getAllMetricsFromTables() {
+    async getAllMetricsFromTables(scope: TenantScope) {
         // First get all metric table names
         const tables = await this.getMetricTables();
 
@@ -768,6 +788,7 @@ export class MetricsService {
           ServiceName,
           MetricName
         FROM ${table.table_name}
+        ${this.clickhouseService.buildTenantFilter(scope).where}
         ORDER BY ServiceName, MetricName
       `;
 
@@ -775,7 +796,7 @@ export class MetricsService {
                 const rows = await this.query<{
                     ServiceName: string;
                     MetricName: string;
-                }>(query);
+                }>(scope, query);
 
                 result.push({
                     table: table.table_name,
@@ -799,7 +820,7 @@ export class MetricsService {
     /**
      * Get service/metric pairs from specific metric table
      */
-    async getMetricsFromTable(tableName: string) {
+    async getMetricsFromTable(scope: TenantScope, tableName: string) {
         // Validate table name to prevent SQL injection
         if (!/^[a-z_0-9]*metric[a-z_0-9]*$/i.test(tableName)) {
             throw new Error('Invalid table name');
@@ -810,19 +831,21 @@ export class MetricsService {
         ServiceName,
         MetricName
       FROM ${tableName}
+      ${this.clickhouseService.buildTenantFilter(scope).where}
       ORDER BY ServiceName, MetricName
     `;
 
         return this.query<{
             ServiceName: string;
             MetricName: string;
-        }>(query);
+        }>(scope, query);
     }
 
     /**
      * Compare metrics between two time periods
      */
     async compareMetrics(
+        scope: TenantScope,
         serviceName: string,
         metricName: string,
         timePeriod: 'hour' | 'day',
@@ -841,23 +864,33 @@ export class MetricsService {
         (Sum / Count) AS Average,
         toString(TimeUnix) AS TimeUnix
       FROM otel_metrics_histogram
-      WHERE ServiceName = {serviceName:String}
-        AND MetricName = {metricName:String}
-        AND TimeUnix > now() - ${intervalFunc}(2)
+      ${this.clickhouseService.buildTenantFilter(scope, [
+          'ServiceName = {serviceName:String}',
+          'MetricName = {metricName:String}',
+          `TimeUnix > now() - ${intervalFunc}(2)`,
+      ]).where}
       ORDER BY TimeUnix DESC
     `;
 
-        const results = await this.query(query, { serviceName, metricName });
+        const results = await this.query(scope, query, { serviceName, metricName });
         return this.groupByTimePeriod(results);
     }
 
     // ============= PRIVATE HELPER METHODS =============
 
     private async query<T = Record<string, unknown>>(
+        scope: TenantScope,
         query: string,
         queryParams: Record<string, unknown> = {},
     ): Promise<T[]> {
-        return this.clickhouseService.executeQuery<T>(query, queryParams);
+        return this.clickhouseService.executeTenantQuery<T>(scope, query, queryParams);
+    }
+
+    private async systemQuery<T = Record<string, unknown>>(
+        query: string,
+        queryParams: Record<string, unknown> = {},
+    ): Promise<T[]> {
+        return this.clickhouseService.executeSystemQuery<T>(query, queryParams);
     }
 
     private normalizeMetric(row: any): MetricSummary {

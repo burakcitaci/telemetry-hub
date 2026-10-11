@@ -615,6 +615,9 @@ export type MonitorStatus = 'OK' | 'Alert' | 'Warn' | 'No Data' | 'neutral';
 export type NotificationTarget = 'email' | 'slack' | 'webhook' | 'pagerduty';
 
 export interface MonitorView {
+  teamId?: string;
+  service?: string;
+  env?: string;
   id: string;
   name: string;
   type: MonitorType;

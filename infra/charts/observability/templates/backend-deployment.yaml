@@ -6,7 +6,14 @@ metadata:
   labels:
     {{- include "observability.resourceLabels" (dict "root" . "name" .Values.backend.name "component" "api") | nindent 4 }}
 spec:
+  {{- if ne (int .Values.backend.replicaCount) 1 }}
+  {{- fail "SQLite control-plane storage requires backend.replicaCount=1" }}
+  {{- end }}
   replicas: {{ .Values.backend.replicaCount }}
+  {{- if .Values.backend.persistence.enabled }}
+  strategy:
+    type: Recreate
+  {{- end }}
   # Deployment selectors are immutable; keep the original selector for upgrades.
   selector:
     matchLabels:
@@ -38,6 +45,8 @@ spec:
               containerPort: {{ .Values.backend.service.port }}
               protocol: TCP
           env:
+            - name: AUTH_DB_PATH
+              value: /var/lib/telemetry-hub/platform.sqlite
             {{- range .Values.backend.env }}
             - name: {{ .name }}
               value: {{ .value | quote }}
@@ -46,6 +55,14 @@ spec:
               value: {{ .Values.backend.otelServiceName | default "backend-service" | quote }}
             - name: DEPLOY_ENV
               value: {{ .Values.backend.deploymentEnvironment | default "production" | quote }}
+          {{- if .Values.backend.authSecretName }}
+          envFrom:
+            - secretRef:
+                name: {{ .Values.backend.authSecretName }}
+          {{- end }}
+          volumeMounts:
+            - name: platform-store
+              mountPath: /var/lib/telemetry-hub
           {{- with .Values.backend.livenessProbe }}
           livenessProbe:
             {{- toYaml . | nindent 12 }}
@@ -62,6 +79,14 @@ spec:
       affinity:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      volumes:
+        - name: platform-store
+          {{- if .Values.backend.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ .Values.backend.name }}-platform-store
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
       {{- with .Values.backend.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

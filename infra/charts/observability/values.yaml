@@ -1,6 +1,11 @@
 backend:
   name: backend
   replicaCount: 1
+  authSecretName: backend-auth
+  persistence:
+    enabled: true
+    size: 1Gi
+    storageClassName: ""
   otelServiceName: "backend-service"
   deploymentEnvironment: "production"
 

@@ -2,7 +2,7 @@ import { api, unwrap } from '@/shared/api/client';
 import type { ApiEnvelope } from '@/shared/types/telemetry';
 import type { ServiceMetrics, ServiceSummary } from '@/features/services/types';
 
-export async function getServices(env = 'production'): Promise<ServiceSummary[]> {
+export async function getServices(env = 'all'): Promise<ServiceSummary[]> {
   const response = await api.get<
     ApiEnvelope<ServiceSummary[]> | ServiceSummary[]
   >('/services', { params: { env } });

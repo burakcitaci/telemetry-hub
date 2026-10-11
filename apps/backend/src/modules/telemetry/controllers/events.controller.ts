@@ -1,21 +1,27 @@
-import { Controller, Get, Res } from "@nestjs/common";
+import { Controller, Get, Res, UseGuards } from "@nestjs/common";
 import type { Response } from "express";
 import { CentralLoggerService } from "../../../common/logger/central-logger.service";
 import { ClickhouseService } from "../services/clickhouse.service";
+import { TenantJwtGuard } from '../../auth/tenant-jwt.guard';
+import { Tenant } from '../../auth/tenant-request.decorator';
+import type { TenantScope } from '../../auth/auth.types';
+import { PlatformStore } from '../../auth/platform-store.service';
 
 const POLL_INTERVAL_MS = 3_000;
 const HEARTBEAT_INTERVAL_MS = 15_000;
 const COLLECTOR_GRACE_MS = 15_000;
 
 @Controller("api/events")
+@UseGuards(TenantJwtGuard)
 export class EventsController {
   constructor(
     private readonly clickhouse: ClickhouseService,
     private readonly logger: CentralLoggerService,
+    private readonly identities: PlatformStore,
   ) {}
 
   @Get("stream")
-  stream(@Res() res: Response): void {
+  stream(@Tenant() tenant: TenantScope, @Res() res: Response): void {
     const connectionStartTime = Date.now();
     let cursor = new Date();
     let closed = false;
@@ -60,6 +66,11 @@ export class EventsController {
     };
 
     const poll = async () => {
+      if (!this.identities.isSessionActive(tenant)) {
+        closed = true;
+        res.end();
+        return;
+      }
       const nextCursor = new Date();
       const queryFrom = new Date(cursor.getTime() - COLLECTOR_GRACE_MS);
 
@@ -67,15 +78,18 @@ export class EventsController {
         // ClickHouse reduces each grace window to a constant-size signal, so
         // bursts cannot create unbounded application memory or query loops.
         const [nextTraceSignal, nextLogSignal] = await Promise.all([
-          this.clickhouse.getRecentTraceSignal({
+          this.clickhouse.getRecentTraceSignal(tenant, {
             since: queryFrom,
             until: nextCursor,
           }),
-          this.clickhouse.getRecentLogSignal({
+          this.clickhouse.getRecentLogSignal(tenant, {
             since: queryFrom,
             until: nextCursor,
           }),
         ]);
+        if (!this.identities.isSessionActive(tenant)) {
+          closed = true; res.end(); return;
+        }
         const nextTraceKey = this.signalKey(nextTraceSignal);
         const nextLogKey = this.signalKey(nextLogSignal);
         const tracesChanged =

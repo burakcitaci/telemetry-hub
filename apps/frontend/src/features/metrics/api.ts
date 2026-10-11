@@ -68,15 +68,10 @@ export async function exportMetricAsCSV(
     format: 'csv',
   });
 
-  const response = await fetch(`/api/metrics/detail?${params}`, {
-    method: 'GET',
+  const response = await api.get<Blob>(`/metrics/detail?${params}`, {
+    responseType: 'blob',
   });
-
-  if (!response.ok) {
-    throw new Error(`Failed to export metric data: ${response.status}`);
-  }
-
-  return response.blob();
+  return response.data;
 }
 
 /**
@@ -103,16 +98,8 @@ export async function getMetricStatistics(
     metric: metricName,
   });
 
-  const response = await fetch(`/api/metrics/statistics?${params}`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error(`Failed to fetch metric statistics: ${response.status}`);
-  }
-
-  return response.json() as Promise<MetricStatistics>;
+  const response = await api.get<ApiEnvelope<MetricStatistics> | MetricStatistics>(
+    `/metrics/statistics?${params}`,
+  );
+  return unwrap(response.data);
 }

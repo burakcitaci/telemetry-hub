@@ -38,7 +38,7 @@ function normalizeTrace(
 export async function getTraces(
   limit: number,
   service?: string,
-  env = "production",
+  env = "all",
 ): Promise<TraceSummary[]> {
   const response = await api.get<ApiEnvelope<TraceSummary[]> | TraceSummary[]>(
     "/traces",
@@ -52,7 +52,7 @@ export async function getTraces(
 
 export async function getTraceById(
   traceId: string,
-  env = "production",
+  env = "all",
 ): Promise<TraceSpan[]> {
   const response = await api.get<ApiEnvelope<TraceSpan[]> | TraceSpan[]>(
     "/traces/detail",

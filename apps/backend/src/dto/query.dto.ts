@@ -4,10 +4,10 @@ import { IsNotEmpty, IsOptional, IsString, MaxLength, Matches } from "class-vali
 import { PaginationDto } from "./pagination.dto";
 
 export class TelemetryQueryDto extends PaginationDto {
-  @ApiPropertyOptional({ default: 'production', description: 'Deployment environment' })
+  @ApiPropertyOptional({ default: 'all', description: 'Deployment environment, or all' })
   @IsString()
   @Matches(/^[a-zA-Z0-9][a-zA-Z0-9._-]{0,63}$/)
-  env: string = 'production';
+  env: string = 'all';
 
   @ApiPropertyOptional({
     description: "Only return telemetry emitted by this service",

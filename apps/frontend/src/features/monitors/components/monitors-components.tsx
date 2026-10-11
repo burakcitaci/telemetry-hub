@@ -1,5 +1,7 @@
 import { StatusBadge as TelemetryStatusBadge } from '@/components/shared/telemetry-primitives';
 import React, { useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { useAuth } from '@/features/auth/auth-context';
 import {
   Activity,
   Bell,
@@ -30,7 +32,6 @@ import {
   NotificationTarget,
   MonitorView,
   MonitorSeries,
-  synthesizeSeries,
   MonitorEvent,
   statusBg,
   statusLabel,
@@ -453,14 +454,15 @@ export const MonitorRow: React.FC<{
 
 export const MonitorDetail: React.FC<{
   monitor: MonitorView;
-  datadogMonitor: DatadogMonitor;
+  datadogMonitor?: DatadogMonitor;
   events: MonitorEvent[];
   onClose: () => void;
   onToggleMute: (id: string) => void;
-}> = ({ monitor, datadogMonitor, events, onToggleMute }) => {
-  const series = useMemo(
-    () => synthesizeSeries(datadogMonitor),
-    [datadogMonitor],
+  onEdit: () => void;
+}> = ({ monitor, events, onToggleMute, onEdit }) => {
+  const series = useMemo<MonitorSeries>(
+    () => ({ points: [], threshold: monitor.threshold, warnThreshold: monitor.warnThreshold, unit: undefined }),
+    [monitor.threshold, monitor.warnThreshold],
   );
   const lastPoint = series.points
     .filter((p) => Number.isFinite(p.v))
@@ -490,6 +492,7 @@ export const MonitorDetail: React.FC<{
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-1">
+          <Button variant="outline" size="sm" onClick={onEdit}>Bearbeiten</Button>
           <Button
             variant="outline"
             size="sm"
@@ -572,9 +575,7 @@ export const MonitorDetail: React.FC<{
           <CardContent className="pt-0">
             <MonitorGraph series={series} status={monitor.status} />
             <p className="mt-2 text-[10px] text-muted-foreground">
-              Dummy series · 24h @ 5m resolution ·{' '}
-              {/* TODO: replace with GET /api/v1/query or the Snapshot API */}
-              replace with <code>GET /api/v1/query</code> once wired up.
+              Keine Evaluierungsdaten. Monitor-Konfiguration ist gespeichert; eine Alert-Evaluierung ist noch nicht angebunden.
             </p>
           </CardContent>
         </Card>
@@ -628,10 +629,17 @@ export const MonitorDetail: React.FC<{
 };
 
 export const MonitorForm: React.FC<{
+  pending?: boolean;
+  error?: string | null;
   initial?: MonitorView | null;
   onCancel: () => void;
   onSave: (draft: Partial<MonitorView>) => void;
-}> = ({ initial, onCancel, onSave }) => {
+}> = ({ initial, onCancel, onSave, pending, error }) => {
+  const { session } = useAuth();
+  const [params] = useSearchParams();
+  const [teamId, setTeamId] = useState(initial?.teamId ?? params.get('team') ?? '');
+  const [service, setService] = useState(initial?.service ?? params.get('globalService') ?? '');
+  const [env, setEnv] = useState(initial?.env ?? params.get('env') ?? '');
   const [type, setType] = useState<MonitorType>(initial?.type ?? 'metric');
   const [name, setName] = useState(initial?.name ?? '');
   const [query, setQuery] = useState(initial?.query ?? '');
@@ -683,9 +691,10 @@ export const MonitorForm: React.FC<{
             Cancel
           </Button>
           <Button
-            disabled={!canSave}
+            disabled={!canSave || pending}
             onClick={() =>
               onSave({
+                teamId, service, env: env === 'all' ? '' : env,
                 type,
                 name: name.trim(),
                 query: query.trim(),
@@ -712,6 +721,12 @@ export const MonitorForm: React.FC<{
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {/* Type + name */}
+        {error && <p role="alert" className="text-xs text-destructive">{error}</p>}
+        <Card><CardContent className="grid gap-3 pt-4 sm:grid-cols-3">
+          <label className="space-y-1 text-xs"><span className="text-muted-foreground">Team</span><select aria-label="Monitor team" value={teamId} onChange={event => setTeamId(event.target.value)} className="h-8 w-full rounded-sm border border-border bg-background px-2"><option value="">Alle / ohne Team</option>{session?.teams.map(team => <option key={team} value={team}>{team}</option>)}</select></label>
+          <label className="space-y-1 text-xs"><span className="text-muted-foreground">Service (optional)</span><Input value={service} onChange={event => setService(event.target.value)} maxLength={255} placeholder="Alle Services" className="h-8 text-xs" /></label>
+          <label className="space-y-1 text-xs"><span className="text-muted-foreground">Environment (optional)</span><Input value={env} onChange={event => setEnv(event.target.value)} maxLength={64} placeholder="Alle Umgebungen" className="h-8 text-xs" /></label>
+        </CardContent></Card>
         <Card>
           <CardContent className="pt-4 space-y-3">
             <div className="grid grid-cols-1 gap-3 md:grid-cols-[160px_1fr]">

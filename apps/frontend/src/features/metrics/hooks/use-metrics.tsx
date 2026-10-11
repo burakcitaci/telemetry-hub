@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import type { ColumnDef } from '@tanstack/react-table';
 import { DataTableColumnHeader } from '@/shared/components/data-table';
 import { useTelemetryQuery } from '@/shared/hooks/use-telemetry-query';
+import { api } from '@/shared/api/client';
 import {
   buildFacet,
   FacetSelection,
@@ -10,7 +11,6 @@ import {
   matchesFacets,
 } from '@/shared/lib/facet';
 import {
-  API_BASE,
   DEFAULT_LIMIT,
   SIDEBAR_STORAGE_KEY,
   colorFor,
@@ -120,9 +120,7 @@ export function useMetrics() {
           offset: String(offset),
           env,
         });
-        const res = await fetch(`${API_BASE}/api/metrics?${params}`);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const raw = await res.json();
+        const { data: raw } = await api.get(`/metrics?${params}`);
         if (cancelled) return;
         const list: ApiMetric[] =
           unwrap<{ metrics: ApiMetric[] }>(raw)?.metrics ?? [];
@@ -192,9 +190,7 @@ export function useMetrics() {
           from,
           to,
         });
-        const res = await fetch(`${API_BASE}/api/metrics/detail?${params}`);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const raw = await res.json();
+        const { data: raw } = await api.get(`/metrics/detail?${params}`);
         const payload = unwrap<{ records: RawRecord[] }>(raw);
         const list = payload?.records ?? [];
         if (cancelled) return;

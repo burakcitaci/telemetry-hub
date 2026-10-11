@@ -18,7 +18,7 @@ export function useTelemetryViewParams({
   facetParam,
 }: TelemetryViewParamsOptions = {}) {
   const [searchParams, setSearchParams] = useSearchParams();
-  const env = searchParams.get('env')?.trim() || 'production';
+  const env = searchParams.get('env')?.trim() || 'all';
   useEffect(() => {
     if (searchParams.get('env') === env) return;
     setSearchParams((current) => {

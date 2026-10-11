@@ -9,6 +9,9 @@ import {
   LoggerProvider,
 } from '@opentelemetry/sdk-logs';
 import { PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics';
+import type { ResourceMetrics } from '@opentelemetry/sdk-metrics';
+import { ExportResultCode, type ExportResult } from '@opentelemetry/core';
+import { deploymentTenantAttributes, partitionTenantMetrics } from './common/telemetry/tenant-metrics';
 import {
   ATTR_SERVICE_NAME,
   ATTR_SERVICE_VERSION,
@@ -31,11 +34,24 @@ const resource = resourceFromAttributes({
   [ATTR_SERVICE_VERSION]: version,
   [ATTR_DEPLOYMENT_ENVIRONMENT_NAME]: process.env.DEPLOY_ENV || 'production',
   'host.name': os.hostname(),
+  ...deploymentTenantAttributes(process.env),
 });
 
 // ── Metrics ──────────────────────────────────────────────────────────────────
+class TenantMetricExporter extends OTLPMetricExporter {
+  override export(input: ResourceMetrics, callback: (result: ExportResult) => void): void {
+    const batches = partitionTenantMetrics(input);
+    if (!batches.length) return callback({ code: ExportResultCode.SUCCESS });
+    Promise.all(batches.map((batch) => new Promise<ExportResult>((resolve) => {
+      super.export(batch, resolve);
+    }))).then((results) => callback(
+      results.find((result) => result.code !== ExportResultCode.SUCCESS) ?? results[0],
+    )).catch((error) => callback({ code: ExportResultCode.FAILED, error }));
+  }
+}
+
 const metricReader = new PeriodicExportingMetricReader({
-  exporter: new OTLPMetricExporter({
+  exporter: new TenantMetricExporter({
     url: otlpMetricsUrl,
     headers: { 'Content-Type': 'application/json' },
     timeoutMillis: 10000,
@@ -101,3 +117,6 @@ export function shutdownTelemetry(): Promise<void> {
 
 export default sdk;
 export { loggerProvider };
+export function flushMetrics(): Promise<void> {
+  return metricReader.forceFlush();
+}

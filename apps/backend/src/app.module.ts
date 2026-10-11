@@ -8,6 +8,7 @@ import { TelemetryModule } from "./modules/telemetry/telemetry.module";
 import { HealthModule } from "./modules/health/health.module";
 import { LoggerModule } from "./common/logger/logger.module";
 import { MetricsModule } from "./modules/telemetry/metrics.module";
+import { AuthModule } from "./modules/auth/auth.module";
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { MetricsModule } from "./modules/telemetry/metrics.module";
       ],
     }),
     LoggerModule,
+    AuthModule,
     TelemetryModule,
     MetricsModule,
     HealthModule,

@@ -1,4 +1,5 @@
 import { FeatureRefreshButton } from '@/shared/components/feature-actions';
+import { useState } from 'react';
 import {
   FeaturePage,
   FeatureHeader,
@@ -16,6 +17,7 @@ import {
   ArrowLeft,
   Bell,
   PanelLeft,
+  Filter,
   Plus,
 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -49,6 +51,8 @@ export function MonitorsView({
   monitors,
   setMonitors,
   loading,
+  saving,
+  refresh,
   error,
   search,
   setSearch,
@@ -76,6 +80,7 @@ export function MonitorsView({
   datadogForOpen,
   detailVisible,
 }: MonitorsViewProps) {
+  const [filtersOpen, setFiltersOpen] = useState(false);
   return (
     <FeaturePage>
       {/* Header */}
@@ -107,13 +112,16 @@ export function MonitorsView({
             <Button
               variant="ghost"
               size="icon"
-              className="shrink-0"
+              className="hidden shrink-0 lg:inline-flex"
               aria-label={sidebarOpen ? 'Hide sidebar' : 'Show sidebar'}
               title={sidebarOpen ? 'Hide sidebar' : 'Show sidebar'}
               onClick={() => setSidebarOpen((v) => !v)}
             >
               <PanelLeft className="h-4 w-4" />
             </Button>{' '}
+            <Button variant="ghost" size="icon" className="shrink-0 lg:hidden" aria-label="Open filters" onClick={() => setFiltersOpen(true)}>
+              <Filter className="h-4 w-4" />
+            </Button>
           </>
         }
         actions={
@@ -133,7 +141,7 @@ export function MonitorsView({
             </Button>
             <FeatureRefreshButton
               loading={loading}
-              onRefresh={() => setMonitors((prev) => [...prev])}
+              onRefresh={refresh}
               label="Refresh monitors"
             />
           </>
@@ -144,6 +152,8 @@ export function MonitorsView({
         {/* Sidebar */}
         <AppFilterSidebar
           title="Filters"
+          mobileOpen={filtersOpen}
+          onMobileOpenChange={setFiltersOpen}
           open={sidebarOpen}
           onOpenChange={setSidebarOpen}
         >
@@ -314,16 +324,20 @@ export function MonitorsView({
 
               {creating ? (
                 <MonitorForm
+                  initial={openMonitor}
+                  pending={saving}
+                  error={error}
                   onCancel={() => setCreating(false)}
                   onSave={handleSave}
                 />
-              ) : openMonitor && datadogForOpen ? (
+              ) : openMonitor ? (
                 <MonitorDetail
                   monitor={openMonitor}
                   datadogMonitor={datadogForOpen}
                   events={events[openMonitor.id] ?? []}
                   onClose={() => setOpenId(null)}
                   onToggleMute={handleToggleMute}
+                  onEdit={() => setCreating(true)}
                 />
               ) : null}
             </SheetContent>

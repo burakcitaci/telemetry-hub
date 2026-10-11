@@ -1,7 +1,9 @@
-import { Activity, ChartArea, FileText, Gauge, Monitor, Server } from 'lucide-react';
+import { Activity, ChartArea, FileText, Gauge, Monitor, Server, Shield } from 'lucide-react';
+import { platformFilterSearch as filterSearch } from '@/shared/lib/platform-filters';
 import { Link, useLocation } from 'react-router-dom';
 import { ModeToggle } from '@/app/components/mode-toggle';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/features/auth/auth-context';
 import {
   Sidebar,
   SidebarContent,
@@ -19,7 +21,7 @@ import {
 } from '@/components/ui/sidebar';
 
 const navItems = [
-  { path: '/', label: 'Services', description: 'Service health', icon: Server },
+  { path: '/services', label: 'Services', description: 'Service health', icon: Server },
   { path: '/metrics', label: 'Metrics', description: 'Collected metrics', icon: ChartArea },
   { path: '/traces', label: 'Traces', description: 'Distributed requests', icon: Activity },
   { path: '/logs', label: 'Logs', description: 'Application events', icon: FileText },
@@ -29,6 +31,8 @@ const navItems = [
 export function AppSidebar() {
   const location = useLocation();
   const { isMobile, setOpenMobile } = useSidebar();
+  const { session } = useAuth();
+  const orgPath = `/org/${session?.tenantSlug}`;
   const closeMobileSidebar = () => {
     if (isMobile) setOpenMobile(false);
   };
@@ -39,7 +43,7 @@ export function AppSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild tooltip="Telemetry Hub" className="h-10 px-1.5 text-xs">
-              <Link to="/" onClick={closeMobileSidebar} aria-label="Telemetry Hub traces">
+              <Link to={{ pathname: `${orgPath}/metrics`, search: filterSearch(location.search) }} onClick={closeMobileSidebar} aria-label="Telemetry Hub metrics">
                 <span className="flex aspect-square size-7 items-center justify-center rounded-md bg-purple-600 text-white">
                   <Activity className="size-4" />
                 </span>
@@ -58,14 +62,15 @@ export function AppSidebar() {
           <SidebarGroupLabel className="h-7 px-1.5 text-[12px] uppercase tracking-wide">Explorer</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {navItems.map((item) => {
+              {[...navItems, ...(session?.role === 'admin' ? [{ path: '/admin', label: 'Administration', description: 'Organization settings', icon: Shield }] : [])].map((item) => {
                 const Icon = item.icon;
-                const active = location.pathname === item.path;
+                const path = `${orgPath}${item.path}`;
+                const active = location.pathname === path;
                 return (
                   <SidebarMenuItem key={item.path}>
                     <SidebarMenuButton asChild size="sm" isActive={active} tooltip={item.label}>
                       <Link
-                        to={{ pathname: item.path, search: `?env=${encodeURIComponent(new URLSearchParams(location.search).get('env') || 'production')}` }}
+                        to={{ pathname: path, search: filterSearch(location.search) }}
                         onClick={closeMobileSidebar}
                         aria-current={active ? 'page' : undefined}
                       >
@@ -96,11 +101,13 @@ export function AppSidebar() {
 
 export function MobileAppSidebar() {
   const location = useLocation();
+  const { session } = useAuth();
+  const orgPath = `/org/${session?.tenantSlug}`;
 
   return (
     <aside className="flex h-dvh w-12 shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground md:hidden">
       <Link
-        to="/"
+        to={{ pathname: `${orgPath}/metrics`, search: filterSearch(location.search) }}
         className="flex h-12 items-center justify-center border-b border-sidebar-border"
         aria-label="Telemetry Hub traces"
         title="Telemetry Hub"
@@ -111,13 +118,14 @@ export function MobileAppSidebar() {
       </Link>
 
       <nav className="flex flex-1 flex-col items-center gap-1 py-2" aria-label="Primary navigation">
-        {navItems.map((item) => {
+        {[...navItems, ...(session?.role === 'admin' ? [{ path: '/admin', label: 'Administration', description: 'Organization settings', icon: Shield }] : [])].map((item) => {
           const Icon = item.icon;
-          const active = location.pathname === item.path;
+          const path = `${orgPath}${item.path}`;
+          const active = location.pathname === path;
           return (
             <Link
               key={item.path}
-              to={{ pathname: item.path, search: `?env=${encodeURIComponent(new URLSearchParams(location.search).get('env') || 'production')}` }}
+              to={{ pathname: path, search: filterSearch(location.search) }}
               className={cn(
                 'flex size-9 items-center justify-center rounded-md text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
                 active && 'bg-sidebar-accent text-sidebar-accent-foreground',

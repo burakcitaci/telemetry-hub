@@ -1,4 +1,10 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, UseGuards } from '@nestjs/common';
+import { TenantJwtGuard } from '../../auth/tenant-jwt.guard';
+import { Tenant } from '../../auth/tenant-request.decorator';
+import type { TenantScope } from '../../auth/auth.types';
+import { TenantTelemetryService } from '../services/tenant-telemetry.service';
+import { tenantAttributes } from '../../../common/telemetry/tenant-metrics';
+import { flushMetrics } from '../../../tracing';
 import { CentralLoggerService } from '../../../common/logger/central-logger.service';
 import { DataService } from '../services/data.service';
 import { trace, context, metrics, SpanStatusCode } from '@opentelemetry/api';
@@ -24,14 +30,16 @@ meter.createObservableGauge('memory.usage', {
 });
 
 @Controller('api')
+@UseGuards(TenantJwtGuard)
 export class DataController {
   constructor(
     private readonly dataService: DataService,
     private readonly logger: CentralLoggerService,
+    private readonly tenantTelemetry: TenantTelemetryService,
   ) { }
 
   @Get('data')
-  async getData() {
+  async getData(@Tenant() tenant: TenantScope) {
     const tracer = trace.getTracer(process.env.BACKEND_SERVICE_NAME);
     const span = tracer.startSpan('getData');
 
@@ -44,6 +52,7 @@ export class DataController {
       return await context.with(activeContext, async () => {
         const data = await this.dataService.fetchData();
         const processed = await this.dataService.processData(data);
+        await this.tenantTelemetry.generate(tenant);
 
         span.addEvent('Data processed successfully', {
           recordCount: processed.items.length,
@@ -76,7 +85,7 @@ export class DataController {
   }
 
   @Get('data/metrics')
-  async getMetrics() {
+  async getMetrics(@Tenant() tenant: TenantScope) {
     // Simulate a bit of work so the histogram records varying values
     const started = Date.now();
     const jitter = Math.random() * 200; // 0..200ms
@@ -86,8 +95,10 @@ export class DataController {
     const failed = Math.random() < 0.05; // 5% error rate
     const status = failed ? 500 : 200;
 
-    requestCounter.add(1, { method: 'GET', status: String(status) });
-    responseTime.record(durationMs, { method: 'GET' });
+    const attributes = { ...tenantAttributes(tenant), method: 'GET', status: String(status) };
+    requestCounter.add(1, attributes);
+    responseTime.record(durationMs, attributes);
+    await flushMetrics();
 
     return {
       ok: !failed,

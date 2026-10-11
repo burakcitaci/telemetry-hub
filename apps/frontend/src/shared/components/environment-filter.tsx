@@ -7,7 +7,7 @@ import { useEnvironments, type EnvironmentSource } from '@/shared/hooks/use-envi
 export function EnvironmentFilter({ source }: { source: EnvironmentSource }) {
   const id = useId();
   const [params, setParams] = useSearchParams();
-  const env = params.get('env')?.trim() || 'production';
+  const env = params.get('env')?.trim() || 'all';
   const { values, loading, error, retry } = useEnvironments(source);
   const options = values.filter((value) => /^[a-zA-Z0-9][a-zA-Z0-9._-]{0,63}$/.test(value));
   const setEnv = (value: string) => setParams((current) => {
@@ -20,8 +20,9 @@ export function EnvironmentFilter({ source }: { source: EnvironmentSource }) {
       <Select value={env} onValueChange={setEnv} disabled={loading || error}>
         <SelectTrigger id={id} className="h-8 w-full text-xs"><SelectValue /></SelectTrigger>
         <SelectContent>
-          {!options.includes(env) && <SelectItem value={env}>{env} (not found)</SelectItem>}
-          {options.map((value) => <SelectItem key={value} value={value}>env:{value}</SelectItem>)}
+          <SelectItem value="all">Alle Umgebungen</SelectItem>
+          {env !== 'all' && !options.includes(env) && <SelectItem value={env}>{env} (not found)</SelectItem>}
+          {options.filter(value => value !== 'all').map((value) => <SelectItem key={value} value={value}>env:{value}</SelectItem>)}
         </SelectContent>
       </Select>
       {loading && <p role="status" className="text-xs text-muted-foreground">Loading environments…</p>}

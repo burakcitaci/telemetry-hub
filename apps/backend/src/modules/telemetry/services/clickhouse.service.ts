@@ -5,15 +5,29 @@ import {
   type ClickHouseClient,
   type ClickHouseSettings,
 } from '@clickhouse/client';
-import { Injectable, OnModuleDestroy, OnModuleInit, ServiceUnavailableException } from '@nestjs/common';
+import {
+  Injectable,
+  OnModuleDestroy,
+  OnModuleInit,
+  ServiceUnavailableException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { telemetryTimeWindow } from './telemetry-time-window';
 import { telemetryEnvironment } from './telemetry-environment';
 import type { ClickhouseConfig } from '../../../config/clickhouse.config';
 import { CentralLoggerService } from '../../../common/logger/central-logger.service';
+import type { TenantScope } from '../../auth/auth.types';
 
 const DEFAULT_LIMIT = 100;
 const MAX_LIMIT = 500;
+const TENANT_TABLES = [
+  'otel_traces',
+  'otel_logs',
+  'otel_metrics_gauge',
+  'otel_metrics_sum',
+  'otel_metrics_histogram',
+] as const;
 const LIST_QUERY_SETTINGS: ClickHouseSettings = {
   max_rows_to_read: '200000',
   max_bytes_to_read: String(64 * 1024 * 1024),
@@ -56,10 +70,17 @@ export interface TelemetryChangeSignal {
   fingerprint: string;
 }
 
+export interface TenantQueryFilter {
+  predicate: string;
+  where: string;
+  params: Record<string, string>;
+}
+
 @Injectable()
 export class ClickhouseService implements OnModuleInit, OnModuleDestroy {
   private client!: ClickHouseClient;
   private database = 'default';
+  private tenantSchemaReady?: Promise<void>;
 
   constructor(
     private readonly logger: CentralLoggerService,
@@ -104,7 +125,13 @@ export class ClickhouseService implements OnModuleInit, OnModuleDestroy {
     }
   }
 
-  async getEnvironments(source: 'metrics' | 'logs' | 'traces'): Promise<string[]> {
+  async getEnvironments(
+    scope: TenantScope,
+    source: 'metrics' | 'logs' | 'traces',
+  ): Promise<string[]> {
+    const isolation = this.buildTenantFilter(scope, [
+      "ResourceAttributes['deployment.environment.name'] != ''",
+    ]);
     const tables = {
       metrics: ['otel_metrics_gauge', 'otel_metrics_sum', 'otel_metrics_histogram'],
       logs: ['otel_logs'],
@@ -112,12 +139,13 @@ export class ClickhouseService implements OnModuleInit, OnModuleDestroy {
     }[source];
     const branches = tables.map((table) => `
       SELECT DISTINCT ResourceAttributes['deployment.environment.name'] AS environment
-      FROM ${table} WHERE ResourceAttributes['deployment.environment.name'] != ''
+      FROM ${table} ${isolation.where}
     `);
     try {
-      const rows = await this.query<{ environment: string }>(
+      const rows = await this.executeTenantQuery<{ environment: string }>(
+        scope,
         `SELECT DISTINCT environment FROM (${branches.join(' UNION ALL ')}) ORDER BY environment`,
-        {}, ENVIRONMENT_QUERY_SETTINGS,
+        isolation.params, ENVIRONMENT_QUERY_SETTINGS,
       );
       return rows.map((row) => row.environment);
     } catch (cause) {
@@ -128,13 +156,16 @@ export class ClickhouseService implements OnModuleInit, OnModuleDestroy {
     }
   }
 
-  async getTraces(options: TelemetryListOptions = {}) {
+  async getTraces(scope: TenantScope, options: TelemetryListOptions = {}) {
     const { limit, offset } = this.normalizeListOptions(options);
     const environment = telemetryEnvironment(options.env);
     const serviceFilter = options.service
       ? 'HAVING countIf(ServiceName = {service:String}) > 0'
       : '';
-    const queryParams: Record<string, unknown> = { limit, offset, ...environment.params };
+    const isolation = this.buildTenantFilter(scope, environment.sql ? [environment.sql] : []);
+    const queryParams: Record<string, unknown> = {
+      limit, offset, ...environment.params, ...isolation.params,
+    };
 
     if (options.service) {
       queryParams.service = options.service;
@@ -170,7 +201,7 @@ export class ClickhouseService implements OnModuleInit, OnModuleDestroy {
           count() AS SpanCount,
           uniqExact(ServiceName) AS ServiceCount
         FROM otel_traces
-        ${environment.sql ? `WHERE ${environment.sql}` : ''}
+        ${isolation.where}
         GROUP BY TraceId
         ${serviceFilter}
       )
@@ -178,11 +209,15 @@ export class ClickhouseService implements OnModuleInit, OnModuleDestroy {
       LIMIT {limit:UInt32} OFFSET {offset:UInt32}
     `;
 
-    return this.query(query, queryParams, LIST_QUERY_SETTINGS);
+    return this.executeTenantQuery(scope, query, queryParams, LIST_QUERY_SETTINGS);
   }
 
-  async getTraceById(traceId: string, env?: string) {
+  async getTraceById(scope: TenantScope, traceId: string, env?: string) {
     const environment = telemetryEnvironment(env);
+    const isolation = this.buildTenantFilter(scope, [
+      'TraceId = {traceId:String}',
+      ...(environment.sql ? [environment.sql] : []),
+    ]);
     const query = `
       SELECT
         TraceId,
@@ -198,15 +233,16 @@ export class ClickhouseService implements OnModuleInit, OnModuleDestroy {
         ResourceAttributes,
         SpanAttributes
       FROM otel_traces
-      WHERE TraceId = {traceId:String}
-        ${environment.sql ? `AND ${environment.sql}` : ''}
+      ${isolation.where}
       ORDER BY Timestamp ASC
     `;
 
-    return this.query(query, { traceId, ...environment.params });
+    return this.executeTenantQuery(scope, query, {
+      traceId, ...environment.params, ...isolation.params,
+    });
   }
 
-  async getLogs(options: LogsListOptions = {}) {
+  async getLogs(scope: TenantScope, options: LogsListOptions = {}) {
     const { limit, offset } = this.normalizeListOptions(options);
     const timeWindow = telemetryTimeWindow(options, 'Timestamp');
     const environment = telemetryEnvironment(options.env);
@@ -221,7 +257,8 @@ export class ClickhouseService implements OnModuleInit, OnModuleDestroy {
       predicates.push(timeWindow.sql);
       Object.assign(queryParams, timeWindow.params);
     }
-    const where = predicates.length ? `WHERE ${predicates.join(' AND ')}` : '';
+    const isolation = this.buildTenantFilter(scope, predicates);
+    Object.assign(queryParams, isolation.params);
 
     const query = `
       SELECT
@@ -242,30 +279,38 @@ export class ClickhouseService implements OnModuleInit, OnModuleDestroy {
         ScopeAttributes,
         LogAttributes
       FROM otel_logs
-      ${where}
+      ${isolation.where}
       ORDER BY Timestamp DESC
       LIMIT {limit:UInt32} OFFSET {offset:UInt32}
     `;
 
-    return this.query(query, queryParams, LIST_QUERY_SETTINGS);
+    return this.executeTenantQuery(scope, query, queryParams, LIST_QUERY_SETTINGS);
   }
 
-  async getServices(env?: string) {
+  async getServices(scope: TenantScope, env?: string) {
     const environment = telemetryEnvironment(env);
-    return this.query(`
+    const isolation = this.buildTenantFilter(scope, environment.sql ? [environment.sql] : []);
+    return this.executeTenantQuery(scope, `
       SELECT DISTINCT ServiceName
       FROM otel_traces
-      ${environment.sql ? `WHERE ${environment.sql}` : ''}
+      ${isolation.where}
       ORDER BY ServiceName
-    `, environment.params);
+    `, { ...environment.params, ...isolation.params });
   }
 
   async getServiceMetrics(
+    scope: TenantScope,
     service: string,
     window: { from: string; to: string; env?: string },
   ) {
     const timeWindow = telemetryTimeWindow(window, 'Timestamp', true);
     const environment = telemetryEnvironment(window.env);
+    const isolation = this.buildTenantFilter(scope, [
+      'ServiceName = {service:String}',
+      "(ParentSpanId = '' OR lowerUTF8(SpanKind) = 'server')",
+      timeWindow.sql,
+      ...(environment.sql ? [environment.sql] : []),
+    ]);
     const query = `
       SELECT
         count() AS request_count,
@@ -275,19 +320,20 @@ export class ClickhouseService implements OnModuleInit, OnModuleDestroy {
         quantile(0.99)(Duration) AS p99_duration,
         countIf(lowerUTF8(StatusCode) = 'error') AS error_count
       FROM otel_traces
-      WHERE ServiceName = {service:String}
-        AND (ParentSpanId = '' OR lowerUTF8(SpanKind) = 'server')
-        AND ${timeWindow.sql}
-        ${environment.sql ? `AND ${environment.sql}` : ''}
+      ${isolation.where}
     `;
 
-    const result = await this.query(query, { service, ...timeWindow.params, ...environment.params });
+    const result = await this.executeTenantQuery(scope, query, {
+      service, ...timeWindow.params, ...environment.params, ...isolation.params,
+    });
     return result[0] || {};
   }
 
   async getRecentTraceSignal(
+    scope: TenantScope,
     options: TelemetryStreamOptions,
   ): Promise<TelemetryChangeSignal> {
+    const isolation = this.buildTenantFilter(scope);
     const query = `
       WITH [
         '/api/traces',
@@ -309,15 +355,18 @@ export class ClickhouseService implements OnModuleInit, OnModuleDestroy {
           StatusCode
         ))) AS Fingerprint
       FROM otel_traces
-      WHERE Timestamp > {since:DateTime64(9)}
+      WHERE ${isolation.predicate}
+        AND Timestamp > {since:DateTime64(9)}
         AND Timestamp <= {until:DateTime64(9)}
         AND TraceId NOT IN (
           SELECT DISTINCT TraceId
           FROM otel_traces
-          WHERE TraceId IN (
+          WHERE ${isolation.predicate}
+            AND TraceId IN (
               SELECT DISTINCT TraceId
               FROM otel_traces
-              WHERE Timestamp > {since:DateTime64(9)}
+              WHERE ${isolation.predicate}
+                AND Timestamp > {since:DateTime64(9)}
                 AND Timestamp <= {until:DateTime64(9)}
             )
             AND (
@@ -341,20 +390,23 @@ export class ClickhouseService implements OnModuleInit, OnModuleDestroy {
         )
     `;
 
-    const [signal] = await this.query<{
+    const [signal] = await this.executeTenantQuery<{
       EventCount: number | string;
       Fingerprint: string;
-    }>(query, {
+    }>(scope, query, {
       since: options.since,
       until: options.until,
+      ...isolation.params,
     });
 
     return this.normalizeChangeSignal(signal);
   }
 
   async getRecentLogSignal(
+    scope: TenantScope,
     options: TelemetryStreamOptions,
   ): Promise<TelemetryChangeSignal> {
+    const isolation = this.buildTenantFilter(scope);
     const query = `
       WITH [
         '/api/traces',
@@ -376,7 +428,8 @@ export class ClickhouseService implements OnModuleInit, OnModuleDestroy {
           Body
         ))) AS Fingerprint
       FROM otel_logs
-      WHERE Timestamp > {since:DateTime64(9)}
+      WHERE ${isolation.predicate}
+        AND Timestamp > {since:DateTime64(9)}
         AND Timestamp <= {until:DateTime64(9)}
         AND NOT (
           arrayExists(
@@ -390,12 +443,13 @@ export class ClickhouseService implements OnModuleInit, OnModuleDestroy {
         )
     `;
 
-    const [signal] = await this.query<{
+    const [signal] = await this.executeTenantQuery<{
       EventCount: number | string;
       Fingerprint: string;
-    }>(query, {
+    }>(scope, query, {
       since: options.since,
       until: options.until,
+      ...isolation.params,
     });
 
     return this.normalizeChangeSignal(signal);
@@ -442,11 +496,46 @@ export class ClickhouseService implements OnModuleInit, OnModuleDestroy {
     return Number(rows[0]?.count ?? 0) > 0;
   }
 
-  executeQuery<T = Record<string, unknown>>(
+  async executeTenantQuery<T = Record<string, unknown>>(
+    scope: TenantScope,
+    sql: string,
+    params: Record<string, unknown> = {},
+    settings?: ClickHouseSettings,
+  ): Promise<T[]> {
+    const isolation = this.buildTenantFilter(scope);
+    this.assertTenantIsolation(sql, isolation, scope);
+    await this.ensureTenantSchema();
+    return this.query<T>(sql, { ...params, ...isolation.params }, settings);
+  }
+
+  executeSystemQuery<T = Record<string, unknown>>(
     sql: string,
     params: Record<string, unknown> = {},
   ): Promise<T[]> {
+    if (!/\bFROM\s+system\.(?:tables|columns)\b/i.test(sql)) {
+      throw new Error('Only ClickHouse system metadata queries are allowed here.');
+    }
     return this.query<T>(sql, params);
+  }
+
+  buildTenantFilter(
+    scope: TenantScope,
+    predicates: string[] = [],
+  ): TenantQueryFilter {
+    // Membership identifies the user, not their read boundary. Org isolation is mandatory.
+    const effectiveTeam = scope.teamFilter;
+    const tenantPredicates = ['org_slug = {tenant:String}'];
+    if (effectiveTeam) tenantPredicates.push('team_id = {teamId:String}');
+    if (scope.serviceFilter) tenantPredicates.push('ServiceName = {filterService:String}');
+    if (scope.envFilter) tenantPredicates.push("ResourceAttributes['deployment.environment.name'] = {filterEnv:String}");
+    const allPredicates = [...tenantPredicates, ...predicates.filter(Boolean)];
+    return {
+      predicate: tenantPredicates.join(' AND '),
+      where: `WHERE ${allPredicates.join(' AND ')}`,
+      params: { tenant: scope.tenantSlug, ...(effectiveTeam ? { teamId: effectiveTeam } : {}),
+        ...(scope.serviceFilter ? { filterService: scope.serviceFilter } : {}),
+        ...(scope.envFilter ? { filterEnv: scope.envFilter } : {}) },
+    };
   }
 
   private async query<T = Record<string, unknown>>(
@@ -473,6 +562,55 @@ export class ClickhouseService implements OnModuleInit, OnModuleDestroy {
         'ClickhouseService',
       );
       throw error;
+    }
+  }
+
+  private async ensureTenantSchema(): Promise<void> {
+    if (!this.tenantSchemaReady) {
+      this.tenantSchemaReady = this.createTenantColumns().catch((error) => {
+        this.tenantSchemaReady = undefined;
+        throw error;
+      });
+    }
+    return this.tenantSchemaReady;
+  }
+
+  private async createTenantColumns(): Promise<void> {
+    const existing = await Promise.all(
+      TENANT_TABLES.map(async (table) => ({ table, exists: await this.tableExists(table) })),
+    );
+    const missing = existing.filter(({ exists }) => !exists).map(({ table }) => table);
+    if (missing.length) {
+      throw new ServiceUnavailableException(`Tenant telemetry tables not ready: ${missing.join(', ')}`);
+    }
+    await Promise.all(existing.map(({ table }) => this.addTenantColumns(table)));
+  }
+
+  private async addTenantColumns(table: (typeof TENANT_TABLES)[number]): Promise<void> {
+    const query = `ALTER TABLE ${table}
+      ADD COLUMN IF NOT EXISTS org_slug String MATERIALIZED ResourceAttributes['org.slug'],
+      ADD COLUMN IF NOT EXISTS team_id String MATERIALIZED ResourceAttributes['team.id']`;
+    await this.withTracingSuppressed(() => this.client.command({ query }));
+  }
+
+  private assertTenantIsolation(
+    sql: string,
+    isolation: TenantQueryFilter,
+    scope: TenantScope,
+  ): void {
+    if (!sql.includes('org_slug = {tenant:String}')) {
+      throw new Error('Blocked ClickHouse query without organization isolation.');
+    }
+    const requiresTeam = Boolean(scope.teamFilter);
+    if (requiresTeam && !sql.includes('team_id = {teamId:String}')) {
+      throw new Error('Blocked ClickHouse query without required team isolation.');
+    }
+    if (!isolation.params.tenant) throw new Error('Tenant scope is empty.');
+    if (scope.serviceFilter && !sql.includes('ServiceName = {filterService:String}')) {
+      throw new Error('Blocked query without selected service filter.');
+    }
+    if (scope.envFilter && !sql.includes("ResourceAttributes['deployment.environment.name'] = {filterEnv:String}")) {
+      throw new Error('Blocked query without selected environment filter.');
     }
   }
 

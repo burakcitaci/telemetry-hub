@@ -10,7 +10,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { EnvironmentFilter } from "@/shared/components/environment-filter";
+import { UnifiedFilterSidebar } from "@/shared/components/unified-filter-sidebar";
 import type { EnvironmentSource } from "@/shared/hooks/use-environments";
 
 export interface AppFacetOption {
@@ -185,7 +185,6 @@ function FacetSelector({
 
 export function AppFilterSidebar({
   title = "Filters",
-  environmentSource,
   services = [],
   selectedServices = [],
   onServicesSelect,
@@ -202,7 +201,7 @@ export function AppFilterSidebar({
   const content = (
     <div className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
       <div className="w-full min-w-0 space-y-3 p-1">
-        {environmentSource && <EnvironmentFilter source={environmentSource} />}
+        <UnifiedFilterSidebar />
         {onServicesSelect && (
           <ServiceSelector
             services={services}

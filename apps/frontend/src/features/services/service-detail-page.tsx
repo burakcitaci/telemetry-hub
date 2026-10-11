@@ -52,7 +52,7 @@ function numberValue(value: unknown): number {
 }
 
 function ServiceDetailPage() {
-  const { serviceName = '' } = useParams();
+  const { tenant = '', serviceName = '' } = useParams();
   const { search } = useLocation();
   const { metrics, loading, error, timeRange, setTimeRange, retry } =
     useServiceSummary(serviceName);
@@ -83,7 +83,7 @@ function ServiceDetailPage() {
         <div className="flex items-center justify-between gap-2">
           <div className='flex'>
             <Button asChild variant="ghost" size="icon" className="h-8 w-8 -ml-2 text-muted-foreground">
-              <Link to={{ pathname: '/', search }}>
+              <Link to={{ pathname: `/org/${tenant}/services`, search }}>
                 <ChevronLeft className="h-4 w-4" />
               </Link>
             </Button>
