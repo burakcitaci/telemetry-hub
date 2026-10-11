@@ -6,9 +6,9 @@
     "semantic_hash": ""
   },
   "app/components/app-sidebar.tsx": {
-    "mtime": 1791658962.1202383,
-    "seen": 1791714727.8957522,
-    "ast_hash": "dce77bb1d8aac2d19b0fa76009d1fcbf",
+    "mtime": 1791714974.511671,
+    "seen": 1791720273.7897964,
+    "ast_hash": "a89e6b7bf52655aff684cacdcb656cbb",
     "semantic_hash": ""
   },
   "app/components/mode-toggle.tsx": {
@@ -24,9 +24,9 @@
     "semantic_hash": ""
   },
   "app/components/timer-range.picker.tsx": {
-    "mtime": 1791231391.1352696,
-    "seen": 1791539303.0798535,
-    "ast_hash": "692c7a19cdb0d6bd0c5f6caeece6fac0",
+    "mtime": 1791715120.428007,
+    "seen": 1791720273.789809,
+    "ast_hash": "1d4f0bf35a75b86656ba8c679dcef745",
     "semantic_hash": ""
   },
   "components/shared/feature-header.tsx": {
@@ -42,9 +42,9 @@
     "semantic_hash": ""
   },
   "components/shared/telemetry-primitives.tsx": {
-    "mtime": 1791535796.0697718,
-    "seen": 1791539303.0798573,
-    "ast_hash": "dd85a7e0ff60c4d62e8c8d06bd801363",
+    "mtime": 1791715151.5219634,
+    "seen": 1791720273.7898173,
+    "ast_hash": "ad36b1f45091e53c75d8c4eefbe5dc82",
     "semantic_hash": ""
   },
   "components/shared/telemetry-widget.tsx": {
@@ -174,9 +174,9 @@
     "semantic_hash": ""
   },
   "features/logs/components/log-detail-sheet.tsx": {
-    "mtime": 1791558630.8360329,
-    "seen": 1791558687.9440558,
-    "ast_hash": "5c7ebfeee0a169463f9e5ebfdaf5f504",
+    "mtime": 1791715140.9158573,
+    "seen": 1791720273.7898602,
+    "ast_hash": "bcc63dc199476ea561cc10c5ed121a74",
     "semantic_hash": ""
   },
   "features/logs/components/logs-components.tsx": {
@@ -228,21 +228,21 @@
     "semantic_hash": ""
   },
   "features/metrics/components/metrics-components.tsx": {
-    "mtime": 1791532643.1780345,
-    "seen": 1791539303.0798938,
+    "mtime": 1791715458.6907134,
+    "seen": 1791720273.7898748,
     "ast_hash": "a81fc17baf822657a353769fecd3d842",
     "semantic_hash": ""
   },
   "features/metrics/components/metrics-view.tsx": {
-    "mtime": 1791577477.6256728,
-    "seen": 1791714727.8958979,
-    "ast_hash": "3103dc8503873d230d6f304231376b33",
+    "mtime": 1791716237.07576,
+    "seen": 1791720273.7898765,
+    "ast_hash": "db4e0be0634afdb280128254b40d2c27",
     "semantic_hash": ""
   },
   "features/metrics/hooks/use-metrics.tsx": {
-    "mtime": 1791542437.4537828,
-    "seen": 1791545466.7454698,
-    "ast_hash": "a678ccedcf7a438d86f4539e85d304b8",
+    "mtime": 1791715110.039705,
+    "seen": 1791720273.7898781,
+    "ast_hash": "364f63e82561fa3171d88eae12a714fa",
     "semantic_hash": ""
   },
   "features/metrics/index.ts": {
@@ -270,9 +270,9 @@
     "semantic_hash": ""
   },
   "features/monitors/components/monitors-components.tsx": {
-    "mtime": 1791532734.847019,
-    "seen": 1791539303.0799024,
-    "ast_hash": "60aeb660fed991482a2a0027aeaebef1",
+    "mtime": 1791715249.6302423,
+    "seen": 1791720273.7898858,
+    "ast_hash": "649a445c808c1ef5cbcbc8d8ba055ba7",
     "semantic_hash": ""
   },
   "features/monitors/components/monitors-view.tsx": {
@@ -366,9 +366,9 @@
     "semantic_hash": ""
   },
   "features/services/service-detail-page.tsx": {
-    "mtime": 1791573654.8535001,
-    "seen": 1791573661.7662468,
-    "ast_hash": "08b03288fa7b5b7dec4e85e4a4f7ce8e",
+    "mtime": 1791720168.7745647,
+    "seen": 1791720273.7899125,
+    "ast_hash": "9e9ba66e07621d5a7cfdb525b176b9dc",
     "semantic_hash": ""
   },
   "features/services/services-page.tsx": {
@@ -480,9 +480,9 @@
     "semantic_hash": ""
   },
   "shared/components/facet-query-bar.tsx": {
-    "mtime": 1791576568.6671348,
-    "seen": 1791714727.896032,
-    "ast_hash": "8080fef5102c7813491279c543ddd024",
+    "mtime": 1791715310.446573,
+    "seen": 1791720273.789957,
+    "ast_hash": "37374f07bded31cb62645be8b2afd4b9",
     "semantic_hash": ""
   },
   "shared/components/feature-actions.tsx": {
@@ -498,9 +498,9 @@
     "semantic_hash": ""
   },
   "shared/components/telemetry-detail.tsx": {
-    "mtime": 1791494694.0257797,
-    "seen": 1791539303.0799441,
-    "ast_hash": "dda315a5b676d7735652163422cf9076",
+    "mtime": 1791715278.2806406,
+    "seen": 1791720273.7899642,
+    "ast_hash": "e27517c07f0240b3d5587ca70432bbd8",
     "semantic_hash": ""
   },
   "shared/hooks/use-telemetry-query.ts": {
@@ -558,9 +558,9 @@
     "semantic_hash": ""
   },
   "shared/components/environment-filter.tsx": {
-    "mtime": 1791657016.2752786,
-    "seen": 1791714727.896026,
-    "ast_hash": "e89c97506888b9dc2cdeab439afefe96",
+    "mtime": 1791716869.3684146,
+    "seen": 1791720273.7899523,
+    "ast_hash": "fdc17038e93f66a65c464e2af1226698",
     "semantic_hash": ""
   },
   "shared/hooks/use-environments.ts": {

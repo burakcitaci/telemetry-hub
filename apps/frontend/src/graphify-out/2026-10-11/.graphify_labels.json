@@ -4,6 +4,10 @@
   "2": "app.tsx",
   "3": "shared/trace-detail-sheet.tsx",
   "4": "service-detail-page.tsx",
+  "5": "monitors-components.tsx",
   "6": "use-traces.tsx",
-  "7": "use-metrics.tsx"
+  "7": "use-metrics.tsx",
+  "8": "traces-components.tsx",
+  "9": "telemetry.ts",
+  "10": "timer-range.picker.tsx"
 }
