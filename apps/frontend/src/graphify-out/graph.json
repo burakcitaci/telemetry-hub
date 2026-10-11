@@ -43,7 +43,20 @@
       "file_type": "code",
       "norm_label": "appfacetoption",
       "source_file": "components/shared/app-filter-sidebar.tsx",
-      "source_location": "L16"
+      "source_location": "L14"
+    },
+    {
+      "id": "components_shared_app_filter_sidebar_appfiltersidebarprops",
+      "label": "AppFilterSidebarProps",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "metrics-view.tsx",
+      "file_type": "code",
+      "norm_label": "appfiltersidebarprops",
+      "source_file": "components/shared/app-filter-sidebar.tsx",
+      "source_location": "L22"
     },
     {
       "id": "components_shared_feature_header_featureheaderprops",
@@ -215,17 +228,17 @@
       "source_location": "L11"
     },
     {
-      "id": "components_shared_app_filter_sidebar_appfiltersidebarprops",
-      "label": "AppFilterSidebarProps",
+      "id": "shared_hooks_use_environments_environmentsource",
+      "label": "EnvironmentSource",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
-      "community": 2,
-      "community_name": "app.tsx",
+      "community": 1,
+      "community_name": "metrics-view.tsx",
       "file_type": "code",
-      "norm_label": "appfiltersidebarprops",
-      "source_file": "components/shared/app-filter-sidebar.tsx",
-      "source_location": "L24"
+      "norm_label": "environmentsource",
+      "source_file": "shared/hooks/use-environments.ts",
+      "source_location": "L5"
     },
     {
       "id": "features_auth_auth_context_authcontextvalue",
@@ -267,32 +280,6 @@
       "source_location": "L21"
     },
     {
-      "id": "shared_components_unified_filter_sidebar_options",
-      "label": "Options",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "app.tsx",
-      "file_type": "code",
-      "norm_label": "options",
-      "source_file": "shared/components/unified-filter-sidebar.tsx",
-      "source_location": "L11"
-    },
-    {
-      "id": "shared_hooks_use_environments_environmentsource",
-      "label": "EnvironmentSource",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "app.tsx",
-      "file_type": "code",
-      "norm_label": "environmentsource",
-      "source_file": "shared/hooks/use-environments.ts",
-      "source_location": "L5"
-    },
-    {
       "id": "components_shared_trace_detail_sheet_tracedetailsheetprops",
       "label": "TraceDetailSheetProps",
       "_callable": true,
@@ -304,6 +291,19 @@
       "norm_label": "tracedetailsheetprops",
       "source_file": "components/shared/trace-detail-sheet.tsx",
       "source_location": "L46"
+    },
+    {
+      "id": "components_ui_badge_badgeprops",
+      "label": "BadgeProps",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "shared/trace-detail-sheet.tsx",
+      "file_type": "code",
+      "norm_label": "badgeprops",
+      "source_file": "components/ui/badge.tsx",
+      "source_location": "L31"
     },
     {
       "id": "features_logs_components_log_detail_sheet_logdetailsheetprops",
@@ -371,19 +371,6 @@
       "source_location": "L141"
     },
     {
-      "id": "shared_hooks_use_telemetry_view_params_telemetryviewparamsoptions",
-      "label": "TelemetryViewParamsOptions",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "shared/trace-detail-sheet.tsx",
-      "file_type": "code",
-      "norm_label": "telemetryviewparamsoptions",
-      "source_file": "shared/hooks/use-telemetry-view-params.ts",
-      "source_location": "L9"
-    },
-    {
       "id": "components_shared_telemetry_primitives_statusspanprops",
       "label": "StatusSpanProps",
       "_callable": true,
@@ -407,6 +394,19 @@
       "file_type": "code",
       "norm_label": "telemetrystatus",
       "source_file": "components/shared/telemetry-primitives.tsx",
+      "source_location": "L6"
+    },
+    {
+      "id": "features_services_hooks_use_service_metadata_metadatamap",
+      "label": "MetadataMap",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "service-detail-page.tsx",
+      "file_type": "code",
+      "norm_label": "metadatamap",
+      "source_file": "features/services/hooks/use-service-metadata.ts",
       "source_location": "L6"
     },
     {
@@ -650,11 +650,50 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 6,
-      "community_name": "ref_react",
+      "community_name": "unwrap",
       "file_type": "code",
       "norm_label": "facetoption",
       "source_file": "components/shared/app-filter-sidebar.tsx",
-      "source_location": "L22"
+      "source_location": "L20"
+    },
+    {
+      "id": "features_admin_admin_page_team",
+      "label": "Team",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "unwrap",
+      "file_type": "code",
+      "norm_label": "team",
+      "source_file": "features/admin/admin-page.tsx",
+      "source_location": "L9"
+    },
+    {
+      "id": "features_admin_admin_page_user",
+      "label": "User",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "unwrap",
+      "file_type": "code",
+      "norm_label": "user",
+      "source_file": "features/admin/admin-page.tsx",
+      "source_location": "L10"
+    },
+    {
+      "id": "features_auth_auth_context_userrole",
+      "label": "UserRole",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "unwrap",
+      "file_type": "code",
+      "norm_label": "userrole",
+      "source_file": "features/auth/auth-context.tsx",
+      "source_location": "L12"
     },
     {
       "id": "features_logs_api_logsqueryparams",
@@ -663,7 +702,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 6,
-      "community_name": "ref_react",
+      "community_name": "unwrap",
       "file_type": "code",
       "norm_label": "logsqueryparams",
       "source_file": "features/logs/api.ts",
@@ -676,7 +715,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 6,
-      "community_name": "ref_react",
+      "community_name": "unwrap",
       "file_type": "code",
       "norm_label": "metricdetailrecord",
       "source_file": "features/metrics/api.ts",
@@ -689,7 +728,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 6,
-      "community_name": "ref_react",
+      "community_name": "unwrap",
       "file_type": "code",
       "norm_label": "metricdetailresponse",
       "source_file": "features/metrics/api.ts",
@@ -702,24 +741,11 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 6,
-      "community_name": "ref_react",
+      "community_name": "unwrap",
       "file_type": "code",
       "norm_label": "metricstatistics",
       "source_file": "features/metrics/api.ts",
       "source_location": "L80"
-    },
-    {
-      "id": "features_services_hooks_use_service_metadata_metadatamap",
-      "label": "MetadataMap",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 6,
-      "community_name": "ref_react",
-      "file_type": "code",
-      "norm_label": "metadatamap",
-      "source_file": "features/services/hooks/use-service-metadata.ts",
-      "source_location": "L6"
     },
     {
       "id": "features_services_hooks_use_service_summary_summarystate",
@@ -728,7 +754,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 6,
-      "community_name": "ref_react",
+      "community_name": "unwrap",
       "file_type": "code",
       "norm_label": "summarystate",
       "source_file": "features/services/hooks/use-service-summary.ts",
@@ -741,10 +767,23 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 6,
-      "community_name": "ref_react",
+      "community_name": "unwrap",
       "file_type": "code",
       "norm_label": "activetracecontextvalue",
       "source_file": "shared/hooks/use-active-trace.tsx",
+      "source_location": "L12"
+    },
+    {
+      "id": "app_components_timer_range_picker_timerangepickerprops",
+      "label": "TimeRangePickerProps",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 7,
+      "community_name": "use-metrics.tsx",
+      "file_type": "code",
+      "norm_label": "timerangepickerprops",
+      "source_file": "app/components/timer-range.picker.tsx",
       "source_location": "L12"
     },
     {
@@ -839,69 +878,56 @@
       "source_location": "L20"
     },
     {
-      "id": "components_ui_badge_badgeprops",
-      "label": "BadgeProps",
+      "id": "shared_api_filter_options_filteroptions",
+      "label": "FilterOptions",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 8,
-      "community_name": "traces-components.tsx",
+      "community_name": "use-filter-options.ts",
       "file_type": "code",
-      "norm_label": "badgeprops",
-      "source_file": "components/ui/badge.tsx",
-      "source_location": "L31"
+      "norm_label": "filteroptions",
+      "source_file": "shared/api/filter-options.ts",
+      "source_location": "L11"
     },
     {
-      "id": "app_components_timer_range_picker_timerangepickerprops",
-      "label": "TimeRangePickerProps",
+      "id": "shared_api_filter_options_filteroptionsquery",
+      "label": "FilterOptionsQuery",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
-      "community": 9,
-      "community_name": "admin-page.tsx",
+      "community": 8,
+      "community_name": "use-filter-options.ts",
       "file_type": "code",
-      "norm_label": "timerangepickerprops",
-      "source_file": "app/components/timer-range.picker.tsx",
-      "source_location": "L12"
+      "norm_label": "filteroptionsquery",
+      "source_file": "shared/api/filter-options.ts",
+      "source_location": "L17"
     },
     {
-      "id": "features_admin_admin_page_team",
-      "label": "Team",
+      "id": "shared_api_filter_options_filteroptionssource",
+      "label": "FilterOptionsSource",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
-      "community": 9,
-      "community_name": "admin-page.tsx",
+      "community": 8,
+      "community_name": "use-filter-options.ts",
       "file_type": "code",
-      "norm_label": "team",
-      "source_file": "features/admin/admin-page.tsx",
+      "norm_label": "filteroptionssource",
+      "source_file": "shared/api/filter-options.ts",
+      "source_location": "L3"
+    },
+    {
+      "id": "shared_hooks_use_telemetry_view_params_telemetryviewparamsoptions",
+      "label": "TelemetryViewParamsOptions",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 8,
+      "community_name": "use-filter-options.ts",
+      "file_type": "code",
+      "norm_label": "telemetryviewparamsoptions",
+      "source_file": "shared/hooks/use-telemetry-view-params.ts",
       "source_location": "L9"
-    },
-    {
-      "id": "features_admin_admin_page_user",
-      "label": "User",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 9,
-      "community_name": "admin-page.tsx",
-      "file_type": "code",
-      "norm_label": "user",
-      "source_file": "features/admin/admin-page.tsx",
-      "source_location": "L10"
-    },
-    {
-      "id": "features_auth_auth_context_userrole",
-      "label": "UserRole",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 9,
-      "community_name": "admin-page.tsx",
-      "file_type": "code",
-      "norm_label": "userrole",
-      "source_file": "features/auth/auth-context.tsx",
-      "source_location": "L12"
     },
     {
       "id": "shared_components_data_table_datatable",
@@ -928,6 +954,18 @@
       "source_location": "L321"
     },
     {
+      "id": "app_components_timer_range_picker_timerangepicker",
+      "label": "TimeRangePicker()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "metrics-view.tsx",
+      "file_type": "code",
+      "norm_label": "timerangepicker()",
+      "source_file": "app/components/timer-range.picker.tsx",
+      "source_location": "L19"
+    },
+    {
       "id": "components_shared_app_filter_sidebar_appfiltersidebar",
       "label": "AppFilterSidebar()",
       "_callable": true,
@@ -937,31 +975,7 @@
       "file_type": "code",
       "norm_label": "appfiltersidebar()",
       "source_file": "components/shared/app-filter-sidebar.tsx",
-      "source_location": "L186"
-    },
-    {
-      "id": "components_shared_app_filter_sidebar_facetselector",
-      "label": "FacetSelector()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "metrics-view.tsx",
-      "file_type": "code",
-      "norm_label": "facetselector()",
-      "source_file": "components/shared/app-filter-sidebar.tsx",
-      "source_location": "L110"
-    },
-    {
-      "id": "components_shared_app_filter_sidebar_serviceselector",
-      "label": "ServiceSelector()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "metrics-view.tsx",
-      "file_type": "code",
-      "norm_label": "serviceselector()",
-      "source_file": "components/shared/app-filter-sidebar.tsx",
-      "source_location": "L43"
+      "source_location": "L34"
     },
     {
       "id": "components_shared_feature_header_featureheader",
@@ -988,6 +1002,18 @@
       "source_location": "L17"
     },
     {
+      "id": "components_shared_telemetry_widget_telemetrywidget",
+      "label": "TelemetryWidget()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "metrics-view.tsx",
+      "file_type": "code",
+      "norm_label": "telemetrywidget()",
+      "source_file": "components/shared/telemetry-widget.tsx",
+      "source_location": "L4"
+    },
+    {
       "id": "components_shared_view_skeleton_queryerror",
       "label": "QueryError()",
       "_callable": true,
@@ -998,6 +1024,18 @@
       "norm_label": "queryerror()",
       "source_file": "components/shared/view-skeleton.tsx",
       "source_location": "L68"
+    },
+    {
+      "id": "components_shared_view_skeleton_viewskeleton",
+      "label": "ViewSkeleton()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "metrics-view.tsx",
+      "file_type": "code",
+      "norm_label": "viewskeleton()",
+      "source_file": "components/shared/view-skeleton.tsx",
+      "source_location": "L15"
     },
     {
       "id": "features_logs_components_logs_view_logsview",
@@ -1288,18 +1326,6 @@
       "source_location": "L9"
     },
     {
-      "id": "components_shared_view_skeleton_viewskeleton",
-      "label": "ViewSkeleton()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "app.tsx",
-      "file_type": "code",
-      "norm_label": "viewskeleton()",
-      "source_file": "components/shared/view-skeleton.tsx",
-      "source_location": "L15"
-    },
-    {
       "id": "features_auth_auth_context_authprovider",
       "label": "AuthProvider()",
       "_callable": true,
@@ -1322,6 +1348,18 @@
       "norm_label": "useauth()",
       "source_file": "features/auth/auth-context.tsx",
       "source_location": "L76"
+    },
+    {
+      "id": "features_services_components_services_components_servicedetaillink",
+      "label": "ServiceDetailLink()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "app.tsx",
+      "file_type": "code",
+      "norm_label": "servicedetaillink()",
+      "source_file": "features/services/components/services-components.tsx",
+      "source_location": "L78"
     },
     {
       "id": "shared_components_environment_filter_environmentfilter",
@@ -1357,7 +1395,7 @@
       "file_type": "code",
       "norm_label": "filterselect()",
       "source_file": "shared/components/unified-filter-sidebar.tsx",
-      "source_location": "L65"
+      "source_location": "L46"
     },
     {
       "id": "shared_components_unified_filter_sidebar_unifiedfiltersidebar",
@@ -1369,7 +1407,7 @@
       "file_type": "code",
       "norm_label": "unifiedfiltersidebar()",
       "source_file": "shared/components/unified-filter-sidebar.tsx",
-      "source_location": "L13"
+      "source_location": "L10"
     },
     {
       "id": "shared_hooks_use_active_trace_activetraceprovider",
@@ -1456,6 +1494,18 @@
       "source_location": "L60"
     },
     {
+      "id": "components_ui_badge_badge",
+      "label": "Badge()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "shared/trace-detail-sheet.tsx",
+      "file_type": "code",
+      "norm_label": "badge()",
+      "source_file": "components/ui/badge.tsx",
+      "source_location": "L35"
+    },
+    {
       "id": "features_logs_components_log_detail_sheet_logdetailsheet",
       "label": "LogDetailSheet()",
       "_callable": true,
@@ -1480,16 +1530,52 @@
       "source_location": "L22"
     },
     {
-      "id": "features_traces_hooks_use_traces_usetraces",
-      "label": "useTraces()",
+      "id": "features_logs_components_logs_components_logtracelink",
+      "label": "LogTraceLink()",
       "_callable": true,
       "_origin": "ast",
       "community": 3,
       "community_name": "shared/trace-detail-sheet.tsx",
       "file_type": "code",
-      "norm_label": "usetraces()",
-      "source_file": "features/traces/hooks/use-traces.tsx",
-      "source_location": "L16"
+      "norm_label": "logtracelink()",
+      "source_file": "features/logs/components/logs-components.tsx",
+      "source_location": "L8"
+    },
+    {
+      "id": "features_logs_components_logs_components_severitybadge",
+      "label": "severityBadge()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "shared/trace-detail-sheet.tsx",
+      "file_type": "code",
+      "norm_label": "severitybadge()",
+      "source_file": "features/logs/components/logs-components.tsx",
+      "source_location": "L28"
+    },
+    {
+      "id": "features_traces_components_traces_components_statusbadge",
+      "label": "statusBadge()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "shared/trace-detail-sheet.tsx",
+      "file_type": "code",
+      "norm_label": "statusbadge()",
+      "source_file": "features/traces/components/traces-components.tsx",
+      "source_location": "L12"
+    },
+    {
+      "id": "features_traces_components_traces_components_tracessidebarshell",
+      "label": "TracesSidebarShell()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "shared/trace-detail-sheet.tsx",
+      "file_type": "code",
+      "norm_label": "tracessidebarshell()",
+      "source_file": "features/traces/components/traces-components.tsx",
+      "source_location": "L107"
     },
     {
       "id": "shared_components_telemetry_detail_attributesection",
@@ -1540,28 +1626,28 @@
       "source_location": "L146"
     },
     {
-      "id": "shared_hooks_use_telemetry_view_params_uniquevalues",
-      "label": "uniqueValues()",
+      "id": "shared_hooks_use_active_trace_useactivetrace",
+      "label": "useActiveTrace()",
       "_callable": true,
       "_origin": "ast",
       "community": 3,
       "community_name": "shared/trace-detail-sheet.tsx",
       "file_type": "code",
-      "norm_label": "uniquevalues()",
-      "source_file": "shared/hooks/use-telemetry-view-params.ts",
-      "source_location": "L13"
+      "norm_label": "useactivetrace()",
+      "source_file": "shared/hooks/use-active-trace.tsx",
+      "source_location": "L56"
     },
     {
-      "id": "shared_hooks_use_telemetry_view_params_usetelemetryviewparams",
-      "label": "useTelemetryViewParams()",
+      "id": "shared_lib_telemetry_formatduration",
+      "label": "formatDuration()",
       "_callable": true,
       "_origin": "ast",
       "community": 3,
       "community_name": "shared/trace-detail-sheet.tsx",
       "file_type": "code",
-      "norm_label": "usetelemetryviewparams()",
-      "source_file": "shared/hooks/use-telemetry-view-params.ts",
-      "source_location": "L17"
+      "norm_label": "formatduration()",
+      "source_file": "shared/lib/telemetry.ts",
+      "source_location": "L47"
     },
     {
       "id": "shared_lib_telemetry_formattelemetrytimestamp",
@@ -1588,18 +1674,6 @@
       "source_location": "L36"
     },
     {
-      "id": "shared_lib_telemetry_iswithintimerange",
-      "label": "isWithinTimeRange()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "shared/trace-detail-sheet.tsx",
-      "file_type": "code",
-      "norm_label": "iswithintimerange()",
-      "source_file": "shared/lib/telemetry.ts",
-      "source_location": "L62"
-    },
-    {
       "id": "shared_lib_telemetry_parsetelemetrytimestamp",
       "label": "parseTelemetryTimestamp()",
       "_callable": true,
@@ -1612,18 +1686,6 @@
       "source_location": "L23"
     },
     {
-      "id": "shared_lib_telemetry_resolvetelemetryrange",
-      "label": "resolveTelemetryRange()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "shared/trace-detail-sheet.tsx",
-      "file_type": "code",
-      "norm_label": "resolvetelemetryrange()",
-      "source_file": "shared/lib/telemetry.ts",
-      "source_location": "L6"
-    },
-    {
       "id": "shared_lib_trace_waterfall_spanwaterfall",
       "label": "spanWaterfall()",
       "_callable": true,
@@ -1634,18 +1696,6 @@
       "norm_label": "spanwaterfall()",
       "source_file": "shared/lib/trace-waterfall.ts",
       "source_location": "L2"
-    },
-    {
-      "id": "app_components_timer_range_picker_timerangepicker",
-      "label": "TimeRangePicker()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 4,
-      "community_name": "service-detail-page.tsx",
-      "file_type": "code",
-      "norm_label": "timerangepicker()",
-      "source_file": "app/components/timer-range.picker.tsx",
-      "source_location": "L19"
     },
     {
       "id": "components_shared_page_layout_pagelayout",
@@ -1694,18 +1744,6 @@
       "norm_label": "statusbadge()",
       "source_file": "components/shared/telemetry-primitives.tsx",
       "source_location": "L48"
-    },
-    {
-      "id": "components_shared_telemetry_widget_telemetrywidget",
-      "label": "TelemetryWidget()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 4,
-      "community_name": "service-detail-page.tsx",
-      "file_type": "code",
-      "norm_label": "telemetrywidget()",
-      "source_file": "components/shared/telemetry-widget.tsx",
-      "source_location": "L4"
     },
     {
       "id": "features_auth_login_page_loginfield",
@@ -1790,18 +1828,6 @@
       "norm_label": "servicedetailpage()",
       "source_file": "features/services/service-detail-page.tsx",
       "source_location": "L54"
-    },
-    {
-      "id": "shared_lib_telemetry_formatduration",
-      "label": "formatDuration()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 4,
-      "community_name": "service-detail-page.tsx",
-      "file_type": "code",
-      "norm_label": "formatduration()",
-      "source_file": "shared/lib/telemetry.ts",
-      "source_location": "L47"
     },
     {
       "id": "features_monitors_components_monitors_components_monitordetail",
@@ -2128,12 +2154,36 @@
       "source_location": "L898"
     },
     {
+      "id": "features_admin_admin_page_adminpage",
+      "label": "AdminPage()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "unwrap",
+      "file_type": "code",
+      "norm_label": "adminpage()",
+      "source_file": "features/admin/admin-page.tsx",
+      "source_location": "L15"
+    },
+    {
+      "id": "features_admin_admin_page_errormessage",
+      "label": "errorMessage()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "unwrap",
+      "file_type": "code",
+      "norm_label": "errormessage()",
+      "source_file": "features/admin/admin-page.tsx",
+      "source_location": "L91"
+    },
+    {
       "id": "features_logs_api_getlogs",
       "label": "getLogs()",
       "_callable": true,
       "_origin": "ast",
       "community": 6,
-      "community_name": "ref_react",
+      "community_name": "unwrap",
       "file_type": "code",
       "norm_label": "getlogs()",
       "source_file": "features/logs/api.ts",
@@ -2145,7 +2195,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 6,
-      "community_name": "ref_react",
+      "community_name": "unwrap",
       "file_type": "code",
       "norm_label": "uselogs()",
       "source_file": "features/logs/hooks/use-logs.tsx",
@@ -2157,7 +2207,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 6,
-      "community_name": "ref_react",
+      "community_name": "unwrap",
       "file_type": "code",
       "norm_label": "exportmetricascsv()",
       "source_file": "features/metrics/api.ts",
@@ -2169,7 +2219,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 6,
-      "community_name": "ref_react",
+      "community_name": "unwrap",
       "file_type": "code",
       "norm_label": "getmetricdetail()",
       "source_file": "features/metrics/api.ts",
@@ -2181,7 +2231,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 6,
-      "community_name": "ref_react",
+      "community_name": "unwrap",
       "file_type": "code",
       "norm_label": "getmetrics()",
       "source_file": "features/metrics/api.ts",
@@ -2193,7 +2243,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 6,
-      "community_name": "ref_react",
+      "community_name": "unwrap",
       "file_type": "code",
       "norm_label": "getmetricstatistics()",
       "source_file": "features/metrics/api.ts",
@@ -2205,7 +2255,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 6,
-      "community_name": "ref_react",
+      "community_name": "unwrap",
       "file_type": "code",
       "norm_label": "getservicemetrics()",
       "source_file": "features/services/api.ts",
@@ -2217,7 +2267,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 6,
-      "community_name": "ref_react",
+      "community_name": "unwrap",
       "file_type": "code",
       "norm_label": "getservices()",
       "source_file": "features/services/api.ts",
@@ -2229,7 +2279,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 6,
-      "community_name": "ref_react",
+      "community_name": "unwrap",
       "file_type": "code",
       "norm_label": "useservicesummary()",
       "source_file": "features/services/hooks/use-service-summary.ts",
@@ -2241,7 +2291,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 6,
-      "community_name": "ref_react",
+      "community_name": "unwrap",
       "file_type": "code",
       "norm_label": "load()",
       "source_file": "features/services/hooks/use-service-summary.ts",
@@ -2253,7 +2303,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 6,
-      "community_name": "ref_react",
+      "community_name": "unwrap",
       "file_type": "code",
       "norm_label": "useservices()",
       "source_file": "features/services/hooks/use-services.tsx",
@@ -2265,7 +2315,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 6,
-      "community_name": "ref_react",
+      "community_name": "unwrap",
       "file_type": "code",
       "norm_label": "gettracebyid()",
       "source_file": "features/traces/api.ts",
@@ -2277,7 +2327,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 6,
-      "community_name": "ref_react",
+      "community_name": "unwrap",
       "file_type": "code",
       "norm_label": "gettraces()",
       "source_file": "features/traces/api.ts",
@@ -2289,7 +2339,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 6,
-      "community_name": "ref_react",
+      "community_name": "unwrap",
       "file_type": "code",
       "norm_label": "normalizespan()",
       "source_file": "features/traces/api.ts",
@@ -2301,11 +2351,23 @@
       "_callable": true,
       "_origin": "ast",
       "community": 6,
-      "community_name": "ref_react",
+      "community_name": "unwrap",
       "file_type": "code",
       "norm_label": "normalizetrace()",
       "source_file": "features/traces/api.ts",
       "source_location": "L21"
+    },
+    {
+      "id": "features_traces_hooks_use_traces_usetraces",
+      "label": "useTraces()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "unwrap",
+      "file_type": "code",
+      "norm_label": "usetraces()",
+      "source_file": "features/traces/hooks/use-traces.tsx",
+      "source_location": "L16"
     },
     {
       "id": "shared_api_client_asnumber",
@@ -2313,7 +2375,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 6,
-      "community_name": "ref_react",
+      "community_name": "unwrap",
       "file_type": "code",
       "norm_label": "asnumber()",
       "source_file": "shared/api/client.ts",
@@ -2325,7 +2387,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 6,
-      "community_name": "ref_react",
+      "community_name": "unwrap",
       "file_type": "code",
       "norm_label": "unwrap()",
       "source_file": "shared/api/client.ts",
@@ -2337,7 +2399,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 6,
-      "community_name": "ref_react",
+      "community_name": "unwrap",
       "file_type": "code",
       "norm_label": "createeventsource()",
       "source_file": "shared/api/telemetry-api.ts",
@@ -2349,11 +2411,23 @@
       "_callable": true,
       "_origin": "ast",
       "community": 6,
-      "community_name": "ref_react",
+      "community_name": "unwrap",
       "file_type": "code",
       "norm_label": "generatetelemetry()",
       "source_file": "shared/api/telemetry-api.ts",
       "source_location": "L3"
+    },
+    {
+      "id": "shared_lib_telemetry_iswithintimerange",
+      "label": "isWithinTimeRange()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "unwrap",
+      "file_type": "code",
+      "norm_label": "iswithintimerange()",
+      "source_file": "shared/lib/telemetry.ts",
+      "source_location": "L62"
     },
     {
       "id": "features_metrics_hooks_use_metrics_usemetrics",
@@ -2464,6 +2538,18 @@
       "source_location": "L105"
     },
     {
+      "id": "shared_components_data_table_datatablecolumnheader",
+      "label": "DataTableColumnHeader()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 7,
+      "community_name": "use-metrics.tsx",
+      "file_type": "code",
+      "norm_label": "datatablecolumnheader()",
+      "source_file": "shared/components/data-table.tsx",
+      "source_location": "L288"
+    },
+    {
       "id": "shared_components_facet_query_bar_facetpill",
       "label": "FacetPill()",
       "_callable": true,
@@ -2488,124 +2574,64 @@
       "source_location": "L46"
     },
     {
-      "id": "components_ui_badge_badge",
-      "label": "Badge()",
+      "id": "shared_api_filter_options_getfilteroptions",
+      "label": "getFilterOptions()",
       "_callable": true,
       "_origin": "ast",
       "community": 8,
-      "community_name": "traces-components.tsx",
+      "community_name": "use-filter-options.ts",
       "file_type": "code",
-      "norm_label": "badge()",
-      "source_file": "components/ui/badge.tsx",
-      "source_location": "L35"
+      "norm_label": "getfilteroptions()",
+      "source_file": "shared/api/filter-options.ts",
+      "source_location": "L23"
     },
     {
-      "id": "features_logs_components_logs_components_logtracelink",
-      "label": "LogTraceLink()",
+      "id": "shared_hooks_use_filter_options_usefilteroptions",
+      "label": "useFilterOptions()",
       "_callable": true,
       "_origin": "ast",
       "community": 8,
-      "community_name": "traces-components.tsx",
+      "community_name": "use-filter-options.ts",
       "file_type": "code",
-      "norm_label": "logtracelink()",
-      "source_file": "features/logs/components/logs-components.tsx",
-      "source_location": "L8"
-    },
-    {
-      "id": "features_logs_components_logs_components_severitybadge",
-      "label": "severityBadge()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 8,
-      "community_name": "traces-components.tsx",
-      "file_type": "code",
-      "norm_label": "severitybadge()",
-      "source_file": "features/logs/components/logs-components.tsx",
-      "source_location": "L28"
-    },
-    {
-      "id": "features_services_components_services_components_servicedetaillink",
-      "label": "ServiceDetailLink()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 8,
-      "community_name": "traces-components.tsx",
-      "file_type": "code",
-      "norm_label": "servicedetaillink()",
-      "source_file": "features/services/components/services-components.tsx",
-      "source_location": "L78"
-    },
-    {
-      "id": "features_traces_components_traces_components_statusbadge",
-      "label": "statusBadge()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 8,
-      "community_name": "traces-components.tsx",
-      "file_type": "code",
-      "norm_label": "statusbadge()",
-      "source_file": "features/traces/components/traces-components.tsx",
-      "source_location": "L12"
-    },
-    {
-      "id": "features_traces_components_traces_components_tracessidebarshell",
-      "label": "TracesSidebarShell()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 8,
-      "community_name": "traces-components.tsx",
-      "file_type": "code",
-      "norm_label": "tracessidebarshell()",
-      "source_file": "features/traces/components/traces-components.tsx",
-      "source_location": "L107"
-    },
-    {
-      "id": "shared_components_data_table_datatablecolumnheader",
-      "label": "DataTableColumnHeader()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 8,
-      "community_name": "traces-components.tsx",
-      "file_type": "code",
-      "norm_label": "datatablecolumnheader()",
-      "source_file": "shared/components/data-table.tsx",
-      "source_location": "L288"
-    },
-    {
-      "id": "shared_hooks_use_active_trace_useactivetrace",
-      "label": "useActiveTrace()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 8,
-      "community_name": "traces-components.tsx",
-      "file_type": "code",
-      "norm_label": "useactivetrace()",
-      "source_file": "shared/hooks/use-active-trace.tsx",
-      "source_location": "L56"
-    },
-    {
-      "id": "features_admin_admin_page_adminpage",
-      "label": "AdminPage()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 9,
-      "community_name": "admin-page.tsx",
-      "file_type": "code",
-      "norm_label": "adminpage()",
-      "source_file": "features/admin/admin-page.tsx",
+      "norm_label": "usefilteroptions()",
+      "source_file": "shared/hooks/use-filter-options.ts",
       "source_location": "L15"
     },
     {
-      "id": "features_admin_admin_page_errormessage",
-      "label": "errorMessage()",
+      "id": "shared_hooks_use_telemetry_view_params_uniquevalues",
+      "label": "uniqueValues()",
       "_callable": true,
       "_origin": "ast",
-      "community": 9,
-      "community_name": "admin-page.tsx",
+      "community": 8,
+      "community_name": "use-filter-options.ts",
       "file_type": "code",
-      "norm_label": "errormessage()",
-      "source_file": "features/admin/admin-page.tsx",
-      "source_location": "L91"
+      "norm_label": "uniquevalues()",
+      "source_file": "shared/hooks/use-telemetry-view-params.ts",
+      "source_location": "L13"
+    },
+    {
+      "id": "shared_hooks_use_telemetry_view_params_usetelemetryviewparams",
+      "label": "useTelemetryViewParams()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 8,
+      "community_name": "use-filter-options.ts",
+      "file_type": "code",
+      "norm_label": "usetelemetryviewparams()",
+      "source_file": "shared/hooks/use-telemetry-view-params.ts",
+      "source_location": "L17"
+    },
+    {
+      "id": "shared_lib_telemetry_resolvetelemetryrange",
+      "label": "resolveTelemetryRange()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 8,
+      "community_name": "use-filter-options.ts",
+      "file_type": "code",
+      "norm_label": "resolvetelemetryrange()",
+      "source_file": "shared/lib/telemetry.ts",
+      "source_location": "L6"
     },
     {
       "id": "components_ui_table",
@@ -2759,6 +2785,17 @@
       "file_type": "code",
       "norm_label": "feature-header.tsx",
       "source_file": "components/shared/feature-header.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "components_shared_telemetry_widget",
+      "label": "telemetry-widget.tsx",
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "metrics-view.tsx",
+      "file_type": "code",
+      "norm_label": "telemetry-widget.tsx",
+      "source_file": "components/shared/telemetry-widget.tsx",
       "source_location": "L1"
     },
     {
@@ -3004,6 +3041,28 @@
       "source_location": "L35"
     },
     {
+      "id": "features_services_components_services_components",
+      "label": "services-components.tsx",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "app.tsx",
+      "file_type": "code",
+      "norm_label": "services-components.tsx",
+      "source_file": "features/services/components/services-components.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "features_services_components_services_components_columns",
+      "label": "columns",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "app.tsx",
+      "file_type": "code",
+      "norm_label": "columns",
+      "source_file": "features/services/components/services-components.tsx",
+      "source_location": "L8"
+    },
+    {
       "id": "shared_components_environment_filter",
       "label": "environment-filter.tsx",
       "_origin": "ast",
@@ -3048,6 +3107,28 @@
       "source_location": "L1"
     },
     {
+      "id": "components_ui_badge",
+      "label": "badge.tsx",
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "shared/trace-detail-sheet.tsx",
+      "file_type": "code",
+      "norm_label": "badge.tsx",
+      "source_file": "components/ui/badge.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "components_ui_badge_badgevariants",
+      "label": "badgeVariants",
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "shared/trace-detail-sheet.tsx",
+      "file_type": "code",
+      "norm_label": "badgevariants",
+      "source_file": "components/ui/badge.tsx",
+      "source_location": "L6"
+    },
+    {
       "id": "features_logs_components_log_detail_sheet",
       "label": "log-detail-sheet.tsx",
       "_origin": "ast",
@@ -3057,6 +3138,28 @@
       "norm_label": "log-detail-sheet.tsx",
       "source_file": "features/logs/components/log-detail-sheet.tsx",
       "source_location": "L1"
+    },
+    {
+      "id": "features_logs_components_logs_components",
+      "label": "logs-components.tsx",
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "shared/trace-detail-sheet.tsx",
+      "file_type": "code",
+      "norm_label": "logs-components.tsx",
+      "source_file": "features/logs/components/logs-components.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "features_logs_components_logs_components_columns",
+      "label": "columns",
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "shared/trace-detail-sheet.tsx",
+      "file_type": "code",
+      "norm_label": "columns",
+      "source_file": "features/logs/components/logs-components.tsx",
+      "source_location": "L40"
     },
     {
       "id": "features_traces_components_trace_detail_sheet",
@@ -3070,6 +3173,28 @@
       "source_location": "L1"
     },
     {
+      "id": "features_traces_components_traces_components",
+      "label": "traces-components.tsx",
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "shared/trace-detail-sheet.tsx",
+      "file_type": "code",
+      "norm_label": "traces-components.tsx",
+      "source_file": "features/traces/components/traces-components.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "features_traces_components_traces_components_columns",
+      "label": "columns",
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "shared/trace-detail-sheet.tsx",
+      "file_type": "code",
+      "norm_label": "columns",
+      "source_file": "features/traces/components/traces-components.tsx",
+      "source_location": "L19"
+    },
+    {
       "id": "shared_components_telemetry_detail",
       "label": "telemetry-detail.tsx",
       "_origin": "ast",
@@ -3078,17 +3203,6 @@
       "file_type": "code",
       "norm_label": "telemetry-detail.tsx",
       "source_file": "shared/components/telemetry-detail.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "shared_hooks_use_telemetry_view_params",
-      "label": "use-telemetry-view-params.ts",
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "shared/trace-detail-sheet.tsx",
-      "file_type": "code",
-      "norm_label": "use-telemetry-view-params.ts",
-      "source_file": "shared/hooks/use-telemetry-view-params.ts",
       "source_location": "L1"
     },
     {
@@ -3101,28 +3215,6 @@
       "norm_label": "telemetry.ts",
       "source_file": "shared/lib/telemetry.ts",
       "source_location": "L1"
-    },
-    {
-      "id": "shared_lib_telemetry_default_telemetry_range",
-      "label": "DEFAULT_TELEMETRY_RANGE",
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "shared/trace-detail-sheet.tsx",
-      "file_type": "code",
-      "norm_label": "default_telemetry_range",
-      "source_file": "shared/lib/telemetry.ts",
-      "source_location": "L4"
-    },
-    {
-      "id": "shared_lib_telemetry_telemetry_fetch_limit",
-      "label": "TELEMETRY_FETCH_LIMIT",
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "shared/trace-detail-sheet.tsx",
-      "file_type": "code",
-      "norm_label": "telemetry_fetch_limit",
-      "source_file": "shared/lib/telemetry.ts",
-      "source_location": "L18"
     },
     {
       "id": "shared_lib_trace_waterfall",
@@ -3191,17 +3283,6 @@
       "source_location": "L8"
     },
     {
-      "id": "components_shared_telemetry_widget",
-      "label": "telemetry-widget.tsx",
-      "_origin": "ast",
-      "community": 4,
-      "community_name": "service-detail-page.tsx",
-      "file_type": "code",
-      "norm_label": "telemetry-widget.tsx",
-      "source_file": "components/shared/telemetry-widget.tsx",
-      "source_location": "L1"
-    },
-    {
       "id": "components_ui_card_carddescription",
       "label": "CardDescription",
       "_origin": "ast",
@@ -3221,6 +3302,17 @@
       "file_type": "code",
       "norm_label": "login-page.tsx",
       "source_file": "features/auth/login-page.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "features_services_hooks_use_service_metadata",
+      "label": "use-service-metadata.ts",
+      "_origin": "ast",
+      "community": 4,
+      "community_name": "service-detail-page.tsx",
+      "file_type": "code",
+      "norm_label": "use-service-metadata.ts",
+      "source_file": "features/services/hooks/use-service-metadata.ts",
       "source_location": "L1"
     },
     {
@@ -3400,11 +3492,22 @@
       "source_location": "L802"
     },
     {
+      "id": "features_admin_admin_page",
+      "label": "admin-page.tsx",
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "unwrap",
+      "file_type": "code",
+      "norm_label": "admin-page.tsx",
+      "source_file": "features/admin/admin-page.tsx",
+      "source_location": "L1"
+    },
+    {
       "id": "features_logs_api",
       "label": "logs/api.ts",
       "_origin": "ast",
       "community": 6,
-      "community_name": "ref_react",
+      "community_name": "unwrap",
       "file_type": "code",
       "norm_label": "logs/api.ts",
       "source_file": "features/logs/api.ts",
@@ -3415,7 +3518,7 @@
       "label": "use-logs.tsx",
       "_origin": "ast",
       "community": 6,
-      "community_name": "ref_react",
+      "community_name": "unwrap",
       "file_type": "code",
       "norm_label": "use-logs.tsx",
       "source_file": "features/logs/hooks/use-logs.tsx",
@@ -3426,7 +3529,7 @@
       "label": "metrics/api.ts",
       "_origin": "ast",
       "community": 6,
-      "community_name": "ref_react",
+      "community_name": "unwrap",
       "file_type": "code",
       "norm_label": "metrics/api.ts",
       "source_file": "features/metrics/api.ts",
@@ -3437,21 +3540,10 @@
       "label": "services/api.ts",
       "_origin": "ast",
       "community": 6,
-      "community_name": "ref_react",
+      "community_name": "unwrap",
       "file_type": "code",
       "norm_label": "services/api.ts",
       "source_file": "features/services/api.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "features_services_hooks_use_service_metadata",
-      "label": "use-service-metadata.ts",
-      "_origin": "ast",
-      "community": 6,
-      "community_name": "ref_react",
-      "file_type": "code",
-      "norm_label": "use-service-metadata.ts",
-      "source_file": "features/services/hooks/use-service-metadata.ts",
       "source_location": "L1"
     },
     {
@@ -3459,7 +3551,7 @@
       "label": "use-service-summary.ts",
       "_origin": "ast",
       "community": 6,
-      "community_name": "ref_react",
+      "community_name": "unwrap",
       "file_type": "code",
       "norm_label": "use-service-summary.ts",
       "source_file": "features/services/hooks/use-service-summary.ts",
@@ -3470,7 +3562,7 @@
       "label": "use-services.tsx",
       "_origin": "ast",
       "community": 6,
-      "community_name": "ref_react",
+      "community_name": "unwrap",
       "file_type": "code",
       "norm_label": "use-services.tsx",
       "source_file": "features/services/hooks/use-services.tsx",
@@ -3481,7 +3573,7 @@
       "label": "traces/api.ts",
       "_origin": "ast",
       "community": 6,
-      "community_name": "ref_react",
+      "community_name": "unwrap",
       "file_type": "code",
       "norm_label": "traces/api.ts",
       "source_file": "features/traces/api.ts",
@@ -3492,7 +3584,7 @@
       "label": "use-traces.tsx",
       "_origin": "ast",
       "community": 6,
-      "community_name": "ref_react",
+      "community_name": "unwrap",
       "file_type": "code",
       "norm_label": "use-traces.tsx",
       "source_file": "features/traces/hooks/use-traces.tsx",
@@ -3503,7 +3595,7 @@
       "label": "client.ts",
       "_origin": "ast",
       "community": 6,
-      "community_name": "ref_react",
+      "community_name": "unwrap",
       "file_type": "code",
       "norm_label": "client.ts",
       "source_file": "shared/api/client.ts",
@@ -3514,7 +3606,7 @@
       "label": "api",
       "_origin": "ast",
       "community": 6,
-      "community_name": "ref_react",
+      "community_name": "unwrap",
       "file_type": "code",
       "norm_label": "api",
       "source_file": "shared/api/client.ts",
@@ -3525,7 +3617,7 @@
       "label": "BACKEND_URL",
       "_origin": "ast",
       "community": 6,
-      "community_name": "ref_react",
+      "community_name": "unwrap",
       "file_type": "code",
       "norm_label": "backend_url",
       "source_file": "shared/api/client.ts",
@@ -3536,7 +3628,7 @@
       "label": "telemetry-api.ts",
       "_origin": "ast",
       "community": 6,
-      "community_name": "ref_react",
+      "community_name": "unwrap",
       "file_type": "code",
       "norm_label": "telemetry-api.ts",
       "source_file": "shared/api/telemetry-api.ts",
@@ -3547,7 +3639,7 @@
       "label": "use-active-trace.tsx",
       "_origin": "ast",
       "community": 6,
-      "community_name": "ref_react",
+      "community_name": "unwrap",
       "file_type": "code",
       "norm_label": "use-active-trace.tsx",
       "source_file": "shared/hooks/use-active-trace.tsx",
@@ -3558,7 +3650,7 @@
       "label": "ActiveTraceContext",
       "_origin": "ast",
       "community": 6,
-      "community_name": "ref_react",
+      "community_name": "unwrap",
       "file_type": "code",
       "norm_label": "activetracecontext",
       "source_file": "shared/hooks/use-active-trace.tsx",
@@ -3569,10 +3661,21 @@
       "label": "use-environments.ts",
       "_origin": "ast",
       "community": 6,
-      "community_name": "ref_react",
+      "community_name": "unwrap",
       "file_type": "code",
       "norm_label": "use-environments.ts",
       "source_file": "shared/hooks/use-environments.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "app_components_timer_range_picker",
+      "label": "timer-range.picker.tsx",
+      "_origin": "ast",
+      "community": 7,
+      "community_name": "use-metrics.tsx",
+      "file_type": "code",
+      "norm_label": "timer-range.picker.tsx",
+      "source_file": "app/components/timer-range.picker.tsx",
       "source_location": "L1"
     },
     {
@@ -3675,114 +3778,70 @@
       "source_location": "L1"
     },
     {
-      "id": "components_ui_badge",
-      "label": "badge.tsx",
+      "id": "shared_api_filter_options",
+      "label": "filter-options.ts",
       "_origin": "ast",
       "community": 8,
-      "community_name": "traces-components.tsx",
+      "community_name": "use-filter-options.ts",
       "file_type": "code",
-      "norm_label": "badge.tsx",
-      "source_file": "components/ui/badge.tsx",
+      "norm_label": "filter-options.ts",
+      "source_file": "shared/api/filter-options.ts",
       "source_location": "L1"
     },
     {
-      "id": "components_ui_badge_badgevariants",
-      "label": "badgeVariants",
+      "id": "shared_hooks_use_filter_options",
+      "label": "use-filter-options.ts",
       "_origin": "ast",
       "community": 8,
-      "community_name": "traces-components.tsx",
+      "community_name": "use-filter-options.ts",
       "file_type": "code",
-      "norm_label": "badgevariants",
-      "source_file": "components/ui/badge.tsx",
-      "source_location": "L6"
-    },
-    {
-      "id": "features_logs_components_logs_components",
-      "label": "logs-components.tsx",
-      "_origin": "ast",
-      "community": 8,
-      "community_name": "traces-components.tsx",
-      "file_type": "code",
-      "norm_label": "logs-components.tsx",
-      "source_file": "features/logs/components/logs-components.tsx",
+      "norm_label": "use-filter-options.ts",
+      "source_file": "shared/hooks/use-filter-options.ts",
       "source_location": "L1"
     },
     {
-      "id": "features_logs_components_logs_components_columns",
-      "label": "columns",
+      "id": "shared_hooks_use_filter_options_empty_options",
+      "label": "EMPTY_OPTIONS",
       "_origin": "ast",
       "community": 8,
-      "community_name": "traces-components.tsx",
+      "community_name": "use-filter-options.ts",
       "file_type": "code",
-      "norm_label": "columns",
-      "source_file": "features/logs/components/logs-components.tsx",
-      "source_location": "L40"
+      "norm_label": "empty_options",
+      "source_file": "shared/hooks/use-filter-options.ts",
+      "source_location": "L9"
     },
     {
-      "id": "features_services_components_services_components",
-      "label": "services-components.tsx",
+      "id": "shared_hooks_use_telemetry_view_params",
+      "label": "use-telemetry-view-params.ts",
       "_origin": "ast",
       "community": 8,
-      "community_name": "traces-components.tsx",
+      "community_name": "use-filter-options.ts",
       "file_type": "code",
-      "norm_label": "services-components.tsx",
-      "source_file": "features/services/components/services-components.tsx",
+      "norm_label": "use-telemetry-view-params.ts",
+      "source_file": "shared/hooks/use-telemetry-view-params.ts",
       "source_location": "L1"
     },
     {
-      "id": "features_services_components_services_components_columns",
-      "label": "columns",
+      "id": "shared_lib_telemetry_default_telemetry_range",
+      "label": "DEFAULT_TELEMETRY_RANGE",
       "_origin": "ast",
       "community": 8,
-      "community_name": "traces-components.tsx",
+      "community_name": "use-filter-options.ts",
       "file_type": "code",
-      "norm_label": "columns",
-      "source_file": "features/services/components/services-components.tsx",
-      "source_location": "L8"
+      "norm_label": "default_telemetry_range",
+      "source_file": "shared/lib/telemetry.ts",
+      "source_location": "L4"
     },
     {
-      "id": "features_traces_components_traces_components",
-      "label": "traces-components.tsx",
+      "id": "shared_lib_telemetry_telemetry_fetch_limit",
+      "label": "TELEMETRY_FETCH_LIMIT",
       "_origin": "ast",
       "community": 8,
-      "community_name": "traces-components.tsx",
+      "community_name": "use-filter-options.ts",
       "file_type": "code",
-      "norm_label": "traces-components.tsx",
-      "source_file": "features/traces/components/traces-components.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "features_traces_components_traces_components_columns",
-      "label": "columns",
-      "_origin": "ast",
-      "community": 8,
-      "community_name": "traces-components.tsx",
-      "file_type": "code",
-      "norm_label": "columns",
-      "source_file": "features/traces/components/traces-components.tsx",
-      "source_location": "L19"
-    },
-    {
-      "id": "app_components_timer_range_picker",
-      "label": "timer-range.picker.tsx",
-      "_origin": "ast",
-      "community": 9,
-      "community_name": "admin-page.tsx",
-      "file_type": "code",
-      "norm_label": "timer-range.picker.tsx",
-      "source_file": "app/components/timer-range.picker.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "features_admin_admin_page",
-      "label": "admin-page.tsx",
-      "_origin": "ast",
-      "community": 9,
-      "community_name": "admin-page.tsx",
-      "file_type": "code",
-      "norm_label": "admin-page.tsx",
-      "source_file": "features/admin/admin-page.tsx",
-      "source_location": "L1"
+      "norm_label": "telemetry_fetch_limit",
+      "source_file": "shared/lib/telemetry.ts",
+      "source_location": "L18"
     },
     {
       "id": "components_ui_dropdown_menu",
@@ -3979,17 +4038,6 @@
       "external": true,
       "file_type": "concept",
       "norm_label": "features_services_types_empty_metadata",
-      "source_file": "",
-      "type": "external"
-    },
-    {
-      "id": "features_services_types_servicemetadata",
-      "label": "features_services_types_servicemetadata",
-      "community": 0,
-      "community_name": "data-table.tsx",
-      "external": true,
-      "file_type": "concept",
-      "norm_label": "features_services_types_servicemetadata",
       "source_file": "",
       "type": "external"
     },
@@ -4434,6 +4482,28 @@
       "type": "external"
     },
     {
+      "id": "features_services_model",
+      "label": "features_services_model",
+      "community": 2,
+      "community_name": "app.tsx",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "features_services_model",
+      "source_file": "",
+      "type": "external"
+    },
+    {
+      "id": "features_services_model_servicerow",
+      "label": "features_services_model_servicerow",
+      "community": 2,
+      "community_name": "app.tsx",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "features_services_model_servicerow",
+      "source_file": "",
+      "type": "external"
+    },
+    {
       "id": "features_traces_index",
       "label": "features_traces_index",
       "community": 2,
@@ -4452,6 +4522,17 @@
       "external": true,
       "file_type": "concept",
       "norm_label": "ref_react_router_dom",
+      "source_file": "",
+      "type": "external"
+    },
+    {
+      "id": "ref_tanstack_react_table",
+      "label": "ref_tanstack_react_table",
+      "community": 2,
+      "community_name": "app.tsx",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "ref_tanstack_react_table",
       "source_file": "",
       "type": "external"
     },
@@ -4588,6 +4669,83 @@
       "type": "external"
     },
     {
+      "id": "features_logs_types",
+      "label": "features_logs_types",
+      "community": 3,
+      "community_name": "shared/trace-detail-sheet.tsx",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "features_logs_types",
+      "source_file": "",
+      "type": "external"
+    },
+    {
+      "id": "features_logs_types_logrecord",
+      "label": "features_logs_types_logrecord",
+      "community": 3,
+      "community_name": "shared/trace-detail-sheet.tsx",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "features_logs_types_logrecord",
+      "source_file": "",
+      "type": "external"
+    },
+    {
+      "id": "features_traces_types",
+      "label": "features_traces_types",
+      "community": 3,
+      "community_name": "shared/trace-detail-sheet.tsx",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "features_traces_types",
+      "source_file": "",
+      "type": "external"
+    },
+    {
+      "id": "features_traces_types_tracesummary",
+      "label": "features_traces_types_tracesummary",
+      "community": 3,
+      "community_name": "shared/trace-detail-sheet.tsx",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "features_traces_types_tracesummary",
+      "source_file": "",
+      "type": "external"
+    },
+    {
+      "id": "lib_utils",
+      "label": "lib_utils",
+      "community": 3,
+      "community_name": "shared/trace-detail-sheet.tsx",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "lib_utils",
+      "source_file": "",
+      "type": "external"
+    },
+    {
+      "id": "lib_utils_cn",
+      "label": "lib_utils_cn",
+      "community": 3,
+      "community_name": "shared/trace-detail-sheet.tsx",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "lib_utils_cn",
+      "source_file": "",
+      "type": "external"
+    },
+    {
+      "id": "ref_class_variance_authority",
+      "label": "ref_class_variance_authority",
+      "community": 3,
+      "community_name": "shared/trace-detail-sheet.tsx",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "ref_class_variance_authority",
+      "source_file": "",
+      "type": "external"
+    },
+    {
       "id": "ref_date_fns",
       "label": "ref_date_fns",
       "community": 3,
@@ -4595,6 +4753,28 @@
       "external": true,
       "file_type": "concept",
       "norm_label": "ref_date_fns",
+      "source_file": "",
+      "type": "external"
+    },
+    {
+      "id": "shared_lib_time_range",
+      "label": "shared_lib_time_range",
+      "community": 3,
+      "community_name": "shared/trace-detail-sheet.tsx",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "shared_lib_time_range",
+      "source_file": "",
+      "type": "external"
+    },
+    {
+      "id": "shared_lib_time_range_parsetimerange",
+      "label": "shared_lib_time_range_parsetimerange",
+      "community": 3,
+      "community_name": "shared/trace-detail-sheet.tsx",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "shared_lib_time_range_parsetimerange",
       "source_file": "",
       "type": "external"
     },
@@ -4621,24 +4801,35 @@
       "type": "external"
     },
     {
-      "id": "lib_utils",
-      "label": "lib_utils",
+      "id": "features_services_types",
+      "label": "features_services_types",
       "community": 4,
       "community_name": "service-detail-page.tsx",
       "external": true,
       "file_type": "concept",
-      "norm_label": "lib_utils",
+      "norm_label": "features_services_types",
       "source_file": "",
       "type": "external"
     },
     {
-      "id": "lib_utils_cn",
-      "label": "lib_utils_cn",
+      "id": "features_services_types_servicemetadata",
+      "label": "features_services_types_servicemetadata",
       "community": 4,
       "community_name": "service-detail-page.tsx",
       "external": true,
       "file_type": "concept",
-      "norm_label": "lib_utils_cn",
+      "norm_label": "features_services_types_servicemetadata",
+      "source_file": "",
+      "type": "external"
+    },
+    {
+      "id": "ref_react",
+      "label": "ref_react",
+      "community": 4,
+      "community_name": "service-detail-page.tsx",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "ref_react",
       "source_file": "",
       "type": "external"
     },
@@ -4679,7 +4870,7 @@
       "id": "features_logs_model",
       "label": "features_logs_model",
       "community": 6,
-      "community_name": "ref_react",
+      "community_name": "unwrap",
       "external": true,
       "file_type": "concept",
       "norm_label": "features_logs_model",
@@ -4690,7 +4881,7 @@
       "id": "features_logs_model_normalizeseverity",
       "label": "features_logs_model_normalizeseverity",
       "community": 6,
-      "community_name": "ref_react",
+      "community_name": "unwrap",
       "external": true,
       "file_type": "concept",
       "norm_label": "features_logs_model_normalizeseverity",
@@ -4698,32 +4889,10 @@
       "type": "external"
     },
     {
-      "id": "features_logs_types",
-      "label": "features_logs_types",
-      "community": 6,
-      "community_name": "ref_react",
-      "external": true,
-      "file_type": "concept",
-      "norm_label": "features_logs_types",
-      "source_file": "",
-      "type": "external"
-    },
-    {
-      "id": "features_logs_types_logrecord",
-      "label": "features_logs_types_logrecord",
-      "community": 6,
-      "community_name": "ref_react",
-      "external": true,
-      "file_type": "concept",
-      "norm_label": "features_logs_types_logrecord",
-      "source_file": "",
-      "type": "external"
-    },
-    {
       "id": "features_metrics_types",
       "label": "features_metrics_types",
       "community": 6,
-      "community_name": "ref_react",
+      "community_name": "unwrap",
       "external": true,
       "file_type": "concept",
       "norm_label": "features_metrics_types",
@@ -4734,7 +4903,7 @@
       "id": "features_metrics_types_metricrecord",
       "label": "features_metrics_types_metricrecord",
       "community": 6,
-      "community_name": "ref_react",
+      "community_name": "unwrap",
       "external": true,
       "file_type": "concept",
       "norm_label": "features_metrics_types_metricrecord",
@@ -4745,7 +4914,7 @@
       "id": "features_metrics_types_metricspage",
       "label": "features_metrics_types_metricspage",
       "community": 6,
-      "community_name": "ref_react",
+      "community_name": "unwrap",
       "external": true,
       "file_type": "concept",
       "norm_label": "features_metrics_types_metricspage",
@@ -4756,7 +4925,7 @@
       "id": "features_services_model_mapservicetorow",
       "label": "features_services_model_mapservicetorow",
       "community": 6,
-      "community_name": "ref_react",
+      "community_name": "unwrap",
       "external": true,
       "file_type": "concept",
       "norm_label": "features_services_model_mapservicetorow",
@@ -4764,21 +4933,10 @@
       "type": "external"
     },
     {
-      "id": "features_services_types",
-      "label": "features_services_types",
-      "community": 6,
-      "community_name": "ref_react",
-      "external": true,
-      "file_type": "concept",
-      "norm_label": "features_services_types",
-      "source_file": "",
-      "type": "external"
-    },
-    {
       "id": "features_services_types_servicemetrics",
       "label": "features_services_types_servicemetrics",
       "community": 6,
-      "community_name": "ref_react",
+      "community_name": "unwrap",
       "external": true,
       "file_type": "concept",
       "norm_label": "features_services_types_servicemetrics",
@@ -4789,7 +4947,7 @@
       "id": "features_services_types_servicesummary",
       "label": "features_services_types_servicesummary",
       "community": 6,
-      "community_name": "ref_react",
+      "community_name": "unwrap",
       "external": true,
       "file_type": "concept",
       "norm_label": "features_services_types_servicesummary",
@@ -4800,7 +4958,7 @@
       "id": "features_traces_model",
       "label": "features_traces_model",
       "community": 6,
-      "community_name": "ref_react",
+      "community_name": "unwrap",
       "external": true,
       "file_type": "concept",
       "norm_label": "features_traces_model",
@@ -4811,7 +4969,7 @@
       "id": "features_traces_model_sidebar_storage_key",
       "label": "features_traces_model_sidebar_storage_key",
       "community": 6,
-      "community_name": "ref_react",
+      "community_name": "unwrap",
       "external": true,
       "file_type": "concept",
       "norm_label": "features_traces_model_sidebar_storage_key",
@@ -4819,21 +4977,10 @@
       "type": "external"
     },
     {
-      "id": "features_traces_types",
-      "label": "features_traces_types",
-      "community": 6,
-      "community_name": "ref_react",
-      "external": true,
-      "file_type": "concept",
-      "norm_label": "features_traces_types",
-      "source_file": "",
-      "type": "external"
-    },
-    {
       "id": "features_traces_types_tracespan",
       "label": "features_traces_types_tracespan",
       "community": 6,
-      "community_name": "ref_react",
+      "community_name": "unwrap",
       "external": true,
       "file_type": "concept",
       "norm_label": "features_traces_types_tracespan",
@@ -4841,24 +4988,13 @@
       "type": "external"
     },
     {
-      "id": "features_traces_types_tracesummary",
-      "label": "features_traces_types_tracesummary",
+      "id": "ref_axios",
+      "label": "ref_axios",
       "community": 6,
-      "community_name": "ref_react",
+      "community_name": "unwrap",
       "external": true,
       "file_type": "concept",
-      "norm_label": "features_traces_types_tracesummary",
-      "source_file": "",
-      "type": "external"
-    },
-    {
-      "id": "ref_react",
-      "label": "ref_react",
-      "community": 6,
-      "community_name": "ref_react",
-      "external": true,
-      "file_type": "concept",
-      "norm_label": "ref_react",
+      "norm_label": "ref_axios",
       "source_file": "",
       "type": "external"
     },
@@ -4866,7 +5002,7 @@
       "id": "shared_hooks_use_telemetry_query",
       "label": "shared_hooks_use_telemetry_query",
       "community": 6,
-      "community_name": "ref_react",
+      "community_name": "unwrap",
       "external": true,
       "file_type": "concept",
       "norm_label": "shared_hooks_use_telemetry_query",
@@ -4877,7 +5013,7 @@
       "id": "shared_hooks_use_telemetry_query_usetelemetryquery",
       "label": "shared_hooks_use_telemetry_query_usetelemetryquery",
       "community": 6,
-      "community_name": "ref_react",
+      "community_name": "unwrap",
       "external": true,
       "file_type": "concept",
       "norm_label": "shared_hooks_use_telemetry_query_usetelemetryquery",
@@ -4888,7 +5024,7 @@
       "id": "shared_hooks_use_telemetry_stream",
       "label": "shared_hooks_use_telemetry_stream",
       "community": 6,
-      "community_name": "ref_react",
+      "community_name": "unwrap",
       "external": true,
       "file_type": "concept",
       "norm_label": "shared_hooks_use_telemetry_stream",
@@ -4899,7 +5035,7 @@
       "id": "shared_hooks_use_telemetry_stream_usetelemetrystream",
       "label": "shared_hooks_use_telemetry_stream_usetelemetrystream",
       "community": 6,
-      "community_name": "ref_react",
+      "community_name": "unwrap",
       "external": true,
       "file_type": "concept",
       "norm_label": "shared_hooks_use_telemetry_stream_usetelemetrystream",
@@ -4910,7 +5046,7 @@
       "id": "shared_lib_errors",
       "label": "shared_lib_errors",
       "community": 6,
-      "community_name": "ref_react",
+      "community_name": "unwrap",
       "external": true,
       "file_type": "concept",
       "norm_label": "shared_lib_errors",
@@ -4921,7 +5057,7 @@
       "id": "shared_lib_errors_geterrormessage",
       "label": "shared_lib_errors_geterrormessage",
       "community": 6,
-      "community_name": "ref_react",
+      "community_name": "unwrap",
       "external": true,
       "file_type": "concept",
       "norm_label": "shared_lib_errors_geterrormessage",
@@ -4932,7 +5068,7 @@
       "id": "shared_types_telemetry",
       "label": "shared_types_telemetry",
       "community": 6,
-      "community_name": "ref_react",
+      "community_name": "unwrap",
       "external": true,
       "file_type": "concept",
       "norm_label": "shared_types_telemetry",
@@ -4943,7 +5079,7 @@
       "id": "shared_types_telemetry_apienvelope",
       "label": "shared_types_telemetry_apienvelope",
       "community": 6,
-      "community_name": "ref_react",
+      "community_name": "unwrap",
       "external": true,
       "file_type": "concept",
       "norm_label": "shared_types_telemetry_apienvelope",
@@ -4954,10 +5090,32 @@
       "id": "shared_types_telemetry_telemetryevent",
       "label": "shared_types_telemetry_telemetryevent",
       "community": 6,
-      "community_name": "ref_react",
+      "community_name": "unwrap",
       "external": true,
       "file_type": "concept",
       "norm_label": "shared_types_telemetry_telemetryevent",
+      "source_file": "",
+      "type": "external"
+    },
+    {
+      "id": "components_ui_input",
+      "label": "components_ui_input",
+      "community": 7,
+      "community_name": "use-metrics.tsx",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "components_ui_input",
+      "source_file": "",
+      "type": "external"
+    },
+    {
+      "id": "components_ui_input_input",
+      "label": "components_ui_input_input",
+      "community": 7,
+      "community_name": "use-metrics.tsx",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "components_ui_input_input",
       "source_file": "",
       "type": "external"
     },
@@ -5050,98 +5208,10 @@
       "type": "external"
     },
     {
-      "id": "features_services_model",
-      "label": "features_services_model",
-      "community": 8,
-      "community_name": "traces-components.tsx",
-      "external": true,
-      "file_type": "concept",
-      "norm_label": "features_services_model",
-      "source_file": "",
-      "type": "external"
-    },
-    {
-      "id": "features_services_model_servicerow",
-      "label": "features_services_model_servicerow",
-      "community": 8,
-      "community_name": "traces-components.tsx",
-      "external": true,
-      "file_type": "concept",
-      "norm_label": "features_services_model_servicerow",
-      "source_file": "",
-      "type": "external"
-    },
-    {
-      "id": "ref_class_variance_authority",
-      "label": "ref_class_variance_authority",
-      "community": 8,
-      "community_name": "traces-components.tsx",
-      "external": true,
-      "file_type": "concept",
-      "norm_label": "ref_class_variance_authority",
-      "source_file": "",
-      "type": "external"
-    },
-    {
-      "id": "ref_tanstack_react_table",
-      "label": "ref_tanstack_react_table",
-      "community": 8,
-      "community_name": "traces-components.tsx",
-      "external": true,
-      "file_type": "concept",
-      "norm_label": "ref_tanstack_react_table",
-      "source_file": "",
-      "type": "external"
-    },
-    {
-      "id": "components_ui_input",
-      "label": "components_ui_input",
-      "community": 9,
-      "community_name": "admin-page.tsx",
-      "external": true,
-      "file_type": "concept",
-      "norm_label": "components_ui_input",
-      "source_file": "",
-      "type": "external"
-    },
-    {
-      "id": "components_ui_input_input",
-      "label": "components_ui_input_input",
-      "community": 9,
-      "community_name": "admin-page.tsx",
-      "external": true,
-      "file_type": "concept",
-      "norm_label": "components_ui_input_input",
-      "source_file": "",
-      "type": "external"
-    },
-    {
-      "id": "ref_axios",
-      "label": "ref_axios",
-      "community": 9,
-      "community_name": "admin-page.tsx",
-      "external": true,
-      "file_type": "concept",
-      "norm_label": "ref_axios",
-      "source_file": "",
-      "type": "external"
-    },
-    {
-      "id": "shared_lib_time_range",
-      "label": "shared_lib_time_range",
-      "community": 9,
-      "community_name": "admin-page.tsx",
-      "external": true,
-      "file_type": "concept",
-      "norm_label": "shared_lib_time_range",
-      "source_file": "",
-      "type": "external"
-    },
-    {
       "id": "shared_lib_time_range_friendlylabel",
       "label": "shared_lib_time_range_friendlylabel",
-      "community": 9,
-      "community_name": "admin-page.tsx",
+      "community": 7,
+      "community_name": "use-metrics.tsx",
       "external": true,
       "file_type": "concept",
       "norm_label": "shared_lib_time_range_friendlylabel",
@@ -5149,21 +5219,10 @@
       "type": "external"
     },
     {
-      "id": "shared_lib_time_range_parsetimerange",
-      "label": "shared_lib_time_range_parsetimerange",
-      "community": 9,
-      "community_name": "admin-page.tsx",
-      "external": true,
-      "file_type": "concept",
-      "norm_label": "shared_lib_time_range_parsetimerange",
-      "source_file": "",
-      "type": "external"
-    },
-    {
       "id": "shared_lib_time_range_time_presets",
       "label": "shared_lib_time_range_time_presets",
-      "community": 9,
-      "community_name": "admin-page.tsx",
+      "community": 7,
+      "community_name": "use-metrics.tsx",
       "external": true,
       "file_type": "concept",
       "norm_label": "shared_lib_time_range_time_presets",
@@ -5173,8 +5232,8 @@
     {
       "id": "shared_lib_time_range_timerangespec",
       "label": "shared_lib_time_range_timerangespec",
-      "community": 9,
-      "community_name": "admin-page.tsx",
+      "community": 7,
+      "community_name": "use-metrics.tsx",
       "external": true,
       "file_type": "concept",
       "norm_label": "shared_lib_time_range_timerangespec",
@@ -5540,43 +5599,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "components/shared/app-filter-sidebar.tsx",
-      "source_location": "L204",
-      "weight": 1.0
-    },
-    {
-      "source": "components_shared_app_filter_sidebar_appfiltersidebar",
-      "target": "components_shared_app_filter_sidebar_serviceselector",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "components/shared/app-filter-sidebar.tsx",
-      "source_location": "L206",
-      "weight": 1.0
-    },
-    {
-      "source": "components_shared_app_filter_sidebar_appfiltersidebar",
-      "target": "components_shared_app_filter_sidebar_facetselector",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "components/shared/app-filter-sidebar.tsx",
-      "source_location": "L213",
-      "weight": 1.0
-    },
-    {
-      "source": "components_shared_app_filter_sidebar_facetselector",
-      "target": "components_ui_badge_badge",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "components/shared/app-filter-sidebar.tsx",
-      "source_location": "L171",
+      "source_location": "L45",
       "weight": 1.0
     },
     {
@@ -5905,14 +5928,14 @@
     },
     {
       "source": "features_logs_components_logs_view_logsview",
-      "target": "shared_components_feature_layout_featureemptystate",
+      "target": "features_logs_components_log_detail_sheet_logdetailsheet",
       "relation": "calls",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "features/logs/components/logs-view.tsx",
-      "source_location": "L106",
+      "source_location": "L116",
       "weight": 1.0
     },
     {
@@ -5924,7 +5947,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "features/logs/components/logs-view.tsx",
-      "source_location": "L48",
+      "source_location": "L42",
       "weight": 1.0
     },
     {
@@ -5936,7 +5959,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "features/logs/components/logs-view.tsx",
-      "source_location": "L49",
+      "source_location": "L43",
       "weight": 1.0
     },
     {
@@ -5948,7 +5971,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "features/logs/components/logs-view.tsx",
-      "source_location": "L55",
+      "source_location": "L49",
       "weight": 1.0
     },
     {
@@ -5960,7 +5983,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "features/logs/components/logs-view.tsx",
-      "source_location": "L65",
+      "source_location": "L59",
       "weight": 1.0
     },
     {
@@ -5972,7 +5995,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "features/logs/components/logs-view.tsx",
-      "source_location": "L66",
+      "source_location": "L60",
       "weight": 1.0
     },
     {
@@ -5984,7 +6007,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "features/logs/components/logs-view.tsx",
-      "source_location": "L81",
+      "source_location": "L68",
       "weight": 1.0
     },
     {
@@ -5996,7 +6019,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "features/logs/components/logs-view.tsx",
-      "source_location": "L88",
+      "source_location": "L75",
       "weight": 1.0
     },
     {
@@ -6008,7 +6031,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "features/logs/components/logs-view.tsx",
-      "source_location": "L90",
+      "source_location": "L77",
       "weight": 1.0
     },
     {
@@ -6020,7 +6043,19 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "features/logs/components/logs-view.tsx",
-      "source_location": "L92",
+      "source_location": "L79",
+      "weight": 1.0
+    },
+    {
+      "source": "features_logs_components_logs_view_logsview",
+      "target": "shared_components_feature_layout_featureemptystate",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "features/logs/components/logs-view.tsx",
+      "source_location": "L93",
       "weight": 1.0
     },
     {
@@ -7585,18 +7620,6 @@
     },
     {
       "source": "features_traces_components_traces_view_tracesview",
-      "target": "shared_components_feature_layout_featureemptystate",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "features/traces/components/traces-view.tsx",
-      "source_location": "L112",
-      "weight": 1.0
-    },
-    {
-      "source": "features_traces_components_traces_view_tracesview",
       "target": "shared_hooks_use_active_trace_useactivetrace",
       "relation": "calls",
       "_origin": "ast",
@@ -7604,7 +7627,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "features/traces/components/traces-view.tsx",
-      "source_location": "L44",
+      "source_location": "L38",
       "weight": 1.0
     },
     {
@@ -7616,7 +7639,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "features/traces/components/traces-view.tsx",
-      "source_location": "L47",
+      "source_location": "L41",
       "weight": 1.0
     },
     {
@@ -7628,7 +7651,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "features/traces/components/traces-view.tsx",
-      "source_location": "L49",
+      "source_location": "L43",
       "weight": 1.0
     },
     {
@@ -7640,7 +7663,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "features/traces/components/traces-view.tsx",
-      "source_location": "L55",
+      "source_location": "L49",
       "weight": 1.0
     },
     {
@@ -7652,7 +7675,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "features/traces/components/traces-view.tsx",
-      "source_location": "L67",
+      "source_location": "L61",
       "weight": 1.0
     },
     {
@@ -7664,7 +7687,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "features/traces/components/traces-view.tsx",
-      "source_location": "L70",
+      "source_location": "L64",
       "weight": 1.0
     },
     {
@@ -7676,7 +7699,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "features/traces/components/traces-view.tsx",
-      "source_location": "L86",
+      "source_location": "L73",
       "weight": 1.0
     },
     {
@@ -7688,7 +7711,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "features/traces/components/traces-view.tsx",
-      "source_location": "L94",
+      "source_location": "L81",
       "weight": 1.0
     },
     {
@@ -7700,7 +7723,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "features/traces/components/traces-view.tsx",
-      "source_location": "L96",
+      "source_location": "L83",
       "weight": 1.0
     },
     {
@@ -7712,7 +7735,19 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "features/traces/components/traces-view.tsx",
-      "source_location": "L98",
+      "source_location": "L85",
+      "weight": 1.0
+    },
+    {
+      "source": "features_traces_components_traces_view_tracesview",
+      "target": "shared_components_feature_layout_featureemptystate",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "features/traces/components/traces-view.tsx",
+      "source_location": "L99",
       "weight": 1.0
     },
     {
@@ -7749,6 +7784,18 @@
       "context": "call",
       "source_file": "features/traces/hooks/use-traces.tsx",
       "source_location": "L60",
+      "weight": 1.0
+    },
+    {
+      "source": "shared_api_filter_options_getfilteroptions",
+      "target": "shared_api_client_unwrap",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "shared/api/filter-options.ts",
+      "source_location": "L32",
       "weight": 1.0
     },
     {
@@ -7952,7 +7999,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "shared/components/unified-filter-sidebar.tsx",
-      "source_location": "L70",
+      "source_location": "L51",
       "weight": 1.0
     },
     {
@@ -7964,7 +8011,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "shared/components/unified-filter-sidebar.tsx",
-      "source_location": "L14",
+      "source_location": "L11",
       "weight": 1.0
     },
     {
@@ -7976,31 +8023,19 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "shared/components/unified-filter-sidebar.tsx",
-      "source_location": "L16",
+      "source_location": "L13",
       "weight": 1.0
     },
     {
       "source": "shared_components_unified_filter_sidebar_unifiedfiltersidebar",
-      "target": "shared_lib_telemetry_resolvetelemetryrange",
+      "target": "shared_hooks_use_filter_options_usefilteroptions",
       "relation": "calls",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "shared/components/unified-filter-sidebar.tsx",
-      "source_location": "L30",
-      "weight": 1.0
-    },
-    {
-      "source": "shared_components_unified_filter_sidebar_unifiedfiltersidebar",
-      "target": "shared_api_client_unwrap",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "shared/components/unified-filter-sidebar.tsx",
-      "source_location": "L32",
+      "source_location": "L18",
       "weight": 1.0
     },
     {
@@ -8012,7 +8047,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "shared/components/unified-filter-sidebar.tsx",
-      "source_location": "L48",
+      "source_location": "L31",
       "weight": 1.0
     },
     {
@@ -8025,6 +8060,30 @@
       "context": "call",
       "source_file": "shared/hooks/use-active-trace.tsx",
       "source_location": "L45",
+      "weight": 1.0
+    },
+    {
+      "source": "shared_hooks_use_filter_options_usefilteroptions",
+      "target": "shared_lib_telemetry_resolvetelemetryrange",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "shared/hooks/use-filter-options.ts",
+      "source_location": "L32",
+      "weight": 1.0
+    },
+    {
+      "source": "shared_hooks_use_filter_options_usefilteroptions",
+      "target": "shared_api_filter_options_getfilteroptions",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "shared/hooks/use-filter-options.ts",
+      "source_location": "L33",
       "weight": 1.0
     },
     {
@@ -8156,7 +8215,7 @@
       "confidence_score": 1.0,
       "context": "field",
       "source_file": "components/shared/app-filter-sidebar.tsx",
-      "source_location": "L26",
+      "source_location": "L24",
       "weight": 1.0
     },
     {
@@ -8752,7 +8811,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "components/shared/app-filter-sidebar.tsx",
-      "source_location": "L13",
+      "source_location": "L11",
       "weight": 1.0
     },
     {
@@ -8764,19 +8823,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "components/shared/app-filter-sidebar.tsx",
-      "source_location": "L14",
-      "weight": 1.0
-    },
-    {
-      "source": "components_shared_app_filter_sidebar",
-      "target": "components_ui_badge_badge",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "components/shared/app-filter-sidebar.tsx",
-      "source_location": "L3",
+      "source_location": "L12",
       "weight": 1.0
     },
     {
@@ -8788,19 +8835,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "components/shared/app-filter-sidebar.tsx",
-      "source_location": "L4",
-      "weight": 1.0
-    },
-    {
-      "source": "components_shared_app_filter_sidebar",
-      "target": "components_ui_checkbox_checkbox",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "components/shared/app-filter-sidebar.tsx",
-      "source_location": "L5",
+      "source_location": "L3",
       "weight": 1.0
     },
     {
@@ -8812,7 +8847,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "components/shared/app-filter-sidebar.tsx",
-      "source_location": "L6",
+      "source_location": "L4",
       "weight": 1.0
     },
     {
@@ -8824,7 +8859,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "components/shared/app-filter-sidebar.tsx",
-      "source_location": "L6",
+      "source_location": "L4",
       "weight": 1.0
     },
     {
@@ -8836,7 +8871,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "components/shared/app-filter-sidebar.tsx",
-      "source_location": "L6",
+      "source_location": "L4",
       "weight": 1.0
     },
     {
@@ -8848,7 +8883,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "components/shared/app-filter-sidebar.tsx",
-      "source_location": "L6",
+      "source_location": "L4",
       "weight": 1.0
     },
     {
@@ -8860,7 +8895,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "components/shared/app-filter-sidebar.tsx",
-      "source_location": "L6",
+      "source_location": "L4",
       "weight": 1.0
     },
     {
@@ -13016,6 +13051,30 @@
       "weight": 1.0
     },
     {
+      "source": "shared_api_filter_options",
+      "target": "shared_api_client_api",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "shared/api/filter-options.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "shared_api_filter_options",
+      "target": "shared_api_client_unwrap",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "shared/api/filter-options.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
       "source": "shared_api_telemetry_api",
       "target": "shared_api_client_api",
       "relation": "imports",
@@ -13636,31 +13695,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "shared/components/unified-filter-sidebar.tsx",
-      "source_location": "L3",
-      "weight": 1.0
-    },
-    {
-      "source": "shared_components_unified_filter_sidebar",
-      "target": "shared_api_client_api",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "shared/components/unified-filter-sidebar.tsx",
-      "source_location": "L4",
-      "weight": 1.0
-    },
-    {
-      "source": "shared_components_unified_filter_sidebar",
-      "target": "shared_api_client_unwrap",
-      "relation": "imports",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "shared/components/unified-filter-sidebar.tsx",
-      "source_location": "L4",
+      "source_location": "L2",
       "weight": 1.0
     },
     {
@@ -13672,7 +13707,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "shared/components/unified-filter-sidebar.tsx",
-      "source_location": "L5",
+      "source_location": "L3",
       "weight": 1.0
     },
     {
@@ -13684,7 +13719,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "shared/components/unified-filter-sidebar.tsx",
-      "source_location": "L6",
+      "source_location": "L4",
       "weight": 1.0
     },
     {
@@ -13696,19 +13731,31 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "shared/components/unified-filter-sidebar.tsx",
-      "source_location": "L7",
+      "source_location": "L5",
       "weight": 1.0
     },
     {
       "source": "shared_components_unified_filter_sidebar",
-      "target": "shared_lib_telemetry_resolvetelemetryrange",
+      "target": "shared_hooks_use_filter_options_usefilteroptions",
       "relation": "imports",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "shared/components/unified-filter-sidebar.tsx",
-      "source_location": "L8",
+      "source_location": "L6",
+      "weight": 1.0
+    },
+    {
+      "source": "shared_components_unified_filter_sidebar",
+      "target": "shared_api_filter_options_filteroptionssource",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "shared/components/unified-filter-sidebar.tsx",
+      "source_location": "L7",
       "weight": 1.0
     },
     {
@@ -13769,6 +13816,54 @@
       "context": "import",
       "source_file": "shared/hooks/use-environments.ts",
       "source_location": "L3",
+      "weight": 1.0
+    },
+    {
+      "source": "shared_hooks_use_filter_options",
+      "target": "shared_api_filter_options_filteroptions",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "shared/hooks/use-filter-options.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "shared_hooks_use_filter_options",
+      "target": "shared_api_filter_options_filteroptionssource",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "shared/hooks/use-filter-options.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "shared_hooks_use_filter_options",
+      "target": "shared_api_filter_options_getfilteroptions",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "shared/hooks/use-filter-options.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "shared_hooks_use_filter_options",
+      "target": "shared_lib_telemetry_resolvetelemetryrange",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "shared/hooks/use-filter-options.ts",
+      "source_location": "L7",
       "weight": 1.0
     },
     {
@@ -14212,7 +14307,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "components/shared/app-filter-sidebar.tsx",
-      "source_location": "L13",
+      "source_location": "L11",
       "weight": 1.0
     },
     {
@@ -14224,7 +14319,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "components/shared/app-filter-sidebar.tsx",
-      "source_location": "L14",
+      "source_location": "L12",
       "type_only": true,
       "weight": 1.0
     },
@@ -14242,7 +14337,7 @@
     },
     {
       "source": "components_shared_app_filter_sidebar",
-      "target": "components_ui_badge",
+      "target": "components_ui_button",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -14254,30 +14349,6 @@
     },
     {
       "source": "components_shared_app_filter_sidebar",
-      "target": "components_ui_button",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "components/shared/app-filter-sidebar.tsx",
-      "source_location": "L4",
-      "weight": 1.0
-    },
-    {
-      "source": "components_shared_app_filter_sidebar",
-      "target": "components_ui_checkbox",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "components/shared/app-filter-sidebar.tsx",
-      "source_location": "L5",
-      "weight": 1.0
-    },
-    {
-      "source": "components_shared_app_filter_sidebar",
       "target": "components_ui_sheet",
       "relation": "imports_from",
       "_origin": "ast",
@@ -14285,7 +14356,7 @@
       "confidence_score": 1.0,
       "context": "import",
       "source_file": "components/shared/app-filter-sidebar.tsx",
-      "source_location": "L6",
+      "source_location": "L4",
       "weight": 1.0
     },
     {
@@ -17442,6 +17513,18 @@
       "weight": 1.0
     },
     {
+      "source": "shared_api_filter_options",
+      "target": "shared_api_client",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "shared/api/filter-options.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
       "source": "shared_api_telemetry_api",
       "target": "shared_api_client",
       "relation": "imports_from",
@@ -17938,7 +18021,7 @@
     },
     {
       "source": "shared_components_unified_filter_sidebar",
-      "target": "ref_react",
+      "target": "ref_react_router_dom",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -17950,7 +18033,7 @@
     },
     {
       "source": "shared_components_unified_filter_sidebar",
-      "target": "ref_react_router_dom",
+      "target": "features_auth_auth_context",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -17962,7 +18045,7 @@
     },
     {
       "source": "shared_components_unified_filter_sidebar",
-      "target": "features_auth_auth_context",
+      "target": "components_ui_button",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -17974,7 +18057,7 @@
     },
     {
       "source": "shared_components_unified_filter_sidebar",
-      "target": "shared_api_client",
+      "target": "shared_components_filter_multiselect",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -17986,7 +18069,7 @@
     },
     {
       "source": "shared_components_unified_filter_sidebar",
-      "target": "components_ui_button",
+      "target": "shared_lib_platform_filters",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -17998,7 +18081,7 @@
     },
     {
       "source": "shared_components_unified_filter_sidebar",
-      "target": "shared_components_filter_multiselect",
+      "target": "shared_hooks_use_filter_options",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -18010,7 +18093,7 @@
     },
     {
       "source": "shared_components_unified_filter_sidebar",
-      "target": "shared_lib_platform_filters",
+      "target": "shared_api_filter_options",
       "relation": "imports_from",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -18018,18 +18101,7 @@
       "context": "import",
       "source_file": "shared/components/unified-filter-sidebar.tsx",
       "source_location": "L7",
-      "weight": 1.0
-    },
-    {
-      "source": "shared_components_unified_filter_sidebar",
-      "target": "shared_lib_telemetry",
-      "relation": "imports_from",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "import",
-      "source_file": "shared/components/unified-filter-sidebar.tsx",
-      "source_location": "L8",
+      "type_only": true,
       "weight": 1.0
     },
     {
@@ -18103,6 +18175,42 @@
       "source_file": "shared/hooks/use-environments.ts",
       "source_location": "L3",
       "type_only": true,
+      "weight": 1.0
+    },
+    {
+      "source": "shared_hooks_use_filter_options",
+      "target": "ref_react",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "shared/hooks/use-filter-options.ts",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "shared_hooks_use_filter_options",
+      "target": "shared_api_filter_options",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "shared/hooks/use-filter-options.ts",
+      "source_location": "L2",
+      "weight": 1.0
+    },
+    {
+      "source": "shared_hooks_use_filter_options",
+      "target": "shared_lib_telemetry",
+      "relation": "imports_from",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "shared/hooks/use-filter-options.ts",
+      "source_location": "L7",
       "weight": 1.0
     },
     {
@@ -18377,35 +18485,13 @@
     },
     {
       "source": "components_shared_app_filter_sidebar",
-      "target": "components_shared_app_filter_sidebar_facetselector",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "components/shared/app-filter-sidebar.tsx",
-      "source_location": "L110",
-      "weight": 1.0
-    },
-    {
-      "source": "components_shared_app_filter_sidebar",
       "target": "components_shared_app_filter_sidebar_appfacetoption",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "components/shared/app-filter-sidebar.tsx",
-      "source_location": "L16",
-      "weight": 1.0
-    },
-    {
-      "source": "components_shared_app_filter_sidebar",
-      "target": "components_shared_app_filter_sidebar_appfiltersidebar",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "components/shared/app-filter-sidebar.tsx",
-      "source_location": "L186",
+      "source_location": "L14",
       "weight": 1.0
     },
     {
@@ -18416,7 +18502,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "components/shared/app-filter-sidebar.tsx",
-      "source_location": "L22",
+      "source_location": "L20",
       "weight": 1.0
     },
     {
@@ -18427,18 +18513,18 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "components/shared/app-filter-sidebar.tsx",
-      "source_location": "L24",
+      "source_location": "L22",
       "weight": 1.0
     },
     {
       "source": "components_shared_app_filter_sidebar",
-      "target": "components_shared_app_filter_sidebar_serviceselector",
+      "target": "components_shared_app_filter_sidebar_appfiltersidebar",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "components/shared/app-filter-sidebar.tsx",
-      "source_location": "L43",
+      "source_location": "L34",
       "weight": 1.0
     },
     {
@@ -20367,6 +20453,50 @@
       "weight": 1.0
     },
     {
+      "source": "shared_api_filter_options",
+      "target": "shared_api_filter_options_filteroptions",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "shared/api/filter-options.ts",
+      "source_location": "L11",
+      "weight": 1.0
+    },
+    {
+      "source": "shared_api_filter_options",
+      "target": "shared_api_filter_options_filteroptionsquery",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "shared/api/filter-options.ts",
+      "source_location": "L17",
+      "weight": 1.0
+    },
+    {
+      "source": "shared_api_filter_options",
+      "target": "shared_api_filter_options_getfilteroptions",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "shared/api/filter-options.ts",
+      "source_location": "L23",
+      "weight": 1.0
+    },
+    {
+      "source": "shared_api_filter_options",
+      "target": "shared_api_filter_options_filteroptionssource",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "shared/api/filter-options.ts",
+      "source_location": "L3",
+      "weight": 1.0
+    },
+    {
       "source": "shared_api_telemetry_api",
       "target": "shared_api_telemetry_api_generatetelemetry",
       "relation": "contains",
@@ -20753,24 +20883,13 @@
     },
     {
       "source": "shared_components_unified_filter_sidebar",
-      "target": "shared_components_unified_filter_sidebar_options",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "shared/components/unified-filter-sidebar.tsx",
-      "source_location": "L11",
-      "weight": 1.0
-    },
-    {
-      "source": "shared_components_unified_filter_sidebar",
       "target": "shared_components_unified_filter_sidebar_unifiedfiltersidebar",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "shared/components/unified-filter-sidebar.tsx",
-      "source_location": "L13",
+      "source_location": "L10",
       "weight": 1.0
     },
     {
@@ -20781,7 +20900,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "shared/components/unified-filter-sidebar.tsx",
-      "source_location": "L65",
+      "source_location": "L46",
       "weight": 1.0
     },
     {
@@ -20848,6 +20967,28 @@
       "confidence_score": 1.0,
       "source_file": "shared/hooks/use-environments.ts",
       "source_location": "L7",
+      "weight": 1.0
+    },
+    {
+      "source": "shared_hooks_use_filter_options",
+      "target": "shared_hooks_use_filter_options_usefilteroptions",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "shared/hooks/use-filter-options.ts",
+      "source_location": "L15",
+      "weight": 1.0
+    },
+    {
+      "source": "shared_hooks_use_filter_options",
+      "target": "shared_hooks_use_filter_options_empty_options",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "shared/hooks/use-filter-options.ts",
+      "source_location": "L9",
       "weight": 1.0
     },
     {
@@ -21125,5 +21266,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "02b19a3ae2b5ff75af0b617bdbf29d07139f3632"
+  "built_at_commit": "fb0c49f46a28d16fdafec22b447fdef1a0890fb7"
 }

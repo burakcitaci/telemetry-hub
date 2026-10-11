@@ -5,8 +5,7 @@
   "3": "shared/trace-detail-sheet.tsx",
   "4": "service-detail-page.tsx",
   "5": "monitors-components.tsx",
-  "6": "ref_react",
+  "6": "unwrap",
   "7": "use-metrics.tsx",
-  "8": "traces-components.tsx",
-  "9": "admin-page.tsx"
+  "8": "use-filter-options.ts"
 }
