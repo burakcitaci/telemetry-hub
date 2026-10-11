@@ -485,7 +485,7 @@ export const MonitorDetail: React.FC<{
             <StatusBadge status={monitor.status} />
             {monitor.isMuted && <MutedBadge />}
           </div>
-          <p className="mt-1 font-mono text-xs text-muted-foreground break-all">
+          <p className="mt-1 text-xs text-muted-foreground break-all">
             {monitor.query}
           </p>
         </div>
@@ -517,7 +517,7 @@ export const MonitorDetail: React.FC<{
           <CardContent className="grid grid-cols-2 gap-3 text-xs">
             <div>
               <div className="text-muted-foreground">Trigger</div>
-              <div className="font-mono">
+              <div>
                 {monitor.aggregation}: {monitor.metric ?? monitor.logSource}{' '}
                 {monitor.comparator.replace(/_/g, ' ')}{' '}
                 {formatNumber(monitor.threshold)}
@@ -525,18 +525,18 @@ export const MonitorDetail: React.FC<{
             </div>
             <div>
               <div className="text-muted-foreground">Evaluation window</div>
-              <div className="font-mono">{monitor.evaluationWindow}</div>
+              <div>{monitor.evaluationWindow}</div>
             </div>
             <div>
               <div className="text-muted-foreground">Group by</div>
-              <div className="font-mono">
+              <div>
                 {monitor.groupBy?.join(', ') || '—'}
               </div>
             </div>
             {monitor.warnThreshold !== undefined && (
               <div>
                 <div className="text-muted-foreground">Warn threshold</div>
-                <div className="font-mono">
+                <div>
                   {formatNumber(monitor.warnThreshold)}
                 </div>
               </div>
@@ -559,7 +559,7 @@ export const MonitorDetail: React.FC<{
           <CardHeader className="pb-2">
             <div className="flex items-center justify-between">
               <CardTitle className="text-sm">Evaluated data</CardTitle>
-              <span className="font-mono text-xs text-muted-foreground">
+              <span className="text-xs text-muted-foreground">
                 now {fmtValue(lastValue)}
                 {series.unit ? ` ${series.unit}` : ''} · critical{' '}
                 {fmtValue(series.threshold)}
@@ -771,7 +771,7 @@ export const MonitorForm: React.FC<{
                       ? 'logs("status:error service:backend-service").rollup("count").last("5m") > 50'
                       : '12345678 && 12345679'
                 }
-                className="font-mono text-xs"
+                className="text-xs"
               />
             </div>
 
@@ -810,7 +810,7 @@ export const MonitorForm: React.FC<{
                     value={groupBy}
                     onChange={(e) => setGroupBy(e.target.value)}
                     placeholder="host.name, service.version"
-                    className="font-mono text-xs"
+                    className="text-xs"
                   />
                 </div>
               </div>
@@ -862,7 +862,7 @@ export const MonitorForm: React.FC<{
                   value={evaluationWindow}
                   onChange={(e) => setEvaluationWindow(e.target.value)}
                   placeholder="5m"
-                  className="font-mono text-xs"
+                  className="text-xs"
                 />
               </div>
             </div>
@@ -901,7 +901,7 @@ export const MonitorForm: React.FC<{
                 onChange={(e) => setMessage(e.target.value)}
                 rows={4}
                 placeholder="{{#is_alert}}Checkout latency is {{value}}s (threshold {{threshold}}s).{{/is_alert}} @slack-backend-alerts"
-                className="font-mono text-xs"
+                className="text-xs"
               />
               <p className="mt-1.5 text-[11px] text-muted-foreground">
                 Supports Datadog template syntax:{' '}

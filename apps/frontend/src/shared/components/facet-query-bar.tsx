@@ -31,7 +31,7 @@ const FacetPill: React.FC<{
 }> = ({ facet, value, onRemove }) => (
   <span className="inline-flex items-center gap-1 rounded-full border bg-muted px-2.5 py-1 text-xs">
     <span className="text-muted-foreground">{facet.label}:</span>
-    <span className="font-mono">{value}</span>
+    <span className="">{value}</span>
     <button
       type="button"
       onClick={onRemove}

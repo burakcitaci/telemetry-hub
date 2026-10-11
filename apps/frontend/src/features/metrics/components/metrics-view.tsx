@@ -310,7 +310,7 @@ export function MetricsView({
                     {visibleSeries.length} of {series.length}
                   </span>
                   <div className="flex flex-wrap items-center gap-1 rounded-md border border-border p-0.5">
-                    {(["line", "bar", "area", "composed"] as const).map((t) => (
+                    {(["line", "bar", "area"] as const).map((t) => (
                       <button
                         key={t}
                         onClick={() => setChartType(t)}
@@ -353,60 +353,7 @@ export function MetricsView({
                     </div>
                   ) : (
                     <ResponsiveContainer width="100%" height="100%">
-                      {chartType === "composed" ? (
-                        <ComposedChart
-                          data={chartData}
-                          margin={{ top: 4, right: 8, left: 0, bottom: 0 }}
-                        >
-                          <CartesianGrid
-                            strokeDasharray="3 3"
-                            className="stroke-muted"
-                            vertical={false}
-                          />
-                          <XAxis
-                            dataKey="time"
-                            tick={{ fontSize: 10 }}
-                            tickLine={false}
-                            axisLine={false}
-                            interval="preserveStartEnd"
-                            height={20}
-                          />
-                          <YAxis
-                            domain={yDomain}
-                            tick={{ fontSize: 10 }}
-                            tickLine={false}
-                            axisLine={false}
-                            width={64}
-                            tickFormatter={(v) => formatValue(v, activeUnit)}
-                          />
-                          <Tooltip
-                            content={<CustomTooltip unit={activeUnit} />}
-                          />
-                          {visibleSeries.map((s, i) =>
-                            i % 2 === 0 ? (
-                              <Bar
-                                key={s.id}
-                                dataKey={s.id}
-                                name={s.label}
-                                fill={s.color}
-                                fillOpacity={0.5}
-                              />
-                            ) : (
-                              <Line
-                                key={s.id}
-                                type="monotone"
-                                dataKey={s.id}
-                                name={s.label}
-                                stroke={s.color}
-                                strokeWidth={1.5}
-                                dot={{ r: 2, strokeWidth: 0, fill: s.color }}
-                                activeDot={{ r: 3 }}
-                                connectNulls
-                              />
-                            ),
-                          )}
-                        </ComposedChart>
-                      ) : chartType === "bar" ? (
+                      {chartType === "bar" ? (
                         <BarChart
                           data={chartData}
                           margin={{ top: 4, right: 8, left: 0, bottom: 0 }}
@@ -448,7 +395,7 @@ export function MetricsView({
                       ) : chartType === "area" ? (
                         <ComposedChart
                           data={chartData}
-                          margin={{ top: 4, right: 8, left: 0, bottom: 0 }}
+                          margin={{ top: 4, right: 8, left: 0, bottom: 15 }}
                         >
                           <defs>
                             {visibleSeries.map((s) => (
@@ -484,14 +431,15 @@ export function MetricsView({
                             tickLine={false}
                             axisLine={false}
                             interval="preserveStartEnd"
-                            height={20}
+                            tickMargin={8}
+                            height={30}
                           />
                           <YAxis
                             domain={yDomain}
                             tick={{ fontSize: 10 }}
                             tickLine={false}
                             axisLine={false}
-                            width={64}
+                            width={80}
                             tickFormatter={(v) => formatValue(v, activeUnit)}
                           />
                           <Tooltip
@@ -513,7 +461,7 @@ export function MetricsView({
                       ) : (
                         <LineChart
                           data={chartData}
-                          margin={{ top: 4, right: 8, left: 0, bottom: 0 }}
+                          margin={{ top: 4, right: 8, left: 0, bottom: 15 }}
                         >
                           <CartesianGrid
                             strokeDasharray="3 3"
@@ -526,14 +474,15 @@ export function MetricsView({
                             tickLine={false}
                             axisLine={false}
                             interval="preserveStartEnd"
-                            height={20}
+                            tickMargin={8}
+                            height={30}
                           />
                           <YAxis
                             domain={yDomain}
                             tick={{ fontSize: 10 }}
                             tickLine={false}
                             axisLine={false}
-                            width={64}
+                            width={80}
                             tickFormatter={(v) => formatValue(v, activeUnit)}
                           />
                           <Tooltip

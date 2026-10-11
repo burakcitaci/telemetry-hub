@@ -361,7 +361,7 @@ export function useMetrics() {
           <DataTableColumnHeader column={column} title="Time" />
         ),
         cell: ({ row }) => (
-          <span className="font-mono text-xs text-muted-foreground">
+          <span className="text-xs text-muted-foreground">
             {new Date(toIso(row.original.timestamp)).toLocaleString()}
           </span>
         ),
@@ -372,7 +372,7 @@ export function useMetrics() {
           <DataTableColumnHeader column={column} title="Value" />
         ),
         cell: ({ row }) => (
-          <span className="font-mono tabular-nums">
+          <span className="tabular-nums">
             {formatValue(row.original.value, metricUnit)}
           </span>
         ),
@@ -383,7 +383,7 @@ export function useMetrics() {
           <DataTableColumnHeader column={column} title="Group" />
         ),
         cell: ({ row }) => (
-          <span className="font-mono text-xs">{row.original.group}</span>
+          <span className="text-xs">{row.original.group}</span>
         ),
       },
     ],

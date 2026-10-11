@@ -93,7 +93,7 @@ export function TimeRangePicker({ value, onChange, className }: TimeRangePickerP
                 if (e.key === 'Enter') commitDraft();
               }}
               placeholder="e.g. 15m, since 3pm, Jan 1 - Jan 2"
-              className="h-8 text-xs font-mono"
+              className="h-8 text-xs"
             />
             {error ? (
               <p className="mt-1 text-[10px] text-red-600">{error}</p>

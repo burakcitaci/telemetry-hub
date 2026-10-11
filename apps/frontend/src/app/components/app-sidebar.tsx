@@ -34,18 +34,18 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-sidebar-border">
-      <SidebarHeader className="border-b border-sidebar-border p-1.5">
+    <Sidebar collapsible="icon" className="border-r border-sidebar-border bg-secondary">
+      <SidebarHeader className="border-b border-sidebar-border p-3">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild tooltip="Telemetry Hub" className="h-9 px-1.5 text-xs">
+            <SidebarMenuButton asChild tooltip="Telemetry Hub" className="h-10 px-1.5 text-xs">
               <Link to="/" onClick={closeMobileSidebar} aria-label="Telemetry Hub traces">
                 <span className="flex aspect-square size-7 items-center justify-center rounded-md bg-purple-600 text-white">
-                  <Activity className="size-3.5" />
+                  <Activity className="size-4" />
                 </span>
                 <span className="grid min-w-0 flex-1 text-left leading-tight">
                   <span className="truncate text-xs font-semibold">Telemetry Hub</span>
-                  <span className="truncate text-[10px] text-muted-foreground">Observability</span>
+                  <span className="truncate text-[12px] text-muted-foreground">Observability</span>
                 </span>
               </Link>
             </SidebarMenuButton>
@@ -55,7 +55,7 @@ export function AppSidebar() {
 
       <SidebarContent>
         <SidebarGroup className="p-1.5">
-          <SidebarGroupLabel className="h-7 px-1.5 text-[10px] uppercase tracking-wide">Explore</SidebarGroupLabel>
+          <SidebarGroupLabel className="h-7 px-1.5 text-[12px] uppercase tracking-wide">Explorer</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {navItems.map((item) => {

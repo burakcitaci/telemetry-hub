@@ -128,7 +128,7 @@ export function LogDetailSheet({ log, isOpen, onClose }: LogDetailSheetProps) {
                   <CopyButton value={log.Body} label="Copy message" />
                 </div>
                 <ScrollArea className="min-h-0 flex-1">
-                  <pre className="whitespace-pre-wrap break-words p-5 font-mono text-sm leading-6">{log.Body}</pre>
+                  <pre className="whitespace-pre-wrap break-words p-5 text-sm leading-6">{log.Body}</pre>
                 </ScrollArea>
               </section>
             </div>

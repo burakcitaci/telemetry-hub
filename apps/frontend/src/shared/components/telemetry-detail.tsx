@@ -79,7 +79,7 @@ export function DetailField({
         {label}
       </dt>
       <dd className="mt-1 flex min-w-0 items-start justify-between gap-2 text-sm">
-        <span className={cn('min-w-0 break-all', mono && 'font-mono text-xs')}>
+        <span className={cn('min-w-0 break-all', mono && 'text-xs')}>
           {children}
         </span>
         {copyValue && (

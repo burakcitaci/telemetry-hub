@@ -37,7 +37,7 @@ export function DataValue({
     <span
       {...props}
       className={cn(
-        'inline-block whitespace-nowrap font-mono tabular-nums tracking-tight',
+        'inline-block whitespace-nowrap tabular-nums tracking-tight',
         valueColors[status],
         className,
       )}
