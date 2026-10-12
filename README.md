@@ -246,10 +246,10 @@ AUTH_JWT_SECRET=<mindestens-32-zufaellige-Zeichen>
 AUTH_USERS_JSON=[{"tenantSlug":"demo","email":"admin@example.com","role":"admin","teams":["backend"],"passwordHash":"<scrypt$SALTHEX$HASHHEX-aus-dem-Bootstrap>"}]
 INGESTION_COLLECTOR_ENDPOINT=http://localhost:4319
 INGESTION_COLLECTOR_TOKEN=<identisches-internes-Token-wie-im-Collector>
-INGESTION_KEYS_JSON=[{"keyHash":"320154d182b6b50085da3df3f317e0246c7cc6ff5bb2f91445177e4dcd8f42ea","orgSlug":"demo","teamId":"backend","expiresAt":1893456000000}]
+INGESTION_KEYS_JSON=[{"keyHash":"<SHA256_HEX_OF_PROVISIONED_CLIENT_KEY>","orgSlug":"demo","teamId":"backend","expiresAt":1893456000000}]
 ```
 
-Der Beispiel-Hash ist SHA-256 von `test-client-key-0123456789abcdef0123456789abcdef`: **nur zur Erläuterung, kein sicherer Zugang**. Im tatsächlichen Setup zufällige Keys verwenden. Die lokale SQLite-Datei ist eine separate Benutzer-/Team-Datenbank, nicht die Datenbank des Cluster-Backends. `.env` und Datenbankdateien nicht committen.
+`<SHA256_HEX_OF_PROVISIONED_CLIENT_KEY>` ist ein **nicht ausführbarer Platzhalter**. Vor dem Start durch den lowercase SHA-256-Hex-Hash des zufälligen, provisionierten Client-Keys ersetzen (genau 64 Hex-Zeichen), beispielsweise mit dem Bootstrap oben. Die lokale SQLite-Datei ist eine separate Benutzer-/Team-Datenbank, nicht die Datenbank des Cluster-Backends. `.env` und Datenbankdateien nicht committen.
 
 ```bash
 yarn dev:backend
@@ -264,12 +264,12 @@ Ein Root-Skript `pnpm dev` beziehungsweise `yarn dev` existiert nicht. Cluster-B
 
 **Kein proprietäres SDK erforderlich:** Anwendungen verwenden ihr OpenTelemetry-SDK oder eine passende Auto-Instrumentierung. Die Plattform benötigt keine sprachspezifischen Controller für Go, Python oder .NET.
 
-Ein Administrator erstellt das Zielteam, generiert einen zufälligen URL-sicheren Key mit 32–256 Zeichen und ergänzt dessen lowercase SHA-256-Hex-Hash in der Registry. Beispielstruktur, mit demselben unsicheren Erläuterungs-Hash wie oben:
+Ein Administrator erstellt das Zielteam, generiert einen zufälligen URL-sicheren Key mit 32–256 Zeichen und ergänzt dessen lowercase SHA-256-Hex-Hash in der Registry. Beispielstruktur; den Hash-Platzhalter vor Verwendung ersetzen:
 
 ```json
 [
   {
-    "keyHash": "320154d182b6b50085da3df3f317e0246c7cc6ff5bb2f91445177e4dcd8f42ea",
+    "keyHash": "<SHA256_HEX_OF_PROVISIONED_CLIENT_KEY>",
     "orgSlug": "demo",
     "teamId": "backend",
     "expiresAt": 1893456000000,

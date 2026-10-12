@@ -246,10 +246,10 @@ AUTH_JWT_SECRET=<at-least-32-random-characters>
 AUTH_USERS_JSON=[{"tenantSlug":"demo","email":"admin@example.com","role":"admin","teams":["backend"],"passwordHash":"<scrypt$SALTHEX$HASHHEX-from-bootstrap>"}]
 INGESTION_COLLECTOR_ENDPOINT=http://localhost:4319
 INGESTION_COLLECTOR_TOKEN=<same-internal-token-as-the-Collector>
-INGESTION_KEYS_JSON=[{"keyHash":"320154d182b6b50085da3df3f317e0246c7cc6ff5bb2f91445177e4dcd8f42ea","orgSlug":"demo","teamId":"backend","expiresAt":1893456000000}]
+INGESTION_KEYS_JSON=[{"keyHash":"<SHA256_HEX_OF_PROVISIONED_CLIENT_KEY>","orgSlug":"demo","teamId":"backend","expiresAt":1893456000000}]
 ```
 
-The example digest is SHA-256 of `test-client-key-0123456789abcdef0123456789abcdef`: **for explanation only, not a secure credential**. Use random keys for actual deployments. Local SQLite is a separate user/team database, not the cluster backend's database. Do not commit `.env` or database files.
+`<SHA256_HEX_OF_PROVISIONED_CLIENT_KEY>` is a **nonfunctional placeholder**. Before starting, replace it with the lowercase SHA-256 hexadecimal digest of your randomly generated, provisioned client key (exactly 64 hexadecimal characters), for example using the bootstrap above. Local SQLite is a separate user/team database, not the cluster backend's database. Do not commit `.env` or database files.
 
 ```bash
 yarn dev:backend
@@ -264,12 +264,12 @@ There is no root `pnpm dev` or `yarn dev` script. Use `yarn cluster:reload-backe
 
 **No proprietary SDK is required.** Use your language's OpenTelemetry SDK or appropriate automatic instrumentation. No language-specific ingestion controller is needed for Go, Python, or .NET.
 
-An administrator creates the destination team, generates a random URL-safe key of 32–256 characters, and adds its lowercase SHA-256 hexadecimal digest to the registry. Example structure, using the insecure explanatory digest above:
+An administrator creates the destination team, generates a random URL-safe key of 32–256 characters, and adds its lowercase SHA-256 hexadecimal digest to the registry. Example structure; replace the digest placeholder before use:
 
 ```json
 [
   {
-    "keyHash": "320154d182b6b50085da3df3f317e0246c7cc6ff5bb2f91445177e4dcd8f42ea",
+    "keyHash": "<SHA256_HEX_OF_PROVISIONED_CLIENT_KEY>",
     "orgSlug": "demo",
     "teamId": "backend",
     "expiresAt": 1893456000000,
