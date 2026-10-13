@@ -92,6 +92,9 @@ export async function browserFixture() {
     const targets = await fetch(`http://127.0.0.1:${debug}/json/list`).then((res) => res.json());
     page = connection(targets.find((target) => target.type === "page").webSocketDebuggerUrl);
     await page.send("Runtime.enable");
+    await page.send("Emulation.setDeviceMetricsOverride", {
+      width: 1280, height: 900, deviceScaleFactor: 1, mobile: false,
+    });
     const evaluate = async (expression) => {
       const result = await page.send("Runtime.evaluate", { expression, returnByValue: true, awaitPromise: true });
       if (result.exceptionDetails) throw new Error(result.exceptionDetails.text);

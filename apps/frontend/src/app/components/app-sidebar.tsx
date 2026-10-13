@@ -136,7 +136,7 @@ export function AppSidebar() {
               ].map((item) => {
                 const Icon = item.icon;
                 const path = `${orgPath}${item.path}`;
-                const active = location.pathname === path;
+                const active = location.pathname === path || location.pathname.startsWith(path + "/");
                 return (
                   <SidebarMenuItem key={item.path}>
                     <SidebarMenuButton
@@ -224,7 +224,7 @@ export function MobileAppSidebar() {
         ].map((item) => {
           const Icon = item.icon;
           const path = `${orgPath}${item.path}`;
-          const active = location.pathname === path;
+          const active = location.pathname === path || location.pathname.startsWith(path + "/");
           return (
             <Link
               key={item.path}
