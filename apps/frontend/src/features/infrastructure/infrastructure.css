@@ -1,0 +1,212 @@
+.infrastructure-dashboard {
+  --infra-ok: #2ce2a2;
+  --infra-warning: #f5a623;
+  --infra-critical: #ff4d4d;
+  margin: 8px;
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.infra-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px;
+}
+.infra-header h1 {
+  font-size: 14px;
+  font-weight: 600;
+}
+.infra-muted,
+.infra-freshness,
+.infra-footnote,
+.infra-host-id {
+  color: hsl(var(--muted-foreground));
+  font-size: 11px;
+}
+.infra-freshness {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.infra-indicator,
+.infra-status-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--infra-ok);
+}
+.infra-indicator.is-stale {
+  background: var(--infra-warning);
+}
+.infra-counts {
+  display: flex;
+  flex-wrap: wrap;
+  border-block: 1px solid hsl(var(--border));
+  background: hsl(var(--card));
+}
+.infra-counts > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border-right: 1px solid hsl(var(--border));
+}
+.infra-counts strong {
+  font-size: 14px;
+}
+.infra-counts > div > span:last-child {
+  color: hsl(var(--muted-foreground));
+}
+.infra-workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 260px;
+}
+.infra-map-panel {
+  padding: 8px;
+  min-width: 0;
+}
+.infra-section-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: hsl(var(--muted-foreground));
+}
+.infra-host-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 24px);
+  gap: 4px;
+  align-content: start;
+}
+.infra-host-tile {
+  width: 24px;
+  height: 24px;
+  border: 1px solid transparent;
+  border-radius: 2px;
+  color: #0f172a;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background-color 240ms ease,
+    box-shadow 120ms ease,
+    filter 120ms ease;
+}
+.infra-host-tile:hover,
+.infra-host-tile:focus-visible {
+  filter: brightness(1.15);
+  box-shadow: 0 0 0 2px hsl(var(--foreground));
+}
+.infra-host-tile[aria-pressed="true"] {
+  border-color: hsl(var(--foreground));
+  box-shadow: inset 0 0 0 2px hsl(var(--background));
+}
+.infrastructure-dashboard .status-ok {
+  background-color: var(--infra-ok);
+}
+.infrastructure-dashboard .status-warning {
+  background-color: var(--infra-warning);
+}
+.infrastructure-dashboard .status-critical {
+  background-color: var(--infra-critical);
+}
+.infra-details {
+  border-left: 1px solid hsl(var(--border));
+  background: hsl(var(--card));
+  padding: 8px;
+  min-width: 0;
+}
+.infra-details h2 {
+  font-size: 12px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.infra-host-id {
+  overflow-wrap: anywhere;
+  margin-block: 4px 8px;
+}
+.infra-metric {
+  padding-block: 8px;
+  border-top: 1px solid hsl(var(--border));
+}
+.infra-metric > div:first-child {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+.infra-metric strong {
+  font-weight: 600;
+}
+.infra-progress {
+  height: 3px;
+  border-radius: 2px;
+  background: hsl(var(--muted));
+  overflow: hidden;
+}
+.infra-progress > span {
+  display: block;
+  height: 100%;
+  transition:
+    width 300ms ease,
+    background-color 240ms ease;
+}
+.status-text-ok {
+  color: hsl(var(--success));
+}
+.status-text-warning {
+  color: hsl(var(--warning));
+}
+.status-text-critical {
+  color: hsl(var(--destructive));
+}
+.infra-state {
+  letter-spacing: normal;
+}
+.infra-footnote {
+  margin-top: 8px;
+}
+.infra-notice {
+  padding: 8px;
+  border-bottom: 1px solid hsl(var(--border));
+  color: hsl(var(--warning));
+}
+.infra-empty {
+  padding: 8px;
+  color: hsl(var(--muted-foreground));
+}
+.infra-tooltip {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: 280px;
+  padding: 8px;
+  font-size: 11px;
+  overflow-wrap: anywhere;
+  background: hsl(var(--popover));
+  color: hsl(var(--popover-foreground));
+  border-color: hsl(var(--border));
+}
+@media (max-width: 760px) {
+  .infra-workspace {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .infra-details {
+    border-left: 0;
+    border-top: 1px solid hsl(var(--border));
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .infra-host-tile,
+  .infra-progress > span {
+    transition: none;
+  }
+}
