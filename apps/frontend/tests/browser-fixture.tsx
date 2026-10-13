@@ -16,6 +16,9 @@ api.defaults.adapter = async (config) => {
   (window as any).__requests.push({ url: config.url, params: config.params, headers: config.headers.toJSON() });
   let data: unknown = [];
   if (config.url?.startsWith("/auth/session")) data = { tenantSlug: "demo", role: "admin", teams: ["platform"] };
+  else if (config.url?.startsWith("/auth/login")) data = {
+    tenantSlug: JSON.parse(String(config.data)).tenantSlug, role: "admin", teams: ["platform"],
+  };
   else if (config.url?.startsWith("/metrics/detail")) data = { records };
   else if (config.url?.startsWith("/metrics")) data = {
     metrics: [{ tableName: "otel_metrics_gauge", metricType: "gauge", serviceName: "api", metricName: "load" }],
@@ -27,11 +30,16 @@ api.defaults.adapter = async (config) => {
     message: "", targets: [], createdAt: "2026-10-13T00:00:00Z", updatedAt: "2026-10-13T00:00:00Z",
     status: "OK", isMuted: false,
   }];
-  else if (config.url?.startsWith("/traces/detail")) data = [{
+  else if (config.url?.startsWith("/traces/detail")) {
+    if (scenario === "retry" && (window as any).__requests.filter((request: any) => request.url === "/traces/detail").length === 1) {
+      throw new Error("Fixture query failed");
+    }
+    data = [{
     TraceId: traceId, SpanId: "1234567890abcdef", ParentSpanId: "",
     SpanName: "GET /fixture", ServiceName: "api", Timestamp: "2026-10-13T00:00:00Z",
     Duration: 1000000, StatusCode: "OK", SpanAttributes: {}, ResourceAttributes: {},
-  }];
+    }];
+  }
   else if (config.url?.startsWith("/traces")) data = [{
     TraceId: traceId, SpanName: "GET /fixture", ServiceName: "api",
     Timestamp: new Date().toISOString(), Duration: 1000000, StatusCode: "OK",

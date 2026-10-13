@@ -18,6 +18,7 @@ import { getTraceById } from "@/features/traces/api";
 import { QueryError, ViewSkeleton } from "./view-skeleton";
 import { spanWaterfall } from "@/shared/lib/trace-waterfall";
 import { useTelemetryQuery } from "@/shared/hooks/use-telemetry-query";
+import { readPlatformFilters } from "@/shared/lib/platform-filters";
 import type { TraceSpan } from "@/features/traces/types";
 import {
   AttributeSection,
@@ -44,6 +45,7 @@ import {
 } from "@/shared/lib/telemetry";
 
 interface TraceDetailSheetProps {
+  investigationSearch?: string;
   traceId: string | null;
   isOpen: boolean;
   onClose: () => void;
@@ -58,12 +60,15 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 export function TraceDetailSheet({
+  investigationSearch,
   traceId,
   isOpen,
   onClose,
   onCloseFocus,
 }: TraceDetailSheetProps) {
-  const { env } = useTelemetryQuery();
+  const { env: currentEnv } = useTelemetryQuery();
+  const pinned = investigationSearch === undefined ? undefined : readPlatformFilters(investigationSearch);
+  const env = pinned ? (pinned.env.length === 1 ? pinned.env[0] : "all") : currentEnv;
   const requestId = useRef(0);
   const [spans, setSpans] = useState<TraceSpan[]>([]);
   const [selectedSpanId, setSelectedSpanId] = useState<string | null>(null);
@@ -81,7 +86,7 @@ export function TraceDetailSheet({
       setExpandedSpans(new Set());
 
       try {
-        const traceSpans = await getTraceById(id, env);
+        const traceSpans = await getTraceById(id, env, investigationSearch);
         if (request !== requestId.current) return;
         setSpans(traceSpans);
 
@@ -110,7 +115,7 @@ export function TraceDetailSheet({
         if (request === requestId.current) setLoading(false);
       }
     },
-    [env],
+    [env, investigationSearch],
   );
 
   useEffect(() => {
@@ -311,6 +316,11 @@ export function TraceDetailSheet({
                   <CopyButton value={traceId} label="Copy trace ID" />
                 )}
               </div>
+              {investigationSearch !== undefined && (
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Investigation context: {investigationSearch || "all environments / no platform filters"}
+                </p>
+              )}
             </div>
           </div>
           <Button

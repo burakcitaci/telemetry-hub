@@ -2,6 +2,13 @@ import axios from 'axios';
 import type { ApiEnvelope } from '@/shared/types/telemetry';
 import { readPlatformFilters } from '@/shared/lib/platform-filters';
 
+declare module 'axios' {
+  interface AxiosRequestConfig {
+    /** Optional immutable scope of an already-open investigation. */
+    investigationSearch?: string;
+  }
+}
+
 export const BACKEND_URL = 'http://localhost:3001';
 
 export const api = axios.create({
@@ -13,7 +20,9 @@ export const api = axios.create({
 // One filter source for every explorer. Auth/admin requests never inherit telemetry filters.
 api.interceptors.request.use(config => {
   if (!/^\/(metrics|logs|traces|services|monitors|events|data|filters)(?:[/?]|$)/.test(config.url ?? '')) return config;
-  const { team, service, env, status } = readPlatformFilters(window.location.search);
+  const { team, service, env, status } = readPlatformFilters(
+    config.investigationSearch ?? window.location.search,
+  );
   const encode = (values: string[]) => values.length > 1 ? JSON.stringify(values) : values[0] || 'all';
   config.headers.set('X-Team-Filter', encode(team));
   config.headers.set('X-Service-Filter', encode(service));

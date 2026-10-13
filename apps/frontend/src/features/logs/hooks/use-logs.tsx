@@ -32,7 +32,6 @@ export function useLogs() {
   } = useTelemetryQuery({ facetParam: 'severity' });
   useEffect(() => {
     setLogs([]);
-    setSelectedLog(null);
   }, [env]);
 
   const loadLogs = useCallback(async () => {

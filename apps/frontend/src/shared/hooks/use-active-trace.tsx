@@ -1,12 +1,11 @@
 import {
   createContext,
   useContext,
-  useEffect,
   useRef,
   useState,
   type ReactNode,
 } from "react";
-import { useTelemetryQuery } from "./use-telemetry-query";
+import { platformFilterSearch } from "../lib/platform-filters";
 import { TraceDetailSheet } from "@/components/shared/trace-detail-sheet";
 
 interface ActiveTraceContextValue {
@@ -17,16 +16,12 @@ interface ActiveTraceContextValue {
 const ActiveTraceContext = createContext<ActiveTraceContextValue | null>(null);
 
 export function ActiveTraceProvider({ children }: { children: ReactNode }) {
-  const { env } = useTelemetryQuery();
   const opener = useRef<HTMLElement | null>(null);
   const [selection, setSelection] = useState<{
     traceId: string;
-    env: string;
+    search: string;
   } | null>(null);
-  const activeTraceId = selection?.env === env ? selection.traceId : null;
-  useEffect(() => {
-    if (selection && selection.env !== env) setSelection(null);
-  }, [env, selection]);
+  const activeTraceId = selection?.traceId ?? null;
   const closeTrace = () => setSelection(null);
   const openTrace = (traceId: string) => {
     opener.current =
@@ -34,7 +29,7 @@ export function ActiveTraceProvider({ children }: { children: ReactNode }) {
         ? document.activeElement
         : null;
     if (/^[a-f0-9]{32}$/i.test(traceId) && !/^0{32}$/.test(traceId))
-      setSelection({ traceId, env });
+      setSelection({ traceId, search: platformFilterSearch(window.location.search) });
   };
   return (
     <ActiveTraceContext.Provider
@@ -43,7 +38,8 @@ export function ActiveTraceProvider({ children }: { children: ReactNode }) {
       {children}
       {activeTraceId && (
         <TraceDetailSheet
-          key={`${env}:${activeTraceId}`}
+          key={`${selection?.search}:${activeTraceId}`}
+          investigationSearch={selection?.search}
           traceId={activeTraceId}
           isOpen
           onClose={closeTrace}

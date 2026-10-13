@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { api, unwrap } from '@/shared/api/client';
+import { platformFilterKey } from '@/shared/lib/platform-filters';
 import {
   MonitorType,
   MonitorStatus,
@@ -15,6 +16,7 @@ export function useMonitors() {
   const navigate = useNavigate();
 
   const [searchParams, setSearchParams] = useSearchParams();
+  const filterKey = platformFilterKey(searchParams.toString());
 
   const [monitors, setMonitors] = useState<MonitorView[]>([]);
 
@@ -81,7 +83,7 @@ export function useMonitors() {
     return () => {
       cancelled = true;
     };
-  }, [revision]);
+  }, [revision, filterKey]);
 
   const events = useMemo<Record<string, MonitorEvent[]>>(() => ({}), []);
 

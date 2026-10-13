@@ -6,7 +6,6 @@ import {
   Route,
   Routes,
   useParams,
-  useSearchParams,
 } from "react-router-dom";
 import { AppSidebar, MobileAppSidebar } from "@/app/components/app-sidebar";
 import { GlobalHeader } from "@/app/components/global-header";
@@ -16,7 +15,6 @@ import { PageLayout } from "@/components/shared/page-layout";
 import { ViewSkeleton } from "@/components/shared/view-skeleton";
 import { ActiveTraceProvider } from "@/shared/hooks/use-active-trace";
 import { AuthProvider, useAuth } from "@/features/auth/auth-context";
-import { platformFilterKey } from "@/shared/lib/platform-filters";
 
 const TracesPage = lazy(() => import("@/features/traces"));
 const LogsPage = lazy(() => import("@/features/logs"));
@@ -35,8 +33,6 @@ const InfrastructurePage = lazy(
 function AuthenticatedRoutes() {
   const { session, isLoading } = useAuth();
   const { tenant } = useParams();
-  const [filters] = useSearchParams();
-  const filterKey = platformFilterKey(filters.toString());
 
   if (isLoading) return <ViewSkeleton showHeader />;
   if (!session) return <Navigate to="/login" replace />;
@@ -45,13 +41,13 @@ function AuthenticatedRoutes() {
   }
 
   return (
-    <ActiveTraceProvider key={`${session.tenantSlug}:${filterKey}`}>
+    <ActiveTraceProvider key={session.tenantSlug}>
       <SidebarProvider>
         <AppSidebar />
         <MobileAppSidebar />
         <SidebarInset className="h-dvh w-0 min-w-0 flex-1 overflow-hidden">
           <GlobalHeader />
-          <div key={filterKey} className="min-h-0 flex-1 overflow-auto">
+          <div className="min-h-0 flex-1 overflow-auto">
             <Suspense
               fallback={
                 <PageLayout>

@@ -53,10 +53,11 @@ export async function getTraces(
 export async function getTraceById(
   traceId: string,
   env = "all",
+  investigationSearch?: string,
 ): Promise<TraceSpan[]> {
   const response = await api.get<ApiEnvelope<TraceSpan[]> | TraceSpan[]>(
     "/traces/detail",
-    { params: { traceId, env } },
+    { params: { traceId, env }, investigationSearch },
   );
 
   return unwrap(response.data).map(normalizeSpan);
