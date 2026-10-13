@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { createEventSource } from '@/shared/api/telemetry-api';
+import { createEventSource } from '@/shared/api/event-stream';
 import type { TelemetryEvent } from '@/shared/types/telemetry';
 
 export function useTelemetryStream(onEvent: (event: TelemetryEvent) => void) {

@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Activity, RefreshCw, Wifi, WifiOff } from 'lucide-react';
+import { RefreshCw, Wifi, WifiOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -27,15 +27,11 @@ export function FeatureRefreshButton({
 
 type TelemetryActionsProps = RefreshProps & {
   connected: boolean;
-  generating: boolean;
-  onGenerate: () => void;
   children?: ReactNode;
 };
 
 export function TelemetryActions({
   connected,
-  generating,
-  onGenerate,
   children,
   ...refresh
 }: TelemetryActionsProps) {
@@ -49,16 +45,6 @@ export function TelemetryActions({
         <Icon className={cn('size-4', connected && 'text-success')} />
         {connected ? 'Stream connected' : 'Stream disconnected'}
       </span>
-      <Button
-        variant="outline"
-        size="sm"
-        className="gap-1.5"
-        onClick={onGenerate}
-        disabled={generating}
-      >
-        <Activity className="size-4" />
-        {generating ? 'Generating…' : 'Generate telemetry'}
-      </Button>
       <FeatureRefreshButton {...refresh} />
       {children}
     </>

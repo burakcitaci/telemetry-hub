@@ -1,11 +1,9 @@
-import { Activity, Settings } from "lucide-react";
-import { useState } from "react";
-import { FeatureHeader } from "@/components/shared/feature-header";
-import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { QueryError, ViewSkeleton } from "@/components/shared/view-skeleton";
-import { DataTable } from "@/shared/components/data-table";
-import { FeatureRefreshButton } from "@/shared/components/feature-actions";
+import { Activity } from 'lucide-react';
+import { useState } from 'react';
+import { FeatureHeader } from '@/components/shared/feature-header';
+import { QueryError, ViewSkeleton } from '@/components/shared/view-skeleton';
+import { DataTable } from '@/shared/components/data-table';
+import { FeatureRefreshButton } from '@/shared/components/feature-actions';
 import {
   FeaturePage,
   FeatureSearch,
@@ -13,22 +11,20 @@ import {
   FeatureContent,
   FeaturePanel,
   FeatureEmptyState,
-} from "@/shared/components/feature-layout";
+} from '@/shared/components/feature-layout';
 import { AppFilterSidebar } from '@/components/shared/app-filter-sidebar';
-import { columns } from "./services-components";
-import type { useServices } from "../hooks/use-services";
-import { useTelemetryQuery } from "@/shared/hooks/use-telemetry-query";
+import { columns } from './services-components';
+import type { useServices } from '../hooks/use-services';
+import { useTelemetryQuery } from '@/shared/hooks/use-telemetry-query';
 
 type ServicesViewProps = ReturnType<typeof useServices>;
 
 export function ServicesView({
   services,
   loading,
-  generating,
   error,
   loadServices,
   rows,
-  generateAndRefresh,
   searchQuery,
   setSearchQuery,
 }: ServicesViewProps) {
@@ -96,16 +92,10 @@ export function ServicesView({
                 <div>
                   <p className="font-medium">No traced services found</p>
                   <p className="text-sm text-muted-foreground">
-                    Generate telemetry, then allow the collector time to export
-                    it.
+                    Verify that your applications export traces through the
+                    ingestion endpoint.
                   </p>
                 </div>
-                <Button
-                  onClick={() => void generateAndRefresh()}
-                  disabled={generating}
-                >
-                  {generating ? "Generating…" : "Generate telemetry"}
-                </Button>
               </FeatureEmptyState>
             )}
           </FeaturePanel>

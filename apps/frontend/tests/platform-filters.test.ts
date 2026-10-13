@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { platformFilterKey, platformFilterSearch, readPlatformFilters } from '../src/shared/lib/platform-filters';
 import { api } from '../src/shared/api/client';
-import { createEventSource } from '../src/shared/api/telemetry-api';
+import { createEventSource } from '../src/shared/api/event-stream';
 
 test('no implicit team or environment boundary, and explorer facets do not become global service filters', () => {
   assert.deepEqual(readPlatformFilters(''), { team: [], service: [], env: [], status: [] });

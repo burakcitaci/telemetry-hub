@@ -1,6 +1,6 @@
-import { TelemetryActions } from "@/shared/components/feature-actions";
-import { useState } from "react";
-import { FeatureHeader } from "@/components/shared/feature-header";
+import { TelemetryActions } from '@/shared/components/feature-actions';
+import { useState } from 'react';
+import { FeatureHeader } from '@/components/shared/feature-header';
 import {
   FeaturePage,
   FeatureBody,
@@ -8,23 +8,19 @@ import {
   FeaturePanel,
   FeatureLoading,
   FeatureEmptyState,
-} from "@/shared/components/feature-layout";
-import type { useTraces } from "../hooks/use-traces";
-import { Activity } from "lucide-react";
-import { useActiveTrace } from "@/shared/hooks/use-active-trace";
-import { DataTable } from "@/shared/components/data-table";
-import { AppFilterSidebar } from "@/components/shared/app-filter-sidebar";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
-import { TELEMETRY_FETCH_LIMIT } from "@/shared/lib/telemetry";
-import { columns } from "@/features/traces/components/traces-components";
+} from '@/shared/components/feature-layout';
+import type { useTraces } from '../hooks/use-traces';
+import { useActiveTrace } from '@/shared/hooks/use-active-trace';
+import { DataTable } from '@/shared/components/data-table';
+import { AppFilterSidebar } from '@/components/shared/app-filter-sidebar';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { columns } from '@/features/traces/components/traces-components';
 
 type TracesViewProps = ReturnType<typeof useTraces>;
 
 export function TracesView({
   traces,
   loading,
-  generating,
   error,
   timeRange,
   setTimeRange,
@@ -32,7 +28,6 @@ export function TracesView({
   setSearchQuery,
   loadTraces,
   connected,
-  generateAndRefresh,
   filteredTraces,
 }: TracesViewProps) {
   const { openTrace } = useActiveTrace();
@@ -48,8 +43,6 @@ export function TracesView({
         actions={
           <TelemetryActions
             connected={connected}
-            generating={generating}
-            onGenerate={() => void generateAndRefresh()}
             loading={loading}
             onRefresh={() => void loadTraces()}
             label="Refresh traces"
@@ -100,18 +93,9 @@ export function TracesView({
                   <div className="max-w-md space-y-3">
                     <p className="text-sm text-muted-foreground">
                       {traces.length > 0
-                        ? "No recent traces match the selected filters."
-                        : "No traces have been stored yet. Generate a request to exercise the instrumented backend."}
+                        ? 'No recent traces match the selected filters.'
+                        : 'No traces have been stored yet. Verify that your applications export traces through the ingestion endpoint.'}
                     </p>
-                    {traces.length === 0 && (
-                      <Button
-                        onClick={() => void generateAndRefresh()}
-                        disabled={generating}
-                      >
-                        <Activity className="mr-2 h-4 w-4" />
-                        {generating ? "Generating…" : "Generate telemetry"}
-                      </Button>
-                    )}
                   </div>
                 </FeatureEmptyState>
               )}

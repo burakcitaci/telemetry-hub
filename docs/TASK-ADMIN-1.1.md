@@ -37,7 +37,7 @@ After rollout, sign in again: tokens issued before the persistent identity/versi
 
 ```powershell
 .\node_modules\.bin\tsc.cmd -p apps/backend/tsconfig.json
-.\node_modules\.bin\tsx.cmd --tsconfig apps/backend/tsconfig.json --test apps/backend/src/modules/auth/auth-admin.test.ts apps/backend/src/common/telemetry/tenant-metrics.test.ts apps/backend/src/modules/health/services/tenant-telemetry.service.test.ts
+.\node_modules\.bin\tsx.cmd --tsconfig apps/backend/tsconfig.json --test apps/backend/src/modules/auth/auth-admin.test.ts apps/backend/src/common/telemetry/tenant-metrics.test.ts
 .\node_modules\.bin\tsx.cmd --tsconfig apps/backend/tsconfig.json --test apps/backend/tests/admin.integration.test.ts
 .\node_modules\.bin\tsc.cmd -p apps/frontend/tsconfig.json --noEmit --incremental false
 .\node_modules\.bin\tsx.cmd --tsconfig apps/frontend/tsconfig.json --test apps/frontend/tests/platform-filters.test.ts

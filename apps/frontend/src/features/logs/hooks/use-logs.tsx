@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { getLogs } from '@/features/logs/api';
 import type { LogRecord } from '@/features/logs/types';
 import { type FacetOption } from '@/components/shared/app-filter-sidebar';
-import { generateTelemetry } from '@/shared/api/telemetry-api';
 import { useTelemetryStream } from '@/shared/hooks/use-telemetry-stream';
 import { useTelemetryQuery } from '@/shared/hooks/use-telemetry-query';
 import { getErrorMessage } from '@/shared/lib/errors';
@@ -14,8 +13,6 @@ export function useLogs() {
   const [logs, setLogs] = useState<LogRecord[]>([]);
 
   const [loading, setLoading] = useState(true);
-
-  const [generating, setGenerating] = useState(false);
 
   const [error, setError] = useState<string | null>(null);
 
@@ -79,23 +76,6 @@ export function useLogs() {
 
   const connected = useTelemetryStream(handleStreamEvent);
 
-  const generateAndRefresh = async () => {
-    setGenerating(true);
-    try {
-      await generateTelemetry();
-      await loadLogs();
-    } catch (generateError) {
-      setError(
-        getErrorMessage(
-          generateError,
-          'Unable to generate telemetry. Check the backend /api/data endpoint and port-forward.',
-        ),
-      );
-    } finally {
-      setGenerating(false);
-    }
-  };
-
   const services = useMemo(
     () =>
       [
@@ -141,7 +121,6 @@ export function useLogs() {
   return {
     logs,
     loading,
-    generating,
     error,
     selectedLog,
     setSelectedLog,
@@ -155,7 +134,6 @@ export function useLogs() {
     setSearchQuery,
     loadLogs,
     connected,
-    generateAndRefresh,
     services,
     facetOptions,
     filteredLogs,

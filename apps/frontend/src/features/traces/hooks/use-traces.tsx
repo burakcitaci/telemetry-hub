@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { getTraces } from '@/features/traces/api';
 import type { TraceSummary } from '@/features/traces/types';
 import { type FacetOption } from '@/components/shared/app-filter-sidebar';
-import { generateTelemetry } from '@/shared/api/telemetry-api';
 import { useTelemetryStream } from '@/shared/hooks/use-telemetry-stream';
 import { useTelemetryViewParams } from '@/shared/hooks/use-telemetry-view-params';
 import { getErrorMessage } from '@/shared/lib/errors';
@@ -18,8 +17,6 @@ export function useTraces() {
   const [traces, setTraces] = useState<TraceSummary[]>([]);
 
   const [loading, setLoading] = useState(true);
-
-  const [generating, setGenerating] = useState(false);
 
   const [error, setError] = useState<string | null>(null);
 
@@ -90,23 +87,6 @@ export function useTraces() {
 
   const connected = useTelemetryStream(handleStreamEvent);
 
-  const generateAndRefresh = async () => {
-    setGenerating(true);
-    try {
-      await generateTelemetry();
-      await loadTraces();
-    } catch (generateError) {
-      setError(
-        getErrorMessage(
-          generateError,
-          'Unable to generate telemetry. Check the backend /api/data endpoint and port-forward.',
-        ),
-      );
-    } finally {
-      setGenerating(false);
-    }
-  };
-
   const services = useMemo(
     () => [...new Set(traces.map((trace) => trace.ServiceName))].sort(),
     [traces],
@@ -151,11 +131,9 @@ export function useTraces() {
     [serviceFilters, statusFilters, timeRange, traces],
   );
 
-  const isEmpty = !loading && traces.length === 0 && !error;
   return {
     traces,
     loading,
-    generating,
     error,
     serviceFilters,
     setServiceFilters,
@@ -167,7 +145,6 @@ export function useTraces() {
     setSearchQuery,
     loadTraces,
     connected,
-    generateAndRefresh,
     services,
     facetOptions,
     filteredTraces,

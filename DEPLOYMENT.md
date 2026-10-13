@@ -56,19 +56,21 @@ The backend CORS allow-list includes the common local Vite ports `5000`, `5001`,
 yarn cluster:reload-backend
 ```
 
-## Generate and verify telemetry
+## Verify health and telemetry ingestion
 
-Check backend health and generate several instrumented requests:
+Check backend health:
 
 ```bash
 curl http://localhost:3001/health
-
-for i in 1 2 3 4 5; do
-  curl --silent http://localhost:3001/api/data > /dev/null
-done
 ```
 
-Wait a few seconds for collector batching. Then inspect the dashboard's Traces, Logs, and Services screens.
+Configure an instrumented application to export OTLP data to
+`http://localhost:3001/api/ingest`. Signal-specific requests use
+`/api/ingest/v1/traces`, `/api/ingest/v1/logs`, and
+`/api/ingest/v1/metrics`. See `docs/ingestion-onboarding.md` for the required
+authentication and exporter configuration. After the application emits real
+traffic, allow a few seconds for collector batching and inspect the dashboard's
+Traces, Logs, Metrics, and Services screens.
 
 ClickHouse stores timestamps in UTC. The dashboard displays those timestamps in the browser's local timezone, so a user in Germany during summer time should see UTC records shifted forward by two hours.
 
@@ -78,8 +80,6 @@ With the ClickHouse port-forward active, verify storage directly:
 curl --get http://localhost:8123/ --data-urlencode "query=SELECT count() FROM otel_traces"
 curl --get http://localhost:8123/ --data-urlencode "query=SELECT count() FROM otel_logs"
 ```
-
-The repository does not collect OTLP metrics or expose a tasks API.
 
 ## Apply changes
 
@@ -120,10 +120,12 @@ yarn cluster:reload-backend
 
 If telemetry is absent, verify the path in order:
 
-1. `curl http://localhost:3001/api/data` succeeds.
-2. `yarn logs:backend` shows the request.
-3. `yarn logs:collector` shows no ClickHouse export errors.
-4. The direct ClickHouse counts above are greater than zero.
+1. `curl http://localhost:3001/health` succeeds.
+2. The instrumented application targets `/api/ingest/v1/{signal}` with valid
+   ingestion credentials.
+3. `yarn logs:backend` shows the ingestion request.
+4. `yarn logs:collector` shows no ClickHouse export errors.
+5. The direct ClickHouse counts above are greater than zero.
 
 If the dashboard says the backend is unreachable but `curl http://localhost:3001/health` succeeds, check the browser port printed by Vite. A missing CORS origin usually appears in the UI as a network error.
 

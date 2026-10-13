@@ -8,6 +8,6 @@
 - [ ] Migrate the running SQLite database to the chart PVC before another restart.
 - [ ] Reassign demo/tenant-heavy to the intended team; no team was guessed.
 
-The running pod uses data/platform.sqlite, OTEL_SERVICE_NAME=tenant-heavy and has no service metadata rows. Teams platform, backend and frontend exist in demo. Selecting one team or saving catalog ownership is required for new generated telemetry. Existing ClickHouse records are not rewritten.
+The running pod uses data/platform.sqlite, OTEL_SERVICE_NAME=tenant-heavy and has no service metadata rows. Teams platform, backend and frontend exist in demo. Selecting one team or saving catalog ownership is required for newly ingested telemetry. Existing ClickHouse records are not rewritten.
 
 Graphify graph has no backend store/generator nodes; direct imports were inspected. Graph refresh tooling is unavailable in this environment.

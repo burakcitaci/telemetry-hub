@@ -1,6 +1,6 @@
-import { TelemetryActions } from "@/shared/components/feature-actions";
-import { useState } from "react";
-import { FeatureHeader } from "@/components/shared/feature-header";
+import { TelemetryActions } from '@/shared/components/feature-actions';
+import { useState } from 'react';
+import { FeatureHeader } from '@/components/shared/feature-header';
 import {
   FeaturePage,
   FeatureBody,
@@ -8,23 +8,19 @@ import {
   FeaturePanel,
   FeatureLoading,
   FeatureEmptyState,
-} from "@/shared/components/feature-layout";
-import type { useLogs } from "../hooks/use-logs";
-import { Activity } from "lucide-react";
-import { LogDetailSheet } from "@/features/logs/components/log-detail-sheet";
-import { DataTable } from "@/shared/components/data-table";
-import { AppFilterSidebar } from "@/components/shared/app-filter-sidebar";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
-import { TELEMETRY_FETCH_LIMIT } from "@/shared/lib/telemetry";
-import { columns } from "@/features/logs/components/logs-components";
+} from '@/shared/components/feature-layout';
+import type { useLogs } from '../hooks/use-logs';
+import { LogDetailSheet } from '@/features/logs/components/log-detail-sheet';
+import { DataTable } from '@/shared/components/data-table';
+import { AppFilterSidebar } from '@/components/shared/app-filter-sidebar';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { columns } from '@/features/logs/components/logs-components';
 
 type LogsViewProps = ReturnType<typeof useLogs>;
 
 export function LogsView({
   logs,
   loading,
-  generating,
   error,
   selectedLog,
   setSelectedLog,
@@ -34,7 +30,6 @@ export function LogsView({
   setSearchQuery,
   loadLogs,
   connected,
-  generateAndRefresh,
   filteredLogs,
 }: LogsViewProps) {
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -48,8 +43,6 @@ export function LogsView({
         actions={
           <TelemetryActions
             connected={connected}
-            generating={generating}
-            onGenerate={() => void generateAndRefresh()}
             loading={loading}
             onRefresh={() => void loadLogs()}
             label="Refresh logs"
@@ -94,18 +87,9 @@ export function LogsView({
                 <div className="max-w-md space-y-3">
                   <p className="text-sm text-muted-foreground">
                     {logs.length > 0
-                      ? "No logs in this period match the selected filters."
-                      : "No logs found in the selected period. Choose another time range or generate telemetry."}
+                      ? 'No logs in this period match the selected filters.'
+                      : 'No logs found in the selected period. Choose another time range or verify your ingestion configuration.'}
                   </p>
-                  {logs.length === 0 && (
-                    <Button
-                      onClick={() => void generateAndRefresh()}
-                      disabled={generating}
-                    >
-                      <Activity className="mr-2 h-4 w-4" />
-                      {generating ? "Generating…" : "Generate telemetry"}
-                    </Button>
-                  )}
                 </div>
               </FeatureEmptyState>
             )}

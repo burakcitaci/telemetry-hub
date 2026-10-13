@@ -6,7 +6,6 @@ import { resourceFromAttributes } from '@opentelemetry/resources';
 import { ExportResultCode } from '@opentelemetry/core';
 import { ConfigService } from '@nestjs/config';
 import { PlatformStore } from '../../modules/auth/platform-store.service';
-import { TenantTelemetryService } from '../../modules/health/services/tenant-telemetry.service';
 import { TenantLogContextProcessor, TenantLogExporter } from './tenant-logs';
 import { authenticatedTelemetryScope, currentTelemetryScope, runTelemetryContext } from './tenant-context';
 import { LoggerMiddleware } from '../middleware/logger.middleware';
@@ -72,24 +71,4 @@ test('HTTP finish logs re-enter their own validated request context', () => {
   runTelemetryContext({ scope: { tenantSlug: 'other', role: 'user' } }, () => response.emit('finish'));
   assert.deepEqual(captured, ['demo']);
   assert.equal(currentTelemetryScope(), undefined);
-});
-
-test('generated logs, traces and metrics receive catalog team ownership even for an admin without a team', async () => {
-  const store = new PlatformStore(new ConfigService({ AUTH_DB_PATH: ':memory:' }));
-  const originalFetch = globalThis.fetch;
-  const payloads: any[] = [];
-  try {
-    store.createTeam('demo', { id: 'platform', name: 'Platform' });
-    store.saveServiceMetadata('demo', 'tenant-heavy', { serviceName: 'tenant-heavy', team: 'platform' });
-    globalThis.fetch = async (_url, options) => { payloads.push(JSON.parse(String(options?.body))); return new Response('{}'); };
-    const generator = new TenantTelemetryService(new ConfigService({ OTEL_SERVICE_NAME: 'tenant-heavy' }), store);
-    await generator.generate({ tenantSlug: 'demo', role: 'admin' });
-    assert.equal(payloads.length, 3);
-    for (const payload of payloads) {
-      const group = (Object.values(payload)[0] as any[])[0];
-      const attrs = Object.fromEntries(group.resource.attributes.map((attr: any) => [attr.key, attr.value.stringValue]));
-      assert.equal(attrs['team.id'], 'platform'); assert.equal(attrs['org.slug'], 'demo');
-      assert.equal(attrs['service.name'], 'tenant-heavy');
-    }
-  } finally { globalThis.fetch = originalFetch; store.onModuleDestroy(); }
 });
