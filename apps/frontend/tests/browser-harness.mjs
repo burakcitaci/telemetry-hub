@@ -110,6 +110,11 @@ export async function browserFixture() {
     };
     return {
       evaluate, wait,
+      async viewport(width, height = 900) {
+        await page.send("Emulation.setDeviceMetricsOverride", {
+          width, height, deviceScaleFactor: 1, mobile: width < 768,
+        });
+      },
       async navigate(path) {
         await page.send("Page.navigate", { url: `http://127.0.0.1:${port}${path}` });
         await wait("Boolean(window.__fixtureReady)");
