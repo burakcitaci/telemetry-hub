@@ -43,7 +43,9 @@ export const CustomTooltip: React.FC<any> = ({
   );
   return (
     <div className="rounded-lg border bg-popover p-3 shadow-lg max-h-80 overflow-y-auto">
-      <p className="mb-2 text-xs font-medium text-muted-foreground">{label}</p>
+      <p className="mb-2 text-xs font-medium text-muted-foreground">
+        {typeof label === 'number' ? new Date(label).toLocaleString() : label}
+      </p>
       {sorted.map((entry: any, idx: number) => (
         <div key={idx} className="flex items-center gap-2 text-xs">
           <span

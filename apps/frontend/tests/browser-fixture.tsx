@@ -6,10 +6,12 @@ import "../src/index.css";
 
 const scenario = new URLSearchParams(location.search).get("case");
 const traceId = "1234567890abcdef1234567890abcdef";
-const records = (scenario === "current" ? [10, 99] : [10, 20, null, 30, 40]).map((sum, index) => ({
+const records = (scenario === "current" ? [10, 99] : scenario === "temporal" ? [10, 20, 30] : [10, 20, null, 30, 40]).map((sum, index) => ({
   serviceName: "api", metricName: "load", metricType: "gauge", metricUnit: "%",
   resourceAttributes: { "host.name": scenario === "current" ? (index ? "older" : "newer") : "node-a" }, attributes: {},
-  timeUnix: scenario === "current" ? (index ? "2026-10-13T00:00:00Z" : "2026-10-13T00:10:00Z") : `2026-10-13T00:0${index}:00Z`, count: 1, sum,
+  timeUnix: scenario === "current" ? (index ? "2026-10-13T00:00:00Z" : "2026-10-13T00:10:00Z")
+    : scenario === "temporal" && index === 2 ? "2026-10-13T00:10:00Z"
+    : `2026-10-13T00:0${index}:00Z`, count: 1, sum,
 }));
 (window as any).__requests = [];
 api.defaults.adapter = async (config) => {

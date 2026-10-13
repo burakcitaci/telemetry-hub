@@ -42,7 +42,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { CardContent, CardTitle } from "@/components/ui/card";
 
-import { makeSeriesId, formatValue } from "@/features/metrics/model";
+import { makeSeriesId, formatValue, formatTime } from "@/features/metrics/model";
 import {
   MetricStatCard,
   CustomTooltip,
@@ -371,7 +371,11 @@ export function MetricsView({
                             vertical={false}
                           />
                           <XAxis
-                            dataKey="time"
+                            dataKey="timestampMs"
+                            type="number"
+                            scale="time"
+                            domain={["dataMin", "dataMax"]}
+                            tickFormatter={(value) => formatTime(new Date(value).toISOString())}
                             tick={{ fontSize: 10 }}
                             tickLine={false}
                             axisLine={false}
@@ -433,7 +437,11 @@ export function MetricsView({
                             vertical={false}
                           />
                           <XAxis
-                            dataKey="time"
+                            dataKey="timestampMs"
+                            type="number"
+                            scale="time"
+                            domain={["dataMin", "dataMax"]}
+                            tickFormatter={(value) => formatTime(new Date(value).toISOString())}
                             tick={{ fontSize: 10 }}
                             tickLine={false}
                             axisLine={false}
@@ -476,7 +484,11 @@ export function MetricsView({
                             vertical={false}
                           />
                           <XAxis
-                            dataKey="time"
+                            dataKey="timestampMs"
+                            type="number"
+                            scale="time"
+                            domain={["dataMin", "dataMax"]}
+                            tickFormatter={(value) => formatTime(new Date(value).toISOString())}
                             tick={{ fontSize: 10 }}
                             tickLine={false}
                             axisLine={false}

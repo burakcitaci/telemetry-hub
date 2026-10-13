@@ -293,7 +293,7 @@ export function useMetrics() {
       m: new Map(s.data.map((p) => [p.timestamp, p.value])),
     }));
     return sorted.map((ts) => {
-      const row: Record<string, any> = { timestamp: ts, time: formatTime(ts) };
+      const row: Record<string, any> = { timestamp: ts, timestampMs: Date.parse(ts), time: formatTime(ts) };
       indexed.forEach(({ id, m }) => {
         row[id] = m.has(ts) ? m.get(ts)! : null;
       });

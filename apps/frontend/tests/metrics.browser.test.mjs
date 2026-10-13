@@ -1,6 +1,15 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { browserFixture } from "./browser-harness.mjs";
+test("FE-A8: irregular metric samples use elapsed-time spacing", { timeout: 60000 }, async () => {
+  const browser = await browserFixture();
+  try {
+    await browser.navigate("/org/demo/metrics?case=temporal");
+    await browser.wait("document.querySelectorAll('.recharts-line-dot').length === 3");
+    const x = await browser.evaluate("[...document.querySelectorAll('.recharts-line-dot')].map(dot => Number(dot.getAttribute('cx')))");
+    assert.ok(Math.abs((x[2] - x[1]) / (x[1] - x[0]) - 9) < 0.05, JSON.stringify(x));
+  } finally { await browser.close(); }
+});
 test("FE-A7: current is the newest observation, not the last flattened group", { timeout: 60000 }, async () => {
   const browser = await browserFixture();
   try {
