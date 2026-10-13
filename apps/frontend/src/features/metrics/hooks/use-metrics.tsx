@@ -287,7 +287,8 @@ export function useMetrics() {
   }, [visibleSeries]);
 
   const yDomain = useMemo((): [number | 'auto', number | 'auto'] => {
-    const all = visibleSeries.flatMap((s) => s.data.map((d) => d.value));
+    const all = visibleSeries.flatMap((s) => s.data.map((d) => d.value))
+      .filter((value): value is number => value !== null && Number.isFinite(value));
     if (!all.length) return ['auto', 'auto'];
     const min = Math.min(...all);
     const max = Math.max(...all);
@@ -300,7 +301,8 @@ export function useMetrics() {
   }, [visibleSeries]);
 
   const summaryStats = useMemo(() => {
-    const all = visibleSeries.flatMap((s) => s.data.map((d) => d.value));
+    const all = visibleSeries.flatMap((s) => s.data.map((d) => d.value))
+      .filter((value): value is number => value !== null && Number.isFinite(value));
     if (!all.length) return null;
     return {
       latest: all[all.length - 1],

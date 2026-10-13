@@ -62,13 +62,13 @@ export interface RawRecord {
   attributes: Record<string, string>;
   timeUnix: string;
   count: number;
-  sum: number;
+  sum: number | null;
 }
 
 export interface SeriesPoint {
   timestamp: string;
   time: string;
-  value: number;
+  value: number | null;
 }
 
 export interface Series {
@@ -81,7 +81,7 @@ export interface Series {
 
 export interface TableRow {
   timestamp: string;
-  value: number;
+  value: number | null;
   metric: string;
   group: string;
 }
@@ -104,7 +104,8 @@ export const formatTime = (ts: string): string => {
 
 export const unwrap = <T>(raw: any): T => (raw?.data ?? raw) as T;
 
-export const recordToValue = (r: RawRecord): number => {
+export const recordToValue = (r: RawRecord): number | null => {
+  if (r.sum === null || r.sum === undefined) return null;
   if (r.metricType === 'histogram' && r.count > 0)
     return Number(r.sum) / Number(r.count);
   return Number(r.sum) || 0;
@@ -122,7 +123,8 @@ export const formatBytes = (v: number): string => {
   return `${n.toFixed(2)} ${units[i]}`;
 };
 
-export const formatValue = (v: number, unit: string): string => {
+export const formatValue = (v: number | null, unit: string): string => {
+  if (v === null) return '—';
   if (!Number.isFinite(v)) return '—';
   if (unit === 'bytes' || unit === 'By') return formatBytes(v);
   if (unit === 's') {

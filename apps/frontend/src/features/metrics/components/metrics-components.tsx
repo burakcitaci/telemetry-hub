@@ -55,7 +55,7 @@ export const CustomTooltip: React.FC<any> = ({
           </span>
           <DataValue className="ml-auto font-medium">
             {entry.value === null || entry.value === undefined
-              ? '—'
+              ? 'No data'
               : formatValue(Number(entry.value), unit)}
           </DataValue>
         </div>

@@ -287,6 +287,11 @@ export function MetricsView({
             )}
 
             {/* Chart */}
+            {selectedMetric && (
+              <p role="note" className="mb-2 text-xs text-warning">
+                0 values cannot be distinguished from missing data until backend returns null.
+              </p>
+            )}
             <FeaturePanel>
               <FeaturePanelHeader>
                 <CardTitle className="text-sm font-medium">
@@ -454,7 +459,7 @@ export function MetricsView({
                               stroke={s.color}
                               strokeWidth={1.5}
                               fill={`url(#g-${s.id.replace(/[^a-z0-9]/gi, "")})`}
-                              connectNulls
+                              connectNulls={false}
                             />
                           ))}
                         </ComposedChart>
@@ -498,7 +503,7 @@ export function MetricsView({
                               strokeWidth={1.5}
                               dot={{ r: 2, strokeWidth: 0, fill: s.color }}
                               activeDot={{ r: 3 }}
-                              connectNulls
+                              connectNulls={false}
                             />
                           ))}
                         </LineChart>
