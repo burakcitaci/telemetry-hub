@@ -21,6 +21,12 @@ api.defaults.adapter = async (config) => {
     metrics: [{ tableName: "otel_metrics_gauge", metricType: "gauge", serviceName: "api", metricName: "load" }],
   };
   else if (config.url?.startsWith("/filters")) data = { services: ["api"], environments: ["dev", "production"], statuses: ["OK"] };
+  else if (config.url?.startsWith("/monitors")) data = [{
+    id: "monitor-a", name: "Fixture monitor", type: "metric", datadogType: "query alert",
+    query: "avg:load{*} > 80", comparator: "above", threshold: 80, evaluationWindow: "5m",
+    message: "", targets: [], createdAt: "2026-10-13T00:00:00Z", updatedAt: "2026-10-13T00:00:00Z",
+    status: "OK", isMuted: false,
+  }];
   else if (config.url?.startsWith("/traces/detail")) data = [{
     TraceId: traceId, SpanId: "1234567890abcdef", ParentSpanId: "",
     SpanName: "GET /fixture", ServiceName: "api", Timestamp: "2026-10-13T00:00:00Z",

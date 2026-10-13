@@ -257,6 +257,10 @@ export function MonitorsView({
             )}
 
             <div className="min-h-0 flex-1 overflow-y-auto">
+              <p role="note" className="mb-2 text-xs text-muted-foreground">
+                Configuration only — evaluation and notification delivery are not connected.
+                Without an evaluation timestamp, status is Unknown.
+              </p>
               {loading && monitors.length === 0 ? (
                 <FeatureLoading />
               ) : filtered.length === 0 ? (
@@ -264,7 +268,7 @@ export function MonitorsView({
                   <Bell className="h-8 w-8 text-muted-foreground/50" />
                   <p className="text-sm text-muted-foreground">
                     {monitors.length === 0
-                      ? 'No monitors yet. Create one to start getting notified.'
+                      ? 'No monitor configurations yet. Create one to define a rule.'
                       : 'No monitors match the current filters.'}
                   </p>
                   {monitors.length === 0 && (

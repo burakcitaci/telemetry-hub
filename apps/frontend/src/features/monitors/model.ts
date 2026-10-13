@@ -610,7 +610,7 @@ export type Comparator =
   | 'above_or_equal'
   | 'below_or_equal';
 
-export type MonitorStatus = 'OK' | 'Alert' | 'Warn' | 'No Data' | 'neutral';
+export type MonitorStatus = 'OK' | 'Alert' | 'Warn' | 'No Data' | 'neutral' | 'Unknown';
 
 export type NotificationTarget = 'email' | 'slack' | 'webhook' | 'pagerduty';
 
@@ -642,6 +642,13 @@ export interface MonitorView {
   status: MonitorStatus;
   isMuted: boolean;
   lastTriggeredAt?: string;
+  lastEvaluatedAt?: string | null;
+}
+
+export function normalizeMonitorEvaluation(monitor: MonitorView): MonitorView {
+  const observed = typeof monitor.lastEvaluatedAt === 'string'
+    && Number.isFinite(Date.parse(monitor.lastEvaluatedAt));
+  return observed ? monitor : { ...monitor, status: 'Unknown', lastEvaluatedAt: null };
 }
 
 export function mapOverallState(
@@ -1015,6 +1022,7 @@ export const statusLabel = (s: MonitorStatus) =>
     Alert: 'Alert',
     'No Data': 'No data',
     neutral: '—',
+    Unknown: 'Unknown',
   })[s];
 
 export const formatRelative = (iso?: string) => {
@@ -1038,6 +1046,7 @@ export const formatNumber = (n: number) => {
 };
 
 export const STATUS_FILTERS: MonitorStatus[] = [
+  'Unknown',
   'OK',
   'Warn',
   'Alert',

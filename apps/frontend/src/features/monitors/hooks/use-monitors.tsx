@@ -8,6 +8,7 @@ import {
   MonitorSeries,
   SIDEBAR_STORAGE_KEY,
   MonitorEvent,
+  normalizeMonitorEvaluation,
 } from '@/features/monitors/model';
 
 export function useMonitors() {
@@ -66,7 +67,7 @@ export function useMonitors() {
       try {
         const { data } = await api.get('/monitors');
         if (cancelled) return;
-        setMonitors(unwrap<MonitorView[]>(data));
+        setMonitors(unwrap<MonitorView[]>(data).map(normalizeMonitorEvaluation));
         setError(null);
       } catch (err) {
         if (!cancelled)
@@ -109,6 +110,7 @@ export function useMonitors() {
       Alert: 0,
       'No Data': 0,
       neutral: 0,
+      Unknown: 0,
     };
     monitors.forEach((m) => {
       out[m.status] = (out[m.status] ?? 0) + 1;
@@ -139,7 +141,7 @@ export function useMonitors() {
     if (!target) return;
     try {
       const { data } = await api.put(`/monitors/${id}`, { ...target, isMuted: !target.isMuted });
-      const updated = unwrap<MonitorView>(data);
+      const updated = normalizeMonitorEvaluation(unwrap<MonitorView>(data));
       setMonitors(prev => prev.map(m => m.id === id ? updated : m)); setError(null);
     } catch { setError('Monitor konnte nicht aktualisiert werden.'); }
   };
@@ -180,21 +182,21 @@ export function useMonitors() {
         targets: draft.targets ?? [],
         createdAt: now,
         updatedAt: now,
-        status: 'OK',
+        status: 'Unknown',
         isMuted: false,
       };
       created.teamId = draft.teamId || undefined;
       created.service = draft.service || undefined;
       created.env = draft.env || undefined;
       const { data } = await api.post('/monitors', created);
-      const saved = unwrap<MonitorView>(data);
+      const saved = normalizeMonitorEvaluation(unwrap<MonitorView>(data));
       setMonitors((prev) => [saved, ...prev]);
       setCreating(false);
       setOpenId(saved.id);
     } else if (openId) {
       const original = monitors.find(m => m.id === openId);
       const { data } = await api.put(`/monitors/${openId}`, { ...original, ...draft });
-      const saved = unwrap<MonitorView>(data);
+      const saved = normalizeMonitorEvaluation(unwrap<MonitorView>(data));
       setMonitors(prev => prev.map(m => m.id === openId ? saved : m));
       setCreating(false);
     }

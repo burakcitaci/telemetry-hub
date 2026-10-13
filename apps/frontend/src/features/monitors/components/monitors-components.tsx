@@ -574,8 +574,10 @@ export const MonitorDetail: React.FC<{
           </CardHeader>
           <CardContent className="pt-0">
             <MonitorGraph series={series} status={monitor.status} />
-            <p className="mt-2 text-[10px] text-muted-foreground">
-              Keine Evaluierungsdaten. Monitor-Konfiguration ist gespeichert; eine Alert-Evaluierung ist noch nicht angebunden.
+            <p role="note" className="mt-2 text-xs text-muted-foreground">
+              {monitor.lastEvaluatedAt
+                ? `Last evaluated: ${monitor.lastEvaluatedAt}`
+                : 'Unknown — no evaluation timestamp. Configuration is saved; evaluation and notification delivery are not connected.'}
             </p>
           </CardContent>
         </Card>
