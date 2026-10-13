@@ -10,6 +10,7 @@ import { LoggerModule } from "./common/logger/logger.module";
 import { MetricsModule } from "./modules/telemetry/metrics.module";
 import { AuthModule } from "./modules/auth/auth.module";
 import { IngestionModule } from './modules/ingestion/ingestion.module';
+import { InfrastructureModule } from './modules/infrastructure/infrastructure.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { IngestionModule } from './modules/ingestion/ingestion.module';
     TelemetryModule,
     MetricsModule,
     HealthModule,
+    InfrastructureModule,
   ],
 })
 export class AppModule {}

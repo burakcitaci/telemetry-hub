@@ -54,3 +54,10 @@ Nach jedem Refactoring-Schritt muss Folgendes erfüllt sein:
 
 ## Integration mit Graphify
 - Nutze vor jedem Refactoring die Datei `graphify-out/graph.json`, um die God Nodes und Projektabhängigkeiten zu prüfen (TASK-PRE.1).
+
+## Git Push Hygiene
+- Prüfe vor jedem Push den vollständigen Commit- und Working-Tree-Umfang auf unbeabsichtigte oder rein generierte Dateien.
+- Versioniere `graphify-out/graph.json`, weil dieser Repository-Workflow darauf angewiesen ist.
+- Nimm Graphify-Berichte nur auf, wenn sie ausdrücklich als Review-Artefakt benötigt werden.
+- Entferne vor dem Push reproduzierbare Graphify-Artefakte wie `cache/`, `graph.html`, datierte Backups, Label-Signaturen, `.graphify_root`, `manifest.json` und `cache/stat-index.json` aus dem Commit.
+- Pushe nur bei sauberem Working Tree und nachdem Build, Tests und `git diff --check` erfolgreich waren.
