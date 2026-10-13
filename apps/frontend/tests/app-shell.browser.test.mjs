@@ -17,7 +17,7 @@ test("FE-A6: retry keeps original scope, logout/login resets investigation, moni
     assert.ok(requests.every(request => request.params.env === "dev" && request.headers["X-Environment-Filter"] === "dev"));
     // Close modal to make the existing logout control reachable, then switch organizations.
     await browser.evaluate("document.querySelector('button[aria-label=\"Close trace details\"]').click()");
-    await browser.evaluate("[...document.querySelectorAll('button')].find(button => button.innerText === 'Abmelden').click()");
+    await browser.evaluate("[...document.querySelectorAll('button')].find(button => button.innerText === 'Log out').click()");
     await browser.wait("Boolean(document.getElementById('tenantSlug'))");
     await browser.evaluate(`for (const [id, value] of [['tenantSlug','other'],['email','a@example.test'],['password','fixture-password']]) {
       const input = document.getElementById(id);

@@ -30,8 +30,8 @@ export function GlobalHeader() {
       <div>
           <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => {
           void logout().catch(() => setLogoutError(true));
-        }}>Abmelden</Button>
-        {logoutError && <span role="alert" className="text-destructive">Abmelden fehlgeschlagen.</span>}
+        }}>Log out</Button>
+        {logoutError && <span role="alert" className="text-destructive">Logout failed.</span>}
 
       </div>
     </header>
