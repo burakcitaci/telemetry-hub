@@ -27,6 +27,21 @@ import {
   formatValue,
 } from '@/features/metrics/model';
 
+export function latestObservation(series: Series[]) {
+  let latest: { timestamp: string; group: string; groupId: string; value: number } | null = null;
+  for (const group of series) {
+    for (const point of group.data) {
+      const timestamp = Date.parse(point.timestamp);
+      if (point.value === null || !Number.isFinite(point.value) || !Number.isFinite(timestamp)) continue;
+      if (!latest || timestamp > Date.parse(latest.timestamp)
+        || (timestamp === Date.parse(latest.timestamp) && group.id < latest.groupId)) {
+        latest = { timestamp: point.timestamp, group: group.label, groupId: group.id, value: point.value };
+      }
+    }
+  }
+  return latest;
+}
+
 export function useMetrics() {
   const navigate = useNavigate();
 
@@ -304,8 +319,11 @@ export function useMetrics() {
     const all = visibleSeries.flatMap((s) => s.data.map((d) => d.value))
       .filter((value): value is number => value !== null && Number.isFinite(value));
     if (!all.length) return null;
+    const latest = latestObservation(visibleSeries);
     return {
-      latest: all[all.length - 1],
+      latest: latest?.value ?? null,
+      latestGroup: latest?.group,
+      latestTimestamp: latest?.timestamp,
       avg: all.reduce((a, b) => a + b, 0) / all.length,
       max: Math.max(...all),
       min: Math.min(...all),

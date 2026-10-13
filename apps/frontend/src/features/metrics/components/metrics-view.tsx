@@ -265,7 +265,9 @@ export function MetricsView({
             {summaryStats && (
               <TelemetryGrid>
                 <MetricStatCard
-                  label="Current"
+                  label={summaryStats.latestTimestamp
+                    ? `Latest observation · ${summaryStats.latestGroup} · ${summaryStats.latestTimestamp}`
+                    : "Current — no valid observation time"}
                   value={formatValue(summaryStats.latest, activeUnit)}
                   color="text-primary dark:text-primary"
                 />
