@@ -69,7 +69,7 @@ All visual judgments below are code-derived inference. Each axis has a concrete 
 
 - Changing global filters remounts the page and active-trace provider. Investigation context is disposable rather than stable ([app.tsx:47](C:/Users/burak/source/repos/telemetry-hub/apps/frontend/src/app/app.tsx:47)).
 - Services is not highlighted on a service-detail route because active matching is exact ([app-sidebar.tsx:139](C:/Users/burak/source/repos/telemetry-hub/apps/frontend/src/app/components/app-sidebar.tsx:139)). **FE-A4 resolved: segment-boundary matching in desktop/mobile. Test: navigation.browser.test.mjs.**
-- Unknown routes silently land on Metrics instead of explaining a bad investigation link ([app.tsx:73](C:/Users/burak/source/repos/telemetry-hub/apps/frontend/src/app/app.tsx:73)).
+- Unknown routes silently land on Metrics instead of explaining a bad investigation link ([app.tsx:73](C:/Users/burak/source/repos/telemetry-hub/apps/frontend/src/app/app.tsx:73)). **FE-A5 resolved: explicit global/org Not found; root/auth redirects retained. Test: navigation.browser.test.mjs.**
 
 **Concrete fixes:**
 

@@ -1,6 +1,7 @@
 import { lazy, Suspense } from "react";
 import {
   BrowserRouter,
+  Link,
   Navigate,
   Route,
   Routes,
@@ -70,7 +71,7 @@ function AuthenticatedRoutes() {
                 <Route path="monitors" element={<MonitorsPage />} />
                 <Route path="admin" element={<AdminPage />} />
                 <Route path="infrastructure" element={<InfrastructurePage />} />
-                <Route path="*" element={<Navigate to="metrics" replace />} />
+                <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
           </div>
@@ -92,7 +93,8 @@ function AppRoutes() {
         }
       />
       <Route path="/org/:tenant/*" element={<AuthenticatedRoutes />} />
-      <Route path="*" element={<EntryRedirect />} />
+      <Route path="/" element={<EntryRedirect />} />
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }
@@ -105,6 +107,23 @@ function EntryRedirect() {
       to={session ? `/org/${session.tenantSlug}/metrics` : "/login"}
       replace
     />
+  );
+}
+
+function NotFound() {
+  const { session, isLoading } = useAuth();
+  if (isLoading) return <ViewSkeleton />;
+  return (
+    <PageLayout>
+      <h1 className="text-lg font-semibold">Route not found</h1>
+      <p className="mt-2 text-sm text-muted-foreground">
+        This investigation link does not match an available page.
+      </p>
+      <Link className="mt-4 inline-block text-sm text-primary underline"
+        to={session ? `/org/${session.tenantSlug}/metrics` : "/login"}>
+        {session ? "Back to Metrics" : "Back to sign in"}
+      </Link>
+    </PageLayout>
   );
 }
 
