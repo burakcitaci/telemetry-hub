@@ -199,8 +199,21 @@ export function DataTable<TData, TValue>({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && 'selected'}
-                  className={cn('border-b border-border/40', density === 'telemetry' && 'odd:bg-muted/40', onRowClick && 'cursor-pointer hover:bg-muted/50')}
-                  onClick={() => onRowClick?.(row.original)}
+                  tabIndex={onRowClick ? 0 : undefined}
+                  role={onRowClick ? 'button' : undefined}
+                  className={cn('border-b border-border/40', density === 'telemetry' && 'odd:bg-muted/40', onRowClick && 'cursor-pointer hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset')}
+                  onClick={(event) => {
+                    const action = (event.target as Element).closest('a,button,input,select,textarea,label,[role="button"],[role="checkbox"],[contenteditable="true"]');
+                    if (action && action !== event.currentTarget) return;
+                    onRowClick?.(row.original);
+                  }}
+                  onKeyDown={(event) => {
+                    if (!onRowClick || (event.key !== 'Enter' && event.key !== ' ')) return;
+                    const action = (event.target as Element).closest('a,button,input,select,textarea,label,[role="button"],[role="checkbox"],[contenteditable="true"]');
+                    if (action && action !== event.currentTarget) return;
+                    event.preventDefault();
+                    if (!event.repeat) onRowClick(row.original);
+                  }}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id} className="px-2 py-1">

@@ -7,6 +7,14 @@ import { FeatureBody, FeatureContent } from '../src/shared/components/feature-la
 
 // The standalone tsx runner uses classic JSX for files outside src.
 Object.assign(globalThis, { React });
+test('FE-B1: actionable rows are keyboard buttons; read-only rows keep table semantics', () => {
+  const props = { columns: [{ accessorKey: 'id' }], data: [{ id: 'row-a' }], enableSearch: false, enablePagination: false };
+  const actionable = renderToStaticMarkup(<DataTable {...props} onRowClick={() => {}} />);
+  assert.match(actionable, /<tr(?=[^>]*tabindex="0")(?=[^>]*role="button")[^>]*>/);
+  assert.match(actionable, /focus-visible:ring/);
+  const readonly = renderToStaticMarkup(<DataTable {...props} />);
+  assert.doesNotMatch(readonly, /<tr[^>]*role="button"/);
+});
 
 test('table preserves column widths and cell whitespace inside a scroll container', () => {
   const html = renderToStaticMarkup(<DataTable

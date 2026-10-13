@@ -368,8 +368,21 @@ export const MonitorRow: React.FC<{
 }> = ({ monitor, series, onToggleMute, onOpen, onDelete }) => {
   return (
     <div
-      className="group grid cursor-pointer grid-cols-[16px_minmax(0,1fr)] items-center gap-x-3 gap-y-2 border-b border-border px-4 py-3 transition-colors hover:bg-accent/40 @4xl:grid-cols-[16px_minmax(0,1fr)_112px_120px_auto_auto]"
-      onClick={() => onOpen(monitor.id)}
+      tabIndex={0}
+      role="button"
+      className="group grid cursor-pointer grid-cols-[16px_minmax(0,1fr)] items-center gap-x-3 gap-y-2 border-b border-border px-4 py-3 transition-colors hover:bg-accent/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset @4xl:grid-cols-[16px_minmax(0,1fr)_112px_120px_auto_auto]"
+      onClick={(event) => {
+        const action = (event.target as Element).closest('a,button,input,select,textarea,label,[role="button"],[role="checkbox"]');
+        if (action && action !== event.currentTarget) return;
+        onOpen(monitor.id);
+      }}
+      onKeyDown={(event) => {
+        if (event.key !== 'Enter' && event.key !== ' ') return;
+        const action = (event.target as Element).closest('a,button,input,select,textarea,label,[role="button"],[role="checkbox"]');
+        if (action && action !== event.currentTarget) return;
+        event.preventDefault();
+        if (!event.repeat) onOpen(monitor.id);
+      }}
     >
       {/* 1. Status dot */}
       <StatusDot status={monitor.status} pulse={monitor.status === 'Alert'} />

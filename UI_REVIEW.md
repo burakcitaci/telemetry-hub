@@ -1825,15 +1825,15 @@ No live-region announcement guarantees were verified. Copy success changes the b
 Ranked by operator impact, not implementation elegance. Effort: S = localized UX correction; M = coordinated interaction/data-scope work; L = new substantial product capability. These are relative estimates, not delivery promises. Each line names one problem and one corresponding product fix.
 
 1. [P0] Unevaluated monitors imply healthy/notifying operation — Replace primary operational status with configuration-only/Not evaluated until evidence exists; a false OK hides a response gap — S — Touches: [monitors-components.tsx:578](C:/Users/burak/source/repos/telemetry-hub/apps/frontend/src/features/monitors/components/monitors-components.tsx:578) **FE-A3: fixed client fallback: absent/invalid lastEvaluatedAt yields Unknown; evaluator remains blocked-on-backend. Tests: monitors-truthfulness.test.tsx / monitors.browser.test.mjs.**
-2. [P0] Historical trace selection queries only a recent batch — Request the selected interval so an empty result is trustworthy — M — Touches: [use-traces.tsx:57](C:/Users/burak/source/repos/telemetry-hub/apps/frontend/src/features/traces/hooks/use-traces.tsx:57)
+2. [P0] Historical trace selection queries only a recent batch — Request the selected interval so an empty result is trustworthy — M — Touches: [use-traces.tsx:57](C:/Users/burak/source/repos/telemetry-hub/apps/frontend/src/features/traces/hooks/use-traces.tsx:57) **Deferred / blocked-on-backend: the trace-list route has no historical time-window contract. Not claimed resolved by this frontend pass.**
 3. [P0] Unknown CPU/RAM looks like measured zero — Expose metric availability and show unavailable instead of reassuring 0% — M — Touches: [infrastructure-dashboard.tsx:219](C:/Users/burak/source/repos/telemetry-hub/apps/frontend/src/features/infrastructure/infrastructure-dashboard.tsx:219) **FE-A2: missing/null CPU/RAM render unobserved; backend placeholder-zero ambiguity remains blocked-on-backend. Test: infrastructure.test.tsx.**
 4. [P0] Metrics connects missing observations — Show gaps rather than implying measured continuity — S — Touches: [metrics-view.tsx:501](C:/Users/burak/source/repos/telemetry-hub/apps/frontend/src/features/metrics/components/metrics-view.tsx:501) **FE-A1: client gap rendering fixed; API zero/missing distinction blocked-on-backend. Tests: metrics-truthfulness.test.tsx / metrics.browser.test.mjs.**
 5. [P0] Current value is not necessarily the latest observation — Use timestamp-defined current value with explicit group/aggregation scope — M — Touches: [use-metrics.tsx:302](C:/Users/burak/source/repos/telemetry-hub/apps/frontend/src/features/metrics/hooks/use-metrics.tsx:302) **FE-A7 resolved: newest finite timestamped visible observation, explicit group/time, deterministic ties. Tests: metrics-truthfulness.test.tsx / metrics.browser.test.mjs.**
-6. [P0] Core log/trace details are pointer-only — Make each primary cell a native Open detail action so keyboard investigation works — M — Touches: [data-table.tsx:199](C:/Users/burak/source/repos/telemetry-hub/apps/frontend/src/shared/components/data-table.tsx:199)
+6. [P0] Core log/trace details are pointer-only — Make each primary cell a native Open detail action so keyboard investigation works — M — Touches: [data-table.tsx:199](C:/Users/burak/source/repos/telemetry-hub/apps/frontend/src/shared/components/data-table.tsx:199) **FE-B1 resolved in Phase A: keyboard row activation with nested-action isolation and focus rings. Tests: data-table-layout.test.tsx / keyboard-details.browser.test.mjs.**
 7. [P0] Metric sample spacing is categorical instead of elapsed time — Use a temporal axis so irregular sampling cannot distort spike duration — M — Touches: [metrics-view.tsx:471](C:/Users/burak/source/repos/telemetry-hub/apps/frontend/src/features/metrics/components/metrics-view.tsx:471) **FE-A8 resolved: numeric epoch/time axes in Line/Area/Bar; actual dot-distance ratio tested in browser. Test: metrics.browser.test.mjs.**
 8. [P1] Logs cannot pause live reading — Add pause/resume preserving reading position — M — Touches: [use-logs.tsx:68](C:/Users/burak/source/repos/telemetry-hub/apps/frontend/src/features/logs/hooks/use-logs.tsx:68)
 9. [P1] Stream connected/disconnected state is hidden — Show a compact visible stream-state indicator — S — Touches: [feature-actions.tsx:41](C:/Users/burak/source/repos/telemetry-hub/apps/frontend/src/shared/components/feature-actions.tsx:41)
-10. [P1] Monitor rows cannot be opened by keyboard — Make monitor names native detail actions — S — Touches: [monitors-components.tsx:370](C:/Users/burak/source/repos/telemetry-hub/apps/frontend/src/features/monitors/components/monitors-components.tsx:370)
+10. [P1] Monitor rows cannot be opened by keyboard — Make monitor names native detail actions — S — Touches: [monitors-components.tsx:370](C:/Users/burak/source/repos/telemetry-hub/apps/frontend/src/features/monitors/components/monitors-components.tsx:370) **FE-B1 resolved in Phase A: keyboard row activation with nested-action isolation and focus rings. Tests: data-table-layout.test.tsx / keyboard-details.browser.test.mjs.**
 11. [P1] Query text and separate threshold controls have unclear combined meaning — Show one human-readable rule preview — M — Touches: [monitors-components.tsx:779](C:/Users/burak/source/repos/telemetry-hub/apps/frontend/src/features/monitors/components/monitors-components.tsx:779)
 12. [P1] Services time picker has no effect — Remove the picker and identify the catalog as environment-wide — S — Touches: [services-view.tsx:42](C:/Users/burak/source/repos/telemetry-hub/apps/frontend/src/features/services/components/services-view.tsx:42)
 13. [P1] Monitors period picker has no effect — Remove the inactive picker while evaluation history is unavailable — S — Touches: [use-monitors.tsx:34](C:/Users/burak/source/repos/telemetry-hub/apps/frontend/src/features/monitors/hooks/use-monitors.tsx:34)
@@ -1866,4 +1866,43 @@ Other lower-ranked findings remain in Sections 2–7; this list intentionally ca
 - Do not make dense tables uniformly spacious just to look more premium. Keep compact data rows and reserve comfortable spacing for authoring forms. [data-table.tsx:204](C:/Users/burak/source/repos/telemetry-hub/apps/frontend/src/shared/components/data-table.tsx:204), [monitors-components.tsx:631](C:/Users/burak/source/repos/telemetry-hub/apps/frontend/src/features/monitors/components/monitors-components.tsx:631)
 
 The goal is a more trustworthy investigation tool, not a prettier imitation of Datadog. Preserve working density and evidence access; stop controls and status labels from promising information they do not have.
+
+# 10. Frontend fix pass — Phase A
+
+TASK-FE-FIX-1 · 2026-10-13. Original review ratings/evidence above describe the original baseline; the inline backlog annotations and this section describe the fixes. Backend and deployment code were not changed. No dependencies were added. Phase B/C are not authorized for execution yet.
+
+| Finding | Status | Commit | Test | Verification |
+| --- | --- | --- | --- | --- |
+| FE-A1 — chart gaps | Client fixed; zero/missing API ambiguity blocked-on-backend | 91f89e4 | metrics-truthfulness.test.tsx; metrics.browser.test.mjs | Null fixture breaks the real SVG line; warning remains visible. |
+| FE-A2 — infrastructure unknown | Client fixed; backend placeholder zero blocked-on-backend | f2df8ee | infrastructure.test.tsx | Missing CPU renders — / unobserved; real zero retains its progress bar. |
+| FE-A3 — monitor evidence | Client fixed; real evaluator blocked-on-backend | 5e21287 | monitors-truthfulness.test.tsx; monitors.browser.test.mjs | Missing/invalid evaluation time yields Unknown, not OK. |
+| FE-A4 — parent navigation | Fixed | 4ea6df7 | navigation.browser.test.mjs | Services stays active on service detail in desktop/mobile; false prefixes do not match. |
+| FE-A5 — invalid routes | Fixed | 96482e9 | navigation.browser.test.mjs | Invalid global/org URLs show Route not found; root/auth redirects still work. |
+| FE-A6 — investigation context | Fixed | a9cfed2 | app-shell.browser.test.mjs; platform-filters.test.ts | Trace remains open after env change; retry uses original scope; lists refetch with new filters. |
+| FE-A7 — Current | Fixed | 649d9d4 | metrics-truthfulness.test.tsx; metrics.browser.test.mjs | Newest timestamp wins across visible groups, with explicit group/time. |
+| FE-A8 — sample spacing | Fixed | 9b1dfc9 | metrics.browser.test.mjs | One-minute/nine-minute intervals produce a 1:9 SVG dot-distance ratio. |
+| FE-B1 — keyboard rows, promoted P0 | Fixed in this finding's commit | git log --grep=FE-B1 -1 | data-table-layout.test.tsx; keyboard-details.browser.test.mjs | Tab + Enter/Space opens log/trace/monitor details; nested trace/mute/delete actions do not open parent details. |
+
+Each finding's regression was observed failing before its correction. The combined runner uses existing node:test/tsx plus an isolated installed Chromium browser; it never contacts the backend or restores a production mock-data feature.
+
+Phase test command (repository root):
+
+```powershell
+node apps/frontend/tests/run-phase-a.mjs
+```
+
+Frontend typecheck and production build passed using installed local TypeScript/Vite executables. Yarn/Corepack could not download its executable in this environment; no package installation or lockfile change was made. Vite still warns about a minified chunk over 500 kB; no chunking redesign or warning suppression was included. No lint script/configured lint runner was available, so lint is not claimed passed. git diff --check passed.
+
+Manual smoke path: open Traces, Tab to a row and press Enter; change the environment query parameter through browser navigation, confirm the same trace remains open and lists refresh; visit an invalid org route and confirm Route not found.
+
+Remaining work is explicit:
+
+- Historical trace search: blocked-on-backend and deferred, not solved by frontend filtering.
+- FE-B2: absent-time fallback is implemented by FE-A3; stale-age policy/real evaluation timestamps remain deferred to the next approved pass.
+- FE-B3/B4/B5/B6 and the promoted login-theme part of FE-C2: deferred until Phase B approval. Historic-range trace drilldown remains backend-dependent.
+- FE-C1, organization help in FE-C2, FE-C4 audit and FE-C5: deferred until Phase C approval. FE-C4's common prefix-matching logic is already covered by FE-A4; do not implement it twice.
+- FE-C3 unit correction: invalid as stated; no concrete FacetQueryBar unit defect was identified in the review.
+- Other approved-list review items remain deferred: live-log pause, visible stream state, monitor rule preview, inert Services/Monitors time controls, separate CSV/Filter false affordances, log severity text, hostname search, authoring labels, missing service summary, dirty-draft dismissal, unsupported coverage icons and stray service-heading 12.
+
+Protect unchanged: infrastructure themes/stale snapshots/unsupported Disk and Network, nested spans and raw/attribute evidence, native service links, facet keyboard controls, destructive confirmations, pending-save guards, compact density and the existing token/font/icon system.
 

@@ -26,12 +26,20 @@ api.defaults.adapter = async (config) => {
     metrics: [{ tableName: "otel_metrics_gauge", metricType: "gauge", serviceName: "api", metricName: "load" }],
   };
   else if (config.url?.startsWith("/filters")) data = { services: ["api"], environments: ["dev", "production"], statuses: ["OK"] };
-  else if (config.url?.startsWith("/monitors")) data = [{
+  else if (config.url?.startsWith("/logs")) data = [{
+    Timestamp: new Date().toISOString(), TraceId: traceId, SpanId: "1234567890abcdef",
+    SeverityText: "INFO", ServiceName: "api", Body: "Fixture log",
+    ResourceAttributes: {}, LogAttributes: {},
+  }];
+  else if (config.url?.startsWith("/monitors")) {
+    const monitor = {
     id: "monitor-a", name: "Fixture monitor", type: "metric", datadogType: "query alert",
     query: "avg:load{*} > 80", comparator: "above", threshold: 80, evaluationWindow: "5m",
     message: "", targets: [], createdAt: "2026-10-13T00:00:00Z", updatedAt: "2026-10-13T00:00:00Z",
     status: "OK", isMuted: false,
-  }];
+    };
+    data = config.method === "put" ? { ...monitor, isMuted: true } : [monitor];
+  }
   else if (config.url?.startsWith("/traces/detail")) {
     if (scenario === "retry" && (window as any).__requests.filter((request: any) => request.url === "/traces/detail").length === 1) {
       throw new Error("Fixture query failed");

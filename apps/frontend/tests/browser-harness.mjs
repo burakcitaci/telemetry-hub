@@ -115,7 +115,12 @@ export async function browserFixture() {
         await wait("Boolean(window.__fixtureReady)");
       },
       async key(key, code = key, virtualKey = 13) {
-        await page.send("Input.dispatchKeyEvent", { type: "keyDown", key, code, windowsVirtualKeyCode: virtualKey });
+        const text = key === "Enter" ? "\r" : key === " " ? " " : undefined;
+        await page.send("Input.dispatchKeyEvent", {
+          type: text ? "keyDown" : "rawKeyDown", key, code,
+          windowsVirtualKeyCode: virtualKey, nativeVirtualKeyCode: virtualKey,
+          text, unmodifiedText: text,
+        });
         await page.send("Input.dispatchKeyEvent", { type: "keyUp", key, code, windowsVirtualKeyCode: virtualKey });
       },
       async close() {
