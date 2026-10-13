@@ -4,7 +4,7 @@ export interface InfrastructureHost {
   id: string;
   hostname: string;
   status: HostStatus;
-  metrics: { cpu: number; ram: number; disk: number };
+  metrics: { cpu?: number | null; ram?: number | null; disk: number };
 }
 
 export const STATUS_LABELS: Record<HostStatus, string> = {
@@ -27,7 +27,8 @@ export function selectedHost(hosts: InfrastructureHost[], id: string | null) {
   return hosts.find((host) => host.id === id) ?? hosts[0] ?? null;
 }
 
-export function metricValue(value: number) {
+export function metricValue(value: number | null | undefined) {
+  if (value === null || value === undefined) return null;
   return Number.isFinite(value) ? Math.min(100, Math.max(0, value)) : 0;
 }
 
@@ -53,6 +54,7 @@ function isHost(value: unknown): value is InfrastructureHost {
     !!host.metrics &&
     ["cpu", "ram", "disk"].every((key) => {
       const metric = host.metrics[key as keyof InfrastructureHost["metrics"]];
+      if (key !== "disk" && (metric === null || metric === undefined)) return true;
       return (
         typeof metric === "number" &&
         Number.isFinite(metric) &&

@@ -13,6 +13,17 @@ import {
 } from "../src/features/infrastructure/model";
 
 Object.assign(globalThis, { React });
+test("FE-A2: missing CPU renders unobserved instead of zero without weakening validation", () => {
+  const missing = { id: "missing", hostname: "node-missing", status: "ok", metrics: { ram: 0, disk: 0 } };
+  const parsed = parseHosts([missing]);
+  const html = renderToStaticMarkup(<InfrastructureDashboard hosts={parsed} />);
+  assert.match(html, /CPU unobserved/);
+  assert.match(html, /title="unobserved"/);
+  assert.match(html, /Memory usage[^>]*aria-valuenow="0"/);
+  assert.doesNotMatch(html, /CPU usage[^>]*aria-valuenow="0"/);
+  assert.equal(parseHosts([{ ...missing, metrics: { ...missing.metrics, cpu: null } }]).length, 1);
+  assert.throws(() => parseHosts([{ ...missing, metrics: { ...missing.metrics, cpu: "missing" } }]));
+});
 const hosts: InfrastructureHost[] = [
   {
     id: "a",

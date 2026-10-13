@@ -167,7 +167,7 @@ const HostTile = memo(
             type="button"
             className={`infra-host-tile status-${host.status}`}
             aria-pressed={selected}
-            aria-label={`${host.hostname}: ${STATUS_LABELS[host.status]}, CPU ${host.metrics.cpu}%, RAM ${host.metrics.ram}%`}
+            aria-label={`${host.hostname}: ${STATUS_LABELS[host.status]}, CPU ${host.metrics.cpu == null ? "unobserved" : host.metrics.cpu + "%"}, RAM ${host.metrics.ram == null ? "unobserved" : host.metrics.ram + "%"}`}
             onClick={() => onSelect(host.id)}
           >
             <span aria-hidden="true">
@@ -182,8 +182,8 @@ const HostTile = memo(
         <TooltipContent className="infra-tooltip" side="top">
           <strong>{host.hostname}</strong>
           <span>
-            {STATUS_LABELS[host.status]} · CPU {host.metrics.cpu}% · RAM{" "}
-            {host.metrics.ram}%
+            {STATUS_LABELS[host.status]} · CPU {host.metrics.cpu == null ? "— (unobserved)" : host.metrics.cpu + "%"} · RAM{" "}
+            {host.metrics.ram == null ? "— (unobserved)" : host.metrics.ram + "%"}
           </span>
         </TooltipContent>
       </Tooltip>
@@ -211,8 +211,8 @@ function HostMetrics({ host }: { host: InfrastructureHost | null }) {
       </div>
       <h2>{host?.hostname ?? "Select a host"}</h2>
       <p className="infra-host-id">{host?.id ?? "Host details appear here."}</p>
-      <MetricRow label="CPU" value={host?.metrics.cpu} />
-      <MetricRow label="Memory" value={host?.metrics.ram} />
+      <MetricRow label="CPU" value={host?.metrics.cpu} note={host ? "unobserved" : "No host selected"} />
+      <MetricRow label="Memory" value={host?.metrics.ram} note={host ? "unobserved" : "No host selected"} />
       <MetricRow label="Disk" note="Not reported by Kubernetes Metrics API" />
       <MetricRow label="Network" note="Not provided by this endpoint" />
       <p className="infra-footnote">
@@ -229,7 +229,7 @@ function MetricRow({
   note,
 }: {
   label: string;
-  value?: number;
+    value?: number | null;
   note?: string;
 }) {
   const percent = value === undefined ? null : metricValue(value);
@@ -237,7 +237,9 @@ function MetricRow({
     <div className="infra-metric">
       <div>
         <span>{label}</span>
-        <strong>{percent === null ? "—" : `${percent}%`}</strong>
+        <strong title={percent === null && note === "unobserved" ? "unobserved" : undefined}>
+          {percent === null ? "—" : `${percent}%`}
+        </strong>
       </div>
       {percent === null ? (
         <span className="infra-muted">{note ?? "No host selected"}</span>
