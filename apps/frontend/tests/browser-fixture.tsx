@@ -30,6 +30,13 @@ api.defaults.adapter = async (config) => {
     p50_duration: 0, p95_duration: null, p99_duration: null,
   };
   else if (config.url?.startsWith("/service-metadata")) data = [];
+  else if (config.url?.startsWith("/admin/users")) {
+    if (scenario === "admin-loading") await new Promise((resolve) => setTimeout(resolve, 500));
+    const attempts = (window as any).__requests.filter((request: any) => request.url === "/admin/users").length;
+    if (scenario === "admin-retry" && attempts === 1) throw new Error("Fixture admin load failed");
+    data = [{ id: "user-a", email: "admin@example.test", role: "admin", teamId: "platform" }];
+  }
+  else if (config.url?.startsWith("/admin/teams")) data = [{ id: "platform", name: "Platform" }];
   else if (config.url?.startsWith("/filters")) data = { services: ["api"], environments: ["dev", "production"], statuses: ["OK"] };
   else if (config.url?.startsWith("/logs")) data = [{
     Timestamp: new Date().toISOString(), TraceId: traceId, SpanId: "1234567890abcdef",

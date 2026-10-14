@@ -5,6 +5,7 @@ import { useAuth, type UserRole } from '@/features/auth/auth-context';
 import { api, unwrap } from '@/shared/api/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { QueryError, ViewSkeleton } from '@/components/shared/view-skeleton';
 
 interface Team { id: string; name: string }
 interface User { id: string; email: string; role: UserRole; teamId?: string }
@@ -18,14 +19,26 @@ export default function AdminPage() {
   const [teams, setTeams] = useState<Team[]>([]);
   const [editing, setEditing] = useState<User | null>(null);
   const [busy, setBusy] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const load = useCallback(async () => {
-    const [userResponse, teamResponse] = await Promise.all([api.get('/admin/users'), api.get('/admin/teams')]);
-    setUsers(unwrap<User[]>(userResponse.data)); setTeams(unwrap<Team[]>(teamResponse.data));
+    setLoading(true);
+    try {
+      const [userResponse, teamResponse] = await Promise.all([api.get('/admin/users'), api.get('/admin/teams')]);
+      setUsers(unwrap<User[]>(userResponse.data)); setTeams(unwrap<Team[]>(teamResponse.data));
+      setError('');
+    } catch (err) {
+      setError(errorMessage(err));
+      throw err;
+    } finally {
+      setLoading(false);
+      setInitialLoading(false);
+    }
   }, []);
   useEffect(() => {
-    if (session?.role === 'admin') void load().catch(err => setError(errorMessage(err)));
+    if (session?.role === 'admin') void load().catch(() => undefined);
   }, [session?.role, load]);
   const execute = async (action: () => Promise<unknown>) => {
     setBusy(true); setError(''); setNotice('');
@@ -34,6 +47,10 @@ export default function AdminPage() {
     finally { setBusy(false); }
   };
   if (session?.role !== 'admin') return <Navigate to={`/org/${session?.tenantSlug}/metrics`} replace />;
+  if (initialLoading) return <main className="space-y-4 bg-background p-5 md:p-6">
+    <p role="status" className="text-xs text-muted-foreground">Loading administration…</p>
+    <ViewSkeleton showHeader={false} variant="list" />
+  </main>;
   const addTeam = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault(); const form = event.currentTarget; const data = new FormData(form);
     void execute(async () => { await api.post('/admin/teams', { id: data.get('id'), name: data.get('name') }); form.reset(); });
@@ -53,7 +70,8 @@ export default function AdminPage() {
   return <main className="space-y-5 bg-background p-5 md:p-6">
     <div><h1 className="text-lg font-semibold">Organization Administration</h1>
       <p className="mt-1 text-xs text-muted-foreground">{session.tenantSlug} · Benutzer, Teams und Zugangsdaten. Plattformfilter beeinflussen diese Verwaltung nicht.</p></div>
-    {error && <p role="alert" className="rounded-sm border border-destructive/40 p-3 text-xs text-destructive">{error}</p>}
+    {error && <QueryError title="Administration could not be loaded" message={error}
+      onRetry={() => load().catch(() => undefined)} isRetrying={loading} />}
     {notice && <p role="status" className="text-xs text-muted-foreground">{notice}</p>}
     <div className="grid items-start gap-5 xl:grid-cols-[1fr_1.6fr]">
       <section className={PANEL}><h2 className="mb-4 text-sm font-semibold">Teams ({teams.length})</h2>

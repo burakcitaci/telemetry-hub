@@ -1840,11 +1840,11 @@ Ranked by operator impact, not implementation elegance. Effort: S = localized UX
 14. [P1] CSV button does nothing — Hide it until actual export exists — S — Touches: [metrics-view.tsx:565](C:/Users/burak/source/repos/telemetry-hub/apps/frontend/src/features/metrics/components/metrics-view.tsx:565)
 15. [P1] Raw-data Filter button does nothing — Remove it and keep the functioning facet controls — S — Touches: [metrics-view.tsx:562](C:/Users/burak/source/repos/telemetry-hub/apps/frontend/src/features/metrics/components/metrics-view.tsx:562)
 16. [P1] Log severity is an unnamed empty badge — Render readable severity labels — S — Touches: [logs-components.tsx:28](C:/Users/burak/source/repos/telemetry-hub/apps/frontend/src/features/logs/components/logs-components.tsx:28)
-17. [P1] Service latency has no trace drilldown — Add same-service/same-range trace navigation at latency evidence — M — Touches: [service-detail-page.tsx:135](C:/Users/burak/source/repos/telemetry-hub/apps/frontend/src/features/services/service-detail-page.tsx:135)
+17. [P1] Service latency has no trace drilldown — Add same-service/same-range trace navigation at latency evidence — M — Touches: [service-detail-page.tsx:135](C:/Users/burak/source/repos/telemetry-hub/apps/frontend/src/features/services/service-detail-page.tsx:135) **FE-B5 resolved on the client: the link preserves service/range/environment; historical server querying remains blocked-on-backend and is disclosed in the UI.**
 18. [P1] Anonymous host map lacks hostname lookup — Add hostname search with matching selection/highlight — M — Touches: [infrastructure-dashboard.tsx:128](C:/Users/burak/source/repos/telemetry-hub/apps/frontend/src/features/infrastructure/infrastructure-dashboard.tsx:128)
 19. [P1] Monitor authoring fields lack associated labels — Pair each visible field label with its input identifier — S — Touches: [monitors-components.tsx:734](C:/Users/burak/source/repos/telemetry-hub/apps/frontend/src/features/monitors/components/monitors-components.tsx:734)
-20. [P1] Login ignores selected light theme — Use theme-matched surface and text tokens — S — Touches: [login-page.tsx:36](C:/Users/burak/source/repos/telemetry-hub/apps/frontend/src/features/auth/login-page.tsx:36)
-21. [P1] Missing service summary leaves a blank body — Show an explicit no-summary state with retry/context — S — Touches: [service-detail-page.tsx:362](C:/Users/burak/source/repos/telemetry-hub/apps/frontend/src/features/services/service-detail-page.tsx:362)
+20. [P1] Login ignores selected light theme — Use theme-matched surface and text tokens — S — Touches: [login-page.tsx:36](C:/Users/burak/source/repos/telemetry-hub/apps/frontend/src/features/auth/login-page.tsx:36) **FE-C2a resolved: semantic surfaces plus the existing three-way theme control are available before authentication.**
+21. [P1] Missing service summary leaves a blank body — Show an explicit no-summary state with retry/context — S — Touches: [service-detail-page.tsx:362](C:/Users/burak/source/repos/telemetry-hub/apps/frontend/src/features/services/service-detail-page.tsx:362) **FE-B5 resolved: explicit no-summary context and Retry; unavailable KPI values no longer become zero.**
 22. [P1] Closing monitor authoring silently loses edits — Confirm dismissal only for dirty drafts — M — Touches: [monitors-view.tsx:300](C:/Users/burak/source/repos/telemetry-hub/apps/frontend/src/features/monitors/components/monitors-view.tsx:300)
 23. [P1] Every service receives identical telemetry icons — Hide coverage indicators until they carry real coverage evidence — S — Touches: [services-components.tsx:58](C:/Users/burak/source/repos/telemetry-hub/apps/frontend/src/features/services/components/services-components.tsx:58)
 24. [P1] Global-filter changes reset investigation context — Retain compatible selection/detail state across filter changes — M — Touches: [app.tsx:47](C:/Users/burak/source/repos/telemetry-hub/apps/frontend/src/app/app.tsx:47) **FE-A6 resolved: no filter-key remount, trace scope pinned for retry, log selection retained; org/auth changes reset intentionally. Tests: app-shell.browser.test.mjs / platform-filters.test.ts.**
@@ -1869,7 +1869,7 @@ The goal is a more trustworthy investigation tool, not a prettier imitation of D
 
 # 10. Frontend fix pass — Phase A
 
-TASK-FE-FIX-1 · 2026-10-13. Original review ratings/evidence above describe the original baseline; the inline backlog annotations and this section describe the fixes. Backend and deployment code were not changed. No dependencies were added. Phase B/C are not authorized for execution yet.
+TASK-FE-FIX-1 · 2026-10-13. Original review ratings/evidence above describe the original baseline; the inline backlog annotations and this section describe the fixes. Backend and deployment code were not changed. No dependencies were added. Phase B was authorized later and is recorded in Section 11.
 
 | Finding | Status | Commit | Test | Verification |
 | --- | --- | --- | --- | --- |
@@ -1903,10 +1903,24 @@ Remaining work is explicit:
 - FE-B4 complete: compact theme controls remain reachable in the collapsed desktop sidebar and the mobile rail; both responsive paths have browser coverage.
 - FE-C2a complete: Login now uses semantic light/dark surface tokens and exposes the existing theme control; a browser test verifies both themes. Organization-field guidance remains deferred as FE-C2b.
 - FE-B5 complete on the client: unavailable service KPIs render as unavailable, absent summaries have retry/context, and latency evidence links to traces with service/range/environment scope. Historic server-side trace-range correctness remains backend-dependent and visibly disclosed.
-- FE-B6: deferred until its individual Phase B commit.
+- FE-B6 complete: Admin has a distinct initial skeleton, recoverable load errors, and retry keeps the mounted form and entered values intact.
 - FE-C1, organization help in FE-C2, FE-C4 audit and FE-C5: deferred until Phase C approval. FE-C4's common prefix-matching logic is already covered by FE-A4; do not implement it twice.
 - FE-C3 unit correction: invalid as stated; no concrete FacetQueryBar unit defect was identified in the review.
 - Other approved-list review items remain deferred: live-log pause, visible stream state, monitor rule preview, inert Services/Monitors time controls, separate CSV/Filter false affordances, log severity text, hostname search, authoring labels, missing service summary, dirty-draft dismissal, unsupported coverage icons and stray service-heading 12.
 
 Protect unchanged: infrastructure themes/stale snapshots/unsupported Disk and Network, nested spans and raw/attribute evidence, native service links, facet keyboard controls, destructive confirmations, pending-save guards, compact density and the existing token/font/icon system.
+
+# 11. Frontend fix pass — Phase B
+
+TASK-FE-FIX-2 · 2026-10-14. Backend and deployment code were not changed. No dependency or lockfile changes were made.
+
+| Finding | Status | Commit | Test | Verification |
+| --- | --- | --- | --- | --- |
+| FE-B3 — logout language | Fixed | 0e8887a | app-shell.browser.test.mjs | Auth reset path finds and executes the English Log out action. |
+| FE-B4 — compact theme access | Fixed | 5357a67 | theme-navigation.browser.test.mjs | Theme control remains visible in collapsed desktop and mobile navigation. |
+| FE-C2a — login theme, promoted | Fixed | eb39e39 | theme-navigation.browser.test.mjs | Login switches between light/dark and its surface matches the selected theme. |
+| FE-B5 — service KPI evidence | Client fixed; historic trace query blocked-on-backend | d14660f | service-detail.browser.test.mjs | Unknown KPIs remain unavailable; empty summary retries; trace link preserves scope. |
+| FE-B6 — Admin load recovery | Fixed | `git log --grep=FE-B6 -1` | admin.browser.test.mjs | Initial skeleton prevents false zero state; retry preserves entered form data. |
+
+All five findings were observed failing before their corrections. The combined frontend runner passes 34/34 tests. TypeScript and the Vite production build pass; Vite retains the pre-existing warning for a minified chunk over 500 kB.
 
