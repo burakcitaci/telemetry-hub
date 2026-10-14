@@ -63,7 +63,7 @@ export async function browserFixture() {
       name: "isolated-test-document",
       configureServer(vite) {
         vite.middlewares.use(async (req, res, next) => {
-          if (!/^\/(?:org\/|does-not-exist|$)/.test(req.url.split("?")[0])) return next();
+          if (!/^\/(?:org\/|login|does-not-exist|$)/.test(req.url.split("?")[0])) return next();
           try {
             const html = await vite.transformIndexHtml(req.url,
               `<!doctype html><meta name="viewport" content="width=device-width, initial-scale=1"><div id="root"></div><script type="module" src="/@fs/${entry}"></script>`);

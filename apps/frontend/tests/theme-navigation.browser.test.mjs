@@ -24,3 +24,23 @@ test("FE-B4: mobile rail exposes theme controls", { timeout: 60000 }, async () =
     assert.equal(visible, true);
   } finally { await browser.close(); }
 });
+
+test("FE-C2a: login exposes theme controls and uses theme surfaces", { timeout: 60000 }, async () => {
+  const browser = await browserFixture();
+  try {
+    await browser.navigate("/login?case=unauthenticated");
+    await browser.wait("Boolean(document.getElementById('tenantSlug'))");
+    const lightButton = "[...document.querySelectorAll('button')].find(button => button.getAttribute('aria-label') === 'Use light theme')";
+    assert.equal(await browser.evaluate(`Boolean(${lightButton})`), true);
+    await browser.evaluate(`${lightButton}.click()`);
+    await browser.wait("document.documentElement.classList.contains('light')");
+    const light = await browser.evaluate("[getComputedStyle(document.querySelector('main')).backgroundColor, getComputedStyle(document.body).backgroundColor]");
+    assert.equal(light[0], light[1]);
+    await browser.evaluate("[...document.querySelectorAll('button')].find(button => button.getAttribute('aria-label') === 'Use dark theme').click()");
+    await browser.wait("document.documentElement.classList.contains('dark')");
+    await browser.wait("getComputedStyle(document.querySelector('main')).backgroundColor === getComputedStyle(document.body).backgroundColor");
+    const dark = await browser.evaluate("[getComputedStyle(document.querySelector('main')).backgroundColor, getComputedStyle(document.body).backgroundColor]");
+    assert.equal(dark[0], dark[1]);
+    assert.notEqual(dark[0], light[0]);
+  } finally { await browser.close(); }
+});
