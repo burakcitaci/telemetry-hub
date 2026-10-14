@@ -14,15 +14,16 @@ const node: V1Node = {
 
 const inventoryClient = (overrides: Record<string, unknown> = {}) => ({
   nodes: async () => [node], metrics: async () => [], namespaces: async () => [],
+  podMetrics: async () => [],
   pods: async () => [], services: async () => [],
   workloads: async () => ({ deployments: [], statefulSets: [], daemonSets: [] }), ...overrides,
 });
 
 test('maps real quantities to host percentages and combines readiness, pressure and thresholds', () => {
-  const usage = { metadata: { name: 'worker-1' }, usage: { cpu: '1800000000n', memory: '5898240Ki' } };
-  assert.deepEqual(mapNode(node, usage), {
-    id: 'node-uid', hostname: 'worker-1', status: 'ok', metrics: { cpu: 45, ram: 70, disk: null },
-  });
+  const usage = { metadata: { name: 'worker-1' }, timestamp: new Date().toISOString(), window: '15s',
+    usage: { cpu: '1800000000n', memory: '5898240Ki' } };
+  assert.deepEqual(mapNode(node, usage).metrics, { cpu: 45, ram: 70, disk: null });
+  assert.equal(mapNode(node, usage).usage.cpuCores, 1.8);
   assert.equal(mapNode(node, { ...usage, usage: { cpu: '3200m', memory: '1Gi' } }).status, 'warning');
   assert.equal(mapNode(node, { ...usage, usage: { cpu: '3.8', memory: '1Gi' } }).status, 'critical');
   assert.equal(mapNode({ ...node, status: { conditions: [{ type: 'Ready', status: 'False' }] } }).status, 'critical');
@@ -42,7 +43,9 @@ test('maps namespaces, workloads, pods, containers and services truthfully', () 
     spec: { containers: [{ name: 'api', image: 'api:v1' }], nodeName: 'worker-1' },
     status: { phase: 'Running', containerStatuses: [{ name: 'api', image: 'api:v1', imageID: 'sha256:x',
       ready: true, restartCount: 2, started: true, state: { running: { startedAt: new Date() } } }] } });
-  assert.deepEqual(pod.containers[0], { name: 'api', image: 'api:v1', ready: true, restarts: 2, state: 'running' });
+  assert.equal(pod.containers[0].imageId, 'sha256:x');
+  assert.equal(pod.containers[0].restarts, 2);
+  assert.deepEqual(pod.usage, { cpuCores: null, memoryBytes: null, observedAt: null, window: null });
   assert.equal(pod.status, 'ok');
   assert.equal(mapWorkload({ metadata: { name: 'api', namespace: 'demo' }, spec: { replicas: 2 },
     status: { readyReplicas: 1, availableReplicas: 1 } }, 'Deployment').status, 'warning');
@@ -93,4 +96,40 @@ test('metrics API tries stable then beta and falls back to conditions when unava
   assert.deepEqual(versions, ['v1', 'v1beta1']);
   Object.assign(client, { custom: { listClusterCustomObject: async () => { throw { code: 503 }; } } });
   assert.deepEqual(await client.metrics(), []);
+});
+
+test('pod usage joins by namespace and container name; missing and stale samples stay unknown', async () => {
+  const now = new Date().toISOString();
+  const pod = { metadata: { name: 'api', namespace: 'demo' }, spec: { containers: [
+    { name: 'api', image: 'api:v1', resources: { requests: { cpu: '100m' }, limits: { memory: '256Mi' } } },
+    { name: 'sidecar', image: 'sidecar:v1' },
+  ] } };
+  const sample = { metadata: { name: 'api', namespace: 'demo' }, timestamp: now, window: '15s', containers: [
+    { name: 'sidecar', usage: { cpu: '0', memory: '16Mi' } },
+    { name: 'api', usage: { cpu: '250m', memory: '64Mi' } },
+  ] };
+  const service = new InfrastructureService(inventoryClient({ pods: async () => [pod],
+    podMetrics: async () => [sample, { ...sample, metadata: { name: 'api', namespace: 'other' }, containers: [] }] }) as KubernetesService);
+  const result = (await service.status()).pods[0];
+  assert.equal(result.containers[0].usage.cpuCores, .25);
+  assert.equal(result.containers[1].usage.cpuCores, 0);
+  assert.equal(result.usage.memoryBytes, 80 * 1024 ** 2);
+  assert.equal(result.containers[0].requests.cpuCores, .1);
+  assert.equal(result.containers[0].limits.cpuCores, null);
+  assert.equal(mapPod(pod, { ...sample, containers: sample.containers.slice(0, 1) }).usage.cpuCores, null);
+  assert.equal(mapPod(pod, { ...sample, timestamp: new Date(Date.now() - 120_000).toISOString() }).usage.cpuCores, null);
+});
+
+test('workload usage follows namespace and label selectors and stays unknown for missing pods', () => {
+  const workload = { metadata: { name: 'api', namespace: 'demo' }, spec: { replicas: 1,
+    selector: { matchLabels: { app: 'api' }, matchExpressions: [{ key: 'tier', operator: 'In', values: ['web'] }] } } };
+  const pod = { metadata: { name: 'api-1', namespace: 'demo', uid: 'p1', labels: { app: 'api', tier: 'web' } },
+    spec: { containers: [{ name: 'api', image: 'api:v1' }] } };
+  const measured = mapPod(pod, { metadata: { name: 'api-1', namespace: 'demo' }, timestamp: new Date().toISOString(),
+    window: '15s', containers: [{ name: 'api', usage: { cpu: '10m', memory: '20Mi' } }] });
+  const result = mapWorkload(workload, 'Deployment', [pod, { ...pod, metadata: { ...pod.metadata, uid: 'p2', namespace: 'other' } }], [measured]);
+  assert.deepEqual(result.podIds, ['p1']);
+  assert.equal(result.usage.cpuCores, .01);
+  assert.equal(mapWorkload(workload, 'Deployment', [], []).usage.cpuCores, null);
+  assert.equal(mapWorkload(workload, 'Deployment', [pod], [mapPod(pod)]).usage.cpuCores, null);
 });

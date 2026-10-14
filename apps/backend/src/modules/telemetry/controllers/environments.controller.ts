@@ -4,6 +4,7 @@ import { Tenant } from '../../auth/tenant-request.decorator';
 import type { TenantScope } from '../../auth/auth.types';
 import { ClickhouseService } from '../services/clickhouse.service';
 
+@ApiTags('environments')
 @Controller('api/environments')
 @UseGuards(TenantJwtGuard)
 export class EnvironmentsController {
@@ -17,3 +18,4 @@ export class EnvironmentsController {
     return this.clickhouse.getEnvironments(tenant, source);
   }
 }
+import { ApiTags } from '@nestjs/swagger';

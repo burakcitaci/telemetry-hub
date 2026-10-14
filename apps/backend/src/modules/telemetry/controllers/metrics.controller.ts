@@ -6,6 +6,7 @@ import { TenantJwtGuard } from '../../auth/tenant-jwt.guard';
 import { Tenant } from '../../auth/tenant-request.decorator';
 import type { TenantScope } from '../../auth/auth.types';
 
+@ApiTags('metrics')
 @Controller('api/metrics')
 @UseGuards(TenantJwtGuard)
 export class MetricsController {
@@ -224,3 +225,4 @@ export class MetricsController {
     );
   }
 }
+import { ApiTags } from '@nestjs/swagger';

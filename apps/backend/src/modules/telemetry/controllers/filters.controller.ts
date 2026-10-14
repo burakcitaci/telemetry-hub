@@ -14,6 +14,7 @@ export class FilterOptionsDto {
   @IsOptional() @IsISO8601() to?: string;
 }
 
+@ApiTags('filters')
 @Controller('api/filters')
 @UseGuards(TenantJwtGuard)
 export class FiltersController {
@@ -59,3 +60,4 @@ export class FiltersController {
     return rows.map(row => row.status).sort();
   }
 }
+import { ApiTags } from '@nestjs/swagger';

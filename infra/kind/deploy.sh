@@ -5,6 +5,8 @@ set -euo pipefail
 readonly REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
 
+bash infra/kind/install-metrics-server.sh
+
 helm upgrade --install observability infra/charts/observability \
   --namespace telemetry-hub --create-namespace \
   --wait --timeout 5m --kube-context kind-observability \

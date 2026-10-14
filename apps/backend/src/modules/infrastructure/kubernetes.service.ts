@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { AppsV1Api, CoreV1Api, CustomObjectsApi, KubeConfig } from '@kubernetes/client-node';
 import type { V1DaemonSet, V1Deployment, V1Namespace, V1Node, V1Pod, V1Service, V1StatefulSet } from '@kubernetes/client-node';
-import type { NodeUsage } from './infrastructure.model';
+import type { NodeUsage, PodUsage } from './infrastructure.model';
 
 export interface KubernetesWorkloads { deployments: V1Deployment[]; statefulSets: V1StatefulSet[]; daemonSets: V1DaemonSet[]; }
 
@@ -54,16 +54,24 @@ export class KubernetesService {
   }
 
   async metrics(): Promise<NodeUsage[]> {
+    return this.resourceMetrics<NodeUsage>('nodes');
+  }
+
+  async podMetrics(): Promise<PodUsage[]> {
+    return this.resourceMetrics<PodUsage>('pods');
+  }
+
+  private async resourceMetrics<T>(plural: 'nodes' | 'pods'): Promise<T[]> {
     this.initialize();
     for (const version of ['v1', 'v1beta1']) {
       try {
         const response = await this.custom.listClusterCustomObject({
-          group: 'metrics.k8s.io', version, plural: 'nodes', timeoutSeconds: 5,
+          group: 'metrics.k8s.io', version, plural, timeoutSeconds: 5,
         });
-        return (response.items ?? []) as NodeUsage[];
+        return (response.items ?? []) as T[];
       } catch (error) {
         if (version === 'v1' && (error.code === 404 || error.statusCode === 404)) continue;
-        this.logger.warn('Node metrics unavailable; using Kubernetes node conditions.');
+        this.logger.warn(`${plural} metrics unavailable; retaining Kubernetes inventory.`);
         return [];
       }
     }

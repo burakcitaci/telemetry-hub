@@ -4,6 +4,7 @@ import { readFileSync } from "node:fs";
 import * as React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { InfrastructureDashboard } from "../src/features/infrastructure/infrastructure-dashboard";
+import { ContainerDetails, PodResourceRow, imageUsage } from '../src/features/infrastructure/resource-usage';
 import {
   countHosts,
   metricValue,
@@ -147,4 +148,17 @@ test("loading, empty and stale states are explicit", () => {
   assert.match(html, /data is stale/);
   assert.match(html, /role="alert"/);
   assert.match(html, /node-a/);
+});
+
+test('pod/container details show measured units, images, configured limits and honest incomplete image usage', () => {
+  const usage = { cpuCores: .25, memoryBytes: 64 * 1024 ** 2, observedAt: '2026-10-14T10:00:00Z', window: '15s' };
+  const container = { ...snapshot.pods[0].containers[0], usage, requests: { cpuCores: .1, memoryBytes: null },
+    limits: { cpuCores: null, memoryBytes: 256 * 1024 ** 2 } };
+  const pod = { ...snapshot.pods[0], usage, containers: [container] };
+  const html = renderToStaticMarkup(<table><PodResourceRow pod={pod} /></table>);
+  assert.match(html, /250 mCPU/); assert.match(html, /64 MiB/); assert.match(html, /api:v1/);
+  assert.match(renderToStaticMarkup(<ContainerDetails container={container} />), /256 MiB/);
+  assert.equal(imageUsage([pod])[0].cpuCores, .25);
+  assert.equal(imageUsage([pod, { ...pod, id: 'missing', containers: [{ ...container, usage: undefined }] }])[0].cpuCores, null);
+  assert.throws(() => parseInfrastructure({ ...snapshot, pods: [{ ...pod, usage: { ...usage, cpuCores: 'bad' } }] }));
 });

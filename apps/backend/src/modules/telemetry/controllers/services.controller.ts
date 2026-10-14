@@ -7,6 +7,7 @@ import { TelemetryQueryDto } from '../../../dto/query.dto';
 import { ServiceParamDto } from '../../../dto/service.dto';
 import { ClickhouseService } from '../services/clickhouse.service';
 
+@ApiTags('services')
 @Controller('api/services')
 @UseGuards(TenantJwtGuard)
 export class ServicesController {
@@ -30,3 +31,4 @@ export class ServicesController {
     });
   }
 }
+import { ApiTags } from '@nestjs/swagger';

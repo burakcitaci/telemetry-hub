@@ -20,6 +20,7 @@ export class ServiceMetadataKeyDto {
 }
 
 // Catalog ownership is descriptive metadata, never an authorization boundary.
+@ApiTags('service-metadata')
 @Controller('api/service-metadata')
 @UseGuards(TenantJwtGuard)
 export class ServiceMetadataController {
@@ -40,3 +41,4 @@ export class ServiceMetadataController {
     return { success: true };
   }
 }
+import { ApiTags } from '@nestjs/swagger';

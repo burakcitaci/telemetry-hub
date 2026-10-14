@@ -20,6 +20,7 @@
     "cluster:create": "kind create cluster --name observability --config infra/kind/kind-config.yaml",
     "cluster:destroy": "yarn cluster:undeploy && kind delete cluster --name observability",
     "cluster:deploy": "bash infra/kind/deploy.sh",
+    "cluster:metrics": "bash infra/kind/install-metrics-server.sh",
     "cluster:undeploy": "helm uninstall observability --namespace telemetry-hub --ignore-not-found --kube-context kind-observability",
     "cluster:init": "bash infra/kind/cluster-up.sh",
     "cluster:reload-backend": "bash infra/kind/reload-backend.sh",

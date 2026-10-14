@@ -20,6 +20,7 @@ export function listFilteredMonitors(store: PlatformStore, scope: TenantScope) {
     (!statuses.length || statuses.includes(m.isMuted ? 'Muted' : m.status || 'Unknown')));
 }
 
+@ApiTags('monitors')
 @Controller('api/monitors')
 @UseGuards(TenantJwtGuard)
 export class MonitorsController {
@@ -66,3 +67,4 @@ export class MonitorsController {
       datadogType: dto.type === 'log' ? 'log alert' : 'query alert' };
   }
 }
+import { ApiTags } from '@nestjs/swagger';

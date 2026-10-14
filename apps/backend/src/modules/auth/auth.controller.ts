@@ -5,6 +5,7 @@ import { LoginDto } from './dto/login.dto';
 import { AUTH_COOKIE, TenantJwtGuard } from './tenant-jwt.guard';
 import type { TenantRequest } from './auth.types';
 
+@ApiTags('auth')
 @Controller('api/auth')
 export class AuthController {
   constructor(private readonly auth: AuthService) {}
@@ -47,3 +48,4 @@ export class AuthController {
     });
   }
 }
+import { ApiTags } from '@nestjs/swagger';

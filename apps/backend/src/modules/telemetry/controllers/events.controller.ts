@@ -11,6 +11,7 @@ const POLL_INTERVAL_MS = 3_000;
 const HEARTBEAT_INTERVAL_MS = 15_000;
 const COLLECTOR_GRACE_MS = 15_000;
 
+@ApiTags('events')
 @Controller("api/events")
 @UseGuards(TenantJwtGuard)
 export class EventsController {
@@ -169,3 +170,4 @@ export class EventsController {
     return `${signal.eventCount}:${signal.fingerprint}`;
   }
 }
+import { ApiTags } from '@nestjs/swagger';

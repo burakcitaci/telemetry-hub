@@ -4,6 +4,7 @@ import {
   countHosts, countResources, metricValue, selectedHost, STATUS_LABELS,
   type InfrastructureHost, type InfrastructureSnapshot, type WorkloadSummary,
 } from "./model";
+import { cpuText, memoryText, imageUsage, ImageResourceRows, PodResourceRow } from './resource-usage';
 
 interface DashboardProps {
   snapshot: InfrastructureSnapshot;
@@ -64,33 +65,35 @@ function InfrastructureResources({ snapshot }: { snapshot: InfrastructureSnapsho
     <Tabs defaultValue="workloads"><TabsList className="infra-tabs">
       <TabsTrigger value="workloads">Workloads <b>{visible(snapshot.workloads).length}</b></TabsTrigger>
       <TabsTrigger value="pods">Pods <b>{visible(snapshot.pods).length}</b></TabsTrigger>
+      <TabsTrigger value="images">Images <b>{imageUsage(visible(snapshot.pods)).length}</b></TabsTrigger>
       <TabsTrigger value="services">Services <b>{visible(snapshot.services).length}</b></TabsTrigger>
     </TabsList>
       <TabsContent value="workloads"><WorkloadTable items={visible(snapshot.workloads)} /></TabsContent>
       <TabsContent value="pods"><PodTable items={visible(snapshot.pods)} /></TabsContent>
+      <TabsContent value="images"><ResourceTable headers={["Image", "Pods", "Containers", "CPU", "Memory"]}
+        empty="No container images found." rowCount={visible(snapshot.pods).length}>
+        <ImageResourceRows pods={visible(snapshot.pods)} /></ResourceTable></TabsContent>
       <TabsContent value="services"><ServiceTable items={visible(snapshot.services)} /></TabsContent>
     </Tabs>
   </section>;
 }
 
 function WorkloadTable({ items }: { items: InfrastructureSnapshot["workloads"] }) {
-  return <ResourceTable headers={["Name", "Kind", "Namespace", "Ready", "Status"]} empty="No workloads found." rowCount={items.length}>
+  return <ResourceTable headers={["Name", "Namespace", "Readiness", "CPU", "Memory"]} empty="No workloads found." rowCount={items.length}>
     {items.map((item) => <WorkloadRow key={item.id} item={item} />)}
   </ResourceTable>;
 }
 
 function WorkloadRow({ item }: { item: WorkloadSummary }) {
   return <tbody className="infra-expandable"><tr><td><details><summary className="infra-resource-link">{item.name}</summary>
-    <div className="infra-expanded-detail">Available {item.available} · Desired {item.desired} · ID {item.id}</div>
-  </details></td><td>{item.kind}</td><td>{item.namespace}</td><td>{item.ready}/{item.desired}</td>
-    <td><StatusBadge status={item.status} /></td></tr></tbody>;
+    <div className="infra-expanded-detail">{item.kind} · Available {item.available} · Desired {item.desired} · {item.podIds?.length ?? '—'} pods · ID {item.id}</div>
+  </details></td><td>{item.namespace}</td><td>{item.ready}/{item.desired} <StatusBadge status={item.status} /></td>
+    <td>{cpuText(item.usage?.cpuCores)}</td><td>{memoryText(item.usage?.memoryBytes)}</td></tr></tbody>;
 }
 
 function PodTable({ items }: { items: InfrastructureSnapshot["pods"] }) {
-  return <ResourceTable headers={["Pod", "Namespace", "Phase", "Ready", "Restarts"]} empty="No pods found." rowCount={items.length}>
-    <tbody>{items.map((item) => <tr key={item.id}><td className="infra-name-cell" title={item.name}>{item.name}</td>
-      <td>{item.namespace}</td><td>{item.phase}</td><td>{item.containers.filter((value) => value.ready).length}/{item.containers.length}</td>
-      <td>{item.restarts}</td></tr>)}</tbody>
+  return <ResourceTable headers={["Pod", "Namespace", "Readiness", "CPU", "Memory"]} empty="No pods found." rowCount={items.length}>
+    {items.map(item => <PodResourceRow key={item.id} pod={item} />)}
   </ResourceTable>;
 }
 
@@ -153,6 +156,14 @@ function HostMetrics({ host, metricsAvailable }: { host: InfrastructureHost | nu
     {!metricsAvailable && host && <div className="infra-metrics-warning"><strong>Node metrics unavailable</strong>
       <span>CPU and memory require Kubernetes Metrics API.</span><a href="https://kubernetes.io/docs/tasks/debug/debug-cluster/resource-metrics-pipeline/" target="_blank" rel="noreferrer">Configure Metrics API ↗</a></div>}
     <MetricRow label="CPU" value={host?.metrics.cpu} /><MetricRow label="Memory" value={host?.metrics.ram} />
+    {host?.capacity && <dl className="infra-node-facts">
+      <div><dt>CPU used / capacity</dt><dd>{cpuText(host.usage?.cpuCores)} / {cpuText(host.capacity.cpuCores)}</dd></div>
+      <div><dt>Memory used / capacity</dt><dd>{memoryText(host.usage?.memoryBytes)} / {memoryText(host.capacity.memoryBytes)}</dd></div>
+      <div><dt>Allocatable CPU / memory</dt><dd>{cpuText(host.allocatable?.cpuCores)} / {memoryText(host.allocatable?.memoryBytes)}</dd></div>
+      {host.usage?.observedAt && <div><dt>Metric sample</dt><dd>{new Date(host.usage.observedAt).toLocaleTimeString()} · {host.usage.window}</dd></div>}
+      {host.info && <><div><dt>Operating system</dt><dd>{host.info.os} · {host.info.architecture}</dd></div>
+        <div><dt>Kubelet</dt><dd>{host.info.kubelet}</dd></div><div><dt>Runtime</dt><dd>{host.info.runtime}</dd></div></>}
+    </dl>}
     <MetricRow label="Disk" note="Not reported by Kubernetes Metrics API" />
     <MetricRow label="Network" note="Not provided by this endpoint" />
   </div></aside>;

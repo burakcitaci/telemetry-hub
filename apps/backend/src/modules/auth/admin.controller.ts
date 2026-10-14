@@ -6,6 +6,7 @@ import { Tenant } from './tenant-request.decorator';
 import type { TenantScope } from './auth.types';
 import { CreateUserDto, PasswordDto, TeamDto, UpdateUserDto } from './dto/admin.dto';
 
+@ApiTags('admin')
 @Controller('api/admin')
 @UseGuards(TenantJwtGuard, OrgAdminGuard)
 export class AdminController {
@@ -34,3 +35,4 @@ export class AdminController {
     return { success: true };
   }
 }
+import { ApiTags } from '@nestjs/swagger';

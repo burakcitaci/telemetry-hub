@@ -4,6 +4,7 @@ import { TenantJwtGuard } from '../auth/tenant-jwt.guard';
 import { OrgAdminGuard } from '../auth/admin.service';
 import { InfrastructureService } from './infrastructure.service';
 
+@ApiTags('infrastructure')
 @Controller('api/v1/infrastructure')
 @UseGuards(TenantJwtGuard, OrgAdminGuard)
 export class InfrastructureController {
@@ -16,3 +17,4 @@ export class InfrastructureController {
     response.json(hosts);
   }
 }
+import { ApiTags } from '@nestjs/swagger';

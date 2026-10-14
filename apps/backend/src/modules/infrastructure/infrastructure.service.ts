@@ -25,17 +25,23 @@ export class InfrastructureService {
 
   private async refresh(): Promise<InfrastructureSnapshot> {
     try {
-      const [nodes, metrics, namespaces, pods, services, workloads] = await Promise.all([
+      const [nodes, metrics, namespaces, pods, services, workloads, podMetrics] = await Promise.all([
         this.kubernetes.nodes(), this.kubernetes.metrics(), this.kubernetes.namespaces(),
         this.kubernetes.pods(), this.kubernetes.services(), this.kubernetes.workloads(),
+        this.kubernetes.podMetrics(),
       ]);
       const usage = new Map(metrics.map(item => [item.metadata.name, item]));
-      this.cached = { collectedAt: new Date().toISOString(), metricsAvailable: metrics.length > 0,
-        nodes: nodes.map(node => mapNode(node, usage.get(node.metadata.name))),
-        namespaces: namespaces.map(mapNamespace), pods: pods.map(mapPod), services: services.map(mapService),
-        workloads: [...workloads.deployments.map(item => mapWorkload(item, 'Deployment')),
-          ...workloads.statefulSets.map(item => mapWorkload(item, 'StatefulSet')),
-          ...workloads.daemonSets.map(item => mapWorkload(item, 'DaemonSet'))] };
+      const podUsage = new Map(podMetrics.map(item => [`${item.metadata.namespace}/${item.metadata.name}`, item]));
+      const mappedNodes = nodes.map(node => mapNode(node, usage.get(node.metadata.name)));
+      const mappedPods = pods.map(pod => mapPod(pod, podUsage.get(`${pod.metadata?.namespace}/${pod.metadata?.name}`)));
+      this.cached = { collectedAt: new Date().toISOString(),
+        metricsAvailable: mappedNodes.some(node => node.metrics.cpu !== null && node.metrics.ram !== null), nodes: mappedNodes,
+        namespaces: namespaces.map(mapNamespace),
+        pods: mappedPods,
+        services: services.map(mapService),
+        workloads: [...workloads.deployments.map(item => mapWorkload(item, 'Deployment', pods, mappedPods)),
+          ...workloads.statefulSets.map(item => mapWorkload(item, 'StatefulSet', pods, mappedPods)),
+          ...workloads.daemonSets.map(item => mapWorkload(item, 'DaemonSet', pods, mappedPods))] };
       this.failure = undefined;
       return this.cached;
     } catch (cause) {

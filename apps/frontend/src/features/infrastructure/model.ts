@@ -1,14 +1,21 @@
 export type InfrastructureStatus = "ok" | "warning" | "critical";
 
 export interface InfrastructureHost { id: string; hostname: string; status: InfrastructureStatus;
-  metrics: { cpu: number | null; ram: number | null; disk: number | null } }
+  metrics: { cpu: number | null; ram: number | null; disk: number | null };
+  usage?: ResourceUsage; capacity?: ResourceCapacity; allocatable?: ResourceCapacity;
+  info?: { os: string; architecture: string; kubelet: string; runtime: string } }
+export interface ResourceCapacity { cpuCores: number | null; memoryBytes: number | null }
+export interface ResourceUsage extends ResourceCapacity { observedAt: string | null; window: string | null }
 export interface NamespaceSummary { name: string; status: InfrastructureStatus; phase: string }
-export interface ContainerSummary { name: string; image: string; ready: boolean; restarts: number; state: string }
+export interface ContainerSummary { name: string; image: string; imageId?: string | null;
+  ready: boolean; restarts: number; state: string; usage?: ResourceUsage;
+  requests?: ResourceCapacity; limits?: ResourceCapacity }
 export interface PodSummary { id: string; name: string; namespace: string; nodeName: string | null;
-  status: InfrastructureStatus; phase: string; restarts: number; containers: ContainerSummary[] }
+  status: InfrastructureStatus; phase: string; restarts: number; containers: ContainerSummary[];
+  usage?: ResourceUsage; createdAt?: string | null; podIp?: string | null; qosClass?: string | null }
 export interface WorkloadSummary { id: string; name: string; namespace: string;
   kind: "Deployment" | "StatefulSet" | "DaemonSet"; status: InfrastructureStatus;
-  desired: number; ready: number; available: number }
+  desired: number; ready: number; available: number; podIds?: string[]; usage?: ResourceCapacity }
 export interface ServiceSummary { id: string; name: string; namespace: string; type: string;
   clusterIp: string | null; ports: string[] }
 export interface InfrastructureSnapshot { collectedAt: string; metricsAvailable: boolean;
@@ -68,28 +75,42 @@ function isStatus(value: unknown): value is InfrastructureStatus {
   return value === "ok" || value === "warning" || value === "critical";
 }
 function isNumber(value: unknown): value is number { return typeof value === "number" && Number.isFinite(value) }
+function isCapacity(value: unknown): boolean {
+  if (value === undefined) return true;
+  const metric = (item: unknown) => item === null || isNumber(item) && item >= 0;
+  return isRecord(value) && metric(value.cpuCores) && metric(value.memoryBytes);
+}
+function isUsage(value: unknown): boolean {
+  if (value === undefined) return true;
+  return isRecord(value) && isCapacity(value)
+    && (value.observedAt === null || typeof value.observedAt === 'string' && Number.isFinite(Date.parse(value.observedAt)))
+    && (value.window === null || typeof value.window === 'string');
+}
 function isHost(value: unknown): value is InfrastructureHost {
   if (!isRecord(value) || !isRecord(value.metrics)) return false;
   const metric = (item: unknown) => item === null || isNumber(item) && item >= 0 && item <= 100;
   return typeof value.id === "string" && !!value.id && typeof value.hostname === "string" &&
-    isStatus(value.status) && metric(value.metrics.cpu) && metric(value.metrics.ram) && metric(value.metrics.disk);
+    isStatus(value.status) && metric(value.metrics.cpu) && metric(value.metrics.ram) && metric(value.metrics.disk)
+    && isUsage(value.usage) && isCapacity(value.capacity) && isCapacity(value.allocatable);
 }
 function isNamespace(value: unknown): value is NamespaceSummary {
   return isRecord(value) && typeof value.name === "string" && typeof value.phase === "string" && isStatus(value.status);
 }
 function isContainer(value: unknown): value is ContainerSummary {
   return isRecord(value) && typeof value.name === "string" && typeof value.image === "string" &&
-    typeof value.ready === "boolean" && isNumber(value.restarts) && typeof value.state === "string";
+    typeof value.ready === "boolean" && isNumber(value.restarts) && typeof value.state === "string"
+    && isUsage(value.usage) && isCapacity(value.requests) && isCapacity(value.limits);
 }
 function isPod(value: unknown): value is PodSummary {
   return isRecord(value) && typeof value.id === "string" && typeof value.name === "string" &&
     typeof value.namespace === "string" && isStatus(value.status) && typeof value.phase === "string" &&
-    isNumber(value.restarts) && isArray(value.containers, isContainer);
+    isNumber(value.restarts) && isArray(value.containers, isContainer) && isUsage(value.usage);
 }
 function isWorkload(value: unknown): value is WorkloadSummary {
   return isRecord(value) && typeof value.id === "string" && typeof value.name === "string" &&
     typeof value.namespace === "string" && ["Deployment", "StatefulSet", "DaemonSet"].includes(String(value.kind)) &&
-    isStatus(value.status) && isNumber(value.desired) && isNumber(value.ready) && isNumber(value.available);
+    isStatus(value.status) && isNumber(value.desired) && isNumber(value.ready) && isNumber(value.available)
+    && isCapacity(value.usage);
 }
 function isService(value: unknown): value is ServiceSummary {
   return isRecord(value) && typeof value.id === "string" && typeof value.name === "string" &&

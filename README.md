@@ -206,6 +206,32 @@ yarn cluster:status
 
 `cluster:init` baut das Backend-Image, lädt es in Kind und installiert beziehungsweise aktualisiert das Helm-Release `observability` im Namespace `telemetry-hub`. ClickHouse, Collector und Backend laufen im Cluster.
 
+#### TASK-INFRA-METRICS-1: CPU und Speicher beobachten
+
+`cluster:deploy` installiert auch den auf Version 0.8.1 fixierten Metrics Server.
+Für einen bestehenden Kind-Cluster kann er separat mit `yarn cluster:metrics`
+installiert werden. Die Ausnahme `--kubelet-insecure-tls` gilt ausschließlich für
+den lokalen Kind-Cluster mit seinen selbst erzeugten Kubelet-Zertifikaten.
+
+- [x] Node-CPU und Speicher mit Kapazität, Allocatable, Betriebssystem und Runtime.
+- [x] Pod- und Container-Verbrauch in mCPU und MiB; Details zeigen Requests,
+  Limits, Image-ID, Readiness und Restarts.
+- [x] Workload-Verbrauch aggregiert zugehörige Pods anhand von Namespace und Label-Selector.
+- [x] Image-Ansicht aggregiert die Container des ausgewählten Namespace.
+- [x] Fehlende oder über 90 Sekunden alte Samples bleiben unbekannt; ohne
+  vollständige Container-Samples wird kein scheinbar vollständiger Gesamtwert angezeigt.
+
+```bash
+kubectl --context kind-observability top nodes
+kubectl --context kind-observability top pods -n telemetry-hub --containers
+```
+
+Die Metrics API liefert aktuelle CPU-Auslastung und Memory-Working-Set. Disk,
+Netzwerk und dauerhafte historische Infrastruktur-Metriken brauchen eine eigene
+Collector-/Kubelet-Pipeline. Images verbrauchen selbst keine CPU; die Image-Ansicht
+zeigt den Verbrauch ihrer laufenden Container. Nicht gesetzte Requests/Limits
+werden als `—` dargestellt.
+
 > `docker-compose -f infra/docker-compose.local.yml up -d` ist derzeit nicht ausführbar: Die referenzierte Datei fehlt. Kind/Helm ist der vorhandene Infrastrukturpfad.
 
 Jeweils in einem eigenen Terminal geöffnet lassen:

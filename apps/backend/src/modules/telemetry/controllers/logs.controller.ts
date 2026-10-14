@@ -6,6 +6,7 @@ import { TelemetryTimeWindowPipe } from '../../../common/pipes/telemetry-time-wi
 import { LogsQueryDto } from '../../../dto/logs-query.dto';
 import { ClickhouseService } from '../services/clickhouse.service';
 
+@ApiTags('logs')
 @Controller('api/logs')
 @UseGuards(TenantJwtGuard)
 export class LogsController {
@@ -19,3 +20,4 @@ export class LogsController {
     return this.clickhouse.getLogs(tenant, query);
   }
 }
+import { ApiTags } from '@nestjs/swagger';

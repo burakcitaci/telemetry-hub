@@ -7,6 +7,7 @@ import { TelemetryQueryDto } from "../../../dto/query.dto";
 import { TraceIdParamDto } from "../../../dto/trace.dto";
 import { ClickhouseService } from "../services/clickhouse.service";
 
+@ApiTags('traces')
 @Controller("api/traces")
 @UseGuards(TenantJwtGuard)
 export class TracesController {
@@ -42,3 +43,4 @@ export class TracesController {
     return this.clickhouse.getTraceById(tenant, params.traceId, query.env);
   }
 }
+import { ApiTags } from '@nestjs/swagger';
