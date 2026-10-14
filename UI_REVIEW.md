@@ -1909,6 +1909,7 @@ Remaining work is explicit:
 - FE-C5 complete: Services uses one search control and distinguishes a query with no matches from a genuinely empty ingestion result. FE-C4 is already covered by FE-A4 and will not be implemented twice.
 - FE-C3 unit correction: invalid as stated; no concrete FacetQueryBar unit defect was identified in the review.
 - All approved-list items are complete. Live logs now expose connection state and pause/resume without replacing the current reading snapshot; Infrastructure supports hostname lookup with matching selection/highlight; monitor authoring has associated core-field labels, a readable rule preview, and confirmation before discarding dirty drafts. Inert Services/Monitors time controls, CSV/Filter false affordances, unreadable log severity badges, unsupported service coverage icons, and the stray service-heading text are also resolved.
+- Monitor alignment follow-up complete: the page now uses the canonical explorer header without page-specific back/sidebar icons. Create/edit authoring follows the Trace Detail work-surface pattern with the same wide borderless sheet, explicit icon header and close action, independently scrolling body, fixed action footer, fieldset, and pending-label conventions.
 
 Protect unchanged: infrastructure themes/stale snapshots/unsupported Disk and Network, nested spans and raw/attribute evidence, native service links, facet keyboard controls, destructive confirmations, pending-save guards, compact density and the existing token/font/icon system.
 

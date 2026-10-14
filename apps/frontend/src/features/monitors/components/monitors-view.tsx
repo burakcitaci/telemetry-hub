@@ -1,8 +1,8 @@
 import { FeatureRefreshButton } from '@/shared/components/feature-actions';
 import { useState } from 'react';
+import { FeatureHeader } from '@/components/shared/feature-header';
 import {
   FeaturePage,
-  FeatureHeader,
   FeatureBody,
   FeatureContent,
   FeaturePanel,
@@ -14,11 +14,9 @@ import { AppFilterSidebar } from '@/components/shared/app-filter-sidebar';
 import type { useMonitors } from '../hooks/use-monitors';
 import {
   AlertCircle,
-  ArrowLeft,
   Bell,
-  PanelLeft,
-  Filter,
   Plus,
+  X,
 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -26,7 +24,6 @@ import { Button } from '@/components/ui/button';
 import {
   Sheet,
   SheetContent,
-  SheetHeader,
   SheetTitle,
   SheetDescription,
 } from '@/components/ui/sheet';
@@ -46,7 +43,6 @@ import {
 type MonitorsViewProps = ReturnType<typeof useMonitors>;
 
 export function MonitorsView({
-  navigate,
   monitors,
   setMonitors,
   loading,
@@ -92,7 +88,7 @@ export function MonitorsView({
       {/* Header */}
       <FeatureHeader
         title="Monitors"
-        icon={Bell}
+        onFiltersOpen={() => setFiltersOpen(true)}
         description={
           <>
             {filtered.length} of {monitors.length} shown
@@ -103,37 +99,10 @@ export function MonitorsView({
             )}
           </>
         }
-        leading={
-          <>
-            {' '}
-            <Button
-              variant="ghost"
-              size="icon"
-              aria-label="Go back"
-              onClick={() => navigate(-1)}
-              className="shrink-0"
-            >
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="hidden shrink-0 lg:inline-flex"
-              aria-label={sidebarOpen ? 'Hide sidebar' : 'Show sidebar'}
-              title={sidebarOpen ? 'Hide sidebar' : 'Show sidebar'}
-              onClick={() => setSidebarOpen((v) => !v)}
-            >
-              <PanelLeft className="h-4 w-4" />
-            </Button>{' '}
-            <Button variant="ghost" size="icon" className="shrink-0 lg:hidden" aria-label="Open filters" onClick={() => setFiltersOpen(true)}>
-              <Filter className="h-4 w-4" />
-            </Button>
-          </>
-        }
         actions={
           <>
             <Button
-              variant="outline"
+              variant="default"
               size="sm"
               className="gap-1.5"
               onClick={() => {
@@ -317,29 +286,44 @@ export function MonitorsView({
           >
             <SheetContent
               side="right"
-              className="flex w-full flex-col gap-0 p-0 sm:max-w-2xl lg:max-w-3xl"
+              className="flex w-[min(96vw,1080px)] flex-col p-0 sm:max-w-[1080px] [&>button:first-of-type]:hidden"
             >
-              {/* Radix requires a title for accessibility; hide it visually. */}
-              <SheetHeader className="sr-only">
-                <SheetTitle>
-                  {creating ? 'New monitor' : (openMonitor?.name ?? 'Monitor')}
-                </SheetTitle>
-                <SheetDescription>
-                  {creating
-                    ? 'Define a query, a threshold, and who to notify.'
-                    : 'Monitor detail and state history.'}
-                </SheetDescription>
-              </SheetHeader>
+              <SheetTitle className="sr-only">
+                {creating ? (openMonitor ? 'Edit monitor' : 'New monitor') : (openMonitor?.name ?? 'Monitor')}
+              </SheetTitle>
+              <SheetDescription className="sr-only">
+                {creating ? 'Define and save a monitor rule.' : 'Monitor detail and state history.'}
+              </SheetDescription>
 
               {creating ? (
-                <MonitorForm
-                  initial={openMonitor}
-                  pending={saving}
-                  error={error}
-                  onCancel={closeDetail}
-                  onDirtyChange={setFormDirty}
-                  onSave={handleSave}
-                />
+                <>
+                  <header className="flex items-start justify-between gap-3 border-b border-border bg-muted/20 px-5 py-4">
+                    <div className="flex min-w-0 items-start gap-3">
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border bg-background">
+                        <Bell className="h-4 w-4" />
+                      </div>
+                      <div className="min-w-0">
+                        <h2 className="text-base font-semibold">
+                          {openMonitor ? 'Edit monitor' : 'New monitor'}
+                        </h2>
+                        <p className="mt-0.5 text-xs text-muted-foreground">
+                          {openMonitor ? `Update ${openMonitor.name}.` : 'Define a query, threshold, and notification targets.'}
+                        </p>
+                      </div>
+                    </div>
+                    <Button variant="ghost" size="icon" className="size-8 shrink-0" onClick={closeDetail} aria-label="Close monitor editor">
+                      <X className="h-3.5 w-3.5" />
+                    </Button>
+                  </header>
+                  <MonitorForm
+                    initial={openMonitor}
+                    pending={saving}
+                    error={error}
+                    onCancel={closeDetail}
+                    onDirtyChange={setFormDirty}
+                    onSave={handleSave}
+                  />
+                </>
               ) : openMonitor ? (
                 <MonitorDetail
                   monitor={openMonitor}
