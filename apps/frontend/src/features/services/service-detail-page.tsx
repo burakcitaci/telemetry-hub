@@ -45,10 +45,22 @@ import { EMPTY_METADATA, type ServiceMetadata } from './types';
 import { useServiceMetadata } from './hooks/use-service-metadata';
 import { useServiceSummary } from './hooks/use-service-summary';
 
-function numberValue(value: unknown): number {
-  if (typeof value !== 'string' && typeof value !== 'number') return 0;
+function numberValue(value: unknown): number | null {
+  if (typeof value !== 'string' && typeof value !== 'number') return null;
   const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : 0;
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function displayDuration(value: unknown): string {
+  const number = numberValue(value);
+  return number === null ? '—' : formatDuration(number);
+}
+
+function traceSearch(search: string, serviceName: string): string {
+  const params = new URLSearchParams(search);
+  params.delete('service');
+  params.append('service', serviceName);
+  return `?${params}`;
 }
 
 function ServiceDetailPage() {
@@ -64,14 +76,16 @@ function ServiceDetailPage() {
 
   const requestCount = numberValue(metrics?.request_count);
   const errorCount = numberValue(metrics?.error_count);
-  const errorRate = requestCount > 0 ? (errorCount / requestCount) * 100 : 0;
+  const errorRate = requestCount !== null && requestCount > 0 && errorCount !== null
+    ? (errorCount / requestCount) * 100
+    : null;
 
   const latencyData = metrics
     ? [
-      { name: 'P50', value: numberValue(metrics.p50_duration) / 1_000_000 },
-      { name: 'P95', value: numberValue(metrics.p95_duration) / 1_000_000 },
-      { name: 'P99', value: numberValue(metrics.p99_duration) / 1_000_000 },
-    ]
+      { name: 'P50', value: numberValue(metrics.p50_duration) },
+      { name: 'P95', value: numberValue(metrics.p95_duration) },
+      { name: 'P99', value: numberValue(metrics.p99_duration) },
+    ].flatMap((point) => point.value === null ? [] : [{ ...point, value: point.value / 1_000_000 }])
     : [];
 
   const hasMetadata = Boolean(metadata[serviceName]);
@@ -139,7 +153,7 @@ function ServiceDetailPage() {
               </div>
               <div>
                 <DataValue className="text-xl font-bold">
-                  {requestCount}
+                  {requestCount ?? '—'}
                 </DataValue>
                 <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">
                   Requests
@@ -152,7 +166,7 @@ function ServiceDetailPage() {
               </div>
               <div>
                 <DataValue className="text-xl font-bold">
-                  {errorRate.toFixed(2)}%
+                  {errorRate === null ? '—' : `${errorRate.toFixed(2)}%`}
                 </DataValue>
                 <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">
                   Error Rate
@@ -165,7 +179,7 @@ function ServiceDetailPage() {
               </div>
               <div>
                 <DataValue className="text-xl font-bold">
-                  {formatDuration(metrics.avg_duration)}
+                  {displayDuration(metrics.avg_duration)}
                 </DataValue>
                 <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">
                   Avg Duration
@@ -178,7 +192,7 @@ function ServiceDetailPage() {
               </div>
               <div>
                 <DataValue className="text-xl font-bold">
-                  {formatDuration(metrics.p95_duration)}
+                  {displayDuration(metrics.p95_duration)}
                 </DataValue>
                 <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">
                   P95 Duration
@@ -190,11 +204,18 @@ function ServiceDetailPage() {
           {/* Charts + summary - Compacted Chart */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             <Card className="lg:col-span-2 border">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base font-medium">Latency Percentiles</CardTitle>
-                <CardDescription className="text-xs">
-                  Span duration distribution (ms)
-                </CardDescription>
+              <CardHeader className="flex flex-row items-start justify-between gap-3 pb-2">
+                <div>
+                  <CardTitle className="text-base font-medium">Latency Percentiles</CardTitle>
+                  <CardDescription className="text-xs">
+                    Span duration distribution (ms)
+                  </CardDescription>
+                </div>
+                <Button asChild variant="outline" size="sm" className="h-8 shrink-0 text-xs">
+                  <Link to={{ pathname: `/org/${tenant}/traces`, search: traceSearch(search, serviceName) }}>
+                    View related traces
+                  </Link>
+                </Button>
               </CardHeader>
               <CardContent className="pt-0">
                 <ResponsiveContainer width="100%" height={200}>
@@ -230,7 +251,7 @@ function ServiceDetailPage() {
                         fontSize: '12px'
                       }}
                       formatter={(value) => [
-                        `${numberValue(value).toFixed(2)}ms`,
+                        `${Number(value).toFixed(2)}ms`,
                         'Duration',
                       ]}
                     />
@@ -243,6 +264,9 @@ function ServiceDetailPage() {
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
+              <p className="px-6 pb-4 text-[11px] text-muted-foreground">
+                Trace results are limited to the batch currently returned by the trace API.
+              </p>
             </Card>
 
             <Card className="lg:col-span-1">
@@ -257,10 +281,10 @@ function ServiceDetailPage() {
               <CardContent className="pt-2">
                 <div className="space-y-4">
                   {[
-                    ['P50 latency', formatDuration(metrics.p50_duration)],
-                    ['P95 latency', formatDuration(metrics.p95_duration)],
-                    ['P99 latency', formatDuration(metrics.p99_duration)],
-                    ['Error span count', String(errorCount)],
+                    ['P50 latency', displayDuration(metrics.p50_duration)],
+                    ['P95 latency', displayDuration(metrics.p95_duration)],
+                    ['P99 latency', displayDuration(metrics.p99_duration)],
+                    ['Error span count', errorCount === null ? '—' : String(errorCount)],
                   ].map(([label, value]) => (
                     <div
                       key={label}
@@ -359,7 +383,17 @@ function ServiceDetailPage() {
             </CardContent>
           </Card>
         </div>
-      ) : null}
+      ) : (
+        <Card className="border-dashed p-6 text-center">
+          <p className="text-sm font-medium">No service summary available</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            No aggregated KPI response was returned for this service and selected scope.
+          </p>
+          <Button className="mt-4" variant="outline" size="sm" onClick={retry}>
+            Retry
+          </Button>
+        </Card>
+      )}
 
       {metadataLoading && <p role="status" className="text-xs text-muted-foreground">Loading service metadata…</p>}
       {metadataError && <QueryError message={metadataError} onRetry={() => void reloadMetadata()} />}

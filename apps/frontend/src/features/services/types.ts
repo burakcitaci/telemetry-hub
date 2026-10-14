@@ -3,12 +3,12 @@ export interface ServiceSummary {
 }
 
 export interface ServiceMetrics {
-  request_count: string | number;
-  avg_duration: string | number;
-  p50_duration: string | number;
-  p95_duration: string | number;
-  p99_duration: string | number;
-  error_count: string | number;
+  request_count?: string | number | null;
+  avg_duration?: string | number | null;
+  p50_duration?: string | number | null;
+  p95_duration?: string | number | null;
+  p99_duration?: string | number | null;
+  error_count?: string | number | null;
 }
 
 export type ServiceMetadata = {

@@ -1902,7 +1902,8 @@ Remaining work is explicit:
 - FE-B3 complete: the global logout action and its failure message now use the shell's English UI language; verified by the existing auth-reset browser path.
 - FE-B4 complete: compact theme controls remain reachable in the collapsed desktop sidebar and the mobile rail; both responsive paths have browser coverage.
 - FE-C2a complete: Login now uses semantic light/dark surface tokens and exposes the existing theme control; a browser test verifies both themes. Organization-field guidance remains deferred as FE-C2b.
-- FE-B5/B6: deferred until their individual Phase B commits. Historic-range trace drilldown remains backend-dependent.
+- FE-B5 complete on the client: unavailable service KPIs render as unavailable, absent summaries have retry/context, and latency evidence links to traces with service/range/environment scope. Historic server-side trace-range correctness remains backend-dependent and visibly disclosed.
+- FE-B6: deferred until its individual Phase B commit.
 - FE-C1, organization help in FE-C2, FE-C4 audit and FE-C5: deferred until Phase C approval. FE-C4's common prefix-matching logic is already covered by FE-A4; do not implement it twice.
 - FE-C3 unit correction: invalid as stated; no concrete FacetQueryBar unit defect was identified in the review.
 - Other approved-list review items remain deferred: live-log pause, visible stream state, monitor rule preview, inert Services/Monitors time controls, separate CSV/Filter false affordances, log severity text, hostname search, authoring labels, missing service summary, dirty-draft dismissal, unsupported coverage icons and stray service-heading 12.
