@@ -7,7 +7,6 @@ import { TenantJwtGuard } from './tenant-jwt.guard';
 import { PlatformStore } from './platform-store.service';
 import { AdminController } from './admin.controller';
 import { AdminService, OrgAdminGuard } from './admin.service';
-import { MonitorsController } from './monitors.controller';
 import { ServiceMetadataController } from './service-metadata.controller';
 
 @Module({
@@ -27,8 +26,8 @@ import { ServiceMetadataController } from './service-metadata.controller';
       },
     }),
   ],
-  controllers: [AuthController, AdminController, MonitorsController, ServiceMetadataController],
+  controllers: [AuthController, AdminController, ServiceMetadataController],
   providers: [PlatformStore, AuthService, TenantJwtGuard, AdminService, OrgAdminGuard],
-  exports: [JwtModule, TenantJwtGuard, PlatformStore],
+  exports: [JwtModule, TenantJwtGuard, PlatformStore, AdminService],
 })
 export class AuthModule {}

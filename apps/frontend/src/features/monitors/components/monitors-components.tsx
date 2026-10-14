@@ -1,7 +1,15 @@
 import { StatusBadge as TelemetryStatusBadge } from '@/components/shared/telemetry-primitives';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/features/auth/auth-context';
+import { api, unwrap } from '@/shared/api/client';
+import { monitorPayload } from '../api';
+import { MonitorHistoryChart } from './monitor-history-chart';
+import { calculationLabels } from '../log-builder';
+import { displayLogQuery, resolveLogQuery } from '../log-query-input';
+import { TimeRangePicker } from '@/app/components/timer-range.picker';
+import { resolveTelemetryRange } from '@/shared/lib/telemetry';
+import { readPlatformFilters } from '@/shared/lib/platform-filters';
 import {
   Activity,
   Bell,
@@ -11,6 +19,7 @@ import {
   Pause,
   Play,
   Trash2,
+  X,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -244,119 +253,7 @@ export const MonitorGraph: React.FC<{
     );
   }
 
-  // ── Full: axes, labels, bands ───────────────────────────────────────────
-  return (
-    <svg
-      viewBox={`0 0 ${W} ${H}`}
-      className="w-full"
-      style={{ height }}
-      preserveAspectRatio="none"
-    >
-      {warnThreshold !== undefined && (
-        <rect
-          x={padL}
-          y={Math.min(y(warnThreshold), y(threshold))}
-          width={W - padL - padR}
-          height={Math.abs(y(warnThreshold) - y(threshold))}
-          fill="hsl(var(--warning))"
-          opacity={0.08}
-        />
-      )}
-
-      <line
-        x1={padL}
-        x2={W - padR}
-        y1={y(threshold)}
-        y2={y(threshold)}
-        stroke="hsl(var(--destructive))"
-        strokeWidth={1}
-        strokeDasharray="4 3"
-        opacity={0.8}
-      />
-
-      {warnThreshold !== undefined && (
-        <line
-          x1={padL}
-          x2={W - padR}
-          y1={y(warnThreshold)}
-          y2={y(warnThreshold)}
-          stroke="hsl(var(--warning))"
-          strokeWidth={1}
-          strokeDasharray="2 3"
-          opacity={0.7}
-        />
-      )}
-
-      {segments.map((d, i) => (
-        <path
-          key={i}
-          d={d}
-          fill="none"
-          stroke={strokeColor}
-          strokeWidth={1.5}
-        />
-      ))}
-
-      {series.hasGap && series.gapStart && series.gapEnd && (
-        <>
-          <rect
-            x={x(series.gapStart)}
-            y={padT}
-            width={x(series.gapEnd) - x(series.gapStart)}
-            height={H - padT - padB}
-            fill="hsl(var(--primary))"
-            opacity={0.08}
-          />
-          <text
-            x={(x(series.gapStart) + x(series.gapEnd)) / 2}
-            y={padT + 14}
-            textAnchor="middle"
-            fontSize={10}
-            fill="hsl(var(--primary))"
-          >
-            No data
-          </text>
-        </>
-      )}
-
-      <text
-        x={padL - 6}
-        y={y(yMax) + 4}
-        textAnchor="end"
-        fontSize={10}
-        fill="hsl(var(--muted-foreground))"
-      >
-        {fmt(yMax)}
-        {unit ? ` ${unit}` : ''}
-      </text>
-      <text
-        x={padL - 6}
-        y={y(yMin) + 4}
-        textAnchor="end"
-        fontSize={10}
-        fill="hsl(var(--muted-foreground))"
-      >
-        {fmt(yMin)}
-      </text>
-
-      {[0, 0.5, 1].map((f) => {
-        const t = tMin + f * (tMax - tMin);
-        const label = f === 0 ? '24h ago' : f === 0.5 ? '12h ago' : 'now';
-        return (
-          <text
-            key={f}
-            x={x(t)}
-            y={H - 6}
-            textAnchor={f === 0 ? 'start' : f === 1 ? 'end' : 'middle'}
-            fontSize={10}
-            fill="hsl(var(--muted-foreground))"
-          >
-            {label}
-          </text>
-        );
-      })}
-    </svg>
-  );
+  return <MonitorHistoryChart series={series} />;
 };
 
 export const MonitorRow: React.FC<{
@@ -399,7 +296,7 @@ export const MonitorRow: React.FC<{
             className="block truncate font-mono text-xs text-muted-foreground"
             title={monitor.query}
           >
-            {monitor.query}
+            {monitor.type === 'log' ? displayLogQuery(monitor.query, monitor.logAttribute) : monitor.query}
           </span>
         </div>
       </div>
@@ -472,15 +369,43 @@ export const MonitorDetail: React.FC<{
   onClose: () => void;
   onToggleMute: (id: string) => void;
   onEdit: () => void;
-}> = ({ monitor, events, onToggleMute, onEdit }) => {
+  onEvaluate?: () => void;
+  evaluating?: boolean;
+  chartTimeRange?: string;
+  onChartTimeRangeChange?: (range: string) => void;
+}> = ({ monitor, events, onClose, onToggleMute, onEdit, onEvaluate, evaluating, chartTimeRange = '30m', onChartTimeRangeChange }) => {
+  const [clock, setClock] = useState(() => Date.now());
+  const [historical, setHistorical] = useState<{ points: Array<{ t: number; v: number | null }>; unit: string; bucketMs: number } | null>(null);
+  const [historyError, setHistoryError] = useState<string | null>(null);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [historyRefresh, setHistoryRefresh] = useState(0);
+  useEffect(() => {
+    const controller = new AbortController();
+    const load = async () => {
+      setHistoryLoading(true); setHistoryError(null); setHistorical(null);
+      const selected = resolveTelemetryRange(chartTimeRange);
+      try {
+        const response = await api.get(`/monitors/${encodeURIComponent(monitor.id)}/history`, { signal: controller.signal,
+          params: { from: selected.from.toISOString(), to: selected.to.toISOString() } });
+        if (!controller.signal.aborted) setHistorical(unwrap(response.data));
+      } catch { if (!controller.signal.aborted) setHistoryError('Could not load historical telemetry. Try refreshing or select a shorter range.'); }
+      finally { if (!controller.signal.aborted) setHistoryLoading(false); }
+    };
+    void load();
+    return () => controller.abort();
+  }, [monitor.id, monitor.updatedAt, chartTimeRange, historyRefresh]);
+  useEffect(() => { const timer = setInterval(() => setHistoryRefresh(value => value + 1), 30_000); return () => clearInterval(timer); }, []);
+  useEffect(() => { const timer = setInterval(() => setClock(Date.now()), 10_000); return () => clearInterval(timer); }, []);
+  const resolvedRange = resolveTelemetryRange(chartTimeRange, clock);
+  const chartRange = { from: resolvedRange.from.getTime(), to: resolvedRange.to.getTime() };
   const series = useMemo<MonitorSeries>(
-    () => ({ points: [], threshold: monitor.threshold, warnThreshold: monitor.warnThreshold, unit: undefined }),
-    [monitor.threshold, monitor.warnThreshold],
+    () => ({ points: (historical?.points ?? []).map(point => ({ t: point.t, v: point.v ?? Number.NaN })),
+      threshold: monitor.threshold, warnThreshold: monitor.warnThreshold, unit: historical?.unit ?? monitor.unit }),
+    [historical, monitor.unit, monitor.threshold, monitor.warnThreshold],
   );
-  const lastPoint = series.points
-    .filter((p) => Number.isFinite(p.v))
-    .slice(-1)[0];
-  const lastValue = lastPoint?.v;
+  const lastPoint = monitor.history?.[monitor.history.length - 1];
+  const lastValue = monitor.value !== undefined ? monitor.value ?? undefined
+    : typeof lastPoint?.v === 'number' && Number.isFinite(lastPoint.v) ? lastPoint.v : undefined;
   const fmtValue = (v?: number) =>
     v === undefined
       ? '—'
@@ -492,7 +417,7 @@ export const MonitorDetail: React.FC<{
 
   return (
     <div className="flex h-full flex-col">
-      <div className="flex shrink-0 items-start justify-between gap-3 border-b p-4 pr-12">
+      <header className="flex shrink-0 flex-wrap items-start justify-between gap-3 border-b border-border bg-muted/20 px-5 py-4">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
             <h2 className="truncate text-base font-semibold">{monitor.name}</h2>
@@ -505,7 +430,9 @@ export const MonitorDetail: React.FC<{
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-1">
-          <Button variant="outline" size="sm" onClick={onEdit}>Bearbeiten</Button>
+          {onEvaluate && <Button variant="outline" size="sm" disabled={evaluating} onClick={onEvaluate}>
+            {evaluating ? 'Evaluating…' : 'Evaluate now'}</Button>}
+          <Button variant="outline" size="sm" onClick={onEdit}>Edit</Button>
           <Button
             variant="outline"
             size="sm"
@@ -521,20 +448,22 @@ export const MonitorDetail: React.FC<{
               </>
             )}
           </Button>
+          <Button variant="ghost" size="icon" className="size-8 shrink-0" onClick={onClose} aria-label="Close monitor details"><X className="h-3.5 w-3.5" /></Button>
         </div>
-      </div>
+      </header>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4 space-y-4">
         {/* Condition summary */}
-        <Card>
-          <CardHeader className="pb-2">
+        <Card className="rounded-md shadow-none">
+          <CardHeader className="px-4 pt-4 pb-3">
             <CardTitle className="text-sm">Condition</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-3 text-xs">
+            <div className="col-span-2"><div className="text-muted-foreground">Query</div><div>{monitor.type === 'log' ? displayLogQuery(monitor.query, monitor.logAttribute) : monitor.query}</div></div>
             <div>
               <div className="text-muted-foreground">Trigger</div>
               <div>
-                {monitor.aggregation}: {monitor.metric ?? monitor.logSource}{' '}
+                {calculationLabels[monitor.aggregation ?? 'count']} of {monitor.logAttribute ? monitor.logAttribute : monitor.metric ?? monitor.logSource ?? monitor.query}{' '}
                 {monitor.comparator.replace(/_/g, ' ')}{' '}
                 {formatNumber(monitor.threshold)}
               </div>
@@ -543,12 +472,12 @@ export const MonitorDetail: React.FC<{
               <div className="text-muted-foreground">Evaluation window</div>
               <div>{monitor.evaluationWindow}</div>
             </div>
-            <div>
+            {!!monitor.groupBy?.length && <div>
               <div className="text-muted-foreground">Group by</div>
               <div>
                 {monitor.groupBy?.join(', ') || '—'}
               </div>
-            </div>
+            </div>}
             {monitor.warnThreshold !== undefined && (
               <div>
                 <div className="text-muted-foreground">Warn threshold</div>
@@ -557,7 +486,7 @@ export const MonitorDetail: React.FC<{
                 </div>
               </div>
             )}
-            <div>
+            {!!monitor.targets.length && <div>
               <div className="text-muted-foreground">Notify</div>
               <div className="flex gap-1.5">
                 {monitor.targets.length
@@ -566,15 +495,16 @@ export const MonitorDetail: React.FC<{
                     ))
                   : '—'}
               </div>
-            </div>
+            </div>}
           </CardContent>
         </Card>
 
         {/* Graph */}
-        <Card>
-          <CardHeader className="pb-2">
-            <div className="flex items-center justify-between">
+        <Card className="rounded-md shadow-none">
+          <CardHeader className="px-4 pt-4 pb-3">
+            <div className="flex flex-wrap items-center justify-between gap-2">
               <CardTitle className="text-sm">Evaluated data</CardTitle>
+              {onChartTimeRangeChange && <TimeRangePicker value={chartTimeRange} onChange={onChartTimeRangeChange} />}
               <span className="text-xs text-muted-foreground">
                 now {fmtValue(lastValue)}
                 {series.unit ? ` ${series.unit}` : ''} · critical{' '}
@@ -585,19 +515,27 @@ export const MonitorDetail: React.FC<{
               </span>
             </div>
           </CardHeader>
-          <CardContent className="pt-0">
-            <MonitorGraph series={series} status={monitor.status} />
+          <CardContent className="px-4 pb-4 pt-0">
+            <Button variant="ghost" size="sm" disabled={historyLoading} onClick={() => setHistoryRefresh(value => value + 1)}>Refresh chart</Button>
+            {historyLoading ? <p className="py-8 text-center text-xs text-muted-foreground">Loading historical telemetry…</p>
+              : historyError ? <p role="alert" className="py-8 text-xs text-destructive">{historyError}</p>
+              : <MonitorHistoryChart series={series} range={chartRange} bucketMs={historical?.bucketMs} />}
             <p role="note" className="mt-2 text-xs text-muted-foreground">
               {monitor.lastEvaluatedAt
-                ? `Last evaluated: ${monitor.lastEvaluatedAt}`
-                : 'Unknown — no evaluation timestamp. Configuration is saved; evaluation and notification delivery are not connected.'}
+                ? `Last evaluated: ${new Date(monitor.lastEvaluatedAt).toLocaleString()}`
+                : 'Awaiting first evaluation. Rules are checked every 30 seconds.'}
             </p>
+            {monitor.evaluationError && <p role="alert" className="mt-2 text-xs text-destructive">{monitor.evaluationError}</p>}
+            {!!monitor.groups?.length && <ul className="mt-3 space-y-1 text-xs">{monitor.groups.map(group =>
+              <li key={group.key} className="flex justify-between gap-2"><span>{group.labels.map(label => label || '(unset)').join(' / ') || 'All matching data'}</span>
+                <span>{group.value == null ? '—' : formatNumber(group.value)} {monitor.unit} · {group.status}</span></li>)}</ul>}
+            <p className="mt-2 text-xs text-muted-foreground">State changes are recorded in-app. External notification delivery is not configured.</p>
           </CardContent>
         </Card>
 
         {/* History */}
-        <Card>
-          <CardHeader className="pb-2">
+        <Card className="rounded-md shadow-none">
+          <CardHeader className="px-4 pt-4 pb-3">
             <CardTitle className="text-sm">
               State history
               <span className="ml-2 text-xs font-normal text-muted-foreground">
@@ -653,15 +591,27 @@ export const MonitorForm: React.FC<{
 }> = ({ initial, onCancel, onDirtyChange, onSave, pending, error }) => {
   const { session } = useAuth();
   const [params] = useSearchParams();
-  const [teamId, setTeamId] = useState(initial?.teamId ?? params.get('team') ?? '');
-  const [service, setService] = useState(initial?.service ?? params.get('globalService') ?? '');
-  const [env, setEnv] = useState(initial?.env ?? params.get('env') ?? '');
+  const scopeDefaults = readPlatformFilters(params.toString());
+  const [teamId, setTeamId] = useState(initial?.teamId ?? (scopeDefaults.team.length === 1 ? scopeDefaults.team[0] : ''));
+  const [service, setService] = useState(initial?.service ?? (scopeDefaults.service.length === 1 ? scopeDefaults.service[0] : ''));
+  const [env, setEnv] = useState(initial?.env ?? (scopeDefaults.env.length === 1 ? scopeDefaults.env[0] : ''));
   const [type, setType] = useState<MonitorType>(initial?.type ?? 'metric');
   const [name, setName] = useState(initial?.name ?? '');
-  const [query, setQuery] = useState(initial?.query ?? '');
+  const [query, setQuery] = useState(initial?.type === 'log' ? displayLogQuery(initial.query, initial.logAttribute) : initial?.query ?? '');
   const [aggregation, setAggregation] = useState<Aggregation>(
-    initial?.aggregation ?? 'avg',
+    initial?.aggregation ?? (initial?.type === 'log' ? 'count' : 'avg'),
   );
+  const [metricType, setMetricType] = useState<NonNullable<MonitorView['metricType']>>(initial?.metricType ?? 'gauge');
+  const [signalStatus, setSignalStatus] = useState(initial?.signalStatus ?? '');
+  const [logAttribute, setLogAttribute] = useState(initial?.logAttribute ?? '');
+  const resolvedLogQuery = resolveLogQuery(query, aggregation, query === displayLogQuery(initial?.query ?? '', initial?.logAttribute) ? logAttribute : undefined);
+  const effectiveQuery = type === 'log' ? resolvedLogQuery.query : query;
+  const logBuilderError = type === 'log' ? resolvedLogQuery.error : undefined;
+  const [noDataPolicy, setNoDataPolicy] = useState<NonNullable<MonitorView['noDataPolicy']>>(initial?.noDataPolicy ?? 'no_data');
+  const [preview, setPreview] = useState<{ status: string; value: number | null; unit: string; groups: unknown[] } | null>(null);
+  const [previewError, setPreviewError] = useState<string | null>(null);
+  const [previewing, setPreviewing] = useState(false);
+  const previewVersion = useRef(0);
   const [groupBy, setGroupBy] = useState((initial?.groupBy ?? []).join(', '));
   const [comparator, setComparator] = useState<Comparator>(
     initial?.comparator ?? 'above',
@@ -675,7 +625,7 @@ export const MonitorForm: React.FC<{
   );
   const [message, setMessage] = useState(initial?.message ?? '');
   const [targets, setTargets] = useState<Set<NotificationTarget>>(
-    new Set(initial?.targets ?? ['slack']),
+    new Set(initial?.targets ?? []),
   );
 
   const initialSnapshot = useState(() =>
@@ -687,6 +637,7 @@ export const MonitorForm: React.FC<{
       name,
       query,
       aggregation,
+      metricType, signalStatus, noDataPolicy, logAttribute,
       groupBy,
       comparator,
       threshold,
@@ -704,6 +655,7 @@ export const MonitorForm: React.FC<{
     name,
     query,
     aggregation,
+    metricType, signalStatus, noDataPolicy, logAttribute,
     groupBy,
     comparator,
     threshold,
@@ -716,10 +668,27 @@ export const MonitorForm: React.FC<{
     onDirtyChange(draftSnapshot !== initialSnapshot);
   }, [draftSnapshot, initialSnapshot, onDirtyChange]);
 
-  const comparatorLabel = comparator.replaceAll('_', ' ');
-  const rulePreview = `${aggregation} of ${query.trim() || 'your query'} is ${comparatorLabel} ${threshold || '…'} over ${evaluationWindow || '…'}`;
+  const canSave = name.trim() && effectiveQuery.trim() && !logBuilderError && threshold.trim() && Number.isFinite(Number(threshold))
+    && (!warnThreshold || Number.isFinite(Number(warnThreshold))) && type !== 'other';
 
-  const canSave = name.trim() && query.trim() && threshold.trim();
+  const draft = (): Partial<MonitorView> => ({ teamId, service, env: env === 'all' ? '' : env, type, name: name.trim(),
+    query: effectiveQuery.trim(), aggregation,
+    logAttribute: type === 'log' ? resolvedLogQuery.attribute : undefined, metricType, signalStatus: signalStatus || undefined,
+    noDataPolicy, groupBy: groupBy.split(',').map(value => value.trim()).filter(Boolean), comparator,
+    threshold: Number(threshold), warnThreshold: warnThreshold ? Number(warnThreshold) : undefined,
+    evaluationWindow, message, targets: Array.from(targets), isMuted: initial?.isMuted ?? false });
+
+  const previewRule = async () => {
+    const requestVersion = previewVersion.current;
+    setPreviewing(true); setPreviewError(null); setPreview(null);
+    try { const response = await api.post('/monitors/preview', monitorPayload(draft()));
+      if (requestVersion === previewVersion.current) setPreview(unwrap(response.data)); }
+    catch (cause: any) { if (requestVersion === previewVersion.current)
+      setPreviewError(String(cause.response?.data?.message ?? 'Could not evaluate this rule. Check your inputs and data source.')); }
+    finally { setPreviewing(false); }
+  };
+  useEffect(() => { previewVersion.current++; setPreview(null); setPreviewError(null); }, [draftSnapshot]);
+  useEffect(() => { if (aggregation !== 'count' || groupBy.trim()) setNoDataPolicy('no_data'); }, [aggregation, groupBy]);
 
   const toggleTarget = (t: NotificationTarget) => {
     setTargets((prev) => {
@@ -758,7 +727,8 @@ export const MonitorForm: React.FC<{
                 <label htmlFor="monitor-type" className="mb-1.5 block text-xs font-medium">Type</label>
                 <Select
                   value={type}
-                  onValueChange={(v) => setType(v as MonitorType)}
+                  onValueChange={(v) => { setType(v as MonitorType); setAggregation(v === 'log' ? 'max' : 'avg');
+                    setSignalStatus(''); setLogAttribute(''); setNoDataPolicy('no_data'); setQuery(v === 'metric' ? '' : '*'); }}
                 >
                   <SelectTrigger id="monitor-type">
                     <SelectValue />
@@ -766,7 +736,7 @@ export const MonitorForm: React.FC<{
                   <SelectContent>
                     <SelectItem value="metric">Metric</SelectItem>
                     <SelectItem value="log">Log</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
+                    <SelectItem value="trace">Trace / APM</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -789,79 +759,34 @@ export const MonitorForm: React.FC<{
         {/* Query */}
         <section className="space-y-3 rounded-md border bg-background p-4">
           <h3 className="text-sm font-semibold">Query</h3>
-            <div>
-              <label htmlFor="monitor-query" className="mb-1.5 block text-xs font-medium">
-                {type === 'metric'
-                  ? 'Metric query'
-                  : type === 'log'
-                    ? 'Log query'
-                    : 'Query'}
-              </label>
-              <Input
-                id="monitor-query"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder={
-                  type === 'metric'
-                    ? 'avg(last_5m):avg:http.response_time{service:backend-service} by {host} > 0.5'
-                    : type === 'log'
-                      ? 'logs("status:error service:backend-service").rollup("count").last("5m") > 50'
-                      : '12345678 && 12345679'
-                }
-                className="text-xs"
-              />
-            </div>
+          <Input id="monitor-query" aria-label="Monitor query" value={query} onChange={event => setQuery(event.target.value)}
+            placeholder={type === 'log' ? 'ForecastCount > 5' : type === 'metric' ? 'http.server.request.duration' : '* or span name'} maxLength={4000} />
+          {logBuilderError && <p role="alert" className="text-xs text-destructive">{logBuilderError}</p>}
+          <details open={type === 'metric'} className="space-y-2"><summary className="cursor-pointer text-xs text-muted-foreground">Optional settings</summary>
+            {type === 'metric' ? <label className="block space-y-1 text-xs">Metric stream type
+              <Select value={metricType} onValueChange={value => setMetricType(value as typeof metricType)}>
+                <SelectTrigger aria-label="Metric stream type"><SelectValue /></SelectTrigger><SelectContent>
+                  <SelectItem value="gauge">Gauge</SelectItem><SelectItem value="sum">Sum / counter snapshot</SelectItem><SelectItem value="histogram">Histogram snapshot</SelectItem>
+                </SelectContent></Select></label> : <label className="block space-y-1 text-xs">Signal status
+              <Select value={signalStatus || '__all__'} onValueChange={value => setSignalStatus(value === '__all__' ? '' : value)}>
+                <SelectTrigger aria-label="Signal status"><SelectValue /></SelectTrigger><SelectContent>
+                  <SelectItem value="__all__">All statuses</SelectItem>{(type === 'trace' ? ['ERROR', 'OK', 'UNSET'] : ['ERROR', 'WARN', 'INFO', 'DEBUG']).map(value => <SelectItem key={value} value={value}>{value}</SelectItem>)}
+                </SelectContent></Select></label>}
 
-            {type === 'metric' && (
-              <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-                <div>
-                  <label className="mb-1.5 block text-xs font-medium">
-                    Aggregation
-                  </label>
-                  <Select
-                    value={aggregation}
-                    onValueChange={(v) => setAggregation(v as Aggregation)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {(
-                        ['avg', 'sum', 'min', 'max', 'count'] as Aggregation[]
-                      ).map((a) => (
-                        <SelectItem key={a} value={a}>
-                          {a}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="md:col-span-2">
-                  <label className="mb-1.5 block text-xs font-medium">
-                    Group by{' '}
-                    <span className="text-muted-foreground font-normal">
-                      (optional, comma-separated)
-                    </span>
-                  </label>
-                  <Input
-                    value={groupBy}
-                    onChange={(e) => setGroupBy(e.target.value)}
-                    placeholder="host.name, service.version"
-                    className="text-xs"
-                  />
-                </div>
-              </div>
-            )}
+            <label className="block space-y-1 text-xs">Group by (optional)<Input value={groupBy} onChange={event => setGroupBy(event.target.value)} placeholder="service.name, host.name" /></label>
+          </details>
         </section>
 
         {/* Condition */}
         <section className="space-y-3 rounded-md border bg-background p-4">
           <h3 className="text-sm font-semibold">Alert condition</h3>
-            <div className="rounded-md border border-border bg-muted/30 p-3" role="status">
-              <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Rule preview</p>
-              <p className="mt-1 text-xs font-medium">{rulePreview}</p>
-            </div>
-            <div className="flex flex-wrap items-end gap-2">
+            <label className="block space-y-1 text-xs">Aggregation
+              <Select value={aggregation} onValueChange={value => setAggregation(value as Aggregation)}>
+                <SelectTrigger id="monitor-log-calculation" aria-label="Aggregation"><SelectValue /></SelectTrigger><SelectContent>
+                  {(type === 'log' ? ['count', 'sum', 'avg', 'max', 'min', 'p95'] : type === 'trace' ? ['count', 'avg', 'min', 'max', 'p95'] : ['count', 'avg', 'sum', 'min', 'max']).map(value => <SelectItem key={value} value={value}>{calculationLabels[value]}</SelectItem>)}
+                </SelectContent></Select>
+            </label>
+             <div className="flex flex-wrap items-end gap-2">
               <span className="pb-2 text-xs text-muted-foreground">
                 Trigger when the value is
               </span>
@@ -898,16 +823,13 @@ export const MonitorForm: React.FC<{
               </div>
               <span className="pb-2 text-xs text-muted-foreground">over</span>
               <div className="w-28">
-                <Input
-                  id="monitor-window"
-                  aria-label="Evaluation window"
-                  value={evaluationWindow}
-                  onChange={(e) => setEvaluationWindow(e.target.value)}
-                  placeholder="5m"
-                  className="text-xs"
-                />
+                <Select value={evaluationWindow} onValueChange={setEvaluationWindow}>
+                  <SelectTrigger id="monitor-window" aria-label="Evaluation window"><SelectValue /></SelectTrigger><SelectContent>
+                    {['1m', '5m', '15m', '30m', '1h'].map(value => <SelectItem key={value} value={value}>{value}</SelectItem>)}
+                  </SelectContent></Select>
               </div>
             </div>
+
 
             <div className="flex flex-wrap items-end gap-3 border-t pt-3">
               <div className="w-40">
@@ -928,9 +850,20 @@ export const MonitorForm: React.FC<{
             </div>
         </section>
 
-        {/* Notify */}
         <section className="space-y-3 rounded-md border bg-background p-4">
-          <h3 className="text-sm font-semibold">Notify</h3>
+          <h3 className="text-sm font-semibold">Missing data and preview</h3>
+          <Select value={noDataPolicy} onValueChange={value => setNoDataPolicy(value as typeof noDataPolicy)}>
+            <SelectTrigger aria-label="Missing data policy"><SelectValue /></SelectTrigger><SelectContent>
+              <SelectItem value="no_data">Show No Data when telemetry is missing</SelectItem>
+              {aggregation === 'count' && <SelectItem value="zero">Treat an empty ungrouped count as zero</SelectItem>}
+            </SelectContent></Select>
+          <Button variant="outline" disabled={!canSave || previewing} onClick={previewRule}>{previewing ? 'Evaluating…' : 'Preview against real data'}</Button>
+          {preview && <p role="status" className="text-xs">{preview.status} · Value {preview.value == null ? '—' : preview.value} {preview.unit} · {preview.groups.length} groups</p>}
+          {previewError && <p role="alert" className="text-xs text-destructive">{previewError}</p>}
+        </section>
+        {/* Notify */}
+        <details className="space-y-3 rounded-md border bg-background p-4">
+          <summary className="cursor-pointer text-xs text-muted-foreground">Message (optional)</summary>
             <div>
               <label htmlFor="monitor-message" className="mb-1.5 block text-xs font-medium">
                 Message
@@ -940,74 +873,22 @@ export const MonitorForm: React.FC<{
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 rows={4}
-                placeholder="{{#is_alert}}Checkout latency is {{value}}s (threshold {{threshold}}s).{{/is_alert}} @slack-backend-alerts"
+                placeholder="Describe the incident and the steps to investigate."
                 className="text-xs"
               />
               <p className="mt-1.5 text-[11px] text-muted-foreground">
-                Supports Datadog template syntax:{' '}
-                <code>{'{{#is_alert}}…{{/is_alert}}'}</code>,{' '}
-                <code>{'{{value}}'}</code>, <code>{'{{threshold}}'}</code>,{' '}
-                <code>{'{{host.name}}'}</code>, plus <code>@slack-…</code>,{' '}
-                <code>@pagerduty-…</code>, and email handles.
+                Message is stored with the rule. Evaluation and alert history run in-app; template rendering and external delivery are not configured.
               </p>
             </div>
 
-            <div>
-              <label className="mb-1.5 block text-xs font-medium">
-                Targets
-              </label>
-              <div className="flex flex-wrap gap-2">
-                {(
-                  [
-                    'slack',
-                    'email',
-                    'pagerduty',
-                    'webhook',
-                  ] as NotificationTarget[]
-                ).map((t) => {
-                  const on = targets.has(t);
-                  return (
-                    <button
-                      key={t}
-                      type="button"
-                      onClick={() => toggleTarget(t)}
-                      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs transition-colors ${
-                        on
-                          ? 'border-transparent bg-accent text-accent-foreground'
-                          : 'border-muted-foreground/30 text-muted-foreground hover:border-muted-foreground/60'
-                      }`}
-                    >
-                      <TargetIcon target={t} />
-                      {t}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-        </section>
+
+        </details>
       </fieldset>
       <div className="flex shrink-0 justify-end gap-2 border-t bg-background px-5 py-4">
         <Button variant="outline" onClick={onCancel}>Cancel</Button>
         <Button
           disabled={!canSave || pending}
-          onClick={() =>
-            onSave({
-              teamId,
-              service,
-              env: env === 'all' ? '' : env,
-              type,
-              name: name.trim(),
-              query: query.trim(),
-              aggregation,
-              groupBy: groupBy.split(',').map((value) => value.trim()).filter(Boolean),
-              comparator,
-              threshold: Number(threshold),
-              warnThreshold: warnThreshold ? Number(warnThreshold) : undefined,
-              evaluationWindow,
-              message,
-              targets: Array.from(targets),
-            })
-          }
+          onClick={() => onSave(draft())}
         >
           {pending ? 'Saving…' : initial ? 'Save' : 'Create monitor'}
         </Button>

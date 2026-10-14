@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { api, unwrap } from '@/shared/api/client';
 import { platformFilterKey } from '@/shared/lib/platform-filters';
+import { monitorPayload } from '../api';
 import {
   MonitorType,
   MonitorStatus,
@@ -22,6 +23,7 @@ export function useMonitors() {
 
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [evaluatingId, setEvaluatingId] = useState<string | null>(null);
   const [revision, setRevision] = useState(0);
 
   const [error, setError] = useState<string | null>(null);
@@ -62,10 +64,14 @@ export function useMonitors() {
 
   useEffect(() => {
     let cancelled = false;
-    (async () => {
+    let active = false;
+    const controller = new AbortController();
+    const load = async () => {
+      if (active) return;
+      active = true;
       setLoading(true);
       try {
-        const { data } = await api.get('/monitors');
+        const { data } = await api.get('/monitors', { signal: controller.signal });
         if (cancelled) return;
         setMonitors(unwrap<MonitorView[]>(data).map(normalizeMonitorEvaluation));
         setError(null);
@@ -75,19 +81,27 @@ export function useMonitors() {
             err instanceof Error ? err.message : 'Failed to load monitors',
           );
       } finally {
+        active = false;
         if (!cancelled) setLoading(false);
       }
-    })();
+    };
+    void load();
+    const timer = window.setInterval(() => void load(), 10_000);
     return () => {
       cancelled = true;
+      controller.abort(); window.clearInterval(timer);
     };
   }, [revision, filterKey]);
 
-  const events = useMemo<Record<string, MonitorEvent[]>>(() => ({}), []);
+  const events = useMemo<Record<string, MonitorEvent[]>>(() =>
+    Object.fromEntries(monitors.map(monitor => [monitor.id, monitor.events ?? []])), [monitors]);
 
   const seriesById = useMemo<Record<string, MonitorSeries>>(() => {
-    return {};
-  }, []);
+    return Object.fromEntries(monitors.map(monitor => [monitor.id, {
+      points: (monitor.history ?? []).map(point => ({ t: point.t, v: point.v ?? Number.NaN })),
+      threshold: monitor.threshold, warnThreshold: monitor.warnThreshold, unit: monitor.unit,
+    }]));
+  }, [monitors]);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -140,7 +154,7 @@ export function useMonitors() {
     const target = monitors.find((m) => m.id === id);
     if (!target) return;
     try {
-      const { data } = await api.put(`/monitors/${id}`, { ...target, isMuted: !target.isMuted });
+      const { data } = await api.post(`/monitors/${id}/mute`, { isMuted: !target.isMuted });
       const updated = normalizeMonitorEvaluation(unwrap<MonitorView>(data));
       setMonitors(prev => prev.map(m => m.id === id ? updated : m)); setError(null);
     } catch { setError('Monitor konnte nicht aktualisiert werden.'); }
@@ -153,6 +167,17 @@ export function useMonitors() {
       setMonitors(prev => prev.filter(m => m.id !== id));
       if (openId === id) setOpenId(null); setError(null);
     } catch { setError('Monitor konnte nicht gelöscht werden.'); }
+  };
+
+  const handleEvaluate = async (id: string) => {
+    if (evaluatingId) return;
+    setEvaluatingId(id);
+    try {
+      const { data } = await api.post(`/monitors/${id}/evaluate`);
+      const updated = normalizeMonitorEvaluation(unwrap<MonitorView>(data));
+      setMonitors(previous => previous.map(monitor => monitor.id === id ? updated : monitor)); setError(null);
+    } catch { setError('Monitor evaluation could not be completed.'); }
+    finally { setEvaluatingId(null); }
   };
 
   const handleSave = async (draft: Partial<MonitorView>) => {
@@ -173,6 +198,10 @@ export function useMonitors() {
             : undefined,
         logSource: draft.type === 'log' ? 'logs' : undefined,
         aggregation: draft.aggregation,
+        metricType: draft.metricType,
+        signalStatus: draft.signalStatus,
+        logAttribute: draft.logAttribute,
+        noDataPolicy: draft.noDataPolicy,
         groupBy: draft.groupBy,
         comparator: draft.comparator ?? 'above',
         threshold: draft.threshold ?? 0,
@@ -188,21 +217,25 @@ export function useMonitors() {
       created.teamId = draft.teamId || undefined;
       created.service = draft.service || undefined;
       created.env = draft.env || undefined;
-      const { data } = await api.post('/monitors', created);
+      const { data } = await api.post('/monitors', monitorPayload(created));
       const saved = normalizeMonitorEvaluation(unwrap<MonitorView>(data));
       setMonitors((prev) => [saved, ...prev]);
       setCreating(false);
       setOpenId(saved.id);
     } else if (openId) {
       const original = monitors.find(m => m.id === openId);
-      const { data } = await api.put(`/monitors/${openId}`, { ...original, ...draft });
+      const { data } = await api.put(`/monitors/${openId}`, monitorPayload({ ...original, ...draft }));
       const saved = normalizeMonitorEvaluation(unwrap<MonitorView>(data));
       setMonitors(prev => prev.map(m => m.id === openId ? saved : m));
       setCreating(false);
     }
     setError(null);
     setRevision(value => value + 1);
-    } catch { setError('Monitor konnte nicht gespeichert werden. Bitte Eingaben prüfen.'); }
+    } catch (cause: any) {
+      const message = cause.response?.data?.message;
+      setError(Array.isArray(message) ? message.join(' ') : typeof message === 'string' ? message
+        : 'Monitor konnte nicht gespeichert werden. Bitte Eingaben prüfen.');
+    }
     finally { setSaving(false); }
   };
 
@@ -219,6 +252,8 @@ export function useMonitors() {
     setMonitors,
     loading,
     saving,
+    evaluatingId,
+    handleEvaluate,
     refresh: () => setRevision(value => value + 1),
     error,
     search,

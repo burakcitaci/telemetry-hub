@@ -31,8 +31,9 @@ builds, Helm lint/template and all 32 backend source tests.
 - [x] P1 query correctness: trace lists honor UTC windows, metric discovery uses
   the configured database and all compatible signal tables, scope aggregation is
   valid SQL, unit-mixing averages are removed and detail truncation is explicit.
-- [x] P1/P2 operational truthfulness: monitors disclose that evaluation is disabled,
-  status facets require an actual evaluation timestamp, trace detail is bounded,
+- [x] P1/P2 operational truthfulness: monitors now have a 30-second evaluator,
+  bounded persisted samples and transitions (TASK-MONITORS-1); status facets require
+  an actual evaluation timestamp, trace detail is bounded,
   health errors and request/attribute diagnostics no longer expose raw values, and
   independent telemetry exporters are all drained during shutdown.
 - [x] P1 repository gate: backend test/typecheck scripts are available at workspace

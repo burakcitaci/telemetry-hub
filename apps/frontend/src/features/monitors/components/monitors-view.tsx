@@ -57,6 +57,8 @@ export function MonitorsView({
   setMonitors,
   loading,
   saving,
+  evaluatingId,
+  handleEvaluate,
   refresh,
   error,
   search,
@@ -84,6 +86,7 @@ export function MonitorsView({
   detailVisible,
 }: MonitorsViewProps) {
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [chartTimeRange, setChartTimeRange] = useState('30m');
   const [formDirty, setFormDirty] = useState(false);
   const [discardOpen, setDiscardOpen] = useState(false);
   const forceCloseDetail = () => {
@@ -241,7 +244,7 @@ export function MonitorsView({
                           {openMonitor ? 'Edit monitor' : 'New monitor'}
                         </h2>
                         <p className="mt-0.5 text-xs text-muted-foreground">
-                          {openMonitor ? `Update ${openMonitor.name}.` : 'Define a query, threshold, and notification targets.'}
+                          {openMonitor ? `Update ${openMonitor.name}.` : 'Configure a query and alert condition.'}
                         </p>
                       </div>
                     </div>
@@ -260,9 +263,13 @@ export function MonitorsView({
                 </>
               ) : openMonitor ? (
                 <MonitorDetail
+                  chartTimeRange={chartTimeRange}
+                  onChartTimeRangeChange={setChartTimeRange}
                   monitor={openMonitor}
                   datadogMonitor={datadogForOpen}
                   events={events[openMonitor.id] ?? []}
+                  onEvaluate={() => void handleEvaluate(openMonitor.id)}
+                  evaluating={evaluatingId === openMonitor.id}
                   onClose={closeDetail}
                   onToggleMute={handleToggleMute}
                   onEdit={() => {

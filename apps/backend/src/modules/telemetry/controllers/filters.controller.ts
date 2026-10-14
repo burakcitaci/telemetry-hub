@@ -24,6 +24,13 @@ export class FiltersController {
     const window = options.from || options.to ? { from: options.from, to: options.to }
       : { from: new Date(Date.now() - 300_000).toISOString(), to: new Date().toISOString() };
     const organization: TenantScope = { tenantSlug: scope.tenantSlug, role: scope.role };
+    if (options.source === 'monitors') {
+      telemetryTimeWindow(window, 'Timestamp', true);
+      const monitors = this.store.monitors(scope.tenantSlug);
+      return { services: [...new Set(monitors.map(monitor => monitor.service).filter(Boolean))].sort(),
+        environments: [...new Set(monitors.map(monitor => monitor.env).filter(Boolean))].sort(),
+        statuses: await this.statuses({ ...scope, statusFilter: undefined }, 'monitors', window) };
+    }
     const isolation = this.clickhouse.buildTenantFilter(organization);
     const metricTables = ['otel_metrics_gauge', 'otel_metrics_sum', 'otel_metrics_histogram'];
     const tables = options.source === 'metrics' ? metricTables : options.source === 'logs' ? ['otel_logs']

@@ -35,7 +35,7 @@ api.interceptors.request.use(config => {
   const scopedParams = { ...config.params };
   delete scopedParams.env;
   // Filter discovery takes source/time parameters; scope is supplied in headers.
-  if (path !== '/filters') scopedParams.env = env.length === 1 ? env[0] : 'all';
+  if (path !== '/filters' && !/^\/monitors\/[^/]+\/history$/.test(path)) scopedParams.env = env.length === 1 ? env[0] : 'all';
   config.params = scopedParams;
   return config;
 });

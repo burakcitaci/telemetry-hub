@@ -140,6 +140,10 @@ export class PlatformStore implements OnModuleDestroy {
       .map(row => JSON.parse(String(row.body)));
   }
 
+  monitorOrganizations(): string[] {
+    return this.db.prepare('SELECT DISTINCT org FROM monitors ORDER BY org').all().map(row => String(row.org));
+  }
+
   saveMonitor(org: string, monitor: Record<string, any>) {
     this.db.prepare('INSERT INTO monitors VALUES (?, ?, ?) ON CONFLICT(org,id) DO UPDATE SET body=excluded.body')
       .run(org, monitor.id, JSON.stringify(monitor));

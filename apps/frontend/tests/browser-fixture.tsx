@@ -15,7 +15,7 @@ const records = (scenario === "current" ? [10, 99] : scenario === "temporal" ? [
 }));
 (window as any).__requests = [];
 api.defaults.adapter = async (config) => {
-  (window as any).__requests.push({ url: config.url, params: config.params, headers: config.headers.toJSON() });
+  (window as any).__requests.push({ url: config.url, method: config.method, body: config.data, params: config.params, headers: config.headers.toJSON() });
   let data: unknown = [];
   if (config.url?.startsWith("/auth/session")) data = { tenantSlug: "demo", role: "admin", teams: ["platform"] };
   else if (config.url?.startsWith("/auth/login")) data = {
@@ -47,6 +47,10 @@ api.defaults.adapter = async (config) => {
     SeverityText: "INFO", ServiceName: "api", Body: "Fixture log",
     ResourceAttributes: {}, LogAttributes: {},
   }];
+  else if (/\/monitors\/[^/]+\/history$/.test(config.url ?? '')) {
+    const from = Date.parse(config.params.from), to = Date.parse(config.params.to);
+    data = { points: Array.from({ length: 6 }, (_, index) => ({ t: from + (to - from) * (index + 1) / 6, v: index + 1 })), unit: 'forecasts', bucketMs: (to - from) / 6 };
+  }
   else if (config.url?.startsWith("/monitors")) {
     const monitor = {
     id: "monitor-a", name: "Fixture monitor", type: "metric", datadogType: "query alert",

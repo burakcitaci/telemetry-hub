@@ -5,6 +5,15 @@ import test from 'node:test';
 const source = (path: string) =>
   readFileSync(new URL(`../src/${path}`, import.meta.url), 'utf8');
 
+test('monitor history uses valid HSL theme colors for visible value and threshold lines', () => {
+  const chart = source('features/monitors/components/monitor-history-chart.tsx');
+  assert.match(chart, /stroke="hsl\(var\(--primary\)\)"/);
+  assert.match(chart, /stroke="hsl\(var\(--destructive\)\)"/);
+  assert.doesNotMatch(chart, /stroke="var\(/);
+  assert.match(chart, /connectNulls=\{false\}/);
+  assert.match(chart, /ifOverflow="extendDomain"/);
+});
+
 test('monitor page uses the canonical feature header', () => {
   const view = source('features/monitors/components/monitors-view.tsx');
 

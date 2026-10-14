@@ -11,6 +11,7 @@ import { MetricsModule } from "./modules/telemetry/metrics.module";
 import { AuthModule } from "./modules/auth/auth.module";
 import { IngestionModule } from './modules/ingestion/ingestion.module';
 import { InfrastructureModule } from './modules/infrastructure/infrastructure.module';
+import { MonitorsModule } from './modules/monitors/monitors.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { InfrastructureModule } from './modules/infrastructure/infrastructure.mo
     MetricsModule,
     HealthModule,
     InfrastructureModule,
+    MonitorsModule,
   ],
 })
 export class AppModule {}

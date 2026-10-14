@@ -600,9 +600,9 @@ export const DATADOG_MONITORS: DatadogMonitor[] = [
   },
 ];
 
-export type MonitorType = 'metric' | 'log' | 'other';
+export type MonitorType = 'metric' | 'log' | 'trace' | 'other';
 
-export type Aggregation = 'avg' | 'sum' | 'min' | 'max' | 'count';
+export type Aggregation = 'avg' | 'sum' | 'min' | 'max' | 'count' | 'p95';
 
 export type Comparator =
   | 'above'
@@ -615,6 +615,17 @@ export type MonitorStatus = 'OK' | 'Alert' | 'Warn' | 'No Data' | 'neutral' | 'U
 export type NotificationTarget = 'email' | 'slack' | 'webhook' | 'pagerduty';
 
 export interface MonitorView {
+  metricType?: 'gauge' | 'sum' | 'histogram';
+  signalStatus?: string;
+  logAttribute?: string;
+  noDataPolicy?: 'no_data' | 'zero';
+  value?: number | null;
+  unit?: string;
+  evaluationEnabled?: boolean;
+  evaluationError?: string | null;
+  history?: Array<{ t: number; v: number | null; status: MonitorStatus }>;
+  events?: MonitorEvent[];
+  groups?: Array<{ key: string; labels: string[]; value: number | null; status: MonitorStatus; samples: number }>;
   teamId?: string;
   service?: string;
   env?: string;

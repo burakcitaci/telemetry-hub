@@ -5,6 +5,7 @@ import { Module } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from '../dist/modules/auth/auth.module.js';
+import { MonitorsController } from '../dist/modules/auth/monitors.controller.js';
 import { PlatformStore } from '../dist/modules/auth/platform-store.service.js';
 import { ValidationPipe } from '../dist/common/pipes/validation.pipe.js';
 import { hashPassword } from '../dist/modules/auth/password.js';
@@ -20,7 +21,7 @@ test('HTTP login, admin CRUD, member authorization, monitor filters and session 
     ]) };
   class TestApplication {}
   Module({ imports: [ConfigModule.forRoot({ isGlobal: true, ignoreEnvFile: true,
-    skipProcessEnv: true, load: [() => settings] }), AuthModule] })(TestApplication);
+    skipProcessEnv: true, load: [() => settings] }), AuthModule], controllers: [MonitorsController] })(TestApplication);
   const app = await NestFactory.create(TestApplication, { logger: false });
   app.useGlobalPipes(new ValidationPipe());
   await app.listen(0, '127.0.0.1');
@@ -43,8 +44,10 @@ test('HTTP login, admin CRUD, member authorization, monitor filters and session 
     assert.equal((await call('/admin/teams', 'POST', { id: 'platform', name: 'Platform' }, admin)).status, 201);
     assert.equal((await call('/admin/teams', 'POST', { id: 'frontend', name: 'Frontend' }, admin)).status, 201);
     assert.equal((await call('/admin/users', 'POST', { email: 'bad@example.com', role: 'superadmin', password }, admin)).status, 400);
+    assert.equal((await call('/admin/users', 'POST', { email: 'member@example.com', role: 'user', password,
+      teamId: 'platform', tenantSlug: 'other' }, admin)).status, 400);
     const response = await call('/admin/users', 'POST', { email: 'member@example.com', role: 'user', password,
-      teamId: 'platform', tenantSlug: 'other' }, admin);
+      teamId: 'platform' }, admin);
     assert.equal(response.status, 201); const member = await response.json();
     assert.equal('passwordHash' in member, false);
     assert.equal(app.get(PlatformStore).identity('other', 'member@example.com'), undefined);
