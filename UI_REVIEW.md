@@ -1905,7 +1905,8 @@ Remaining work is explicit:
 - FE-B5 complete on the client: unavailable service KPIs render as unavailable, absent summaries have retry/context, and latency evidence links to traces with service/range/environment scope. Historic server-side trace-range correctness remains backend-dependent and visibly disclosed.
 - FE-B6 complete: Admin has a distinct initial skeleton, recoverable load errors, and retry keeps the mounted form and entered values intact.
 - FE-C1 complete: the intentional purple identity color now comes from a shared semantic brand token without changing its visual hue.
-- Organization help in FE-C2 and FE-C5: deferred to their individual Phase C commits. FE-C4 is already covered by FE-A4 and will not be implemented twice.
+- FE-C2b complete: the tenant field explains which organization slug is expected and exposes that help through `aria-describedby`.
+- FE-C5: deferred to its Phase C audit. FE-C4 is already covered by FE-A4 and will not be implemented twice.
 - FE-C3 unit correction: invalid as stated; no concrete FacetQueryBar unit defect was identified in the review.
 - Other approved-list review items remain deferred: live-log pause, visible stream state, monitor rule preview, inert Services/Monitors time controls, separate CSV/Filter false affordances, log severity text, hostname search, authoring labels, missing service summary, dirty-draft dismissal, unsupported coverage icons and stray service-heading 12.
 

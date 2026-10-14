@@ -30,6 +30,8 @@ test("FE-C2a: login exposes theme controls and uses theme surfaces", { timeout: 
   try {
     await browser.navigate("/login?case=unauthenticated");
     await browser.wait("Boolean(document.getElementById('tenantSlug'))");
+    assert.equal(await browser.evaluate("document.getElementById('tenantSlug').getAttribute('aria-describedby')"), "tenantSlug-help");
+    assert.match(await browser.evaluate("document.getElementById('tenantSlug-help')?.innerText ?? ''"), /organization URL/i);
     const lightButton = "[...document.querySelectorAll('button')].find(button => button.getAttribute('aria-label') === 'Use light theme')";
     assert.equal(await browser.evaluate(`Boolean(${lightButton})`), true);
     await browser.evaluate(`${lightButton}.click()`);

@@ -50,9 +50,14 @@ export default function LoginPage() {
         </div>
 
         <form className="space-y-4" onSubmit={submit}>
-          <LoginField label="Organisation (Tenant)" name="tenantSlug">
+          <LoginField
+            label="Organisation (Tenant)"
+            name="tenantSlug"
+            description="Use the organization URL slug provided by your administrator, for example acme-observability."
+          >
             <Input
               id="tenantSlug"
+              aria-describedby="tenantSlug-help"
               autoComplete="organization"
               value={tenantSlug}
               onChange={(event) => setTenantSlug(event.target.value.toLowerCase())}
@@ -100,10 +105,12 @@ export default function LoginPage() {
 function LoginField({
   label,
   name,
+  description,
   children,
 }: {
   label: string;
   name: string;
+  description?: string;
   children: ReactNode;
 }) {
   return (
@@ -112,6 +119,11 @@ function LoginField({
         {label}
       </label>
       {children}
+      {description && (
+        <p id={`${name}-help`} className="text-[11px] leading-4 text-muted-foreground">
+          {description}
+        </p>
+      )}
     </div>
   );
 }
