@@ -28,13 +28,13 @@ function LogTraceLink({ traceId }: { traceId: string }) {
 export function severityBadge(severity: string) {
   const normalized = severity.toUpperCase() || "UNKNOWN";
   if (normalized === "ERROR" || normalized === "FATAL") {
-    return <Badge variant="destructive">{normalized}</Badge>;
+    return <Badge variant="destructive" className="rotate-90"></Badge>;
   }
   if (normalized === "WARN" || normalized === "WARNING") {
-    return <Badge variant="warning">{normalized}</Badge>;
+    return <Badge variant="warning" className="rotate-90"></Badge>;
   }
-  if (normalized === "INFO") return <Badge variant="info">{normalized}</Badge>;
-  return <Badge variant="secondary">{normalized}</Badge>;
+  if (normalized === "INFO") return <Badge variant="info" className="rotate-90"></Badge>;
+  return <Badge variant="secondary" className="rotate-90"></Badge>;
 }
 
 export const columns: ColumnDef<LogRecord>[] = [

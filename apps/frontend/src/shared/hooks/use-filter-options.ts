@@ -25,9 +25,13 @@ export function useFilterOptions(
 
   useEffect(() => {
     const controller = new AbortController();
+    let refreshing = false;
 
     const refresh = async () => {
+      if (refreshing || controller.signal.aborted) return;
+      refreshing = true;
       setLoading(true);
+      setError(false);
       try {
         const { from, to } = resolveTelemetryRange(range);
         const discovered = await getFilterOptions(
@@ -48,6 +52,7 @@ export function useFilterOptions(
           setError(true);
         }
       } finally {
+        refreshing = false;
         if (!controller.signal.aborted) setLoading(false);
       }
     };

@@ -54,6 +54,7 @@ export class IngestionMiddleware {
       Authorization: `Bearer ${this.token}`,
       'X-Telemetry-Org': identity.orgSlug,
       'X-Telemetry-Team': identity.teamId,
+      ...(identity.env ? { 'X-Telemetry-Environment': identity.env } : {}),
     };
   }
 }

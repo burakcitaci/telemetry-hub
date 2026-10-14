@@ -7,8 +7,17 @@ import { PlatformStore } from './platform-store.service';
 import { TenantJwtGuard } from './tenant-jwt.guard';
 import { ClickhouseService } from '../telemetry/services/clickhouse.service';
 import { MetricsService } from '../telemetry/services/metrics.service';
-import { FiltersController } from '../telemetry/controllers/filters.controller';
+import { FilterOptionsDto, FiltersController } from '../telemetry/controllers/filters.controller';
+import { ValidationPipe } from '../../common/pipes/validation.pipe';
 import { listFilteredMonitors } from './monitors.controller';
+
+test('filter discovery DTO accepts source/time and rejects unsupported query parameters', async () => {
+  const query = { source: 'metrics', from: '2026-10-14T12:00:00Z', to: '2026-10-14T13:00:00Z' };
+  const pipe = new ValidationPipe();
+  const metadata = { type: 'query' as const, metatype: FilterOptionsDto };
+  assert.equal((await pipe.transform(query, metadata)).source, 'metrics');
+  await assert.rejects(pipe.transform({ ...query, env: 'all' }, metadata), (error: any) => error.getStatus() === 400);
+});
 
 test('guard accepts JSON headers and repeated stream filters and rejects unbounded/malformed values', async () => {
   const store = new PlatformStore(new ConfigService({ AUTH_DB_PATH: ':memory:' }));

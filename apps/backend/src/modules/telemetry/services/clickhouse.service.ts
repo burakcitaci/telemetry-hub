@@ -31,6 +31,7 @@ const TENANT_TABLES = [
   'otel_metrics_sum',
   'otel_metrics_histogram',
 ] as const;
+const OPTIONAL_TENANT_TABLES = ['otel_metrics_exponential_histogram', 'otel_metrics_summary'] as const;
 const LIST_QUERY_SETTINGS: ClickHouseSettings = {
   max_rows_to_read: '200000',
   max_bytes_to_read: String(64 * 1024 * 1024),
@@ -620,16 +621,17 @@ export class ClickhouseService implements OnModuleInit, OnModuleDestroy {
 
   private async createTenantColumns(): Promise<void> {
     const existing = await Promise.all(
-      TENANT_TABLES.map(async (table) => ({ table, exists: await this.tableExists(table) })),
+      [...TENANT_TABLES, ...OPTIONAL_TENANT_TABLES].map(async (table) => ({ table, exists: await this.tableExists(table) })),
     );
-    const missing = existing.filter(({ exists }) => !exists).map(({ table }) => table);
+    const missing = existing.filter(({ table, exists }) => !exists && TENANT_TABLES.some(required => required === table))
+      .map(({ table }) => table);
     if (missing.length) {
       throw new ServiceUnavailableException(`Tenant telemetry tables not ready: ${missing.join(', ')}`);
     }
-    await Promise.all(existing.map(({ table }) => this.addTenantColumns(table)));
+    await Promise.all(existing.filter(({ exists }) => exists).map(({ table }) => this.addTenantColumns(table)));
   }
 
-  private async addTenantColumns(table: (typeof TENANT_TABLES)[number]): Promise<void> {
+  private async addTenantColumns(table: (typeof TENANT_TABLES)[number] | (typeof OPTIONAL_TENANT_TABLES)[number]): Promise<void> {
     const query = `ALTER TABLE ${table}
       ADD COLUMN IF NOT EXISTS org_slug String MATERIALIZED ResourceAttributes['org.slug'],
       ADD COLUMN IF NOT EXISTS team_id String MATERIALIZED ResourceAttributes['team.id']`;

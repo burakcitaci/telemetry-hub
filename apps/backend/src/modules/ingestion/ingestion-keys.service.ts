@@ -5,6 +5,7 @@ import { createHash } from 'node:crypto';
 export interface IngestionIdentity {
   orgSlug: string;
   teamId: string;
+  env?: string;
   expiresAt: number;
 }
 
@@ -29,7 +30,8 @@ export class IngestionKeysService {
     const hash = createHash('sha256').update(key).digest('hex');
     const record = this.records.get(hash);
     if (!record || record.revoked || record.expiresAt <= Date.now()) return undefined;
-    return { orgSlug: record.orgSlug, teamId: record.teamId, expiresAt: record.expiresAt };
+    return { orgSlug: record.orgSlug, teamId: record.teamId, expiresAt: record.expiresAt,
+      ...(record.env ? { env: record.env } : {}) };
   }
 
   private add(record: KeyRecord): void {
@@ -37,6 +39,8 @@ export class IngestionKeysService {
       && /^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/.test(value);
     if (!record || !/^[a-f0-9]{64}$/.test(record.keyHash)
       || !validId(record.orgSlug) || !validId(record.teamId)
+      || record.env !== undefined && (typeof record.env !== 'string' || record.env === 'all'
+        || !/^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$/.test(record.env))
       || !Number.isFinite(record.expiresAt) || typeof record.revoked !== 'undefined'
         && typeof record.revoked !== 'boolean' || this.records.has(record.keyHash)) {
       throw new Error('Invalid or duplicate ingestion key record.');

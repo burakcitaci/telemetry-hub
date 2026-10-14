@@ -732,16 +732,27 @@ export const MonitorForm: React.FC<{
 
   return (
     <>
-      <fieldset disabled={pending} className="min-h-0 flex-1 space-y-4 overflow-y-auto p-5">
+      <fieldset
+        disabled={pending}
+        className="min-h-0 flex-1 space-y-4 overflow-y-auto p-5 [&_input]:h-8 [&_input]:text-xs [&_button[role=combobox]]:h-8 [&_button[role=combobox]]:text-xs"
+      >
         {/* Type + name */}
         {error && <p role="alert" className="text-xs text-destructive">{error}</p>}
-        <Card><CardContent className="grid gap-3 pt-4 sm:grid-cols-3">
-          <label className="space-y-1 text-xs"><span className="text-muted-foreground">Team</span><select aria-label="Monitor team" value={teamId} onChange={event => setTeamId(event.target.value)} className="h-8 w-full rounded-sm border border-border bg-background px-2"><option value="">Alle / ohne Team</option>{session?.teams.map(team => <option key={team} value={team}>{team}</option>)}</select></label>
+        <section className="grid gap-3 rounded-md border bg-background p-4 sm:grid-cols-3">
+          <div className="space-y-1 text-xs">
+            <label htmlFor="monitor-team" className="text-muted-foreground">Team</label>
+            <Select value={teamId || '__all__'} onValueChange={(value) => setTeamId(value === '__all__' ? '' : value)}>
+              <SelectTrigger id="monitor-team" className="h-8 text-xs"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__all__">All / no team</SelectItem>
+                {session?.teams.map((team) => <SelectItem key={team} value={team}>{team}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
           <label className="space-y-1 text-xs"><span className="text-muted-foreground">Service (optional)</span><Input value={service} onChange={event => setService(event.target.value)} maxLength={255} placeholder="Alle Services" className="h-8 text-xs" /></label>
           <label className="space-y-1 text-xs"><span className="text-muted-foreground">Environment (optional)</span><Input value={env} onChange={event => setEnv(event.target.value)} maxLength={64} placeholder="Alle Umgebungen" className="h-8 text-xs" /></label>
-        </CardContent></Card>
-        <Card>
-          <CardContent className="pt-4 space-y-3">
+        </section>
+        <section className="space-y-3 rounded-md border bg-background p-4">
             <div className="grid grid-cols-1 gap-3 md:grid-cols-[160px_1fr]">
               <div>
                 <label htmlFor="monitor-type" className="mb-1.5 block text-xs font-medium">Type</label>
@@ -773,15 +784,11 @@ export const MonitorForm: React.FC<{
                 />
               </div>
             </div>
-          </CardContent>
-        </Card>
+        </section>
 
         {/* Query */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm">Query</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
+        <section className="space-y-3 rounded-md border bg-background p-4">
+          <h3 className="text-sm font-semibold">Query</h3>
             <div>
               <label htmlFor="monitor-query" className="mb-1.5 block text-xs font-medium">
                 {type === 'metric'
@@ -845,15 +852,11 @@ export const MonitorForm: React.FC<{
                 </div>
               </div>
             )}
-          </CardContent>
-        </Card>
+        </section>
 
         {/* Condition */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm">Alert condition</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
+        <section className="space-y-3 rounded-md border bg-background p-4">
+          <h3 className="text-sm font-semibold">Alert condition</h3>
             <div className="rounded-md border border-border bg-muted/30 p-3" role="status">
               <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Rule preview</p>
               <p className="mt-1 text-xs font-medium">{rulePreview}</p>
@@ -923,15 +926,11 @@ export const MonitorForm: React.FC<{
                 />
               </div>
             </div>
-          </CardContent>
-        </Card>
+        </section>
 
         {/* Notify */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm">Notify</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
+        <section className="space-y-3 rounded-md border bg-background p-4">
+          <h3 className="text-sm font-semibold">Notify</h3>
             <div>
               <label htmlFor="monitor-message" className="mb-1.5 block text-xs font-medium">
                 Message
@@ -985,8 +984,7 @@ export const MonitorForm: React.FC<{
                 })}
               </div>
             </div>
-          </CardContent>
-        </Card>
+        </section>
       </fieldset>
       <div className="flex shrink-0 justify-end gap-2 border-t bg-background px-5 py-4">
         <Button variant="outline" onClick={onCancel}>Cancel</Button>

@@ -3,6 +3,7 @@ import { test } from 'node:test';
 import { platformFilterKey, platformFilterSearch, readPlatformFilters } from '../src/shared/lib/platform-filters';
 import { api } from '../src/shared/api/client';
 import { createEventSource } from '../src/shared/api/event-stream';
+import { filterOptionsSource, getFilterOptions } from '../src/shared/api/filter-options';
 
 test('no implicit team or environment boundary, and explorer facets do not become global service filters', () => {
   assert.deepEqual(readPlatformFilters(''), { team: [], service: [], env: [], status: [] });
@@ -67,5 +68,23 @@ test('shared client applies filters to every explorer, overrides stale environme
     globalThis.window.location.search = '';
     await api.get('/metrics'); assert.equal(requests.at(-1).params.env, 'all');
     assert.equal(requests.at(-1).headers.get('X-Team-Filter'), 'all');
+  } finally { api.defaults.adapter = previousAdapter; globalThis.window = previousWindow; }
+});
+
+test('filter discovery sends only supported query fields and keeps scope in headers', async () => {
+  const previousWindow = globalThis.window, previousAdapter = api.defaults.adapter;
+  globalThis.window = { location: { search: '?env=dev&team=backend', pathname: '/org/demo/metrics' } } as any;
+  const options = { services: ['api'], environments: ['dev'], statuses: [] };
+  api.defaults.adapter = async config => {
+    assert.deepEqual(Object.keys(config.params).sort(), ['from', 'source', 'to']);
+    assert.equal(config.headers.get('X-Environment-Filter'), 'dev');
+    assert.equal(config.headers.get('X-Team-Filter'), 'backend');
+    return { data: { data: options }, status: 200, statusText: 'OK', headers: {}, config };
+  };
+  try {
+    assert.deepEqual(await getFilterOptions({ source: 'metrics', from: '2026-10-14T12:00:00Z', to: '2026-10-14T13:00:00Z' }), options);
+    assert.equal(filterOptionsSource('/org/demo/metrics'), 'metrics');
+    assert.equal(filterOptionsSource('/org/demo/infrastructure'), 'all');
+    assert.equal(filterOptionsSource('/org/demo/admin'), 'all');
   } finally { api.defaults.adapter = previousAdapter; globalThis.window = previousWindow; }
 });

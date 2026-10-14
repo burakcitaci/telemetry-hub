@@ -197,6 +197,44 @@ Das Bootstrap ist nicht transaktional: Scheitert die zweite Erstellung, kann das
 
 Kubernetes Secrets sind base64-kodiert, nicht dadurch verschlüsselt. Produktion benötigt eingeschränkte RBAC-Rechte, Verschlüsselung der Datenhaltung und einen geeigneten Secret Manager.
 
+### TASK-ONBOARD-1: Eigene Backends mit Environment integrieren
+
+Das Instrumentierungs-SDK liest `OTEL_RESOURCE_ATTRIBUTES`. Für Environment-Filter
+ist `deployment.environment.name` erforderlich; allein der Kubernetes-Namespace
+oder `ASPNETCORE_ENVIRONMENT` erzeugt dieses Attribut nicht automatisch.
+
+```bash
+node scripts/deploy-backend.mjs --name sample-api --image local/sample:v1 \
+  --service sample-api --org demo --team platform --env staging \
+  --build-context /path/to/sample
+# Plan prüfen, dann denselben Aufruf mit --apply ausführen.
+```
+
+Die Deployment-Variablen enthalten beispielsweise:
+
+```yaml
+- name: OTEL_RESOURCE_ATTRIBUTES
+  value: deployment.environment.name=staging,org.slug=demo,team.id=platform
+- name: DEPLOY_ENV
+  value: staging
+```
+
+`--env` ist verpflichtend und wird zusätzlich im Ingestion-Key-Eintrag als `env`
+gespeichert. Die Hub-Gateway leitet dieses Environment mit den vertrauenswürdigen
+Org-/Team-Headern an den Collector weiter. Der Collector schreibt es vor dem
+Batching nach `deployment.environment.name` für Logs, Traces und Metriken.
+Ein bestehender Key ohne Environment wird beim erneuten Onboarding gebunden;
+ein bereits anders gebundener Key benötigt `--rotate-key`.
+
+Für manuelle Integrationen darf ein Key-Eintrag optional `"env": "staging"`
+enthalten. Bestehende Einträge ohne `env` funktionieren weiterhin mit den
+SDK-Resource-Attributen. Der Collector übernimmt das ältere
+`deployment.environment` nur, wenn der aktuelle Attributname fehlt.
+Ohne beide Attribute und ohne Key-Environment bleibt das Environment unbekannt;
+der Hub erfindet keinen Standardwert. Alte Telemetrie wird nicht nachträglich
+umbenannt. Das SDK muss Resource-Metadaten für alle gewünschten Signalarten
+exportieren; `OTEL_RESOURCE_ATTRIBUTES` setzt keine Instrumentierung in Gang.
+
 ### TASK-SETUP-3: Infrastruktur und Dashboard starten
 
 ```bash

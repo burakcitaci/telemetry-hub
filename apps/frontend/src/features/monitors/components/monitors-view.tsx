@@ -20,6 +20,16 @@ import {
 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 import {
   Sheet,
@@ -75,13 +85,19 @@ export function MonitorsView({
 }: MonitorsViewProps) {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [formDirty, setFormDirty] = useState(false);
-  const closeDetail = () => {
-    if (creating && formDirty && !window.confirm('Discard unsaved monitor changes?')) {
-      return;
-    }
+  const [discardOpen, setDiscardOpen] = useState(false);
+  const forceCloseDetail = () => {
+    setDiscardOpen(false);
     setFormDirty(false);
     setOpenId(null);
     setCreating(false);
+  };
+  const closeDetail = () => {
+    if (creating && formDirty) {
+      setDiscardOpen(true);
+      return;
+    }
+    forceCloseDetail();
   };
   return (
     <FeaturePage>
@@ -132,73 +148,6 @@ export function MonitorsView({
           open={sidebarOpen}
           onOpenChange={setSidebarOpen}
         >
-          <FeatureSearch
-            placeholder="Search monitors…"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-
-          <div>
-            <p className="mb-2 text-[10px] uppercase tracking-wide text-muted-foreground">
-              Status
-            </p>
-            <div className="space-y-0.5">
-              {STATUS_FILTERS.map((s) => {
-                const on = statusFilter.has(s);
-                const count = statusCounts[s] ?? 0;
-                return (
-                  <button
-                    key={s}
-                    type="button"
-                    onClick={() => toggleStatusFilter(s)}
-                    className={`flex w-full items-center gap-2.5 rounded-md px-2.5 py-1.5 text-left text-xs transition-colors ${
-                      on
-                        ? 'bg-accent text-accent-foreground'
-                        : 'text-muted-foreground hover:bg-accent/50'
-                    }`}
-                  >
-                    <span
-                      className={`h-2 w-2 shrink-0 rounded-full ${statusBg(s)}`}
-                    />
-                    <span className="flex-1">{statusLabel(s)}</span>
-                    <span className="text-[10px] tabular-nums text-muted-foreground">
-                      {count}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          <div>
-            <p className="mb-2 text-[10px] uppercase tracking-wide text-muted-foreground">
-              Type
-            </p>
-            <div className="space-y-0.5">
-              {(['metric', 'log', 'other'] as MonitorType[]).map((t) => {
-                const on = typeFilter.has(t);
-                const count = monitors.filter((m) => m.type === t).length;
-                return (
-                  <button
-                    key={t}
-                    type="button"
-                    onClick={() => toggleTypeFilter(t)}
-                    className={`flex w-full items-center gap-2.5 rounded-md px-2.5 py-1.5 text-left text-xs transition-colors ${
-                      on
-                        ? 'bg-accent text-accent-foreground'
-                        : 'text-muted-foreground hover:bg-accent/50'
-                    }`}
-                  >
-                    {typeIcon(t)}
-                    <span className="flex-1 capitalize">{t}</span>
-                    <span className="text-[10px] tabular-nums text-muted-foreground">
-                      {count}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
         </AppFilterSidebar>
 
         {/* List (full width) + Sheet */}
@@ -232,10 +181,6 @@ export function MonitorsView({
             )}
 
             <div className="min-h-0 flex-1 overflow-y-auto">
-              <p role="note" className="mb-2 text-xs text-muted-foreground">
-                Configuration only — evaluation and notification delivery are not connected.
-                Without an evaluation timestamp, status is Unknown.
-              </p>
               {loading && monitors.length === 0 ? (
                 <FeatureLoading />
               ) : filtered.length === 0 ? (
@@ -246,17 +191,6 @@ export function MonitorsView({
                       ? 'No monitor configurations yet. Create one to define a rule.'
                       : 'No monitors match the current filters.'}
                   </p>
-                  {monitors.length === 0 && (
-                    <Button
-                      onClick={() => {
-                        setFormDirty(false);
-                        setCreating(true);
-                        setOpenId(null);
-                      }}
-                    >
-                      <Plus className="mr-1.5 h-4 w-4" /> New monitor
-                    </Button>
-                  )}
                 </FeatureEmptyState>
               ) : (
                 filtered.map((m) => (
@@ -339,6 +273,24 @@ export function MonitorsView({
               ) : null}
             </SheetContent>
           </Sheet>
+          <AlertDialog open={discardOpen} onOpenChange={setDiscardOpen}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle className="text-lg font-semibold">
+                  Discard unsaved monitor changes?
+                </AlertDialogTitle>
+                <AlertDialogDescription className="text-sm text-muted-foreground">
+                  Your changes have not been saved. This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Keep editing</AlertDialogCancel>
+                <AlertDialogAction variant="destructive" onClick={forceCloseDetail}>
+                  Discard changes
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </FeatureContent>
       </FeatureBody>
     </FeaturePage>

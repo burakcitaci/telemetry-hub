@@ -28,15 +28,16 @@ test("dirty monitor drafts require confirmation before closing", { timeout: 6000
     assert.match(await browser.evaluate("document.body.innerText"), /Rule preview/i);
 
     await browser.evaluate(`
-      window.__confirmMessage = null;
-      window.confirm = (message) => { window.__confirmMessage = message; return false; };
       const input = document.getElementById('monitor-name');
       Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(input, 'Unsaved monitor');
       input.dispatchEvent(new Event('input', { bubbles: true }));
     `);
     await browser.wait("document.getElementById('monitor-name').value === 'Unsaved monitor'");
     await browser.evaluate("[...document.querySelectorAll('button')].find((button) => button.innerText === 'Cancel').click()");
-    await browser.wait("window.__confirmMessage === 'Discard unsaved monitor changes?'");
+    await browser.wait("document.body.innerText.includes('Discard unsaved monitor changes?')");
+    assert.equal(await browser.evaluate("Boolean(document.getElementById('monitor-name'))"), true);
+    await browser.evaluate("[...document.querySelectorAll('button')].find((button) => button.innerText === 'Keep editing').click()");
+    await browser.wait("!document.body.innerText.includes('Discard unsaved monitor changes?')");
     assert.equal(await browser.evaluate("Boolean(document.getElementById('monitor-name'))"), true);
   } finally {
     await browser.close();

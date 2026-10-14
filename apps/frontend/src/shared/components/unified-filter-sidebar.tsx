@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { FilterMultiselect } from './filter-multiselect';
 import { readPlatformFilters } from '@/shared/lib/platform-filters';
 import { useFilterOptions } from '@/shared/hooks/use-filter-options';
-import type { FilterOptionsSource } from '@/shared/api/filter-options';
+import { filterOptionsSource } from '@/shared/api/filter-options';
 
 const LABEL = 'text-[11px] font-bold uppercase tracking-wider text-muted-foreground';
 
@@ -14,7 +14,7 @@ export function UnifiedFilterSidebar() {
   const selected = readPlatformFilters(params.toString());
   const { pathname } = useLocation();
   const range = params.get('range') || params.get('time') || '5m';
-  const source = (pathname.split('/')[3] || 'all') as FilterOptionsSource;
+  const source = filterOptionsSource(pathname);
   const scopeKey = JSON.stringify([selected.team, selected.service, selected.env]);
 
   const { options, loading, error, retry } = useFilterOptions(
@@ -103,7 +103,7 @@ export function UnifiedFilterSidebar() {
         Filter zurücksetzen
       </Button>
 
-      {error && (
+      {error && !loading && (
         <p role="alert" className="text-xs text-destructive">
           Filter-Optionen nicht verfügbar.{' '}
           <button className="underline" onClick={retry}>

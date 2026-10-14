@@ -765,7 +765,10 @@ export class MetricsService {
         total_bytes,
         total_rows
       FROM system.tables
-      WHERE database = currentDatabase() AND name LIKE '%metric%'
+      WHERE database = currentDatabase() AND name IN (
+        'otel_metrics_gauge', 'otel_metrics_sum', 'otel_metrics_histogram',
+        'otel_metrics_exponential_histogram', 'otel_metrics_summary'
+      )
       ORDER BY name
     `;
 

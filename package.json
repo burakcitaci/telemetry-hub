@@ -15,6 +15,7 @@
     "check:backend": "yarn workspace backend tsc --noEmit --incremental false",
     "check:all": "yarn check:backend && yarn check:frontend",
     "test:backend": "yarn workspace backend test",
+    "test:onboarding": "node --test scripts/backend-onboarding.test.mjs",
     "graphify": "node scripts/graphify.mjs",
     "graph:update": "node scripts/graphify.mjs update .",
     "cluster:create": "kind create cluster --name observability --config infra/kind/kind-config.yaml",

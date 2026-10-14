@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { summarizeDistribution, type MetricDetailRecord } from './metrics.service';
+import { MetricsService, summarizeDistribution, type MetricDetailRecord } from './metrics.service';
+import { ClickhouseService } from './clickhouse.service';
 
 function record(bucketCounts: number[], explicitBounds: number[]): MetricDetailRecord {
   return { serviceName: 'api', metricName: 'latency', metricType: 'histogram',
@@ -24,4 +25,26 @@ test('histogram overflow is reported as unknown instead of a fabricated zero', (
   assert.equal(result.p95, null);
   assert.equal(result.stdDev, null);
   assert.equal(result.distributionComplete, false);
+});
+
+test('inventory discovers known installed tables in the configured database and preserves query failures', async () => {
+  const clickhouse = new ClickhouseService({} as never, {} as never);
+  clickhouse.executeSystemQuery = async (query: string) => {
+    assert.match(query, /database = currentDatabase\(\)/);
+    assert.doesNotMatch(query, /LIKE '%metric%'/);
+    assert.match(query, /otel_metrics_summary/);
+    return [{ table_name: 'otel_metrics_gauge' }, { table_name: 'otel_metrics_summary' }] as any;
+  };
+  let fail = false;
+  clickhouse.executeTenantQuery = async (_scope, query) => {
+    assert.match(query, /org_slug = \{tenant:String\}/);
+    if (fail && query.includes('otel_metrics_summary')) throw new Error('query budget exceeded');
+    return [{ ServiceName: 'api', MetricName: 'requests' }] as any;
+  };
+  const metrics = new MetricsService(clickhouse, { warn() {} } as any);
+  const inventory = await metrics.getAllMetricsFlattened({ tenantSlug: 'demo', role: 'admin' });
+  assert.equal(inventory.total, 2);
+  fail = true;
+  await assert.rejects(metrics.getAllMetricsFlattened({ tenantSlug: 'demo', role: 'admin' }), (error: any) =>
+    error.getStatus() === 503 && error.getResponse().failedTables.includes('otel_metrics_summary'));
 });

@@ -8,6 +8,12 @@ export type FilterOptionsSource =
   | 'services'
   | 'monitors';
 
+export function filterOptionsSource(pathname: string): FilterOptionsSource {
+  const source = pathname.split('/')[3];
+  return ['metrics', 'logs', 'traces', 'services', 'monitors'].includes(source)
+    ? source as FilterOptionsSource : 'all';
+}
+
 export interface FilterOptions {
   services: string[];
   environments: string[];

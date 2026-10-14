@@ -51,3 +51,26 @@ test('trace detail queries have an explicit span and execution bound', async () 
   assert.equal(captured?.params.env, 'production');
   assert.ok(Number(captured?.settings.max_execution_time) > 0);
 });
+
+test('tenant schema includes optional metric tables when installed and permits their absence', async () => {
+  for (const optionalInstalled of [false, true]) {
+    const commands: string[] = [];
+    const clickhouse = new ClickhouseService({} as never, {} as never);
+    Object.assign(clickhouse, { client: {
+      query: async ({ query, query_params }) => ({ json: async () => query.includes('FROM system.tables')
+        ? [{ count: optionalInstalled || !['otel_metrics_summary', 'otel_metrics_exponential_histogram'].includes(query_params.tableName) ? '1' : '0' }]
+        : [] }),
+      command: async ({ query }) => { commands.push(query); },
+    } });
+    await clickhouse.executeTenantQuery({ tenantSlug: 'demo', role: 'admin' },
+      'SELECT MetricName FROM otel_metrics_gauge WHERE org_slug = {tenant:String}');
+    assert.equal(commands.length, optionalInstalled ? 7 : 5);
+    for (const table of ['otel_metrics_summary', 'otel_metrics_exponential_histogram']) {
+      assert.equal(commands.some(query => query.includes(`ALTER TABLE ${table}`)), optionalInstalled);
+    }
+    for (const query of commands) {
+      assert.match(query, /org_slug String MATERIALIZED ResourceAttributes\['org.slug'\]/);
+      assert.match(query, /team_id String MATERIALIZED ResourceAttributes\['team.id'\]/);
+    }
+  }
+});

@@ -28,4 +28,10 @@ test('monitor authoring follows the shared sheet structure', () => {
   assert.match(form, /min-h-0 flex-1[^"\n]*overflow-y-auto/);
   assert.match(form, /shrink-0[^"\n]*border-t/);
   assert.match(form, /Saving…/);
+  const monitorForm = form.slice(form.indexOf('export const MonitorForm'));
+  assert.doesNotMatch(monitorForm, /<Card[>\s]/);
+  assert.doesNotMatch(monitorForm, /<select/);
+  assert.match(monitorForm, /SelectTrigger id="monitor-team"/);
+  assert.match(monitorForm, /\[&_input\]:h-8/);
+  assert.match(monitorForm, /\[&_button\[role=combobox\]\]:h-8/);
 });

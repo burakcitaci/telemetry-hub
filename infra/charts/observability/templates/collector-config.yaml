@@ -31,6 +31,12 @@ data:
               authenticator: bearertokenauth/ingestion
 
     processors:
+      resource/environment:
+        attributes:
+          # Normalize older SDKs without replacing the current attribute.
+          - key: deployment.environment.name
+            from_attribute: deployment.environment
+            action: insert
       resource/ingestion:
         attributes:
           - key: org.slug
@@ -42,6 +48,11 @@ data:
             action: upsert
           - key: team.id
             from_context: metadata.x-telemetry-team
+            action: upsert
+          # A key-bound environment overrides client resource attributes.
+          # Missing header preserves the SDK value for older integrations.
+          - key: deployment.environment.name
+            from_context: metadata.x-telemetry-environment
             action: upsert
       memory_limiter:
         check_interval: 1s
@@ -78,25 +89,25 @@ data:
       pipelines:
         traces/ingestion:
           receivers: [otlp/ingestion]
-          processors: [memory_limiter, resource/ingestion, batch]
+          processors: [memory_limiter, resource/environment, resource/ingestion, batch]
           exporters: [clickhouse]
         logs/ingestion:
           receivers: [otlp/ingestion]
-          processors: [memory_limiter, resource/ingestion, batch]
+          processors: [memory_limiter, resource/environment, resource/ingestion, batch]
           exporters: [clickhouse]
         metrics/ingestion:
           receivers: [otlp/ingestion]
-          processors: [memory_limiter, resource/ingestion, batch]
+          processors: [memory_limiter, resource/environment, resource/ingestion, batch]
           exporters: [clickhouse]
         traces:
           receivers: [otlp]
-          processors: [memory_limiter, batch]
+          processors: [memory_limiter, resource/environment, batch]
           exporters: [clickhouse, debug]
         logs:
           receivers: [otlp]
-          processors: [memory_limiter, batch]
+          processors: [memory_limiter, resource/environment, batch]
           exporters: [clickhouse, debug]
         metrics:
           receivers: [otlp]
-          processors: [memory_limiter, batch]
+          processors: [memory_limiter, resource/environment, batch]
           exporters: [clickhouse, debug]

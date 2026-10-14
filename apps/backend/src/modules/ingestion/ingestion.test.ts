@@ -34,6 +34,9 @@ test('API key resolution fails closed for unknown, revoked and expired credentia
   assert.equal(keyStore({ expiresAt: Date.now() - 1 }).resolve(apiKey), undefined);
   assert.equal(keyStore().resolve(apiKey)?.orgSlug, 'acme');
   assert.throws(() => keyStore({ orgSlug: 'injected\r\nheader' }));
+  assert.equal(keyStore({ env: 'staging' }).resolve(apiKey)?.env, 'staging');
+  assert.equal(keyStore().resolve(apiKey)?.env, undefined);
+  for (const env of ['', 'all', 'injected\r\nheader', 'a'.repeat(65)]) assert.throws(() => keyStore({ env }));
 });
 
 test('OTLP gateway rejects unauthorized requests and replaces spoofed headers for all signals', async t => {
@@ -47,7 +50,7 @@ test('OTLP gateway rejects unauthorized requests and replaces spoofed headers fo
   const upstream = await listen(collector);
   t.after(() => upstream.server.close());
   const config = new ConfigService({ INGESTION_COLLECTOR_ENDPOINT: upstream.url, INGESTION_COLLECTOR_TOKEN: token });
-  const gateway = new IngestionMiddleware(keyStore(), config);
+  const gateway = new IngestionMiddleware(keyStore({ env: 'staging' }), config);
   const app = express();
   app.use('/api/ingest', gateway.authenticate, raw({ type: () => true, limit: '8mb' }), gateway.forward);
   app.use(express.json()); // Mirrors Nest's parser registration after the raw gateway.
@@ -63,7 +66,8 @@ test('OTLP gateway rejects unauthorized requests and replaces spoofed headers fo
     const response = await fetch(`${endpoint}${signal}`, {
       method: 'POST', body: bytes,
       headers: { 'Content-Type': 'application/x-protobuf', 'X-API-Key': apiKey,
-        'X-Telemetry-Org': 'victim', 'X-Telemetry-Team': 'victim-team', Cookie: 'secret-session' },
+        'X-Telemetry-Org': 'victim', 'X-Telemetry-Team': 'victim-team',
+        'X-Telemetry-Environment': 'production', Cookie: 'secret-session' },
     });
     assert.equal(response.status, 200);
     assert.deepEqual(Buffer.from(await response.arrayBuffer()), Buffer.from([0x08, 0x01]));
@@ -72,6 +76,7 @@ test('OTLP gateway rejects unauthorized requests and replaces spoofed headers fo
     assert.deepEqual(sent.body, bytes);
     assert.equal(sent.headers['x-telemetry-org'], 'acme');
     assert.equal(sent.headers['x-telemetry-team'], 'platform');
+    assert.equal(sent.headers['x-telemetry-environment'], 'staging');
     assert.equal(sent.headers.authorization, `Bearer ${token}`);
     assert.equal(sent.headers['x-api-key'], undefined);
     assert.equal(sent.headers.cookie, undefined);

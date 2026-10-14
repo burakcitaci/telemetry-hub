@@ -23,4 +23,6 @@ test('monitor authoring previews its rule and protects dirty drafts', () => {
   assert.match(form, /htmlFor="monitor-query"/);
   assert.match(form, /onDirtyChange/);
   assert.match(view, /Discard unsaved monitor changes\?/);
+  assert.doesNotMatch(view, /window\.confirm/);
+  assert.match(view, /AlertDialogContent/);
 });

@@ -32,7 +32,11 @@ api.interceptors.request.use(config => {
   const params = new URLSearchParams(query);
   params.delete('env');
   config.url = path + (params.size ? `?${params}` : '');
-  config.params = { ...config.params, env: env.length === 1 ? env[0] : 'all' };
+  const scopedParams = { ...config.params };
+  delete scopedParams.env;
+  // Filter discovery takes source/time parameters; scope is supplied in headers.
+  if (path !== '/filters') scopedParams.env = env.length === 1 ? env[0] : 'all';
+  config.params = scopedParams;
   return config;
 });
 
