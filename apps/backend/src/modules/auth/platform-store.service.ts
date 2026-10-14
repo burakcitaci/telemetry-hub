@@ -70,6 +70,13 @@ export class PlatformStore implements OnModuleDestroy {
       && user.teamId === payload.teamId && typeof payload.exp === 'number' && payload.exp > Date.now() / 1000;
   }
 
+  revokeSessions(org: string, id: string): void {
+    const user = this.user(org, id);
+    if (!user) return;
+    this.db.prepare('UPDATE users SET body = ? WHERE org = ? AND id = ?')
+      .run(JSON.stringify({ ...user, version: user.version + 1 }), org, id);
+  }
+
   users(org: string): Identity[] {
     return this.db.prepare('SELECT body FROM users WHERE org = ? ORDER BY email')
       .all(org).map(row => JSON.parse(String(row.body)));

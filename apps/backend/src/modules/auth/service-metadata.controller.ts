@@ -30,8 +30,10 @@ export class ServiceMetadataController {
     if (dto.team && !this.store.teams(scope.tenantSlug).some(team => team.id === dto.team)) {
       throw new BadRequestException('Select an existing organization team.');
     }
-    this.store.saveServiceMetadata(scope.tenantSlug, dto.serviceName, { ...dto });
-    return dto;
+    const metadata = { serviceName: dto.serviceName, team: dto.team, type: dto.type,
+      onCall: dto.onCall, contact: dto.contact, repo: dto.repo, metadataSource: dto.metadataSource };
+    this.store.saveServiceMetadata(scope.tenantSlug, dto.serviceName, metadata);
+    return metadata;
   }
   @Delete() remove(@Tenant() scope: TenantScope, @Body() dto: ServiceMetadataKeyDto) {
     this.store.deleteServiceMetadata(scope.tenantSlug, dto.serviceName);

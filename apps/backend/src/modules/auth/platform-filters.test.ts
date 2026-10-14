@@ -83,15 +83,15 @@ test('status discovery uses the relevant table and exact date window, not a stat
   } finally { store.onModuleDestroy(); }
 });
 
-test('monitor filtering supports multi-selection and discovery honors updatedAt bounds', async () => {
+test('monitor filtering supports multi-selection and discovery honors evaluation bounds', async () => {
   const store = new PlatformStore(new ConfigService({ AUTH_DB_PATH: ':memory:' }));
   const clickhouse = new ClickhouseService({} as any, new ConfigService(), store);
   clickhouse.executeTenantQuery = async () => [];
   try {
-    store.saveMonitor('demo', { id: '1', teamId: 'backend', service: 'api', env: 'dev', status: 'Alert', updatedAt: '2026-10-11T12:57:00Z' });
-    store.saveMonitor('demo', { id: '2', teamId: 'frontend', service: 'web', env: 'prod', status: 'OK', updatedAt: '2026-10-11T12:58:00Z' });
-    store.saveMonitor('demo', { id: '3', teamId: 'backend', service: 'api', env: 'dev', status: 'Warn', updatedAt: '2026-10-10T12:00:00Z' });
-    store.saveMonitor('other', { id: '4', status: 'Foreign', updatedAt: '2026-10-11T12:59:00Z' });
+    store.saveMonitor('demo', { id: '1', teamId: 'backend', service: 'api', env: 'dev', status: 'Alert', lastEvaluatedAt: '2026-10-11T12:57:00Z' });
+    store.saveMonitor('demo', { id: '2', teamId: 'frontend', service: 'web', env: 'prod', status: 'OK', lastEvaluatedAt: '2026-10-11T12:58:00Z' });
+    store.saveMonitor('demo', { id: '3', teamId: 'backend', service: 'api', env: 'dev', status: 'Warn', lastEvaluatedAt: '2026-10-10T12:00:00Z' });
+    store.saveMonitor('other', { id: '4', status: 'Foreign', lastEvaluatedAt: '2026-10-11T12:59:00Z' });
     const scope = { tenantSlug: 'demo', role: 'user' as const, teamFilter: ['backend', 'frontend'], serviceFilter: ['api', 'web'], envFilter: ['dev', 'prod'], statusFilter: ['Alert', 'OK'] };
     assert.equal(listFilteredMonitors(store, scope).length, 2);
     const result = await new FiltersController(clickhouse, store).options(scope,

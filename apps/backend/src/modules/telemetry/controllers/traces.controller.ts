@@ -2,6 +2,7 @@ import { Controller, Get, Param, Query, UseGuards } from "@nestjs/common";
 import { TenantJwtGuard } from '../../auth/tenant-jwt.guard';
 import { Tenant } from '../../auth/tenant-request.decorator';
 import type { TenantScope } from '../../auth/auth.types';
+import { LogsQueryDto } from "../../../dto/logs-query.dto";
 import { TelemetryQueryDto } from "../../../dto/query.dto";
 import { TraceIdParamDto } from "../../../dto/trace.dto";
 import { ClickhouseService } from "../services/clickhouse.service";
@@ -12,12 +13,14 @@ export class TracesController {
   constructor(private readonly clickhouse: ClickhouseService) {}
 
   @Get()
-  async getTraces(@Tenant() tenant: TenantScope, @Query() query: TelemetryQueryDto) {
+  async getTraces(@Tenant() tenant: TenantScope, @Query() query: LogsQueryDto) {
     return this.clickhouse.getTraces(tenant, {
       limit: query.limit,
       offset: query.offset,
       service: query.service,
       env: query.env,
+      from: query.from,
+      to: query.to,
     });
   }
 

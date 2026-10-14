@@ -8,6 +8,43 @@ Verdict: a credible local observability platform, not a production-ready multi-t
 
 Evidence boundary: code-derived inspection only. No runtime profiling, load tests, production telemetry, metrics snapshots, deployment inspection or security exploit reproduction. Tests and build were **not executed for this review**; test assertions were inspected. Concurrency, N+1 effects, lock contention, cold-path failures and operational consequences are marked **inferred**. Missing guards, validation options, transaction wrappers and configuration declarations are directly inspected. Scores are provisional engineering judgments, not measurements. External ingress/CNI/secrets/backup infrastructure cannot be certified from this repository.
 
+## Remediation progress · TASK-BACKEND-REVIEW-2 · 2026-10-14
+
+Validated against baseline `0197c59` with backend/frontend typechecks, production
+builds, Helm lint/template and all 32 backend source tests.
+
+- [x] P0 trace attribution: ownership is stored on the concrete span object in a
+  `WeakMap`; equal trace IDs in different organizations cannot overwrite it.
+- [x] P0 histogram amplification: percentiles operate on weighted buckets without
+  allocating one value per observation.
+- [x] P0 histogram overflow: quantiles and deviation that depend on the unbounded
+  bucket return `null`, with `distributionComplete=false`, instead of fabricated zero.
+- [x] P0 flattened-query failures: any failed source table now produces an explicit
+  503 containing failed/successful coverage rather than a successful partial list.
+- [x] P0 readiness: `/health/ready` checks ClickHouse and is used by the backend
+  readiness probe; `/health` remains process liveness.
+- [x] P0 telemetry durability: ClickHouse uses a configurable 10 Gi PVC by default;
+  ephemeral storage remains an explicit opt-out.
+- [x] P1 request/auth boundaries: unknown DTO fields are rejected, legacy metric
+  scalars are parsed, missing statistics inputs return 400, login attempts are
+  bounded and logout invalidates copied tokens.
+- [x] P1 query correctness: trace lists honor UTC windows, metric discovery uses
+  the configured database and all compatible signal tables, scope aggregation is
+  valid SQL, unit-mixing averages are removed and detail truncation is explicit.
+- [x] P1/P2 operational truthfulness: monitors disclose that evaluation is disabled,
+  status facets require an actual evaluation timestamp, trace detail is bounded,
+  health errors and request/attribute diagnostics no longer expose raw values, and
+  independent telemetry exporters are all drained during shutdown.
+- [x] P1 repository gate: backend test/typecheck scripts are available at workspace
+  and root level; new regressions cover trace collisions, histogram overflow,
+  login/logout, request-log redaction and trace span bounds.
+- Production ClickHouse authentication is intentionally deferred for this hobby
+  deployment per project-owner decision. The passwordless local-Kind chart remains
+  unsuitable for a shared or production cluster.
+
+The original findings below are retained as the audit record; this progress block
+is the current disposition and supersedes resolved statements where they conflict.
+
 Scale: 0 = unsafe/unusable, 3 = functional with consequential gaps, 5 = strong production foundation. Summary uses 0–10; module/axis ratings use 0–5. The prompt enumerates twelve axes but requests eleven table rows: each module includes the first eleven axes in its table and a separate scored **Code quality & DX** paragraph, so none is omitted.
 
 | Major surface | Rating / 10 | Operator verdict |

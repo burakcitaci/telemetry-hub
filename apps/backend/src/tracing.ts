@@ -117,11 +117,12 @@ export function shutdownTelemetry(): Promise<void> {
     telemetryShutdown = (async () => {
       // sdk.shutdown() flushes traces, metrics, AND logs
       // because all three are now owned by the SDK.
-      await sdk.shutdown();
-
-      // loggerProvider is not managed by NodeSDK, so flush separately.
-      await loggerProvider.forceFlush();
-      await loggerProvider.shutdown();
+      const results = await Promise.allSettled([
+        sdk.shutdown(),
+        loggerProvider.forceFlush().then(() => loggerProvider.shutdown()),
+      ]);
+      const failure = results.find(result => result.status === 'rejected');
+      if (failure?.status === 'rejected') throw failure.reason;
     })();
   }
   return telemetryShutdown;

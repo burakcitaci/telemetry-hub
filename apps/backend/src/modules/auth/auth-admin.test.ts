@@ -64,6 +64,23 @@ test('member session sees all org teams; guard rejects revoked sessions after pa
   } finally { store.onModuleDestroy(); }
 });
 
+test('logout revokes copied tokens and failed logins are bounded per identity source', async () => {
+  const settings = config(); const store = new PlatformStore(settings); const admin = new AdminService(store);
+  const jwt = new JwtService({ secret: 'test-only-secret-at-least-32-characters', signOptions: { expiresIn: '8h' } });
+  const auth = new AuthService(store, jwt);
+  try {
+    const user = await admin.createUser('demo', { email: 'user@example.com', role: 'user', password: 'a-strong-password' });
+    const credentials = { tenantSlug: 'demo', email: user.email, password: 'wrong-password' };
+    for (let attempt = 0; attempt < 5; attempt += 1) await assert.rejects(auth.login(credentials, '127.0.0.1'));
+    await assert.rejects(auth.login(credentials, '127.0.0.1'), error => (error as any).getStatus() === 429);
+    const signed = await auth.login({ ...credentials, password: 'a-strong-password' }, '127.0.0.2');
+    const claims = await jwt.verifyAsync(signed.token);
+    assert.equal(store.isSessionActive(claims), true);
+    auth.logout(claims);
+    assert.equal(store.isSessionActive(claims), false);
+  } finally { store.onModuleDestroy(); }
+});
+
 test('last admin protection and mutations from untrusted origins', async () => {
   const settings = config(); const store = new PlatformStore(settings); const admin = new AdminService(store);
   const jwt = new JwtService({ secret: 'test-only-secret-at-least-32-characters', signOptions: { expiresIn: '8h' } });

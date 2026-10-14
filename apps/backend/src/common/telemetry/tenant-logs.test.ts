@@ -63,12 +63,13 @@ test('batched logs capture request ownership without cross-tenant leaks or globa
 });
 
 test('HTTP finish logs re-enter their own validated request context', () => {
-  const captured: string[] = [];
-  const middleware = new LoggerMiddleware({ logWithAttributes: () => captured.push(currentTelemetryScope()!.tenantSlug) } as any);
+  const captured: Array<{ tenant: string; url: string }> = [];
+  const middleware = new LoggerMiddleware({ logWithAttributes: (_message: string, _level: string, attributes: any) =>
+    captured.push({ tenant: currentTelemetryScope()!.tenantSlug, url: attributes.url }) } as any);
   const response = Object.assign(new EventEmitter(), { statusCode: 200 });
-  middleware.use({ method: 'GET', originalUrl: '/api/logs', ip: 'localhost' } as any, response as any,
+  middleware.use({ method: 'GET', path: '/api/logs', originalUrl: '/api/logs?query=customer-secret', ip: 'localhost' } as any, response as any,
     () => authenticatedTelemetryScope({ tenantSlug: 'demo', role: 'admin' }));
   runTelemetryContext({ scope: { tenantSlug: 'other', role: 'user' } }, () => response.emit('finish'));
-  assert.deepEqual(captured, ['demo']);
+  assert.deepEqual(captured, [{ tenant: 'demo', url: '/api/logs' }]);
   assert.equal(currentTelemetryScope(), undefined);
 });

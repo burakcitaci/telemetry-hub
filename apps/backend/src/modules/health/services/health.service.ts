@@ -30,8 +30,7 @@ export class HealthService {
       throw new ServiceUnavailableException({
         status: "unhealthy",
         latencyMs: Date.now() - startedAt,
-        message:
-          error instanceof Error ? error.message : "ClickHouse ping failed",
+        message: "ClickHouse is unavailable",
       });
     }
   }

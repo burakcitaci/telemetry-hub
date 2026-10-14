@@ -160,15 +160,17 @@ export class ClickhouseService implements OnModuleInit, OnModuleDestroy {
     }
   }
 
-  async getTraces(scope: TenantScope, options: TelemetryListOptions = {}) {
+  async getTraces(scope: TenantScope, options: LogsListOptions = {}) {
     const { limit, offset } = this.normalizeListOptions(options);
     const environment = telemetryEnvironment(options.env);
+    const timeWindow = telemetryTimeWindow(options, 'Timestamp');
     const serviceFilter = options.service
       ? 'HAVING countIf(ServiceName = {service:String}) > 0'
       : '';
-    const isolation = this.buildTenantFilter({ ...scope, statusFilter: undefined }, environment.sql ? [environment.sql] : []);
+    const isolation = this.buildTenantFilter({ ...scope, statusFilter: undefined },
+      [environment.sql, timeWindow.sql].filter(Boolean));
     const queryParams: Record<string, unknown> = {
-      limit, offset, ...environment.params, ...isolation.params,
+      limit, offset, ...environment.params, ...timeWindow.params, ...isolation.params,
     };
 
     if (options.service) {
@@ -240,11 +242,12 @@ export class ClickhouseService implements OnModuleInit, OnModuleDestroy {
       FROM otel_traces
       ${isolation.where}
       ORDER BY Timestamp ASC
+      LIMIT {limit:UInt32}
     `;
 
     return this.executeTenantQuery(scope, query, {
-      traceId, ...environment.params, ...isolation.params,
-    });
+      traceId, limit: MAX_LIMIT, ...environment.params, ...isolation.params,
+    }, LIST_QUERY_SETTINGS);
   }
 
   async getLogs(scope: TenantScope, options: LogsListOptions = {}) {

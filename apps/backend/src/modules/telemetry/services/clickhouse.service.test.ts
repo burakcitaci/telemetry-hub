@@ -34,3 +34,20 @@ test('service discovery spans every OTel signal table and ignores status selecti
   assert.match(captured?.sql ?? '', /SELECT DISTINCT ServiceName/);
   assert.match(captured?.sql ?? '', /org_slug = \{tenant:String\}/);
 });
+
+test('trace detail queries have an explicit span and execution bound', async () => {
+  const clickhouse = new ClickhouseService({} as never, {} as never);
+  let captured: { sql: string; params: Record<string, unknown>; settings: Record<string, unknown> } | undefined;
+  clickhouse.executeTenantQuery = async (_scope, sql, params = {}, settings = {}) => {
+    captured = { sql, params, settings };
+    return [];
+  };
+
+  await clickhouse.getTraceById({ tenantSlug: 'acme', role: 'admin' }, 'trace-id', 'production');
+
+  assert.match(captured?.sql ?? '', /LIMIT \{limit:UInt32\}/);
+  assert.equal(captured?.params.limit, 500);
+  assert.equal(captured?.params.traceId, 'trace-id');
+  assert.equal(captured?.params.env, 'production');
+  assert.ok(Number(captured?.settings.max_execution_time) > 0);
+});

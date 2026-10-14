@@ -39,7 +39,7 @@ backend:
 
   readinessProbe:
     httpGet:
-      path: /health
+      path: /health/ready
       port: 3001
     initialDelaySeconds: 10
     periodSeconds: 15
@@ -86,6 +86,10 @@ backend:
 clickhouse:
   name: clickhouse
   replicaCount: 1
+  persistence:
+    enabled: true
+    size: 10Gi
+    storageClassName: ""
 
   image:
     repository: clickhouse/clickhouse-server

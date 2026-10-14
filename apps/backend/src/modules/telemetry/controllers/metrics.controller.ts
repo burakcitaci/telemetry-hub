@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
+import { BadRequestException, Controller, Get, Param, ParseEnumPipe, ParseIntPipe, Query, UseGuards } from '@nestjs/common';
 import { MetricsService } from '../services/metrics.service';
 import { MetricsQueryDto } from '../../../dto/metrics-query.dto';
 import { TelemetryTimeWindowPipe } from '../../../common/pipes/telemetry-time-window.pipe';
@@ -64,7 +64,7 @@ export class MetricsController {
     @Query('metric') metricName: string,
   ) {
     if (!serviceName || !metricName) {
-      throw new Error('Missing required parameters: service, metric');
+      throw new BadRequestException('Missing required parameters: service, metric');
     }
     return this.metricsService.getMetricStatistics(tenant, serviceName, metricName);
   }
@@ -101,8 +101,8 @@ export class MetricsController {
   async getMetricsByService(
     @Tenant() tenant: TenantScope,
     @Param('serviceName') serviceName: string,
-    @Query('limit') limit?: number,
-    @Query('offset') offset?: number,
+    @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
+    @Query('offset', new ParseIntPipe({ optional: true })) offset?: number,
   ) {
     return this.metricsService.getMetricsByService(tenant, serviceName, {
       limit,
@@ -132,8 +132,8 @@ export class MetricsController {
   async getHttpMetrics(
     @Tenant() tenant: TenantScope,
     @Param('serviceName') serviceName: string,
-    @Query('type') type?: 'client' | 'server',
-    @Query('limit') limit?: number,
+    @Query('type', new ParseEnumPipe(['client', 'server'], { optional: true })) type?: 'client' | 'server',
+    @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
   ) {
     return this.metricsService.getHttpMetrics(tenant, serviceName, { type, limit });
   }
@@ -214,7 +214,7 @@ export class MetricsController {
     @Tenant() tenant: TenantScope,
     @Param('serviceName') serviceName: string,
     @Param('metricName') metricName: string,
-    @Query('period') period?: 'hour' | 'day',
+    @Query('period', new ParseEnumPipe(['hour', 'day'], { optional: true })) period?: 'hour' | 'day',
   ) {
     return this.metricsService.compareMetrics(
       tenant,

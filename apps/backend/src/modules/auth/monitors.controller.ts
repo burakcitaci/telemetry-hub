@@ -31,8 +31,8 @@ export class MonitorsController {
 
   @Post() create(@Tenant() scope: TenantScope, @Body() dto: MonitorDto) {
     const now = new Date().toISOString();
-    const monitor = { ...this.configuration(scope, dto), id: randomUUID(),
-      createdAt: now, updatedAt: now, status: 'No Data' };
+    const monitor = { ...this.configuration(scope, dto), id: randomUUID(), createdAt: now,
+      updatedAt: now, status: 'No Data', lastEvaluatedAt: null, evaluationEnabled: false };
     this.store.saveMonitor(scope.tenantSlug, monitor);
     return monitor;
   }

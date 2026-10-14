@@ -31,7 +31,8 @@ export interface MetricDetailResponse {
   serviceName: string;
   metricName: string;
   metricType: string;
-  totalRecords: number;
+  returnedRecords: number;
+  truncated: boolean;
   records: MetricDetailRecord[];
 }
 
@@ -83,10 +84,11 @@ export interface MetricStatistics {
   min: number;
   max: number;
   mean: number;
-  p50: number;
-  p95: number;
-  p99: number;
-  stdDev: number;
+  p50: number | null;
+  p95: number | null;
+  p99: number | null;
+  stdDev: number | null;
+  distributionComplete: boolean;
 }
 
 export async function getMetricStatistics(

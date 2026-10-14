@@ -60,7 +60,8 @@ export interface MetricDetailResponse {
     serviceName: string;
     metricName: string;
     metricType: string;
-    totalRecords: number;
+    returnedRecords: number;
+    truncated: boolean;
     records: MetricDetailRecord[];
 }
 
@@ -70,10 +71,46 @@ export interface MetricStatistics {
     min: number;
     max: number;
     mean: number;
-    p50: number;
-    p95: number;
-    p99: number;
-    stdDev: number;
+    p50: number | null;
+    p95: number | null;
+    p99: number | null;
+    stdDev: number | null;
+    distributionComplete: boolean;
+}
+
+interface WeightedValue { value: number; count: number }
+
+export function summarizeDistribution(records: MetricDetailRecord[], mean: number) {
+    const values: WeightedValue[] = [];
+    let overflowCount = 0;
+    for (const record of records) {
+        if (!record.bucketCounts.length) {
+            values.push({ value: record.sum / (record.count || 1), count: 1 });
+            continue;
+        }
+        record.bucketCounts.forEach((count, index) => {
+            const bound = record.explicitBounds[index];
+            if (bound === undefined) overflowCount += count;
+            else if (count > 0) values.push({ value: bound, count });
+        });
+    }
+    values.sort((left, right) => left.value - right.value);
+    const finiteCount = values.reduce((total, item) => total + item.count, 0);
+    const percentile = (ratio: number) => weightedPercentile(values, finiteCount + overflowCount, ratio);
+    const variance = overflowCount ? null : values.reduce((total, item) =>
+        total + item.count * Math.pow(item.value - mean, 2), 0) / Math.max(1, finiteCount);
+    return { p50: percentile(.5), p95: percentile(.95), p99: percentile(.99),
+        stdDev: variance === null ? null : Math.sqrt(variance), distributionComplete: overflowCount === 0 };
+}
+
+function weightedPercentile(values: WeightedValue[], total: number, ratio: number): number | null {
+    const target = Math.ceil(total * ratio);
+    let cumulative = 0;
+    for (const item of values) {
+        cumulative += item.count;
+        if (cumulative >= target) return item.value;
+    }
+    return null;
 }
 
 // ============= SERVICE =============
@@ -249,7 +286,8 @@ export class MetricsService {
         serviceName,
         metricName,
         metricType,
-        totalRecords: allRecords.length,
+        returnedRecords: allRecords.length,
+        truncated: [gaugeRows, sumRows, histogramRows].some(rows => rows.length === limit),
         records: allRecords,
     };
 }
@@ -276,6 +314,7 @@ export class MetricsService {
                 p95: 0,
                 p99: 0,
                 stdDev: 0,
+                distributionComplete: true,
             };
         }
 
@@ -288,40 +327,8 @@ export class MetricsService {
         const maxVal = Math.max(...records.map((r) => r.max));
         const mean = totalCount > 0 ? totalSum / totalCount : 0;
 
-        // Expand bucket data to individual values for percentile calculation
-        const allValues: number[] = [];
-        records.forEach((record) => {
-            if (
-                record.bucketCounts &&
-                record.bucketCounts.length > 0 &&
-                record.explicitBounds
-            ) {
-                record.bucketCounts.forEach((count, idx) => {
-                    const bound = record.explicitBounds[idx] || 0;
-                    for (let i = 0; i < count; i++) {
-                        allValues.push(bound);
-                    }
-                });
-            } else {
-                // For sum/gauge records, add the value
-                allValues.push(record.sum / (record.count || 1));
-            }
-        });
-
-        // Sort for percentile calculation
-        allValues.sort((a, b) => a - b);
-
-        const getPercentile = (p: number) => {
-            if (allValues.length === 0) return 0;
-            const index = Math.ceil((p / 100) * allValues.length) - 1;
-            return allValues[Math.max(0, index)] || 0;
-        };
-
-        // Calculate standard deviation
-        const variance =
-            allValues.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) /
-            (allValues.length || 1);
-        const stdDev = Math.sqrt(variance);
+        const distribution = summarizeDistribution(records, mean);
+        const round = (value: number | null) => value === null ? null : Math.round(value * 100) / 100;
 
         return {
             count: totalCount,
@@ -329,10 +336,11 @@ export class MetricsService {
             min: minVal,
             max: maxVal,
             mean: Math.round(mean * 100) / 100,
-            p50: Math.round(getPercentile(50) * 100) / 100,
-            p95: Math.round(getPercentile(95) * 100) / 100,
-            p99: Math.round(getPercentile(99) * 100) / 100,
-            stdDev: Math.round(stdDev * 100) / 100,
+            p50: round(distribution.p50),
+            p95: round(distribution.p95),
+            p99: round(distribution.p99),
+            stdDev: round(distribution.stdDev),
+            distributionComplete: distribution.distributionComplete,
         };
     }
 
@@ -363,7 +371,7 @@ export class MetricsService {
             metricName: string;
         }> = [];
 
-        // Query each metric table
+        const failures: string[] = [];
         for (const table of tables) {
             const metricType = this.extractMetricType(table.table_name);
 
@@ -391,10 +399,16 @@ export class MetricsService {
                     });
                 });
             } catch (error) {
+                failures.push(table.table_name);
                 this.logger.warn(
                     `Failed to query ${table.table_name}: ${(error as Error).message}`,
                 );
             }
+        }
+
+        if (failures.length) {
+            throw new ServiceUnavailableException({ message: 'Metric inventory is incomplete.',
+                failedTables: failures, successfulTables: tables.length - failures.length });
         }
 
         // Apply pagination to combined results
@@ -495,19 +509,10 @@ export class MetricsService {
       SELECT
         ScopeName,
         ScopeVersion,
-        arrayMap(
-          x -> (
-            'metricName': MetricName,
-            'metricDescription': MetricDescription,
-            'metricUnit': MetricUnit,
-            'count': Count,
-            'sum': Sum,
-            'min': Min,
-            'max': Max,
-            'avg': Sum / Count
-          ),
-          groupArray(MetricName)
-        ) AS metrics
+        groupArray(tuple(
+          MetricName, MetricDescription, MetricUnit, Count, Sum, Min, Max,
+          if(Count = 0, null, Sum / Count)
+        )) AS metrics
       FROM otel_metrics_histogram
       ${this.clickhouseService.buildTenantFilter(scope, ['ServiceName = {serviceName:String}']).where}
       GROUP BY ScopeName, ScopeVersion
@@ -635,8 +640,7 @@ export class MetricsService {
         count() AS total_measurements,
         uniqExact(ScopeName) AS unique_scopes,
         min(TimeUnix) AS earliest_timestamp,
-        max(TimeUnix) AS latest_timestamp,
-        avg(Sum / Count) AS overall_avg_value
+        max(TimeUnix) AS latest_timestamp
       FROM otel_metrics_histogram
       ${this.clickhouseService.buildTenantFilter(scope, ['ServiceName = {serviceName:String}']).where}
     `;
@@ -647,7 +651,6 @@ export class MetricsService {
             unique_scopes: number;
             earliest_timestamp: string;
             latest_timestamp: string;
-            overall_avg_value: number;
         }>(scope, query, { serviceName });
 
         return result || {};
@@ -657,13 +660,15 @@ export class MetricsService {
      * Get metric names available for a service
      */
     async getAvailableMetrics(scope: TenantScope, serviceName: string) {
+        const isolation = this.clickhouseService.buildTenantFilter(scope, ['ServiceName = {serviceName:String}']);
         const query = `
-      SELECT DISTINCT
-        MetricName,
-        MetricDescription,
-        MetricUnit
-      FROM otel_metrics_histogram
-      ${this.clickhouseService.buildTenantFilter(scope, ['ServiceName = {serviceName:String}']).where}
+      SELECT DISTINCT MetricName, MetricDescription, MetricUnit FROM (
+        SELECT MetricName, MetricDescription, MetricUnit FROM otel_metrics_gauge ${isolation.where}
+        UNION ALL
+        SELECT MetricName, MetricDescription, MetricUnit FROM otel_metrics_sum ${isolation.where}
+        UNION ALL
+        SELECT MetricName, MetricDescription, MetricUnit FROM otel_metrics_histogram ${isolation.where}
+      )
       ORDER BY MetricName
     `;
 
@@ -737,7 +742,7 @@ export class MetricsService {
         total_bytes,
         total_rows
       FROM system.tables
-      WHERE database = 'default'
+      WHERE database = currentDatabase()
       ORDER BY name
     `;
 
@@ -760,7 +765,7 @@ export class MetricsService {
         total_bytes,
         total_rows
       FROM system.tables
-      WHERE database = 'default' AND name LIKE '%metric%'
+      WHERE database = currentDatabase() AND name LIKE '%metric%'
       ORDER BY name
     `;
 
@@ -970,9 +975,7 @@ export class MetricsService {
         try {
             return JSON.parse(jsonString);
         } catch (error) {
-            this.logger.warn(
-                `Failed to parse JSON: ${jsonString.substring(0, 100)} - ${(error as Error).message}`,
-            );
+            this.logger.warn(`Failed to parse metric attribute JSON (${jsonString.length} characters): ${(error as Error).name}`);
             return null;
         }
     }

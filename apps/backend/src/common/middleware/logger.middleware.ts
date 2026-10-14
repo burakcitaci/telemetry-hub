@@ -8,7 +8,7 @@ export class LoggerMiddleware {
   use = (req: Request, res: Response, next: NextFunction) => {
     const state: TelemetryContext = {};
     runTelemetryContext(state, () => {
-    const { method, originalUrl, ip } = req;
+    const { method, path, ip } = req;
 
     res.on('finish', () => runTelemetryContext(state, () => {
       const { statusCode } = res;
@@ -17,7 +17,7 @@ export class LoggerMiddleware {
         'INFO',
         {
           method,
-          url: originalUrl,
+          url: path,
           status: statusCode,
           ip,
         },

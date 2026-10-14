@@ -44,7 +44,8 @@ export class FiltersController {
     if (source === 'monitors') {
       const from = Date.parse(window.from!), to = Date.parse(window.to!);
       const monitors = listFilteredMonitors(this.store, scope);
-      return [...new Set(monitors.filter(m => Date.parse(m.updatedAt) >= from && Date.parse(m.updatedAt) <= to)
+      return [...new Set(monitors.filter(m => typeof m.lastEvaluatedAt === 'string'
+        && Date.parse(m.lastEvaluatedAt) >= from && Date.parse(m.lastEvaluatedAt) <= to)
         .map(m => String(m.isMuted ? 'Muted' : m.status || 'Unknown')))].sort();
     }
     if (!['traces', 'logs', 'services'].includes(source)) return [];

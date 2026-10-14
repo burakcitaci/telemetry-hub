@@ -4,12 +4,12 @@ import type {
   ReadableSpan, Span, SpanExporter, SpanProcessor,
 } from '@opentelemetry/sdk-trace-base';
 import type { ExportResult } from '@opentelemetry/core';
-import { telemetryScopeForTrace, telemetryServiceTeam } from './tenant-context';
+import { telemetryScopeForSpan, telemetryServiceTeam } from './tenant-context';
 
 const owners = new WeakMap<object, Attributes>();
 
 function spanOwner(span: ReadableSpan): Attributes | undefined {
-  const scope = telemetryScopeForTrace(span.spanContext().traceId);
+  const scope = telemetryScopeForSpan(span);
   const org = scope?.tenantSlug ?? span.resource.attributes['org.slug'];
   if (typeof org !== 'string' || !org) return undefined;
   const service = String(span.resource.attributes['service.name'] ?? '');

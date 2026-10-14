@@ -59,9 +59,13 @@ spec:
             - name: clickhouse-data
               mountPath: /var/lib/clickhouse
       volumes:
-        # The local demo intentionally discards telemetry when the pod is removed.
         - name: clickhouse-data
+          {{- if .Values.clickhouse.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ .Values.clickhouse.name }}-data
+          {{- else }}
           emptyDir: {}
+          {{- end }}
       {{- with .Values.clickhouse.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}

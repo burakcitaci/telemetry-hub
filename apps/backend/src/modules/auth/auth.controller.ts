@@ -11,7 +11,10 @@ export class AuthController {
 
   @Post('logout')
   @UseGuards(TenantJwtGuard)
-  logout(@Res({ passthrough: true }) response: Response) {
+  logout(@Req() request: Request, @Res({ passthrough: true }) response: Response) {
+    const tenantRequest = request as TenantRequest;
+    this.auth.logout({ tenantSlug: tenantRequest.tenant, role: tenantRequest.userRole,
+      teamId: tenantRequest.userTeam, sub: tenantRequest.authSubject, version: tenantRequest.authVersion });
     response.clearCookie(AUTH_COOKIE, { httpOnly: true, secure: true, sameSite: 'lax', path: '/' });
     return { success: true };
   }
@@ -19,9 +22,10 @@ export class AuthController {
   @Post('login')
   async login(
     @Body() credentials: LoginDto,
+    @Req() request: Request,
     @Res({ passthrough: true }) response: Response,
   ) {
-    const { token, session } = await this.auth.login(credentials);
+    const { token, session } = await this.auth.login(credentials, request.ip);
     response.cookie(AUTH_COOKIE, token, {
       httpOnly: true,
       secure: true,
