@@ -38,7 +38,7 @@ export default function LoginPage() {
       <MetricCard className="w-full max-w-sm rounded-sm border border-border bg-card p-6 text-card-foreground shadow-2xl shadow-black/10 dark:shadow-black/30">
         <div className="mb-6 flex items-start justify-between gap-3">
           <div className="flex items-center gap-3">
-            <span className="flex size-9 items-center justify-center rounded-sm bg-purple-600 text-white">
+            <span className="flex size-9 items-center justify-center rounded-sm bg-brand text-brand-foreground">
               <Activity className="size-4" aria-hidden="true" />
             </span>
             <div>

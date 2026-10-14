@@ -91,7 +91,7 @@ export function AppSidebar() {
                 onClick={closeMobileSidebar}
                 aria-label="Telemetry Hub metrics"
               >
-                <span className="flex aspect-square size-7 items-center justify-center rounded-md bg-purple-600 text-white">
+                <span className="flex aspect-square size-7 items-center justify-center rounded-md bg-brand text-brand-foreground">
                   <Activity className="size-4" />
                 </span>
                 <span className="grid min-w-0 flex-1 text-left leading-tight">
@@ -197,7 +197,7 @@ export function MobileAppSidebar() {
         aria-label="Telemetry Hub traces"
         title="Telemetry Hub"
       >
-        <span className="flex size-8 items-center justify-center rounded-md bg-purple-600 text-white">
+        <span className="flex size-8 items-center justify-center rounded-md bg-brand text-brand-foreground">
           <Activity className="size-4" aria-hidden="true" />
         </span>
       </Link>
