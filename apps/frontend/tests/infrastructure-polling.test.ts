@@ -29,14 +29,14 @@ test("polling serializes requests, pauses in background, preserves stale snapsho
       });
     if (fail) throw new Error("Cluster offline");
     return {
-      data: [
-        {
+      data: { collectedAt: "2026-10-14T10:00:00.000Z", metricsAvailable: true,
+        nodes: [{
           id: "node",
           hostname: "node",
           status: "ok",
-          metrics: { cpu: 45, ram: 72, disk: 0 },
+          metrics: { cpu: 45, ram: 72, disk: null },
         },
-      ],
+      ], namespaces: [], workloads: [], pods: [], services: [] },
       status: 200,
       statusText: "OK",
       headers: {},
@@ -46,7 +46,7 @@ test("polling serializes requests, pauses in background, preserves stale snapsho
   let snapshots = 0;
   let error: string | null = null;
   const stop = startPolling({
-    hosts: () => {
+    snapshot: () => {
       snapshots += 1;
     },
     updatedAt: () => {},

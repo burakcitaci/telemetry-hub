@@ -5,6 +5,11 @@ ingestion:
 backend:
   name: backend
   replicaCount: 1
+  serviceAccount:
+    create: true
+    name: backend
+  rbac:
+    create: true
   authSecretName: backend-auth
   persistence:
     enabled: true

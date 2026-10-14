@@ -5,7 +5,8 @@
 - [x] TASK-PRE.1: Graphify precheck identifies App routing, ThemeProvider and the shared Axios client as integration points.
 - [x] Reuse React/Vite, Tailwind theme variables and Radix tooltips; no new runtime dependencies.
 - [x] Admin-only navigation at `/org/:tenant/infrastructure`, matching the cluster-wide backend access rule.
-- [x] Slim Total Hosts / OK / Warn / Alert bar and dense 24px square host map with 4px gaps.
+- [x] Compact resource totals and dense 24px square host map with 4px gaps.
+- [x] Namespace-filtered Workloads, Pods/Containers and Services inventory tables.
 - [x] Mouse hover and keyboard focus tooltips; buttons expose status and selection without relying on color alone.
 - [x] Responsive host details: CPU and Memory use 3px progress bars; Disk and Network explicitly remain unavailable.
 - [x] Three-second polling through the existing authenticated API client, single in-flight request, cleanup cancellation, hidden-tab pause and stale-snapshot warning.
@@ -13,9 +14,13 @@
 
 ## Data contract
 
-Uses the bare array from `GET /api/v1/infrastructure/status`: `id`, `hostname`, `status`, `metrics.cpu`, `metrics.ram`, `metrics.disk`. No seed data, generated history, or synthetic sparklines are introduced.
+Uses the cluster snapshot from `GET /api/v1/infrastructure/status`. It renders
+real Nodes, Namespaces, Workloads, Pods/Containers and Services without seed
+data, generated history, or synthetic sparklines.
 
-The backend returns zero CPU/RAM when Kubernetes metrics are unavailable, so the UI documents that ambiguity. Disk zero is a placeholder, not a disk measurement. Network is absent from the contract. Those two detail rows display an em dash with the reason rather than inventing values. Tenant telemetry filters do not scope this cluster-wide operator view.
+Unavailable CPU, RAM and disk values are `null` and render as unobserved. Network
+is absent from the contract. Tenant telemetry filters do not scope this
+cluster-wide operator view.
 
 The dashboard inherits the global light/dark/system theme, including tooltip surfaces and status text. The three host-map colors are scoped to the feature, as requested; dark glyphs stay readable in both themes. Selection follows UID; removed hosts fall back to the first available host and an empty snapshot clears the details.
 
@@ -31,3 +36,12 @@ Run workspace typechecks, the monorepo build, frontend tests, and `git diff --ch
 - [x] `git diff --check`: no whitespace errors.
 - [x] Graphify updated: 1,652 nodes / 4,322 edges, including 28 infrastructure frontend source nodes. Community names were mechanically refreshed after the community set changed; no semantic extraction was performed for this document.
 - [ ] Live browser and Kubernetes end-to-end verification (requires a running backend/cluster and an admin session).
+
+## TASK-INFRA-UI-2 — Dashboard hierarchy
+
+- [x] Replace the host map with a compact Node Overview card and polling-based CPU/Memory sparklines.
+- [x] Use a responsive 70/30 core/details layout with sticky Host Details.
+- [x] Consolidate Workloads, Pods and Services into one namespace-filtered tabbed table.
+- [x] Remove nested horizontal scrolling and truncate long resource names.
+- [x] Expand workload details from link-styled names instead of adding columns.
+- [x] Keep missing Metrics API guidance inside Host Details.

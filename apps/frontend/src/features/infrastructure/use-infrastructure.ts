@@ -1,28 +1,28 @@
 import { useEffect, useState } from "react";
 import { fetchInfrastructure } from "./api";
-import type { InfrastructureHost } from "./model";
+import { EMPTY_INFRASTRUCTURE, type InfrastructureSnapshot } from "./model";
 
 export const INFRASTRUCTURE_POLL_MS = 3_000;
 
 export function useInfrastructure(enabled: boolean) {
-  const [hosts, setHosts] = useState<InfrastructureHost[]>([]);
+  const [snapshot, setSnapshot] = useState<InfrastructureSnapshot>(EMPTY_INFRASTRUCTURE);
   const [updatedAt, setUpdatedAt] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     if (!enabled) return;
     return startPolling({
-      hosts: setHosts,
+      snapshot: setSnapshot,
       updatedAt: setUpdatedAt,
       error: setError,
       loading: setLoading,
     });
   }, [enabled]);
-  return { hosts, updatedAt, error, loading };
+  return { snapshot, updatedAt, error, loading };
 }
 
 interface PollUpdates {
-  hosts: (hosts: InfrastructureHost[]) => void;
+  snapshot: (snapshot: InfrastructureSnapshot) => void;
   updatedAt: (time: number) => void;
   error: (error: string | null) => void;
   loading: (loading: boolean) => void;
@@ -55,9 +55,9 @@ export function startPolling(updates: PollUpdates) {
 
 async function refresh(updates: PollUpdates, signal: AbortSignal) {
   try {
-    const hosts = await fetchInfrastructure(signal);
+    const snapshot = await fetchInfrastructure(signal);
     if (signal.aborted) return;
-    updates.hosts(hosts);
+    updates.snapshot(snapshot);
     updates.updatedAt(Date.now());
     updates.error(null);
   } catch {

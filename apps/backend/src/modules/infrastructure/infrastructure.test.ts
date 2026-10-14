@@ -1,7 +1,7 @@
 import 'reflect-metadata';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { mapNode, quantity } from './infrastructure.model';
+import { mapNamespace, mapNode, mapPod, mapService, mapWorkload, quantity } from './infrastructure.model';
 import type { V1Node } from '@kubernetes/client-node';
 import { InfrastructureService } from './infrastructure.service';
 import { KubernetesService } from './kubernetes.service';
@@ -12,10 +12,16 @@ const node: V1Node = {
     conditions: [{ type: 'Ready', status: 'True' }] },
 };
 
+const inventoryClient = (overrides: Record<string, unknown> = {}) => ({
+  nodes: async () => [node], metrics: async () => [], namespaces: async () => [],
+  pods: async () => [], services: async () => [],
+  workloads: async () => ({ deployments: [], statefulSets: [], daemonSets: [] }), ...overrides,
+});
+
 test('maps real quantities to host percentages and combines readiness, pressure and thresholds', () => {
   const usage = { metadata: { name: 'worker-1' }, usage: { cpu: '1800000000n', memory: '5898240Ki' } };
   assert.deepEqual(mapNode(node, usage), {
-    id: 'node-uid', hostname: 'worker-1', status: 'ok', metrics: { cpu: 45, ram: 70, disk: 0 },
+    id: 'node-uid', hostname: 'worker-1', status: 'ok', metrics: { cpu: 45, ram: 70, disk: null },
   });
   assert.equal(mapNode(node, { ...usage, usage: { cpu: '3200m', memory: '1Gi' } }).status, 'warning');
   assert.equal(mapNode(node, { ...usage, usage: { cpu: '3.8', memory: '1Gi' } }).status, 'critical');
@@ -24,17 +30,31 @@ test('maps real quantities to host percentages and combines readiness, pressure 
   assert.equal(mapNode({ ...node, status: { conditions: [
     { type: 'Ready', status: 'True' }, { type: 'DiskPressure', status: 'True' },
   ] } }).status, 'warning');
-  assert.deepEqual(mapNode(node).metrics, { cpu: 0, ram: 0, disk: 0 });
+  assert.deepEqual(mapNode(node).metrics, { cpu: null, ram: null, disk: null });
   assert.equal(quantity('1e3'), 1000);
   assert.equal(quantity('250m'), 0.25);
   assert.equal(quantity('invalid'), 0);
+});
+
+test('maps namespaces, workloads, pods, containers and services truthfully', () => {
+  assert.equal(mapNamespace({ metadata: { name: 'demo' }, status: { phase: 'Active' } }).status, 'ok');
+  const pod = mapPod({ metadata: { uid: 'pod-1', name: 'api', namespace: 'demo' },
+    spec: { containers: [{ name: 'api', image: 'api:v1' }], nodeName: 'worker-1' },
+    status: { phase: 'Running', containerStatuses: [{ name: 'api', image: 'api:v1', imageID: 'sha256:x',
+      ready: true, restartCount: 2, started: true, state: { running: { startedAt: new Date() } } }] } });
+  assert.deepEqual(pod.containers[0], { name: 'api', image: 'api:v1', ready: true, restarts: 2, state: 'running' });
+  assert.equal(pod.status, 'ok');
+  assert.equal(mapWorkload({ metadata: { name: 'api', namespace: 'demo' }, spec: { replicas: 2 },
+    status: { readyReplicas: 1, availableReplicas: 1 } }, 'Deployment').status, 'warning');
+  assert.deepEqual(mapService({ metadata: { name: 'api', namespace: 'demo' },
+    spec: { type: 'ClusterIP', clusterIP: '10.0.0.1', ports: [{ port: 80, protocol: 'TCP' }] } }).ports, ['80/TCP']);
 });
 
 test('polling shares an in-flight refresh and expires the cache after 2.5 seconds', async () => {
   let now = 10_000, calls = 0;
   const original = Date.now;
   Date.now = () => now;
-  const client = { nodes: async () => { calls++; return [node]; }, metrics: async () => [] };
+  const client = inventoryClient({ nodes: async () => { calls++; return [node]; } });
   const service = new InfrastructureService(client as KubernetesService);
   try {
     const result = await Promise.all([service.status(), service.status(), service.status()]);
@@ -51,10 +71,12 @@ test('polling shares an in-flight refresh and expires the cache after 2.5 second
 
 test('Kubernetes failures return 503 and are briefly cached instead of repeatedly hitting the API', async () => {
   let calls = 0;
-  const client = { nodes: async () => { calls++; throw new Error('connection refused'); }, metrics: async () => [] };
+  const cause = new Error('connection refused');
+  const client = inventoryClient({ nodes: async () => { calls++; throw cause; } });
   const service = new InfrastructureService(client as KubernetesService);
   for (let index = 0; index < 2; index++) {
-    await assert.rejects(service.status(), (error: any) => error.getStatus() === 503);
+    await assert.rejects(service.status(), (error: any) =>
+      error.getStatus() === 503 && error.cause === cause);
   }
   assert.equal(calls, 1);
 });

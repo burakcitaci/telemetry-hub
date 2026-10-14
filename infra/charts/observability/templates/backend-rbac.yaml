@@ -1,0 +1,43 @@
+{{- if .Values.backend.serviceAccount.create }}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Values.backend.serviceAccount.name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "observability.resourceLabels" (dict "root" . "name" .Values.backend.name "component" "api") | nindent 4 }}
+{{- end }}
+{{- if .Values.backend.rbac.create }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ printf "%s-%s-infrastructure-reader" .Release.Name .Values.backend.name }}
+  labels:
+    {{- include "observability.resourceLabels" (dict "root" . "name" .Values.backend.name "component" "api") | nindent 4 }}
+rules:
+  - apiGroups: [""]
+    resources: ["nodes", "namespaces", "pods", "services"]
+    verbs: ["get", "list"]
+  - apiGroups: ["apps"]
+    resources: ["deployments", "statefulsets", "daemonsets"]
+    verbs: ["get", "list"]
+  - apiGroups: ["metrics.k8s.io"]
+    resources: ["nodes"]
+    verbs: ["get", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ printf "%s-%s-infrastructure-reader" .Release.Name .Values.backend.name }}
+  labels:
+    {{- include "observability.resourceLabels" (dict "root" . "name" .Values.backend.name "component" "api") | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ printf "%s-%s-infrastructure-reader" .Release.Name .Values.backend.name }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ .Values.backend.serviceAccount.name }}
+    namespace: {{ .Release.Namespace }}
+{{- end }}

@@ -10,7 +10,7 @@ import { TransformInterceptor } from '../dist/common/interceptors/transform.inte
 import { AuthModule } from '../dist/modules/auth/auth.module.js';
 import { hashPassword } from '../dist/modules/auth/password.js';
 
-test('infrastructure HTTP route enforces auth and admin access and returns the bare cached host array', async () => {
+test('infrastructure HTTP route enforces auth and admin access and returns the cached cluster snapshot', async () => {
   const password = 'integration-password';
   const passwordHash = await hashPassword(password);
   const settings = {
@@ -30,6 +30,9 @@ test('infrastructure HTTP route enforces auth and admin access and returns the b
     nodes: async () => { calls++; return [{ metadata: { uid: 'real-node-uid', name: 'worker' },
       status: { capacity: { cpu: '4', memory: '8Gi' }, conditions: [{ type: 'Ready', status: 'True' }] } }]; },
     metrics: async () => [{ metadata: { name: 'worker' }, usage: { cpu: '1800m', memory: '6Gi' } }],
+    namespaces: async () => [{ metadata: { name: 'demo' }, status: { phase: 'Active' } }],
+    pods: async () => [], services: async () => [],
+    workloads: async () => ({ deployments: [], statefulSets: [], daemonSets: [] }),
   });
   await app.listen(0, '127.0.0.1');
   const base = await app.getUrl();
@@ -50,8 +53,12 @@ test('infrastructure HTTP route enforces auth and admin access and returns the b
     const response = await status(admin);
     assert.equal(response.status, 200);
     assert.equal(response.headers.get('cache-control'), 'private, no-store');
-    assert.deepEqual(await response.json(), [{ id: 'real-node-uid', hostname: 'worker',
-      status: 'ok', metrics: { cpu: 45, ram: 75, disk: 0 } }]);
+    const body = await response.json() as any;
+    assert.deepEqual(body.nodes, [{ id: 'real-node-uid', hostname: 'worker',
+      status: 'ok', metrics: { cpu: 45, ram: 75, disk: null } }]);
+    assert.deepEqual(body.namespaces, [{ name: 'demo', phase: 'Active', status: 'ok' }]);
+    assert.deepEqual(body.workloads, []); assert.deepEqual(body.pods, []); assert.deepEqual(body.services, []);
+    assert.equal(body.metricsAvailable, true); assert.match(body.collectedAt, /^\d{4}-/);
     await status(admin);
     assert.equal(calls, 1);
   } finally { await app.close(); }

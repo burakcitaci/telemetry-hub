@@ -12,6 +12,6 @@ cd "$REPO_ROOT"
 # Node invokes kubectl directly, avoiding MSYS path conversion of container paths.
 node infra/kind/migrate-platform-store.mjs
 
-bash infra/kind/load-backend.sh
+bash infra/kind/load-backend.sh "$@"
 kubectl --context "$KUBE_CONTEXT" rollout restart deployment/backend --namespace "$NAMESPACE"
 kubectl --context "$KUBE_CONTEXT" rollout status deployment/backend --namespace "$NAMESPACE" --timeout=3m

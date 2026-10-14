@@ -89,6 +89,12 @@ After changing backend code, rebuild, load, restart, and wait for the new pod:
 yarn cluster:reload-backend
 ```
 
+To force a clean Docker rebuild without using cached layers:
+
+```bash
+yarn cluster:reload-backend:no-cache
+```
+
 After changing Helm templates or values, deploy the chart and reload the backend:
 
 ```bash
