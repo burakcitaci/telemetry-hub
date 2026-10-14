@@ -66,7 +66,7 @@ export async function browserFixture() {
           if (!/^\/(?:org\/|does-not-exist|$)/.test(req.url.split("?")[0])) return next();
           try {
             const html = await vite.transformIndexHtml(req.url,
-              `<!doctype html><div id="root"></div><script type="module" src="/@fs/${entry}"></script>`);
+              `<!doctype html><meta name="viewport" content="width=device-width, initial-scale=1"><div id="root"></div><script type="module" src="/@fs/${entry}"></script>`);
             res.setHeader("Content-Type", "text/html");
             res.end(html);
           } catch (error) { next(error); }

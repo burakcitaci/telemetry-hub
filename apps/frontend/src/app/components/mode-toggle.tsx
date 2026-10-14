@@ -2,8 +2,24 @@ import { Moon, Sun, Monitor } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from '@/app/components/theme-provider';
 
-export function ModeToggle() {
+export function ModeToggle({ compact = false }: { compact?: boolean }) {
   const { theme, resolvedTheme, setTheme } = useTheme();
+
+  if (compact) {
+    const nextTheme = resolvedTheme === "dark" ? "light" : "dark";
+    return (
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={() => setTheme(nextTheme)}
+        title={`Switch to ${nextTheme} mode`}
+        aria-label="Toggle color theme"
+        className="size-8 text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+      >
+        {resolvedTheme === "dark" ? <Sun className="size-4" /> : <Moon className="size-4" />}
+      </Button>
+    );
+  }
 
   return (
     <div className="flex items-center gap-0.5 bg-muted dark:bg-slate-800 rounded-lg p-1 border border-input dark:border-slate-700">

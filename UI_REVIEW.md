@@ -1900,7 +1900,8 @@ Remaining work is explicit:
 - Historical trace search: blocked-on-backend and deferred, not solved by frontend filtering.
 - FE-B2: absent-time fallback is implemented by FE-A3; stale-age policy/real evaluation timestamps remain deferred to the next approved pass.
 - FE-B3 complete: the global logout action and its failure message now use the shell's English UI language; verified by the existing auth-reset browser path.
-- FE-B4/B5/B6 and the promoted login-theme part of FE-C2: deferred until their individual Phase B commits. Historic-range trace drilldown remains backend-dependent.
+- FE-B4 complete: compact theme controls remain reachable in the collapsed desktop sidebar and the mobile rail; both responsive paths have browser coverage.
+- FE-B5/B6 and the promoted login-theme part of FE-C2: deferred until their individual Phase B commits. Historic-range trace drilldown remains backend-dependent.
 - FE-C1, organization help in FE-C2, FE-C4 audit and FE-C5: deferred until Phase C approval. FE-C4's common prefix-matching logic is already covered by FE-A4; do not implement it twice.
 - FE-C3 unit correction: invalid as stated; no concrete FacetQueryBar unit defect was identified in the review.
 - Other approved-list review items remain deferred: live-log pause, visible stream state, monitor rule preview, inert Services/Monitors time controls, separate CSV/Filter false affordances, log severity text, hostname search, authoring labels, missing service summary, dirty-draft dismissal, unsupported coverage icons and stray service-heading 12.

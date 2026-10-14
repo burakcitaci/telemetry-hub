@@ -170,6 +170,9 @@ export function AppSidebar() {
           <div className="group-data-[collapsible=icon]:hidden">
             <ModeToggle />
           </div>
+          <div className="hidden group-data-[collapsible=icon]:block">
+            <ModeToggle compact />
+          </div>
           <SidebarTrigger className="shrink-0" />
         </div>
       </SidebarFooter>
@@ -242,6 +245,9 @@ export function MobileAppSidebar() {
           );
         })}
       </nav>
+      <div className="flex justify-center border-t border-sidebar-border py-2">
+        <ModeToggle compact />
+      </div>
     </aside>
   );
 }
