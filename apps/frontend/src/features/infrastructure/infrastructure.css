@@ -88,6 +88,22 @@
   gap: 4px;
   align-content: start;
 }
+
+.infra-host-search {
+  height: 2rem;
+  margin-bottom: 0.5rem;
+  max-width: 18rem;
+  font-size: 0.75rem;
+}
+
+.infra-host-tile.is-match {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+.infra-host-tile.is-dimmed {
+  opacity: 0.28;
+}
 .infra-host-tile {
   width: 24px;
   height: 24px;

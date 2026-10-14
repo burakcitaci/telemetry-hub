@@ -1,5 +1,5 @@
 import { StatusBadge as TelemetryStatusBadge } from '@/components/shared/telemetry-primitives';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/features/auth/auth-context';
 import {
@@ -648,8 +648,9 @@ export const MonitorForm: React.FC<{
   error?: string | null;
   initial?: MonitorView | null;
   onCancel: () => void;
+  onDirtyChange: (dirty: boolean) => void;
   onSave: (draft: Partial<MonitorView>) => void;
-}> = ({ initial, onCancel, onSave, pending, error }) => {
+}> = ({ initial, onCancel, onDirtyChange, onSave, pending, error }) => {
   const { session } = useAuth();
   const [params] = useSearchParams();
   const [teamId, setTeamId] = useState(initial?.teamId ?? params.get('team') ?? '');
@@ -676,6 +677,47 @@ export const MonitorForm: React.FC<{
   const [targets, setTargets] = useState<Set<NotificationTarget>>(
     new Set(initial?.targets ?? ['slack']),
   );
+
+  const initialSnapshot = useState(() =>
+    JSON.stringify({
+      teamId,
+      service,
+      env,
+      type,
+      name,
+      query,
+      aggregation,
+      groupBy,
+      comparator,
+      threshold,
+      warnThreshold,
+      evaluationWindow,
+      message,
+      targets: [...targets].sort(),
+    }),
+  )[0];
+  const draftSnapshot = JSON.stringify({
+    teamId,
+    service,
+    env,
+    type,
+    name,
+    query,
+    aggregation,
+    groupBy,
+    comparator,
+    threshold,
+    warnThreshold,
+    evaluationWindow,
+    message,
+    targets: [...targets].sort(),
+  });
+  useEffect(() => {
+    onDirtyChange(draftSnapshot !== initialSnapshot);
+  }, [draftSnapshot, initialSnapshot, onDirtyChange]);
+
+  const comparatorLabel = comparator.replaceAll('_', ' ');
+  const rulePreview = `${aggregation} of ${query.trim() || 'your query'} is ${comparatorLabel} ${threshold || '…'} over ${evaluationWindow || '…'}`;
 
   const canSave = name.trim() && query.trim() && threshold.trim();
 
@@ -746,12 +788,12 @@ export const MonitorForm: React.FC<{
           <CardContent className="pt-4 space-y-3">
             <div className="grid grid-cols-1 gap-3 md:grid-cols-[160px_1fr]">
               <div>
-                <label className="mb-1.5 block text-xs font-medium">Type</label>
+                <label htmlFor="monitor-type" className="mb-1.5 block text-xs font-medium">Type</label>
                 <Select
                   value={type}
                   onValueChange={(v) => setType(v as MonitorType)}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger id="monitor-type">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -762,8 +804,9 @@ export const MonitorForm: React.FC<{
                 </Select>
               </div>
               <div>
-                <label className="mb-1.5 block text-xs font-medium">Name</label>
+                <label htmlFor="monitor-name" className="mb-1.5 block text-xs font-medium">Name</label>
                 <Input
+                  id="monitor-name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder={
@@ -784,7 +827,7 @@ export const MonitorForm: React.FC<{
           </CardHeader>
           <CardContent className="space-y-3">
             <div>
-              <label className="mb-1.5 block text-xs font-medium">
+              <label htmlFor="monitor-query" className="mb-1.5 block text-xs font-medium">
                 {type === 'metric'
                   ? 'Metric query'
                   : type === 'log'
@@ -792,6 +835,7 @@ export const MonitorForm: React.FC<{
                     : 'Query'}
               </label>
               <Input
+                id="monitor-query"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder={
@@ -854,16 +898,21 @@ export const MonitorForm: React.FC<{
             <CardTitle className="text-sm">Alert condition</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
+            <div className="rounded-md border border-border bg-muted/30 p-3" role="status">
+              <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Rule preview</p>
+              <p className="mt-1 text-xs font-medium">{rulePreview}</p>
+            </div>
             <div className="flex flex-wrap items-end gap-2">
               <span className="pb-2 text-xs text-muted-foreground">
                 Trigger when the value is
               </span>
               <div className="w-40">
+                <label htmlFor="monitor-comparator" className="sr-only">Comparator</label>
                 <Select
                   value={comparator}
                   onValueChange={(v) => setComparator(v as Comparator)}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger id="monitor-comparator">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -880,6 +929,8 @@ export const MonitorForm: React.FC<{
               </div>
               <div className="w-40">
                 <Input
+                  id="monitor-threshold"
+                  aria-label="Alert threshold"
                   type="number"
                   value={threshold}
                   onChange={(e) => setThreshold(e.target.value)}
@@ -889,6 +940,8 @@ export const MonitorForm: React.FC<{
               <span className="pb-2 text-xs text-muted-foreground">over</span>
               <div className="w-28">
                 <Input
+                  id="monitor-window"
+                  aria-label="Evaluation window"
                   value={evaluationWindow}
                   onChange={(e) => setEvaluationWindow(e.target.value)}
                   placeholder="5m"
@@ -899,13 +952,14 @@ export const MonitorForm: React.FC<{
 
             <div className="flex flex-wrap items-end gap-3 border-t pt-3">
               <div className="w-40">
-                <label className="mb-1.5 block text-xs font-medium">
+                <label htmlFor="monitor-warn-threshold" className="mb-1.5 block text-xs font-medium">
                   Warn threshold{' '}
                   <span className="text-muted-foreground font-normal">
                     (optional)
                   </span>
                 </label>
                 <Input
+                  id="monitor-warn-threshold"
                   type="number"
                   value={warnThreshold}
                   onChange={(e) => setWarnThreshold(e.target.value)}
@@ -923,10 +977,11 @@ export const MonitorForm: React.FC<{
           </CardHeader>
           <CardContent className="space-y-3">
             <div>
-              <label className="mb-1.5 block text-xs font-medium">
+              <label htmlFor="monitor-message" className="mb-1.5 block text-xs font-medium">
                 Message
               </label>
               <Textarea
+                id="monitor-message"
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 rows={4}

@@ -17,6 +17,8 @@ export function useLogs() {
   const [error, setError] = useState<string | null>(null);
 
   const [selectedLog, setSelectedLog] = useState<LogRecord | null>(null);
+  const [paused, setPaused] = useState(false);
+  const pausedRef = useRef(false);
 
   const {
     env,
@@ -66,7 +68,7 @@ export function useLogs() {
 
   const handleStreamEvent = useCallback(
     (event: TelemetryEvent) => {
-      if (event.type === 'update' && event.logsChanged) {
+      if (!pausedRef.current && event.type === 'update' && event.logsChanged) {
         void loadLogs();
       }
     },
@@ -74,6 +76,15 @@ export function useLogs() {
   );
 
   const connected = useTelemetryStream(handleStreamEvent);
+
+  const setStreamPaused = useCallback(
+    (nextPaused: boolean) => {
+      pausedRef.current = nextPaused;
+      setPaused(nextPaused);
+      if (!nextPaused) void loadLogs();
+    },
+    [loadLogs],
+  );
 
   const services = useMemo(
     () =>
@@ -133,6 +144,8 @@ export function useLogs() {
     setSearchQuery,
     loadLogs,
     connected,
+    paused,
+    setStreamPaused,
     services,
     facetOptions,
     filteredLogs,

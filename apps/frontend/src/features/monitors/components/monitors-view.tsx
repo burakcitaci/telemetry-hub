@@ -78,6 +78,15 @@ export function MonitorsView({
   detailVisible,
 }: MonitorsViewProps) {
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [formDirty, setFormDirty] = useState(false);
+  const closeDetail = () => {
+    if (creating && formDirty && !window.confirm('Discard unsaved monitor changes?')) {
+      return;
+    }
+    setFormDirty(false);
+    setOpenId(null);
+    setCreating(false);
+  };
   return (
     <FeaturePage>
       {/* Header */}
@@ -128,6 +137,7 @@ export function MonitorsView({
               size="sm"
               className="gap-1.5"
               onClick={() => {
+                setFormDirty(false);
                 setCreating(true);
                 setOpenId(null);
               }}
@@ -270,6 +280,7 @@ export function MonitorsView({
                   {monitors.length === 0 && (
                     <Button
                       onClick={() => {
+                        setFormDirty(false);
                         setCreating(true);
                         setOpenId(null);
                       }}
@@ -286,6 +297,7 @@ export function MonitorsView({
                     series={seriesById[m.id] ?? { points: [], threshold: 0 }}
                     onToggleMute={handleToggleMute}
                     onOpen={(id) => {
+                      setFormDirty(false);
                       setOpenId(id);
                       setCreating(false);
                     }}
@@ -300,10 +312,7 @@ export function MonitorsView({
           <Sheet
             open={detailVisible}
             onOpenChange={(open) => {
-              if (!open) {
-                setOpenId(null);
-                setCreating(false);
-              }
+              if (!open) closeDetail();
             }}
           >
             <SheetContent
@@ -327,7 +336,8 @@ export function MonitorsView({
                   initial={openMonitor}
                   pending={saving}
                   error={error}
-                  onCancel={() => setCreating(false)}
+                  onCancel={closeDetail}
+                  onDirtyChange={setFormDirty}
                   onSave={handleSave}
                 />
               ) : openMonitor ? (
@@ -335,9 +345,12 @@ export function MonitorsView({
                   monitor={openMonitor}
                   datadogMonitor={datadogForOpen}
                   events={events[openMonitor.id] ?? []}
-                  onClose={() => setOpenId(null)}
+                  onClose={closeDetail}
                   onToggleMute={handleToggleMute}
-                  onEdit={() => setCreating(true)}
+                  onEdit={() => {
+                    setFormDirty(false);
+                    setCreating(true);
+                  }}
                 />
               ) : null}
             </SheetContent>

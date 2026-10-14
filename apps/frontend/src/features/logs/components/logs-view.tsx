@@ -30,6 +30,8 @@ export function LogsView({
   setSearchQuery,
   loadLogs,
   connected,
+  paused,
+  setStreamPaused,
   filteredLogs,
 }: LogsViewProps) {
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -43,6 +45,8 @@ export function LogsView({
         actions={
           <TelemetryActions
             connected={connected}
+            paused={paused}
+            onPausedChange={setStreamPaused}
             loading={loading}
             onRefresh={() => void loadLogs()}
             label="Refresh logs"

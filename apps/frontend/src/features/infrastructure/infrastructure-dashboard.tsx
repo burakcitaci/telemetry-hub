@@ -1,4 +1,5 @@
-import { memo, useState } from "react";
+import { memo, useEffect, useMemo, useState } from "react";
+import { Input } from "@/components/ui/input";
 import {
   Tooltip,
   TooltipContent,
@@ -27,7 +28,22 @@ export function InfrastructureDashboard({
   updatedAt,
 }: DashboardProps) {
   const [selectedId, selectHost] = useState<string | null>(null);
+  const [hostQuery, setHostQuery] = useState("");
   const selected = selectedHost(hosts, selectedId);
+  const matchingIds = useMemo(() => {
+    const query = hostQuery.trim().toLowerCase();
+    if (!query) return new Set<string>();
+    return new Set(
+      hosts
+        .filter((host) => host.hostname.toLowerCase().includes(query))
+        .map((host) => host.id),
+    );
+  }, [hostQuery, hosts]);
+
+  useEffect(() => {
+    const firstMatch = matchingIds.values().next().value;
+    if (firstMatch) selectHost(firstMatch);
+  }, [matchingIds]);
   return (
     <section
       className="infrastructure-dashboard"
@@ -50,9 +66,18 @@ export function InfrastructureDashboard({
             <span>HOST MAP</span>
             <span>COLOR BY STATUS</span>
           </div>
+          <Input
+            aria-label="Search hosts"
+            placeholder="Search hostname…"
+            value={hostQuery}
+            onChange={(event) => setHostQuery(event.target.value)}
+            className="infra-host-search"
+          />
           <HostMap
             hosts={hosts}
             selectedId={selected?.id}
+            matchingIds={matchingIds}
+            queryActive={hostQuery.trim().length > 0}
             onSelect={selectHost}
           />
           {!hosts.length && (
@@ -128,10 +153,14 @@ function CountBar({ hosts }: Pick<DashboardProps, "hosts">) {
 function HostMap({
   hosts,
   selectedId,
+  matchingIds,
+  queryActive,
   onSelect,
 }: {
   hosts: InfrastructureHost[];
   selectedId?: string;
+  matchingIds: Set<string>;
+  queryActive: boolean;
   onSelect: (id: string) => void;
 }) {
   return (
@@ -142,6 +171,8 @@ function HostMap({
             key={host.id}
             host={host}
             selected={host.id === selectedId}
+            matches={matchingIds.has(host.id)}
+            dimmed={queryActive && !matchingIds.has(host.id)}
             onSelect={onSelect}
           />
         ))}
@@ -154,10 +185,14 @@ const HostTile = memo(
   function HostTile({
     host,
     selected,
+    matches,
+    dimmed,
     onSelect,
   }: {
     host: InfrastructureHost;
     selected: boolean;
+    matches: boolean;
+    dimmed: boolean;
     onSelect: (id: string) => void;
   }) {
     return (
@@ -165,7 +200,7 @@ const HostTile = memo(
         <TooltipTrigger asChild>
           <button
             type="button"
-            className={`infra-host-tile status-${host.status}`}
+            className={`infra-host-tile status-${host.status}${matches ? " is-match" : ""}${dimmed ? " is-dimmed" : ""}`}
             aria-pressed={selected}
             aria-label={`${host.hostname}: ${STATUS_LABELS[host.status]}, CPU ${host.metrics.cpu == null ? "unobserved" : host.metrics.cpu + "%"}, RAM ${host.metrics.ram == null ? "unobserved" : host.metrics.ram + "%"}`}
             onClick={() => onSelect(host.id)}
@@ -191,6 +226,8 @@ const HostTile = memo(
   },
   (previous, next) =>
     previous.selected === next.selected &&
+    previous.matches === next.matches &&
+    previous.dimmed === next.dimmed &&
     previous.onSelect === next.onSelect &&
     previous.host.hostname === next.host.hostname &&
     previous.host.status === next.host.status &&

@@ -94,6 +94,7 @@ test("API parser rejects malformed or duplicate resources", () => {
 
 test("dashboard renders compact accessible host controls and honest metric placeholders", () => {
   const html = renderToStaticMarkup(<InfrastructureDashboard hosts={hosts} />);
+  assert.match(html, /aria-label="Search hosts"/);
   assert.match(html, /Total Hosts/);
   assert.equal((html.match(/class="infra-host-tile/g) ?? []).length, 3);
   assert.match(html, /aria-pressed="true"/);
