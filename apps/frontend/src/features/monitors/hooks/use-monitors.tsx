@@ -34,8 +34,6 @@ export function useMonitors() {
 
   const [typeFilter, setTypeFilter] = useState<Set<MonitorType>>(new Set());
 
-  const [timeRange, setTimeRange] = useState('24h');
-
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(() => {
     if (typeof window === 'undefined') return true;
     return window.localStorage.getItem(SIDEBAR_STORAGE_KEY) !== 'collapsed';
@@ -229,8 +227,6 @@ export function useMonitors() {
     setStatusFilter,
     typeFilter,
     setTypeFilter,
-    timeRange,
-    setTimeRange,
     sidebarOpen,
     setSidebarOpen,
     setOpenId,

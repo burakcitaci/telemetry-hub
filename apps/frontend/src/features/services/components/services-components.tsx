@@ -1,4 +1,4 @@
-import { Activity, LayoutList, ExternalLink, GitBranch } from 'lucide-react';
+import { LayoutList, ExternalLink, GitBranch } from 'lucide-react';
 import type { ColumnDef } from '@tanstack/react-table';
 import { Link, useLocation } from 'react-router-dom';
 import { DataTableColumnHeader } from '@/shared/components/data-table';
@@ -49,18 +49,6 @@ export const columns: ColumnDef<ServiceRow>[] = [
       <DataTableColumnHeader column={column} title="REPO" />
     ),
     cell: () => <GitBranch className="h-4 w-4 text-muted-foreground" />,
-  },
-  {
-    accessorKey: 'Telemetry',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="TELEMETRY" />
-    ),
-    cell: () => (
-      <div className="flex gap-1">
-        <Activity className="h-4 w-4 text-primary" />
-        <Activity className="h-4 w-4 text-primary" />
-      </div>
-    ),
   },
   {
     accessorKey: 'MetadataSource',

@@ -26,15 +26,15 @@ function LogTraceLink({ traceId }: { traceId: string }) {
 }
 
 export function severityBadge(severity: string) {
-  const normalized = severity.toUpperCase();
+  const normalized = severity.toUpperCase() || "UNKNOWN";
   if (normalized === "ERROR" || normalized === "FATAL") {
-    return <Badge className="rotate-90" variant="destructive"></Badge>;
+    return <Badge variant="destructive">{normalized}</Badge>;
   }
   if (normalized === "WARN" || normalized === "WARNING") {
-    return <Badge className="rotate-90" variant="warning"></Badge>;
+    return <Badge variant="warning">{normalized}</Badge>;
   }
-  if (normalized === "INFO") return <Badge className="rotate-90" variant="info"></Badge>;
-  return <Badge className="rotate-90" variant="secondary"></Badge>;
+  if (normalized === "INFO") return <Badge variant="info">{normalized}</Badge>;
+  return <Badge variant="secondary">{normalized}</Badge>;
 }
 
 export const columns: ColumnDef<LogRecord>[] = [

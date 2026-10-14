@@ -30,8 +30,6 @@ import {
 import {
   AlertCircle,
   ArrowLeft,
-  Download,
-  Filter,
   Info,
   PanelLeft,
   RefreshCw,
@@ -577,14 +575,6 @@ export function MetricsView({
                     {tableRows.length} rows
                   </span>
                 </CardTitle>
-                <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm" className="gap-1.5">
-                    <Filter className="h-3.5 w-3.5" /> Filter
-                  </Button>
-                  <Button variant="outline" size="sm" className="gap-1.5">
-                    <Download className="h-3.5 w-3.5" /> CSV
-                  </Button>
-                </div>
               </FeaturePanelHeader>
               <CardContent>
                 {tableRows.length ? (

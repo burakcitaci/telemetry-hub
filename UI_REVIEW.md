@@ -1908,7 +1908,7 @@ Remaining work is explicit:
 - FE-C2b complete: the tenant field explains which organization slug is expected and exposes that help through `aria-describedby`.
 - FE-C5 complete: Services uses one search control and distinguishes a query with no matches from a genuinely empty ingestion result. FE-C4 is already covered by FE-A4 and will not be implemented twice.
 - FE-C3 unit correction: invalid as stated; no concrete FacetQueryBar unit defect was identified in the review.
-- Other approved-list review items remain deferred: live-log pause, visible stream state, monitor rule preview, inert Services/Monitors time controls, separate CSV/Filter false affordances, log severity text, hostname search, authoring labels, missing service summary, dirty-draft dismissal, unsupported coverage icons and stray service-heading 12.
+- Remaining approved-list items are: live-log pause, visible stream state, monitor rule preview, hostname search, authoring labels, and dirty-draft dismissal. Inert Services/Monitors time controls, CSV/Filter false affordances, unreadable log severity badges, unsupported service coverage icons, and the stray service-heading text are resolved.
 
 Protect unchanged: infrastructure themes/stale snapshots/unsupported Disk and Network, nested spans and raw/attribute evidence, native service links, facet keyboard controls, destructive confirmations, pending-save guards, compact density and the existing token/font/icon system.
 

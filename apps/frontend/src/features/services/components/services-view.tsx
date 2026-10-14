@@ -16,7 +16,6 @@ import {
 import { AppFilterSidebar } from '@/components/shared/app-filter-sidebar';
 import { columns } from './services-components';
 import type { useServices } from '../hooks/use-services';
-import { useTelemetryQuery } from '@/shared/hooks/use-telemetry-query';
 import type { ServiceRow } from '../model';
 
 type ServicesViewProps = ReturnType<typeof useServices>;
@@ -42,14 +41,11 @@ export function ServicesView({
   setSearchQuery,
 }: ServicesViewProps) {
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const { timeRange, setTimeRange, env } = useTelemetryQuery();
   const filteredRows = filterServiceRows(rows, searchQuery);
   return (
     <FeaturePage>
       <FeatureHeader
         title="Services"
-        timeRange={timeRange}
-        onTimeRangeChange={setTimeRange}
         onFiltersOpen={() => setFiltersOpen(true)}
         actions={
           <>

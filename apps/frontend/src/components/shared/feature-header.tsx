@@ -11,8 +11,8 @@ export interface FeatureHeaderProps {
   description?: ReactNode;
   children?: ReactNode;
   actions?: ReactNode;
-  timeRange: TimeRangeProps["value"];
-  onTimeRangeChange: TimeRangeProps["onChange"];
+  timeRange?: TimeRangeProps["value"];
+  onTimeRangeChange?: TimeRangeProps["onChange"];
   className?: string;
   onFiltersOpen?: () => void;
 }
@@ -49,7 +49,9 @@ export function FeatureHeader({
       )}
       <div className="ml-auto flex max-w-full min-w-0 flex-wrap items-center justify-end gap-2">
         {actions}
-        <TimeRangePicker value={timeRange} onChange={onTimeRangeChange} />
+        {timeRange && onTimeRangeChange && (
+          <TimeRangePicker value={timeRange} onChange={onTimeRangeChange} />
+        )}
         {onFiltersOpen && (
           <Button
             variant="ghost"

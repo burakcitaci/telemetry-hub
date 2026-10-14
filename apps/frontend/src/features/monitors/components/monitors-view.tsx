@@ -30,7 +30,6 @@ import {
   SheetTitle,
   SheetDescription,
 } from '@/components/ui/sheet';
-import { TimeRangePicker } from '@/app/components/timer-range.picker';
 import {
   MonitorType,
   statusBg,
@@ -60,8 +59,6 @@ export function MonitorsView({
   setStatusFilter,
   typeFilter,
   setTypeFilter,
-  timeRange,
-  setTimeRange,
   sidebarOpen,
   setSidebarOpen,
   setOpenId,
@@ -126,7 +123,6 @@ export function MonitorsView({
         }
         actions={
           <>
-            <TimeRangePicker value={timeRange} onChange={setTimeRange} />
             <Button
               variant="outline"
               size="sm"

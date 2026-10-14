@@ -103,7 +103,7 @@ function ServiceDetailPage() {
             </Button>
             <div className="flex items-center gap-3">
               <h1 className="text-2xl font-semibold tracking-tight">{serviceName}</h1>
-        12      <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary text-secondary-foreground">
+              <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary text-secondary-foreground">
                 {currentMetadata.type}
               </span>
             </div>
