@@ -29,6 +29,10 @@ api.defaults.adapter = async (config) => {
     request_count: null, error_count: null, avg_duration: null,
     p50_duration: 0, p95_duration: null, p99_duration: null,
   };
+  else if (config.url?.startsWith("/services")) data = [
+    { ServiceName: "api" },
+    { ServiceName: "worker" },
+  ];
   else if (config.url?.startsWith("/service-metadata")) data = [];
   else if (config.url?.startsWith("/admin/users")) {
     if (scenario === "admin-loading") await new Promise((resolve) => setTimeout(resolve, 500));

@@ -1,6 +1,7 @@
-import { Activity } from 'lucide-react';
+import { Activity, SearchX } from 'lucide-react';
 import { useState } from 'react';
 import { FeatureHeader } from '@/components/shared/feature-header';
+import { Button } from '@/components/ui/button';
 import { QueryError, ViewSkeleton } from '@/components/shared/view-skeleton';
 import { DataTable } from '@/shared/components/data-table';
 import { FeatureRefreshButton } from '@/shared/components/feature-actions';
@@ -16,8 +17,20 @@ import { AppFilterSidebar } from '@/components/shared/app-filter-sidebar';
 import { columns } from './services-components';
 import type { useServices } from '../hooks/use-services';
 import { useTelemetryQuery } from '@/shared/hooks/use-telemetry-query';
+import type { ServiceRow } from '../model';
 
 type ServicesViewProps = ReturnType<typeof useServices>;
+
+function filterServiceRows(rows: ServiceRow[], query: string) {
+  const normalizedQuery = query.trim().toLowerCase();
+  if (!normalizedQuery) return rows;
+
+  return rows.filter((row) =>
+    Object.values(row).some((value) =>
+      String(value).toLowerCase().includes(normalizedQuery),
+    ),
+  );
+}
 
 export function ServicesView({
   services,
@@ -30,6 +43,7 @@ export function ServicesView({
 }: ServicesViewProps) {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const { timeRange, setTimeRange, env } = useTelemetryQuery();
+  const filteredRows = filterServiceRows(rows, searchQuery);
   return (
     <FeaturePage>
       <FeatureHeader
@@ -74,19 +88,7 @@ export function ServicesView({
                 onRetry={loadServices}
                 isRetrying={loading}
               />
-            ) : rows.length > 0 ? (
-              <DataTable
-                columns={columns}
-                data={rows}
-                searchPlaceholder="Search for services"
-                searchValue={searchQuery}
-                onSearchChange={setSearchQuery}
-                enableRowSelection={false}
-                enableColumnVisibility={false}
-                enablePagination
-                pageSize={20}
-              />
-            ) : (
+            ) : rows.length === 0 ? (
               <FeatureEmptyState>
                 <Activity className="h-8 w-8 text-muted-foreground" />
                 <div>
@@ -96,6 +98,31 @@ export function ServicesView({
                     ingestion endpoint.
                   </p>
                 </div>
+              </FeatureEmptyState>
+            ) : filteredRows.length > 0 ? (
+              <DataTable
+                columns={columns}
+                data={filteredRows}
+                enableSearch={false}
+                enableRowSelection={false}
+                enableColumnVisibility={false}
+                enablePagination
+                pageSize={20}
+              />
+            ) : (
+              <FeatureEmptyState>
+                <SearchX className="h-8 w-8 text-muted-foreground" />
+                <div>
+                  <p className="font-medium">
+                    No services match “{searchQuery.trim()}”
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Try a different service, team, repository, or type.
+                  </p>
+                </div>
+                <Button variant="outline" onClick={() => setSearchQuery('')}>
+                  Clear search
+                </Button>
               </FeatureEmptyState>
             )}
           </FeaturePanel>

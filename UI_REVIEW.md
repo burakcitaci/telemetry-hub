@@ -1906,7 +1906,7 @@ Remaining work is explicit:
 - FE-B6 complete: Admin has a distinct initial skeleton, recoverable load errors, and retry keeps the mounted form and entered values intact.
 - FE-C1 complete: the intentional purple identity color now comes from a shared semantic brand token without changing its visual hue.
 - FE-C2b complete: the tenant field explains which organization slug is expected and exposes that help through `aria-describedby`.
-- FE-C5: deferred to its Phase C audit. FE-C4 is already covered by FE-A4 and will not be implemented twice.
+- FE-C5 complete: Services uses one search control and distinguishes a query with no matches from a genuinely empty ingestion result. FE-C4 is already covered by FE-A4 and will not be implemented twice.
 - FE-C3 unit correction: invalid as stated; no concrete FacetQueryBar unit defect was identified in the review.
 - Other approved-list review items remain deferred: live-log pause, visible stream state, monitor rule preview, inert Services/Monitors time controls, separate CSV/Filter false affordances, log severity text, hostname search, authoring labels, missing service summary, dirty-draft dismissal, unsupported coverage icons and stray service-heading 12.
 
