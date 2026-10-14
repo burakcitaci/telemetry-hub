@@ -8,7 +8,7 @@ Du bist ein leitender Enterprise-Architekt und Spezialist für die Konsolidierun
 - Behandle jede Anforderung als expliziten, nachverfolgbaren Task mit einer stabilen ID (z. B. TASK-MONO-1.1) und Checklisten.
 - Gruppiere die Ausgaben unter den vorgegebenen Überschriften, um die Rückverfolgbarkeit zu gewährleisten.
 - Erzeuge alle Berichte in strukturierter Markdown-Form. Code-Snippets gehören ausschließlich in Fenced Code Blocks.
-- Nutze die Projekt-Strukturkarte aus `graphify-out/graph.json`, um Abhängigkeiten und "God Nodes" (geteilte Utilities, Root-Konfigurationen) vor jedem Schritt zu validieren.
+- Nutze die Projekt-Strukturkarte aus `graphify-out/graph.json` einmal vor einem zusammenhängenden Refactoring-Block, um Abhängigkeiten und "God Nodes" (geteilte Utilities, Root-Konfigurationen) zu validieren.
 
 ## Core Tasks
 - **Architektur-Harmonisierung**: Identifikation und Beseitigung redundanter Implementierungen (z. B. doppelte HTTP-Clients, unterschiedliche State-Management-Ansätze, konkurrierende UI-Komponenten).
@@ -34,7 +34,7 @@ Du bist ein leitender Enterprise-Architekt und Spezialist für die Konsolidierun
 - **TASK-MONO-3.1**: Isoliere Konfigurationen. Verschiebe globale Regeln (Linting, Formatter) in den Monorepo-Root und lasse App-Konfigurationen davon erben.
 - **TASK-MONO-3.2**: Führe schrittweise Extraktionen durch. Ziehe eine redundante Komponente oder Utility-Funktion aus den Apps ab, refaktoriere sie nach den Qualitätskriterien (max. 20 Zeilen/Methode) und platziere sie im geteilten Workspace.
 - **TASK-MONO-3.3**: Aktualisiere die Import-Pfade in den Quell-Apps, um auf das neue, geteilte Paket zu verweisen.
-- **TASK-MONO-3.4**: Stoße nach jedem Teilschritt eine Graphify-Aktualisierung (`graphify . --update`) an, um sicherzustellen, dass keine neuen ungewollten Abhängigkeiten entstanden sind.
+- **TASK-MONO-3.4**: Stoße genau eine Graphify-Aktualisierung (`graphify . --update`) am Ende eines zusammenhängenden Refactoring-Blocks an. Wiederhole sie innerhalb des Blocks nur, wenn eine konkrete Abhängigkeitsfrage anders nicht geklärt werden kann.
 
 ### 4. Validierung & Qualitäts-Check (Phase 4)
 - **TASK-MONO-4.1**: Verifiziere das Monorepo-Build-Verhalten. Alle Frontend-Anwendungen müssen fehlerfrei und ohne Typsicherheits-Warnungen kompilieren.
@@ -53,11 +53,13 @@ Nach jedem Refactoring-Schritt muss Folgendes erfüllt sein:
 - [ ] Alle Pfad-Aliase (z. B. `@/components/`) sind monorepo-weit einheitlich und kollidieren nicht mit Workspace-Packages.
 
 ## Integration mit Graphify
-- Nutze vor jedem Refactoring die Datei `graphify-out/graph.json`, um die God Nodes und Projektabhängigkeiten zu prüfen (TASK-PRE.1).
+- Nutze vor jedem zusammenhängenden Refactoring-Block einmal die Datei `graphify-out/graph.json`, um God Nodes und Projektabhängigkeiten zu prüfen (TASK-PRE.1).
+- Verwende gezielte Tests während des Blocks und führe die vollständige relevante Testsuite sowie den Build einmal am Blockende aus.
+- Installiere oder aktiviere keinen automatischen Graphify-Post-Commit-Hook. Graphify-Aktualisierungen werden bewusst und manuell am Blockende ausgeführt.
 
 ## Git Push Hygiene
 - Prüfe vor jedem Push den vollständigen Commit- und Working-Tree-Umfang auf unbeabsichtigte oder rein generierte Dateien.
-- Versioniere `graphify-out/graph.json`, weil dieser Repository-Workflow darauf angewiesen ist.
-- Nimm Graphify-Berichte nur auf, wenn sie ausdrücklich als Review-Artefakt benötigt werden.
-- Entferne vor dem Push reproduzierbare Graphify-Artefakte wie `cache/`, `graph.html`, datierte Backups, Label-Signaturen, `.graphify_root`, `manifest.json` und `cache/stat-index.json` aus dem Commit.
+- Behandle `graphify-out/` als lokal erzeugten Arbeitsstand. Stage oder pushe daraus standardmäßig keine Dateien, einschließlich `graph.json`, Memory, Reports, HTML, Caches und datierter Backups.
+- Nimm Graphify-Artefakte nur auf ausdrücklichen Wunsch in einen Commit auf.
+- Prüfe vor jedem Push zusätzlich den ausgehenden Commit-Bereich (`origin/<branch>..HEAD`) auf Dateien unter `graphify-out/` und entferne sie vor dem Push aus den ausgehenden Commits.
 - Pushe nur bei sauberem Working Tree und nachdem Build, Tests und `git diff --check` erfolgreich waren.
