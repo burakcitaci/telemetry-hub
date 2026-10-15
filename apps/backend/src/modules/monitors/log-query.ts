@@ -1,3 +1,5 @@
+// FROZEN — bugfixes only. New features go in signal-adapter.ts.
+// Delete after both inventoried monitors are explicitly migrated and legacy API compatibility is verified.
 import { BadRequestException } from '@nestjs/common';
 import type { MonitorDto } from '../auth/dto/monitor.dto';
 
