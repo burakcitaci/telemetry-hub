@@ -238,3 +238,38 @@ Example canonical request (POST /api/monitors):
 Status/history metadata is available through GET /api/monitors/:id/status and GET /api/alerts?monitor_id=:id&limit=50. Canonical request fields remain canonical in responses; list responses add legacy display aliases for existing consumers. Authoring unified rules uses the JSON contract, not the existing legacy form contract. Legacy event IDs are unique within their organization/monitor tuple, not guaranteed globally unique.
 
 This step changes application code and isolated test databases only; it does not deploy the application or upgrade the two running rules. On the next application deployment, history migration is lazy on first read and new writes use the single alert store. Rule upgrades still require explicit complete canonical PATCH requests. Review checkpoint: **pause before TASK-MON-3.f**.
+
+## TASK-MON-3.f — Monitoring configuration and self-instrumentation (2026-10-15)
+
+- [x] Committed the reviewed TASK-MON-3.e changes as **173894a**. Frontend edits and generated Graphify artifacts were excluded; no push or deployment was performed.
+- [x] TASK-PRE.1: inspected the existing graph's monitor/controller, shared store and tenant-context boundaries before the block. Existing global OTel Meter, Logger and Tracer providers remain the shared instrumentation entry points. No SDK bootstrap, exporter, ingestion path or signal schema was changed; no dependency was added.
+- [x] Expanded monitoring.config.ts with validated environment settings. Invalid numbers, timer overflow and unsupported notifier names fail during provider/service construction before the evaluation timers start. Retention retains its existing startup validation before the database is opened.
+- [x] Wired the configured initial delay and check interval into the existing scheduler. List-view overdue detection now follows three configured check intervals. Missing window_seconds on canonical create resolves to the configured default and is persisted explicitly; explicit windows and later rename-only PATCH operations retain their value. Null, zero, negative and string request windows remain invalid. Legacy request parsing is unchanged.
+- [x] Added a signal-independent MonitorObserver port with a quiet default for isolated evaluator tests. MonitoringTelemetry uses the already-wired global OTel APIs. Evaluation spans and structured logs carry monitor/event correlation IDs within a trusted per-evaluation tenant context, including API-triggered evaluations. Raw queries, monitor names and private database/notifier errors are excluded from self-instrumentation logs.
+- [x] Added evaluation and whole-cycle duration histograms in seconds, evaluation outcomes, evaluation-error counts, committed alert-transition counts and completed notification-attempt counts. Concurrent duplicate calls share one evaluation; losing configuration/runtime comparisons report STALE and cannot increment alert or delivery counters. Disabled/missing rules are skipped. NO_DATA, ERROR, CANCELLED and STALE remain distinguishable from successful evaluation. Suppressed notifications produce transition counts without delivery-attempt counts.
+- [x] Cardinality guard uses an independent literal instrument/key/value allowlist in the test. Permitted metric keys are only signal_type, outcome, state and status with closed enum values; cycle duration has no labels. Tenant IDs, monitor IDs, event IDs, names and queries never become metric labels. Metrics aggregate at the deployment resource; tenant correlation stays in logs/traces. New metric names or label keys require an explicit test allowlist update.
+- [x] HTTP integrations now use the production signalProviders wiring, replacing only ClickHouse access and the notifier with test doubles. Seven new source tests cover startup settings, notifier rejection, scheduler timing/shutdown, real SDK metric collection/allowlists, concurrent SQLite evaluation, failure paths and overlapping tenant contexts. One new HTTP test verifies configured/default/explicit/invalid windows and PATCH persistence.
+- [x] Full backend source and monitoring HTTP suite: **147/147 passed**. Backend and frontend production builds passed; frontend retains its existing large-chunk warning. git diff --check passed. Signal-query SQL was unchanged, so the real ClickHouse adapter fixtures from TASK-MON-3.b were not repeated.
+- [ ] Exactly one manual Graphify update was attempted at block end. The installed CLI again failed before extraction because 40 document files require an LLM backend that is not configured. The graph remains stale; no second update or automatic hook was run, and generated outputs remain outside commits.
+
+| Environment setting | Default | Contract |
+|---|---|---|
+| MONITOR_CHECK_INTERVAL_SECONDS | 30 | Positive integer, fitting a Node timer |
+| MONITOR_INITIAL_DELAY_SECONDS | 1 | Nonnegative integer, fitting a Node timer |
+| MONITOR_DEFAULT_WINDOW_SECONDS | 300 | Positive integer, representable Date range; applies only when omitted |
+| MONITOR_NOTIFIER | dummy | Only dummy is supported; other names fail startup |
+| MONITOR_ALERT_RETENTION_DAYS | 30 | Positive integer, representable cutoff |
+| MONITOR_ALERT_PRUNE_INTERVAL_SECONDS | 3600 | Positive integer, fitting a Node timer |
+
+| Metric | Unit / labels |
+|---|---|
+| monitoring.evaluation.duration | Seconds; signal_type |
+| monitoring.cycle.duration | Seconds; no labels |
+| monitoring.evaluations | Count; signal_type, outcome (OK/NO_DATA/ERROR/STALE/CANCELLED) |
+| monitoring.evaluation.errors | Count; signal_type |
+| monitoring.alerts | Count; signal_type, state (FIRING/RECOVERED) |
+| monitoring.notifications | Count; signal_type, status (SENT/FAILED) |
+
+Only persisted transitions count as alerts. Notification failures are separate from evaluation errors and do not replay transitions. Instrumentation uses the existing providers and their lifecycle; monitoring creates no exporter, reader or new SDK instance. Test-only MeterProvider instances collect metrics locally and are shut down after each test.
+
+Review checkpoint: **TASK-MON-3.f is uncommitted; pause before TASK-MON-3.g** (README and final integration/cutover verification). The two inventoried live legacy monitors have not been upgraded.

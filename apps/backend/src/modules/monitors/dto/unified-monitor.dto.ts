@@ -12,7 +12,7 @@ export class CreateMonitorDto {
   @IsIn(AGGREGATIONS) aggregation!: typeof AGGREGATIONS[number];
   @IsIn(COMPARATORS) comparator!: typeof COMPARATORS[number];
   @IsNumber() threshold!: number;
-  @IsInt() @Min(1) @Max(Math.floor(Number.MAX_SAFE_INTEGER / 1000)) window_seconds!: number;
+  @ValidateIf((_object, value) => value !== undefined) @IsInt() @Min(1) @Max(Math.floor(Number.MAX_SAFE_INTEGER / 1000)) window_seconds!: number;
   @ValidateIf((_object, value) => value !== undefined) @IsBoolean() enabled?: boolean;
   @IsOptional() @IsString() @MinLength(1) @MaxLength(255) metric_name?: string;
   @IsOptional() @IsString() @MinLength(1) @MaxLength(128) field?: string;

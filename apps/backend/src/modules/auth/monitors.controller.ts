@@ -21,12 +21,12 @@ class MonitorHistoryDto { @IsISO8601() from!: string; @IsISO8601() to!: string; 
 
 export class MonitorMuteDto { @IsBoolean() isMuted!: boolean; }
 
-export function listFilteredMonitors(store: PlatformStore, scope: TenantScope) {
+export function listFilteredMonitors(store: PlatformStore, scope: TenantScope, overdueAfterMs = 90_000) {
   const ownership = scope.teamFilter ? store.serviceOwnership(scope.tenantSlug, scope.teamFilter) : undefined;
   const teams = filterValues(scope.teamFilter), services = filterValues(scope.serviceFilter), envs = filterValues(scope.envFilter);
   const statuses = filterValues(scope.statusFilter);
   return store.monitors(scope.tenantSlug).map(monitorView).map(m => m.evaluationEnabled && m.lastEvaluatedAt
-    && Date.now() - Date.parse(m.lastEvaluatedAt) > 90_000
+    && Date.now() - Date.parse(m.lastEvaluatedAt) > overdueAfterMs
     ? { ...m, status: 'Unknown', evaluationError: 'Evaluation is overdue.' } : m).filter(m =>
     (!teams.length || (ownership?.assigned.includes(m.service)
       ? ownership.owned.includes(m.service) : teams.includes(m.teamId))) &&
@@ -43,7 +43,7 @@ export class MonitorsController {
     @Optional() private readonly evaluator?: MonitorEvaluatorService, @Optional() private readonly unified?: MonitoringService) {}
 
   @Get() list(@Tenant() scope: TenantScope) {
-    return listFilteredMonitors(this.store, scope);
+    return listFilteredMonitors(this.store, scope, this.evaluator?.overdueAfterMs);
   }
 
   @Post() create(@Tenant() scope: TenantScope, @Body(MonitorInputPipe) dto: MonitorDto | CreateMonitorDto) {

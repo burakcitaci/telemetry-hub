@@ -1,4 +1,5 @@
-import { BadRequestException, ConflictException, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Inject, Injectable, Logger, NotFoundException, Optional } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { randomUUID } from 'node:crypto';
 import { PlatformStore } from '../auth/platform-store.service';
 import { AdminService } from '../auth/admin.service';
@@ -11,12 +12,15 @@ import { validateMonitorInput } from './monitor-input.pipe';
 import { validateEvaluation } from './monitor-state';
 import { validateNotificationPolicy } from './notification-policy';
 import type { Monitor } from './monitor.model';
+import { monitoringConfig, type MonitoringConfig } from './monitoring.config';
 
 @Injectable()
 export class MonitoringService {
   private readonly logger = new Logger(MonitoringService.name);
+  private readonly settings: MonitoringConfig;
   constructor(private readonly store: PlatformStore, private readonly admin: AdminService,
-    private readonly adapters: SignalRegistry, @Inject(SIGNAL_EVALUATOR) private readonly evaluator: SignalEvaluator) {}
+    private readonly adapters: SignalRegistry, @Inject(SIGNAL_EVALUATOR) private readonly evaluator: SignalEvaluator,
+    @Optional() config: ConfigService = new ConfigService()) { this.settings = monitoringConfig(config); }
 
   async create(scope: TenantScope, dto: CreateMonitorDto): Promise<Monitor> {
     const configuration = await this.configuration(scope, dto);
@@ -54,6 +58,7 @@ export class MonitoringService {
 
   private async configuration(scope: TenantScope, input: unknown): Promise<CreateMonitorDto> {
     const dto = await validateMonitorInput(CreateMonitorDto, input);
+    dto.window_seconds ??= this.settings.defaultWindowSeconds;
     if (!dto.name.trim()) throw new BadRequestException('Monitor name must not be blank.');
     this.admin.assertTeam(scope.tenantSlug, dto.team_id ?? undefined);
     for (const key of ['field', 'metric_name', 'team_id', 'service', 'env', 'muted_until'] as const)

@@ -10,19 +10,16 @@ import { MonitorQueryService } from '../../dist/modules/monitors/monitor-query.s
 import { MonitoringService } from '../../dist/modules/monitors/monitoring.service.js';
 import { AlertsController } from '../../dist/modules/monitors/alerts.controller.js';
 import { AlertRetentionService } from '../../dist/modules/monitors/alert-retention.service.js';
-import { SignalEvaluator, SIGNAL_EVALUATOR } from '../../dist/modules/monitors/signal-evaluator.js';
-import { SignalRegistry } from '../../dist/modules/monitors/signal-registry.js';
 import { ClickhouseService } from '../../dist/modules/telemetry/services/clickhouse.service.js';
-import { LogAdapter } from '../../dist/modules/monitors/adapters/log.adapter.js';
-import { MetricAdapter } from '../../dist/modules/monitors/adapters/metric.adapter.js';
-import { TraceAdapter } from '../../dist/modules/monitors/adapters/trace.adapter.js';
 import { ValidationPipe } from '../../dist/common/pipes/validation.pipe.js';
 import { hashPassword } from '../../dist/modules/auth/password.js';
+import { signalProviders } from '../../dist/modules/monitors/monitors.module.js';
+import { MONITOR_NOTIFIER } from '../../dist/modules/monitors/notifier.js';
 
-export async function unifiedMonitorApp() {
+export async function unifiedMonitorApp(overrides: Record<string, unknown> = {}) {
   const password = 'monitor-http-password', passwordHash = await hashPassword(password);
   const settings = { AUTH_DB_PATH: ':memory:', AUTH_JWT_SECRET: 'unified-monitor-integration-secret-at-least-32',
-    AUTH_USERS_JSON: JSON.stringify(['demo', 'other'].map(tenantSlug => ({ tenantSlug, email: 'admin@example.com', role: 'admin', passwordHash }))) };
+    AUTH_USERS_JSON: JSON.stringify(['demo', 'other'].map(tenantSlug => ({ tenantSlug, email: 'admin@example.com', role: 'admin', passwordHash }))), ...overrides };
   const state = { value: 12, overflow: false, fail: false, queries: 0 };
   const notifications: any[] = [];
   const clickhouse = new ClickhouseService({ error() {} } as any, new ConfigService());
@@ -38,11 +35,8 @@ export async function unifiedMonitorApp() {
   class TestApplication {}
   Module({ imports: [ConfigModule.forRoot({ isGlobal: true, ignoreEnvFile: true, skipProcessEnv: true, load: [() => settings] }), AuthModule],
     controllers: [MonitorsController, AlertsController], providers: [MonitorEvaluatorService, MonitorQueryService, MonitoringService,
-      AlertRetentionService, { provide: ClickhouseService, useValue: clickhouse },
-      { provide: SignalRegistry, useFactory: () => new SignalRegistry(new Map<any, any>([
-        ['LOG', new LogAdapter(clickhouse)], ['METRIC', new MetricAdapter(clickhouse)], ['TRACE', new TraceAdapter(clickhouse)]])) },
-      { provide: SIGNAL_EVALUATOR, inject: [PlatformStore, SignalRegistry], useFactory: (store, registry) =>
-        new SignalEvaluator(store.monitorRepository, registry, { notify: async event => { notifications.push(event); } }, { now: () => new Date() }) },
+      AlertRetentionService, ...signalProviders, { provide: ClickhouseService, useValue: clickhouse },
+      { provide: MONITOR_NOTIFIER, useValue: { notify: async event => { notifications.push(event); } } },
     ] })(TestApplication);
   const app = await NestFactory.create(TestApplication, { logger: false });
   app.useGlobalPipes(new ValidationPipe()); await app.listen(0, '127.0.0.1');

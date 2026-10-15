@@ -6,6 +6,25 @@ import { unifiedMonitorApp } from './helpers/unified-monitor-app';
 const definition = { name: 'Unified monitor', signal_type: 'LOG', query: 'service.name:api',
   aggregation: 'COUNT', comparator: 'GT', threshold: 10, window_seconds: 300, enabled: false };
 
+test('HTTP create persists a configured default window and keeps explicit windows through PATCH', { timeout: 60000 }, async () => {
+  const f = await unifiedMonitorApp({ MONITOR_DEFAULT_WINDOW_SECONDS: '600' });
+  try {
+    const cookie = await f.login('demo');
+    const { window_seconds: _window, ...withoutWindow } = definition;
+    const created = await f.call('/monitors', 'POST', withoutWindow, cookie);
+    assert.equal(created.status, 201); const monitor = await created.json();
+    assert.equal(monitor.window_seconds, 600);
+    const renamed = await f.call(`/monitors/${monitor.id}`, 'PATCH', { name: 'Renamed' }, cookie);
+    assert.equal((await renamed.json()).window_seconds, 600);
+    const changed = await f.call(`/monitors/${monitor.id}`, 'PATCH', { window_seconds: 120 }, cookie);
+    assert.equal((await changed.json()).window_seconds, 120);
+    const explicit = await f.call('/monitors', 'POST', definition, cookie);
+    assert.equal((await explicit.json()).window_seconds, 300);
+    for (const window_seconds of [null, 0, -1, '300'])
+      assert.equal((await f.call('/monitors', 'POST', { ...definition, window_seconds }, cookie)).status, 400);
+  } finally { await f.app.close(); }
+});
+
 test('unified HTTP CRUD/status/history works across signals with strict bodies and organization boundaries', { timeout: 60000 }, async () => {
   const f = await unifiedMonitorApp();
   try {

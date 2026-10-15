@@ -5,6 +5,7 @@ import type { MonitorRepository } from './monitor.repository';
 import type { Notifier } from './notifier';
 import { alertTransition, failedEvaluation, successfulEvaluation, validateEvaluation } from './monitor-state';
 import { planNotification, validateNotificationPolicy } from './notification-policy';
+import { quietMonitorObserver, type MonitorObserver } from './monitor-observer';
 
 export const SIGNAL_EVALUATOR = 'MONITOR_SIGNAL_EVALUATOR';
 export interface AdapterRegistry { get(signal: SignalType): SignalAdapter; }
@@ -16,7 +17,8 @@ export class SignalEvaluator {
   constructor(private readonly repository: MonitorRepository, private readonly adapters: AdapterRegistry,
     private readonly notifier: Notifier, private readonly clock: Clock, private readonly id: () => string = randomUUID,
     private readonly notificationFailure: (event: AlertEvent) => void = event =>
-      console.error({ event: 'monitor.notification_failed', monitor_id: event.monitor_id, event_id: event.id })) {}
+      console.error({ event: 'monitor.notification_failed', monitor_id: event.monitor_id, event_id: event.id }),
+    private readonly observer: MonitorObserver = quietMonitorObserver) {}
 
   evaluate(org: string, id: string): Promise<Monitor | undefined> {
     if (this.stopped) return Promise.resolve(undefined);
@@ -36,12 +38,23 @@ export class SignalEvaluator {
   private async evaluateOnce(org: string, id: string): Promise<Monitor | undefined> {
     const monitor = this.repository.find(org, id);
     if (!monitor?.enabled) return monitor;
+    return this.observer.run(org, monitor, () => this.evaluateMonitor(org, monitor));
+  }
+
+  private async evaluateMonitor(org: string, monitor: Monitor): Promise<Monitor | undefined> {
     const runtime = await this.measure(org, monitor);
-    if (this.stopped) return this.repository.find(org, id);
+    if (this.stopped) {
+      this.observer.evaluated(monitor, 'CANCELLED'); return this.repository.find(org, monitor.id);
+    }
     const planned = planNotification(monitor, runtime, alertTransition(monitor, runtime, this.id), this.clock.now().toISOString());
-    if (!this.repository.commitEvaluation(org, monitor, planned.runtime, planned.event)) return this.repository.find(org, id);
+    if (!this.repository.commitEvaluation(org, monitor, planned.runtime, planned.event)) {
+      this.observer.evaluated(monitor, 'STALE'); return this.repository.find(org, monitor.id);
+    }
+    if (planned.event) this.observer.transition(planned.event);
     if (planned.event?.notification?.status === 'PENDING') await this.notify(org, planned.event);
-    return this.repository.find(org, id);
+    const result = this.repository.find(org, monitor.id);
+    this.observer.evaluated(monitor, runtime.operational_status);
+    return result;
   }
 
   private async measure(org: string, monitor: Monitor) {
@@ -63,6 +76,7 @@ export class SignalEvaluator {
     try { await this.notifier.notify(event); }
     catch { status = 'FAILED'; }
     this.repository.completeNotification(org, event.id, status, this.clock.now().toISOString());
+    this.observer.notification(event, status);
     if (status === 'FAILED') this.notificationFailure(event);
   }
 }

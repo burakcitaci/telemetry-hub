@@ -16,12 +16,23 @@ import { MonitoringService } from './monitoring.service';
 import { AlertsController } from './alerts.controller';
 import { AlertRetentionService } from './alert-retention.service';
 import type { SignalAdapter, SignalType } from './signal-adapter';
+import { ConfigService } from '@nestjs/config';
+import { monitoringConfig } from './monitoring.config';
+import { MonitoringTelemetry } from './monitoring.telemetry';
+import { MONITOR_NOTIFIER, type Notifier } from './notifier';
 
 export const signalProviders = [
+  { provide: MonitoringTelemetry, useFactory: () => new MonitoringTelemetry() },
+  { provide: MONITOR_NOTIFIER, inject: [ConfigService], useFactory: (config: ConfigService) => {
+    monitoringConfig(config); return new DummyNotifier();
+  } },
   { provide: SignalRegistry, inject: [ClickhouseService], useFactory: (clickhouse: ClickhouseService) =>
     new SignalRegistry(new Map<SignalType, SignalAdapter>([['LOG', new LogAdapter(clickhouse)], ['METRIC', new MetricAdapter(clickhouse)], ['TRACE', new TraceAdapter(clickhouse)]])) },
-  { provide: SIGNAL_EVALUATOR, inject: [PlatformStore, SignalRegistry], useFactory: (store: PlatformStore, adapters: SignalRegistry) =>
-    new SignalEvaluator(store.monitorRepository, adapters, new DummyNotifier(), { now: () => new Date() }) },
+  { provide: SIGNAL_EVALUATOR, inject: [PlatformStore, SignalRegistry, MONITOR_NOTIFIER, MonitoringTelemetry],
+    useFactory: (store: PlatformStore, adapters: SignalRegistry, notifier: Notifier, telemetry: MonitoringTelemetry) => {
+      return new SignalEvaluator(store.monitorRepository, adapters, notifier, { now: () => new Date() },
+        undefined, () => {}, telemetry);
+    } },
 ];
 
 @Module({ imports: [AuthModule, TelemetryModule], controllers: [MonitorsController, AlertsController],

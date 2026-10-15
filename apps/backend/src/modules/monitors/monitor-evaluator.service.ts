@@ -6,8 +6,10 @@ import { MonitorQueryService } from './monitor-query.service';
 import { overallState, type MonitorEvaluation, type MonitorGroup } from './monitor-rule';
 import { runTelemetryContext } from '../../common/telemetry/tenant-context';
 import { SIGNAL_EVALUATOR, type SignalEvaluator } from './signal-evaluator';
-
-export const MONITOR_POLL_MS = 30_000;
+import { ConfigService } from '@nestjs/config';
+import { performance } from 'node:perf_hooks';
+import { monitoringConfig, type MonitoringConfig } from './monitoring.config';
+import { MonitoringTelemetry } from './monitoring.telemetry';
 
 @Injectable()
 export class MonitorEvaluatorService implements OnModuleInit, OnModuleDestroy {
@@ -17,17 +19,23 @@ export class MonitorEvaluatorService implements OnModuleInit, OnModuleDestroy {
   private stopped = false;
   private running = false;
   private readonly pending = new Map<string, Promise<Record<string, any> | undefined>>();
+  private readonly settings: MonitoringConfig;
   constructor(private readonly store: PlatformStore, private readonly query: MonitorQueryService,
-    @Optional() @Inject(SIGNAL_EVALUATOR) private readonly signals?: SignalEvaluator) {
+    @Optional() @Inject(SIGNAL_EVALUATOR) private readonly signals?: SignalEvaluator,
+    @Optional() config: ConfigService = new ConfigService(),
+    @Optional() private readonly telemetry?: MonitoringTelemetry) {
+    this.settings = monitoringConfig(config);
     this.store.registerMonitorCleanup(() => this.onModuleDestroy());
   }
 
   onModuleInit(): void {
-    this.initial = setTimeout(() => void this.tick(), 1000);
+    this.initial = setTimeout(() => void this.tick(), this.settings.initialDelayMs);
     this.initial.unref();
-    this.timer = setInterval(() => void this.tick(), MONITOR_POLL_MS);
+    this.timer = setInterval(() => void this.tick(), this.settings.intervalMs);
     this.timer.unref();
   }
+
+  get overdueAfterMs(): number { return this.settings.intervalMs * 3; }
 
   async onModuleDestroy(): Promise<void> {
     this.stopped = true;
@@ -65,6 +73,7 @@ export class MonitorEvaluatorService implements OnModuleInit, OnModuleDestroy {
 
   private async tick(): Promise<void> {
     if (this.running || this.stopped) return;
+    const started = performance.now();
     this.running = true;
     try {
       for (const org of this.store.monitorOrganizations()) for (const id of this.store.monitorIds(org)) {
@@ -72,7 +81,7 @@ export class MonitorEvaluatorService implements OnModuleInit, OnModuleDestroy {
         await this.evaluate(org, id);
       }
     } catch { this.logger.error('Monitor evaluation cycle failed.'); }
-    finally { this.running = false; }
+    finally { this.running = false; this.telemetry?.cycle(started); }
   }
 
   private async evaluateOnce(org: string, id: string) {
