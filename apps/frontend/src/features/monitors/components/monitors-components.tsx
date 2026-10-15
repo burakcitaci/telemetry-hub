@@ -5,6 +5,7 @@ import { useAuth } from '@/features/auth/auth-context';
 import { api, unwrap } from '@/shared/api/client';
 import { monitorPayload } from '../api';
 import { MonitorHistoryChart } from './monitor-history-chart';
+import { MonitorConditionSummary } from './monitor-condition-summary';
 import { calculationLabels } from '../log-builder';
 import { displayLogQuery, resolveLogQuery } from '../log-query-input';
 import { TimeRangePicker } from '@/app/components/timer-range.picker';
@@ -18,11 +19,11 @@ import {
   Info,
   Pause,
   Play,
+  RefreshCw,
   Trash2,
   X,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import {
@@ -417,25 +418,23 @@ export const MonitorDetail: React.FC<{
 
   return (
     <div className="flex h-full flex-col">
-      <header className="flex shrink-0 flex-wrap items-start justify-between gap-3 border-b border-border bg-muted/20 px-5 py-4">
-        <div className="min-w-0">
+      <header className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-border bg-muted/20 px-5 py-3">
+        <div className="min-w-0 flex-1 basis-48">
           <div className="flex flex-wrap items-center gap-2">
-            <h2 className="truncate text-base font-semibold">{monitor.name}</h2>
+            <h2 className="truncate text-base font-semibold" title={monitor.name}>{monitor.name}</h2>
             <TypeBadge type={monitor.type} />
             <StatusBadge status={monitor.status} />
             {monitor.isMuted && <MutedBadge />}
           </div>
-          <p className="mt-1 text-xs text-muted-foreground break-all">
-            {monitor.query}
-          </p>
         </div>
-        <div className="flex shrink-0 items-center gap-1">
-          {onEvaluate && <Button variant="outline" size="sm" disabled={evaluating} onClick={onEvaluate}>
+        <div className="ml-auto flex max-w-full flex-wrap items-center gap-1">
+          {onEvaluate && <Button variant="outline" size="sm" className="h-8 px-2 text-xs" disabled={evaluating} onClick={onEvaluate}>
             {evaluating ? 'Evaluating…' : 'Evaluate now'}</Button>}
-          <Button variant="outline" size="sm" onClick={onEdit}>Edit</Button>
+          <Button variant="outline" size="sm" className="h-8 px-2 text-xs" onClick={onEdit}>Edit</Button>
           <Button
             variant="outline"
             size="sm"
+            className="h-8 px-2 text-xs"
             onClick={() => onToggleMute(monitor.id)}
           >
             {monitor.isMuted ? (
@@ -452,59 +451,19 @@ export const MonitorDetail: React.FC<{
         </div>
       </header>
 
-      <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4 space-y-4">
-        {/* Condition summary */}
-        <Card className="rounded-md shadow-none">
-          <CardHeader className="px-4 pt-4 pb-3">
-            <CardTitle className="text-sm">Condition</CardTitle>
-          </CardHeader>
-          <CardContent className="grid grid-cols-2 gap-3 text-xs">
-            <div className="col-span-2"><div className="text-muted-foreground">Query</div><div>{monitor.type === 'log' ? displayLogQuery(monitor.query, monitor.logAttribute) : monitor.query}</div></div>
-            <div>
-              <div className="text-muted-foreground">Trigger</div>
-              <div>
-                {calculationLabels[monitor.aggregation ?? 'count']} of {monitor.logAttribute ? monitor.logAttribute : monitor.metric ?? monitor.logSource ?? monitor.query}{' '}
-                {monitor.comparator.replace(/_/g, ' ')}{' '}
-                {formatNumber(monitor.threshold)}
-              </div>
-            </div>
-            <div>
-              <div className="text-muted-foreground">Evaluation window</div>
-              <div>{monitor.evaluationWindow}</div>
-            </div>
-            {!!monitor.groupBy?.length && <div>
-              <div className="text-muted-foreground">Group by</div>
-              <div>
-                {monitor.groupBy?.join(', ') || '—'}
-              </div>
-            </div>}
-            {monitor.warnThreshold !== undefined && (
-              <div>
-                <div className="text-muted-foreground">Warn threshold</div>
-                <div>
-                  {formatNumber(monitor.warnThreshold)}
-                </div>
-              </div>
-            )}
-            {!!monitor.targets.length && <div>
-              <div className="text-muted-foreground">Notify</div>
-              <div className="flex gap-1.5">
-                {monitor.targets.length
-                  ? monitor.targets.map((t) => (
-                      <TargetIcon key={t} target={t} />
-                    ))
-                  : '—'}
-              </div>
-            </div>}
-          </CardContent>
-        </Card>
+      <div className="min-h-0 flex-1 overflow-y-auto">
+        <MonitorConditionSummary monitor={monitor} />
 
         {/* Graph */}
-        <Card className="rounded-md shadow-none">
-          <CardHeader className="px-4 pt-4 pb-3">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <CardTitle className="text-sm">Evaluated data</CardTitle>
-              {onChartTimeRangeChange && <TimeRangePicker value={chartTimeRange} onChange={onChartTimeRangeChange} />}
+        <section aria-label="Evaluated data" className="border-b border-border px-5 py-3">
+            <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+              <h3 className="text-xs font-semibold">Evaluated data</h3>
+              <div className="ml-auto flex items-center gap-1">
+                {onChartTimeRangeChange && <TimeRangePicker className="[&>button]:h-7 [&>button]:px-2 [&>button]:text-xs" value={chartTimeRange} onChange={onChartTimeRangeChange} />}
+                <Button variant="ghost" size="icon" className="size-7" title="Refresh chart" aria-label="Refresh chart" disabled={historyLoading} onClick={() => setHistoryRefresh(value => value + 1)}><RefreshCw className="size-3.5" /></Button>
+              </div>
+            </div>
+            <div className="mb-2">
               <span className="text-xs text-muted-foreground">
                 now {fmtValue(lastValue)}
                 {series.unit ? ` ${series.unit}` : ''} · critical{' '}
@@ -514,12 +473,9 @@ export const MonitorDetail: React.FC<{
                   : ''}
               </span>
             </div>
-          </CardHeader>
-          <CardContent className="px-4 pb-4 pt-0">
-            <Button variant="ghost" size="sm" disabled={historyLoading} onClick={() => setHistoryRefresh(value => value + 1)}>Refresh chart</Button>
             {historyLoading ? <p className="py-8 text-center text-xs text-muted-foreground">Loading historical telemetry…</p>
               : historyError ? <p role="alert" className="py-8 text-xs text-destructive">{historyError}</p>
-              : <MonitorHistoryChart series={series} range={chartRange} bucketMs={historical?.bucketMs} />}
+              : <MonitorHistoryChart compact series={series} range={chartRange} bucketMs={historical?.bucketMs} />}
             <p role="note" className="mt-2 text-xs text-muted-foreground">
               {monitor.lastEvaluatedAt
                 ? `Last evaluated: ${new Date(monitor.lastEvaluatedAt).toLocaleString()}`
@@ -530,22 +486,20 @@ export const MonitorDetail: React.FC<{
               <li key={group.key} className="flex justify-between gap-2"><span>{group.labels.map(label => label || '(unset)').join(' / ') || 'All matching data'}</span>
                 <span>{group.value == null ? '—' : formatNumber(group.value)} {monitor.unit} · {group.status}</span></li>)}</ul>}
             <p className="mt-2 text-xs text-muted-foreground">State changes are recorded in-app. External notification delivery is not configured.</p>
-          </CardContent>
-        </Card>
+        </section>
 
         {/* History */}
-        <Card className="rounded-md shadow-none">
-          <CardHeader className="px-4 pt-4 pb-3">
-            <CardTitle className="text-sm">
+        <section aria-label="State history" className="border-b border-border">
+          <div className="px-5 py-3">
+            <h3 className="text-xs font-semibold">
               State history
               <span className="ml-2 text-xs font-normal text-muted-foreground">
                 {events.length} event{events.length === 1 ? '' : 's'}
               </span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-0">
+            </h3>
+          </div>
             {events.length === 0 ? (
-              <p className="px-4 py-6 text-center text-xs text-muted-foreground">
+              <p className="px-5 pb-3 text-xs text-muted-foreground">
                 No state changes yet
               </p>
             ) : (
@@ -553,10 +507,10 @@ export const MonitorDetail: React.FC<{
                 {events.map((e) => (
                   <li
                     key={e.id}
-                    className="flex items-center gap-3 px-4 py-2 text-xs"
+                    className="flex flex-wrap items-center gap-x-3 gap-y-1 px-5 py-2 text-xs"
                   >
                     <StatusDot status={e.status} />
-                    <span className="w-40 shrink-0 text-muted-foreground">
+                    <span className="shrink-0 text-muted-foreground">
                       {new Date(e.at).toLocaleString()}
                     </span>
                     <StatusBadge status={e.status} />
@@ -568,10 +522,9 @@ export const MonitorDetail: React.FC<{
                 ))}
               </ul>
             )}
-          </CardContent>
-        </Card>
+        </section>
 
-        <div className="text-[11px] text-muted-foreground">
+        <div className="px-5 py-3 text-[11px] text-muted-foreground">
           Created {new Date(monitor.createdAt).toLocaleString()} · Updated{' '}
           {new Date(monitor.updatedAt).toLocaleString()} · Last triggered{' '}
           {formatRelative(monitor.lastTriggeredAt)}

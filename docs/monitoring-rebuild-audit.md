@@ -301,3 +301,16 @@ Review checkpoint: **TASK-MON-3.f is uncommitted; pause before TASK-MON-3.g** (R
 | Graphify refresh | Attempted, unavailable due to the installed CLI's semantic-backend requirement |
 
 The implementation block is complete and ready for final diff review. **TASK-MON-3.g remains uncommitted at this checkpoint**, including the two test-fixture corrections. No deployment, live-rule conversion, push or change to ingestion/SDK initialization/signal schemas was made. Unrelated frontend edits are preserved.
+
+## TASK-MON-UI.1 — Compact monitor detail sheet (2026-10-15)
+
+- [x] Committed reviewed TASK-MON-3.g as **24ae0f1** before starting the user's separate UI request. Existing log-detail/severity edits and Graphify artifacts were excluded.
+- [x] Inspected the existing graph for MonitorDetail (degree 21), TraceDetailSheet (28) and LogDetailSheet (17), then checked current sheet styles. Retained the shared 1080px maximum width, theme tokens and close/action controls. No root configuration, dependency version or API behavior changed.
+- [x] Replaced nested cards with flat, separated sections matching the trace/log detail structure. Extracted the condition display into a small pure MonitorConditionSummary component; query appears once, and trigger/window/warning/group/notification fields stay visible. Header actions, chart controls and the empty history state use less space.
+- [x] Added a compact chart presentation used by MonitorDetail. Chart height is 192px on desktop and 176px on mobile; other chart callers keep their original sizing. Per the user's follow-up, removed excess chart margins and used automatic Y-axis width with tighter tick spacing. In the browser fixture the plot starts 26px from the chart's left edge instead of the previous configured 68px reserve.
+- [x] Browser inspection at 1280x900 and 390x844 showed no horizontal dialog overflow and all six historical points. The condition section measured approximately 86px / 102px; state history was visible within both viewports. Screenshots were saved in this task's visualization directory, outside the repository.
+- [x] Existing frontend render/contract tests: **10/10 passed**. Existing historical-chart and monitor-truthfulness browser tests: **2/2 passed**. Replaced an obsolete browser assertion for the removed list copy “Configuration only” with a direct check that details show “Awaiting first evaluation” and no fabricated last-evaluated timestamp.
+- [x] Frontend production build and git diff --check passed. The existing large-bundle warning remains. Backend code was unchanged in this UI step, so backend tests were not repeated.
+- [ ] One manual Graphify refresh was attempted at block end; the installed CLI still requires an unavailable semantic backend for document extraction. No repeat/hook was run and generated files remain excluded from commits.
+
+The UI changes remain uncommitted for review. The user's existing log-sheet edits are preserved; no deployment or push was performed.

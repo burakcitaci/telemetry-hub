@@ -9,6 +9,10 @@ test("FE-A3: real monitor row shows Unknown without evaluation evidence", { time
     const row = await browser.evaluate("[...document.querySelectorAll('div.group.grid')].find(row => row.innerText.includes('Fixture monitor')).innerText");
     assert.match(row, /Unknown/i);
     assert.doesNotMatch(row, /\bOK\b/);
-    assert.match(await browser.evaluate("document.body.innerText"), /Configuration only/);
+    await browser.evaluate("document.querySelector('div.group.grid').click()");
+    await browser.wait("Boolean(document.querySelector('[role=dialog]'))");
+    const detail = await browser.evaluate("document.querySelector('[role=dialog]').innerText");
+    assert.match(detail, /Awaiting first evaluation/);
+    assert.doesNotMatch(detail, /Last evaluated:/);
   } finally { await browser.close(); }
 });

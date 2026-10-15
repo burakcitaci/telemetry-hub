@@ -12,6 +12,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { LogRecord } from '@/features/logs/types';
 import { AttributeSection, CopyButton, DetailField, JsonPanel } from '@/shared/components/telemetry-detail';
 import { formatTelemetryTimestamp } from '@/shared/lib/telemetry';
+import { cn } from '@/lib/utils';
+import { severityAccent } from '../severity';
 
 interface LogDetailSheetProps {
   log: LogRecord | null;
@@ -19,14 +21,22 @@ interface LogDetailSheetProps {
   onClose: () => void;
 }
 
+const SEVERITY_RULES = [
+  { keywords: ['ERROR', 'FATAL'], variant: 'destructive' as const },
+  { keywords: ['WARN'],           variant: 'warning' as const },
+  { keywords: ['INFO'],           variant: 'info' as const },
+];
+
 function SeverityBadge({ severity }: { severity: string }) {
-  const normalized = severity.toUpperCase();
-  if (normalized === 'ERROR' || normalized === 'FATAL') {
-    return <Badge variant="destructive">{normalized}</Badge>;
-  }
-  if (normalized === 'WARN' || normalized === 'WARNING') return <Badge variant="warning">WARN</Badge>;
-  if (normalized === 'INFO') return <Badge variant="info">INFO</Badge>;
-  return <Badge variant="secondary">{normalized || 'UNSET'}</Badge>;
+  const normalized = severity?.toUpperCase() ?? '';
+  const rule = SEVERITY_RULES.find(r =>
+    r.keywords.some(k => normalized.includes(k))
+  );
+  return (
+    <Badge variant={rule?.variant ?? 'secondary'}>
+      {normalized || 'UNSET'}
+    </Badge>
+  );
 }
 
 export function LogDetailSheet({ log, isOpen, onClose }: LogDetailSheetProps) {
@@ -42,27 +52,32 @@ export function LogDetailSheet({ log, isOpen, onClose }: LogDetailSheetProps) {
           Message, correlation identifiers, and attributes for a log from {serviceName}.
         </SheetDescription>
 
-        <header className="flex items-start justify-between gap-3 border-b border-border bg-muted/20 px-5 py-4">
-          <div className="flex min-w-0 items-start gap-3">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border bg-background">
-              <FileText className="h-4 w-4" />
-            </div>
-            <div className="min-w-0">
-              <h2 className="text-base font-semibold">Log details</h2>
-              <div className="mt-0.5 flex min-w-0 items-center gap-1">
-                <code className="truncate text-xs text-muted-foreground">
-                  {log.TraceId || log.SpanId || 'Uncorrelated log record'}
-                </code>
-                {(log.TraceId || log.SpanId) && (
-                  <CopyButton value={log.TraceId || log.SpanId} label="Copy correlation ID" />
-                )}
-              </div>
-            </div>
-          </div>
-          <Button variant="ghost" size="sm" className="h-8 w-8 shrink-0 p-0" onClick={onClose} aria-label="Close log details">
-            <X className="h-3.5 w-3.5" />
-          </Button>
-        </header>
+     <header className="border-b border-border bg-muted/20">
+  {/* Severity accent line */}
+  <div className={cn('h-1 w-full', severityAccent(log.SeverityText))} />
+
+  <div className="flex items-start justify-between gap-3 px-5 py-4">
+    <div className="flex min-w-0 items-start gap-3">
+      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border bg-background">
+        <FileText className="h-4 w-4" />
+      </div>
+      <div className="min-w-0">
+        <h2 className="text-base font-semibold">Log details</h2>
+        <div className="mt-0.5 flex min-w-0 items-center gap-1">
+          <code className="truncate text-xs text-muted-foreground">
+            {log.TraceId || log.SpanId || 'Uncorrelated log record'}
+          </code>
+          {(log.TraceId || log.SpanId) && (
+            <CopyButton value={log.TraceId || log.SpanId} label="Copy correlation ID" />
+          )}
+        </div>
+      </div>
+    </div>
+    <Button variant="ghost" size="sm" className="h-8 w-8 shrink-0 p-0" onClick={onClose} aria-label="Close log details">
+      <X className="h-3.5 w-3.5" />
+    </Button>
+  </div>
+</header>
 
         <div className="grid grid-cols-2 border-b border-border bg-background px-5 py-3 text-xs sm:grid-cols-4">
           <div className="border-r border-border pr-4">
