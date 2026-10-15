@@ -1,10 +1,11 @@
-import { HttpException, Injectable, Logger, ServiceUnavailableException, type OnModuleInit, type OnModuleDestroy } from '@nestjs/common';
+import { HttpException, Inject, Injectable, Logger, Optional, ServiceUnavailableException, type OnModuleInit, type OnModuleDestroy } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
 import { PlatformStore } from '../auth/platform-store.service';
 import type { MonitorDto } from '../auth/dto/monitor.dto';
 import { MonitorQueryService } from './monitor-query.service';
 import { overallState, type MonitorEvaluation, type MonitorGroup } from './monitor-rule';
 import { runTelemetryContext } from '../../common/telemetry/tenant-context';
+import { SIGNAL_EVALUATOR, type SignalEvaluator } from './signal-evaluator';
 
 export const MONITOR_POLL_MS = 30_000;
 
@@ -16,7 +17,8 @@ export class MonitorEvaluatorService implements OnModuleInit, OnModuleDestroy {
   private stopped = false;
   private running = false;
   private readonly pending = new Map<string, Promise<Record<string, any> | undefined>>();
-  constructor(private readonly store: PlatformStore, private readonly query: MonitorQueryService) {}
+  constructor(private readonly store: PlatformStore, private readonly query: MonitorQueryService,
+    @Optional() @Inject(SIGNAL_EVALUATOR) private readonly signals?: SignalEvaluator) {}
 
   onModuleInit(): void {
     this.initial = setTimeout(() => void this.tick(), 1000);
@@ -28,6 +30,7 @@ export class MonitorEvaluatorService implements OnModuleInit, OnModuleDestroy {
   async onModuleDestroy(): Promise<void> {
     this.stopped = true;
     clearTimeout(this.initial); clearInterval(this.timer);
+    await this.signals?.stop();
     await Promise.allSettled([...this.pending.values()]);
   }
 
@@ -73,6 +76,15 @@ export class MonitorEvaluatorService implements OnModuleInit, OnModuleDestroy {
   private async evaluateOnce(org: string, id: string) {
     const monitor = this.store.monitors(org).find(item => item.id === id);
     if (!monitor) return undefined;
+    if (monitor.schemaVersion === 2) {
+      if (!this.signals) throw new Error('Unified signal evaluator is not configured.');
+      return runTelemetryContext({ scope: { tenantSlug: org, role: 'admin', teamId: monitor.team_id } },
+        () => this.signals!.evaluate(org, id));
+    }
+    return this.evaluateLegacy(org, monitor);
+  }
+
+  private async evaluateLegacy(org: string, monitor: Record<string, any>) {
     let result: MonitorEvaluation;
     try { result = await runTelemetryContext({ scope: { tenantSlug: org, role: 'admin', teamId: monitor.teamId } },
       () => this.query.evaluate(org, monitor as MonitorDto)); }
@@ -81,7 +93,7 @@ export class MonitorEvaluatorService implements OnModuleInit, OnModuleDestroy {
       result = { status: 'Unknown', value: null, unit: '', groups: [], evaluatedAt: at, from: at, to: at,
         error: 'Evaluation failed. Check the rule, metric type and data availability.' };
     }
-    const current = this.store.monitors(org).find(item => item.id === id);
+    const current = this.store.monitors(org).find(item => item.id === monitor.id);
     if (!current || current.updatedAt !== monitor.updatedAt || current.configurationVersion !== monitor.configurationVersion || this.stopped) return current;
     return this.persist(org, current, result);
   }
