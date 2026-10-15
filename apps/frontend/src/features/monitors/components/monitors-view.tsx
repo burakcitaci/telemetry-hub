@@ -156,11 +156,8 @@ export function MonitorsView({
         {/* List (full width) + Sheet */}
         <FeatureContent>
           <FeaturePanel>
-            <div className="flex items-center justify-between border-b px-4 py-2">
-              <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                <span>
-                  {filtered.length} monitor{filtered.length === 1 ? '' : 's'}
-                </span>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center text-xs text-muted-foreground">
                 {(statusFilter.size > 0 || typeFilter.size > 0 || search) && (
                   <button
                     className="text-primary hover:underline"
