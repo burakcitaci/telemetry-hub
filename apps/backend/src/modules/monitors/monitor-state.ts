@@ -13,6 +13,7 @@ export function crossesThreshold(value: number, threshold: number, comparator: C
 export function validateEvaluation(monitor: Monitor): void {
   if (!COMPARATORS.includes(monitor.comparator) || !Number.isFinite(monitor.threshold)) throw new Error('Invalid monitor threshold.');
   if (!Number.isSafeInteger(monitor.window_seconds) || monitor.window_seconds <= 0) throw new Error('Invalid monitor window.');
+  if (!Number.isFinite(new Date(-monitor.window_seconds * 1000).getTime())) throw new Error('Monitor window exceeds the supported date range.');
 }
 
 export function successfulEvaluation(monitor: Monitor, result: SignalMeasurement, at: string): MonitorRuntime {
@@ -37,4 +38,13 @@ export function alertTransition(monitor: Monitor, runtime: MonitorRuntime, id: (
     state: runtime.state === 'FIRING' ? 'FIRING' : 'RECOVERED', value: runtime.value!,
     threshold: monitor.threshold, comparator: monitor.comparator, window_seconds: monitor.window_seconds,
     unit: runtime.unit, estimated: runtime.estimated, fired_at: runtime.checked_at, transition_revision: runtime.revision };
+}
+
+export function configurationRuntime(current: Monitor, next: Monitor): MonitorRuntime | undefined {
+  if (!current.runtime) return undefined;
+  const fields = ['signal_type', 'query', 'aggregation', 'field', 'metric_name', 'window_seconds',
+    'threshold', 'comparator', 'team_id', 'service', 'env'] as const;
+  const changed = fields.some(key => current[key] !== next[key]) || !current.enabled && next.enabled;
+  return changed ? { ...current.runtime, revision: current.runtime.revision + 1, value: null, unit: '', estimated: false,
+    operational_status: 'NO_DATA', warnings: [], error: 'Configuration changed; awaiting evaluation.' } : current.runtime;
 }

@@ -1,4 +1,4 @@
-import { Body, ConflictException, Controller, Delete, Get, NotFoundException, Optional, Param, Post, Put, UseGuards } from '@nestjs/common';
+import { Body, ConflictException, Controller, Delete, Get, NotFoundException, Optional, Param, Patch, Post, Put, UseGuards } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
 import { AdminService } from './admin.service';
 import { PlatformStore } from './platform-store.service';
@@ -13,6 +13,10 @@ import { validateMonitor } from '../monitors/monitor-rule';
 import { normalizeLogRule } from '../monitors/log-query';
 import { Query } from '@nestjs/common';
 import { IsISO8601 } from 'class-validator';
+import { CreateMonitorDto, PatchMonitorDto } from '../monitors/dto/unified-monitor.dto';
+import { MonitorInputPipe } from '../monitors/monitor-input.pipe';
+import { MonitoringService } from '../monitors/monitoring.service';
+import { monitorView } from '../monitors/monitor-contract.mapper';
 class MonitorHistoryDto { @IsISO8601() from!: string; @IsISO8601() to!: string; }
 
 export class MonitorMuteDto { @IsBoolean() isMuted!: boolean; }
@@ -21,7 +25,7 @@ export function listFilteredMonitors(store: PlatformStore, scope: TenantScope) {
   const ownership = scope.teamFilter ? store.serviceOwnership(scope.tenantSlug, scope.teamFilter) : undefined;
   const teams = filterValues(scope.teamFilter), services = filterValues(scope.serviceFilter), envs = filterValues(scope.envFilter);
   const statuses = filterValues(scope.statusFilter);
-  return store.monitors(scope.tenantSlug).map(m => m.evaluationEnabled && m.lastEvaluatedAt
+  return store.monitors(scope.tenantSlug).map(monitorView).map(m => m.evaluationEnabled && m.lastEvaluatedAt
     && Date.now() - Date.parse(m.lastEvaluatedAt) > 90_000
     ? { ...m, status: 'Unknown', evaluationError: 'Evaluation is overdue.' } : m).filter(m =>
     (!teams.length || (ownership?.assigned.includes(m.service)
@@ -36,14 +40,15 @@ export function listFilteredMonitors(store: PlatformStore, scope: TenantScope) {
 @UseGuards(TenantJwtGuard)
 export class MonitorsController {
   constructor(private readonly store: PlatformStore, private readonly admin: AdminService,
-    @Optional() private readonly evaluator?: MonitorEvaluatorService) {}
+    @Optional() private readonly evaluator?: MonitorEvaluatorService, @Optional() private readonly unified?: MonitoringService) {}
 
   @Get() list(@Tenant() scope: TenantScope) {
     return listFilteredMonitors(this.store, scope);
   }
 
-  @Post() create(@Tenant() scope: TenantScope, @Body() dto: MonitorDto) {
-    if (this.store.monitors(scope.tenantSlug).length >= 100) throw new ConflictException('The limit is 100 monitors per organization.');
+  @Post() create(@Tenant() scope: TenantScope, @Body(MonitorInputPipe) dto: MonitorDto | CreateMonitorDto) {
+    if (dto instanceof CreateMonitorDto) return this.requireUnified().create(scope, dto);
+    if (this.store.monitorIds(scope.tenantSlug).length >= 100) throw new ConflictException('The limit is 100 monitors per organization.');
     const now = new Date().toISOString();
     const monitor = { ...this.configuration(scope, dto), id: randomUUID(), createdAt: now,
       updatedAt: now, configurationVersion: 1, status: 'No Data', lastEvaluatedAt: null, evaluationEnabled: !!this.evaluator, history: [], events: [] };
@@ -54,6 +59,7 @@ export class MonitorsController {
 
   @Put(':id') update(@Tenant() scope: TenantScope, @Param('id') id: string, @Body() dto: MonitorDto) {
     const existing = this.requireMonitor(scope, id);
+    if (existing.schemaVersion === 2) throw new ConflictException('Use PATCH with the unified monitor contract.');
     const configuration = this.configuration(scope, dto);
     const measurementChanged = ['type', 'query', 'aggregation', 'metricType', 'logAttribute', 'signalStatus',
       'noDataPolicy', 'evaluationWindow', 'groupBy', 'teamId', 'service', 'env']
@@ -83,11 +89,13 @@ export class MonitorsController {
 
   @Get(':id/history') async history(@Tenant() scope: TenantScope, @Param('id') id: string, @Query() range: MonitorHistoryDto) {
     const monitor = this.requireMonitor(scope, id);
+    if (monitor.schemaVersion === 2) throw new ConflictException('Use /api/alerts?monitor_id= for unified transition history.');
     if (!this.evaluator) throw new NotFoundException('Monitor evaluator unavailable.');
     return this.evaluator.history(scope.tenantSlug, monitor as MonitorDto, new Date(range.from), new Date(range.to));
   }
 
   @Post(':id/mute') mute(@Tenant() scope: TenantScope, @Param('id') id: string, @Body() dto: MonitorMuteDto) {
+    if (this.requireMonitor(scope, id).schemaVersion === 2) throw new ConflictException('Use PATCH muted_until for unified monitors.');
     const monitor = { ...this.requireMonitor(scope, id), isMuted: dto.isMuted, updatedAt: new Date().toISOString() };
     this.store.saveMonitor(scope.tenantSlug, monitor);
     return monitor;
@@ -99,8 +107,25 @@ export class MonitorsController {
     return { success: true };
   }
 
+  @Get(':id') get(@Tenant() scope: TenantScope, @Param('id') id: string) {
+    return this.requireMonitor(scope, id);
+  }
+
+  @Patch(':id') patch(@Tenant() scope: TenantScope, @Param('id') id: string, @Body() dto: PatchMonitorDto) {
+    return this.requireUnified().patch(scope, id, dto);
+  }
+
+  @Get(':id/status') status(@Tenant() scope: TenantScope, @Param('id') id: string) {
+    return this.requireUnified().status(scope.tenantSlug, id);
+  }
+
+  private requireUnified(): MonitoringService {
+    if (!this.unified) throw new NotFoundException('Unified monitoring service unavailable.');
+    return this.unified;
+  }
+
   private requireMonitor(scope: TenantScope, id: string) {
-    const monitor = this.store.monitors(scope.tenantSlug).find(m => m.id === id);
+    const monitor = this.store.monitor(scope.tenantSlug, id);
     if (!monitor) throw new NotFoundException('Monitor not found.');
     return monitor;
   }

@@ -1,6 +1,6 @@
 import type { ClickhouseService } from '../../telemetry/services/clickhouse.service';
 import { NoDataError, type SignalAdapter, type SignalQuery, type SignalMeasurement } from '../signal-adapter';
-import { ADAPTER_BUDGET, prepareQuery, scalarAggregation, type AdapterOptions, type ScalarRow } from './adapter-query';
+import { ADAPTER_BUDGET, inspectSignalQuery, prepareQuery, scalarAggregation, type AdapterOptions, type ScalarRow } from './adapter-query';
 import { checkedHistogram, metricSource, type MetricKind } from './metric-source';
 import { histogramQuantile, histogramSql, metricScalar, type BucketRow } from './metric-histogram';
 
@@ -8,6 +8,14 @@ interface MetricInventory { kind: MetricKind; samples: string | number; unit: st
 
 export class MetricAdapter implements SignalAdapter {
   constructor(private readonly clickhouse: ClickhouseService, private readonly options: AdapterOptions = {}) {}
+
+  validate(monitor: SignalQuery): void {
+    const inspected = inspectSignalQuery(monitor, 'METRIC', this.options.warn);
+    if (monitor.aggregation !== 'COUNT' && monitor.field !== 'value') throw new Error('Metric numeric field must be value.');
+    const name = monitor.metric_name ?? inspected.filters.metric_name;
+    if (!name || monitor.metric_name && inspected.filters.metric_name && monitor.metric_name !== inspected.filters.metric_name)
+      throw new Error('Select one consistent metric_name.');
+  }
 
   async aggregate(monitor: SignalQuery, since: Date, until: Date): Promise<number> {
     return (await this.measure(monitor, since, until)).value;

@@ -18,7 +18,9 @@ export class MonitorEvaluatorService implements OnModuleInit, OnModuleDestroy {
   private running = false;
   private readonly pending = new Map<string, Promise<Record<string, any> | undefined>>();
   constructor(private readonly store: PlatformStore, private readonly query: MonitorQueryService,
-    @Optional() @Inject(SIGNAL_EVALUATOR) private readonly signals?: SignalEvaluator) {}
+    @Optional() @Inject(SIGNAL_EVALUATOR) private readonly signals?: SignalEvaluator) {
+    this.store.registerMonitorCleanup(() => this.onModuleDestroy());
+  }
 
   onModuleInit(): void {
     this.initial = setTimeout(() => void this.tick(), 1000);
@@ -65,16 +67,16 @@ export class MonitorEvaluatorService implements OnModuleInit, OnModuleDestroy {
     if (this.running || this.stopped) return;
     this.running = true;
     try {
-      for (const org of this.store.monitorOrganizations()) for (const monitor of this.store.monitors(org)) {
+      for (const org of this.store.monitorOrganizations()) for (const id of this.store.monitorIds(org)) {
         if (this.stopped) return;
-        await this.evaluate(org, monitor.id);
+        await this.evaluate(org, id);
       }
     } catch { this.logger.error('Monitor evaluation cycle failed.'); }
     finally { this.running = false; }
   }
 
   private async evaluateOnce(org: string, id: string) {
-    const monitor = this.store.monitors(org).find(item => item.id === id);
+    const monitor = this.store.monitor(org, id);
     if (!monitor) return undefined;
     if (monitor.schemaVersion === 2) {
       if (!this.signals) throw new Error('Unified signal evaluator is not configured.');
@@ -93,7 +95,7 @@ export class MonitorEvaluatorService implements OnModuleInit, OnModuleDestroy {
       result = { status: 'Unknown', value: null, unit: '', groups: [], evaluatedAt: at, from: at, to: at,
         error: 'Evaluation failed. Check the rule, metric type and data availability.' };
     }
-    const current = this.store.monitors(org).find(item => item.id === monitor.id);
+    const current = this.store.monitor(org, monitor.id);
     if (!current || current.updatedAt !== monitor.updatedAt || current.configurationVersion !== monitor.configurationVersion || this.stopped) return current;
     return this.persist(org, current, result);
   }

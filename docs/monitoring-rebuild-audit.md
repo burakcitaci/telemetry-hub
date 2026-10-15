@@ -199,3 +199,42 @@ Cooldown limits firing **attempts**, measured from last_firing_attempt_at; faile
 Receipt status is distinct from firing state and operational errors. A notification write failure does not undo the transition or trigger a repeat on the next evaluation; its event is recorded FAILED without leaking output error details. If receipt persistence fails after stdout has accepted the record, the receipt remains PENDING and no automatic resend occurs. This deliberately avoids claiming exactly-once external delivery or introducing a durable outbox/retry subsystem. The failure-injection test proves receipt/event updates roll back together and that a later evaluation does not repeat stdout.
 
 No deployed monitor has been migrated and no production DI factory has been enabled. The concrete dummy is ready for the later config/wiring step. The two legacy monitors retain their existing path until explicit migration. Review checkpoint: **pause before TASK-MON-3.e**.
+
+## TASK-MON-3.e — CRUD, history migration and retention
+
+The reviewed evaluator/notifier work (TASK-MON-3.c/d) was committed as **e617021**, excluding graphify-out/ and unrelated frontend edits. The following API/persistence changes are a separate reviewable working-tree step.
+
+- [x] Rechecked the graph's controller, shared PlatformStore and evaluator entry points before the block. Monitoring continues to share the existing control-plane SQLite connection and AUTH_DB_PATH. No OTel ingestion path, signal table/schema or signal-data model was changed.
+- [x] Added the canonical JSON contract and strict DTOs, a body-discriminating pipe, MonitoringService, response mapper and AlertsController. Canonical requests use signal_type; existing requests using type still use the legacy DTO/behavior. DTOs reject protected IDs, runtime/state, schemaVersion and unsupported fields. Adapter-owned validation checks query syntax and signal-specific fields without executing storage queries.
+- [x] Canonical routes: POST /api/monitors, GET /api/monitors, GET /api/monitors/:id, PATCH /api/monitors/:id, DELETE /api/monitors/:id, GET /api/monitors/:id/status and GET /api/alerts. PATCH supports enabled, muted_until and cooldown_seconds. Alert pagination uses limit/offset, an optional monitor_id, and next_offset; limit is capped at 100. Existing tenant JWT boundaries are retained without a new auth system.
+- [x] PATCH merges and revalidates the full configuration, then atomically compares configurationVersion and reloads the current runtime. Rename-only edits retain runtime/notification state. Measurement/threshold changes clear the cached value and expose NO_DATA pending re-evaluation while retaining prior firing state and delivery pairing. Stale updates cannot revive a deleted monitor or overwrite a newer configuration.
+- [x] A complete canonical PATCH can explicitly upgrade a legacy monitor in place while preserving its ID and imported history. A partial rename cannot accidentally upgrade it. No deployed rule was automatically upgraded. Canonical PUT, indefinite legacy mute and legacy chart-history routes are rejected with an explicit instruction to use PATCH or /api/alerts instead. Legacy chart history remains unchanged for legacy monitors.
+- [x] Added MonitorAlertHistory and a guarded additive legacy_event_id column/index on the existing alert table. First read imports embedded events, strips events from stored JSON and sets legacyEventsMigrated in one transaction. Deduplication is keyed by organization, monitor and original event ID. The API retains original event IDs; an internal namespaced storage ID prevents collisions across monitors. Failed import/marker writes roll back together.
+- [x] Legacy history is marked legacy=true, preserves original states/values/timestamps and original payload, and uses null for unavailable threshold, signal, name, comparator, window, unit and estimated snapshots. It is not relabeled as a fully known FIRING/RECOVERED snapshot. New canonical events retain complete snapshots and estimated metadata.
+- [x] Legacy responses derive their events array from the alert table. Subsequent legacy writes import new events and strip JSON arrays again, avoiding a permanent second source of truth. Deleting a monitor first migrates any remaining embedded events; its retained alert history survives deletion. Expired events are excluded during import so stale legacy snapshots cannot resurrect pruned history.
+- [x] Added validated retention configuration in monitoring.config.ts: MONITOR_ALERT_RETENTION_DAYS defaults to 30; MONITOR_ALERT_PRUNE_INTERVAL_SECONDS defaults to 3600. Invalid configuration fails before opening the platform database. A single-process job prunes at startup and at the configured interval. Reads also apply the cutoff; events exactly at the cutoff remain visible. Evaluation sample retention remains separate.
+- [x] MonitorsModule now supplies the adapter registry, DummyNotifier-backed evaluator, API service and retention job so canonical HTTP routes are functional. Environment-wide evaluator configuration/self-instrumentation remains TASK-MON-3.f; documentation and final cutover remain TASK-MON-3.g. No real notification integrations or new UI were added.
+- [x] Shared-store shutdown waits for monitoring cleanup before closing SQLite. The scheduler now enumerates IDs and reads/evaluates one record at a time: corrupt embedded history on one monitor logs a failure without blocking healthy monitors. Corrupt JSON events are retained when their migration fails.
+- [x] Added **11 source tests** and **2 HTTP integrations**. They cover idempotent import, transactional failure, invalid legacy data, ID/tenant collisions, pagination/deletion, exact retention cutoff and expired reimports, file-backed restart with delivery receipts, fresh-runtime preservation, stale configuration writes, pruning cadence/cleanup, shutdown ordering and isolation of a failed migration. HTTP tests exercise all signals, strict bodies, enable/disable, status, rename without duplicate alerts, estimated histogram snapshots/NoData, unknown-filter warnings, organization isolation and explicit legacy upgrade.
+- [x] Complete backend source suite plus legacy/unified HTTP integrations: **139/139 passed**. Backend production build passed. Frontend production build passed with its existing large-chunk warning. git diff --check passed. Unrelated frontend edits are outside this implementation and were not included in e617021.
+- [ ] One manual Graphify refresh was attempted at block end; document semantic extraction again failed because no LLM API key is configured. No second update or hook was run. Generated Graphify files were not staged.
+
+Example canonical request (POST /api/monitors):
+
+```json
+{
+  "name": "Production errors",
+  "signal_type": "LOG",
+  "query": "severity_text:ERROR deployment.environment:production",
+  "aggregation": "COUNT",
+  "window_seconds": 300,
+  "threshold": 100,
+  "comparator": "GT",
+  "enabled": true,
+  "cooldown_seconds": 600
+}
+```
+
+Status/history metadata is available through GET /api/monitors/:id/status and GET /api/alerts?monitor_id=:id&limit=50. Canonical request fields remain canonical in responses; list responses add legacy display aliases for existing consumers. Authoring unified rules uses the JSON contract, not the existing legacy form contract. Legacy event IDs are unique within their organization/monitor tuple, not guaranteed globally unique.
+
+This step changes application code and isolated test databases only; it does not deploy the application or upgrade the two running rules. On the next application deployment, history migration is lazy on first read and new writes use the single alert store. Rule upgrades still require explicit complete canonical PATCH requests. Review checkpoint: **pause before TASK-MON-3.f**.

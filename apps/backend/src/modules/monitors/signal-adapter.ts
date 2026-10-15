@@ -23,6 +23,7 @@ export interface SignalMeasurement {
 }
 
 export interface SignalAdapter {
+  validate?(monitor: SignalQuery): void;
   aggregate(monitor: SignalQuery, since: Date, until: Date): Promise<number>;
   measure(monitor: SignalQuery, since: Date, until: Date): Promise<SignalMeasurement>;
 }

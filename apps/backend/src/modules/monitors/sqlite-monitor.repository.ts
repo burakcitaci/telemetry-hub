@@ -1,20 +1,48 @@
 import type { DatabaseSync } from 'node:sqlite';
 import type { AlertEvent, Monitor, MonitorRuntime } from './monitor.model';
 import type { MonitorRepository } from './monitor.repository';
+import { MonitorAlertHistory, type HistoryOptions } from './monitor-alert-history';
+import { configurationRuntime } from './monitor-state';
 
 export class SqliteMonitorRepository implements MonitorRepository {
-  constructor(private readonly db: DatabaseSync) {
+  readonly history: MonitorAlertHistory;
+  constructor(private readonly db: DatabaseSync, options: HistoryOptions = {}) {
     this.db.exec(`CREATE TABLE IF NOT EXISTS monitors (org TEXT, id TEXT, body TEXT NOT NULL, PRIMARY KEY(org,id));
       CREATE TABLE IF NOT EXISTS monitor_alert_events (
         org TEXT NOT NULL, id TEXT NOT NULL, monitor_id TEXT NOT NULL, transition_revision INTEGER NOT NULL,
         fired_at TEXT NOT NULL, body TEXT NOT NULL, PRIMARY KEY(org,id), UNIQUE(org,monitor_id,transition_revision));
       CREATE INDEX IF NOT EXISTS monitor_alert_events_time ON monitor_alert_events(fired_at);`);
+    this.history = new MonitorAlertHistory(db, operation => this.transaction(operation), options);
   }
 
   find(org: string, id: string): Monitor | undefined {
-    const row = this.db.prepare('SELECT body FROM monitors WHERE org = ? AND id = ?').get(org, id);
-    const monitor = row ? JSON.parse(String(row.body)) : undefined;
-    return monitor?.schemaVersion === 2 ? monitor : undefined;
+    const monitor = this.history.load(org, id);
+    return monitor?.schemaVersion === 2 ? monitor as Monitor : undefined;
+  }
+
+  records(org: string): Record<string, any>[] {
+    return this.db.prepare('SELECT id FROM monitors WHERE org = ? ORDER BY id').all(org)
+      .map(row => this.history.load(org, String(row.id))!);
+  }
+
+  saveRecord(org: string, record: Record<string, any>): void {
+    this.transaction(() => {
+      const body = this.history.stripEmbedded(org, record);
+      this.db.prepare('INSERT INTO monitors VALUES (?, ?, ?) ON CONFLICT(org,id) DO UPDATE SET body = excluded.body')
+        .run(org, body.id, JSON.stringify(body));
+    });
+  }
+
+  replaceConfiguration(org: string, expected: Record<string, any>, next: Monitor): Monitor | undefined {
+    return this.transaction(() => {
+      const row = this.db.prepare('SELECT body FROM monitors WHERE org = ? AND id = ?').get(org, expected.id);
+      const current = row ? JSON.parse(String(row.body)) : undefined;
+      if (!current || current.configurationVersion !== expected.configurationVersion) return undefined;
+      const saved = { ...next, ...(current.legacyEventsMigrated ? { legacyEventsMigrated: true } : {}),
+        ...(current.schemaVersion === 2 ? { runtime: configurationRuntime(current, next) } : {}) };
+      this.save(org, saved);
+      return saved;
+    });
   }
 
   save(org: string, monitor: Monitor): void {
@@ -73,7 +101,7 @@ export class SqliteMonitorRepository implements MonitorRepository {
   }
 
   private insertEvent(org: string, event: AlertEvent): void {
-    this.db.prepare('INSERT INTO monitor_alert_events VALUES (?, ?, ?, ?, ?, ?)')
+    this.db.prepare('INSERT INTO monitor_alert_events (org,id,monitor_id,transition_revision,fired_at,body) VALUES (?, ?, ?, ?, ?, ?)')
       .run(org, event.id, event.monitor_id, event.transition_revision, event.fired_at, JSON.stringify(event));
   }
 }

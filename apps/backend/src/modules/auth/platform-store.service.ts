@@ -7,6 +7,8 @@ import { randomUUID } from 'node:crypto';
 import type { TenantJwtPayload, UserRole } from './auth.types';
 import { filterValues, type FilterSelection } from './platform-filters';
 import { registerTelemetryOwnership } from '../../common/telemetry/tenant-context';
+import { SqliteMonitorRepository } from '../monitors/sqlite-monitor.repository';
+import { alertRetentionConfig } from '../monitors/monitoring.config';
 
 export interface Identity {
   id: string; email: string; tenantSlug: string; role: UserRole;
@@ -19,8 +21,13 @@ export interface Team { id: string; name: string }
 export class PlatformStore implements OnModuleDestroy {
   private readonly db: DatabaseSync;
   private readonly releaseOwnership: () => void;
+  readonly monitorRepository: SqliteMonitorRepository;
+  private readonly monitorCleanups: Array<() => void | Promise<void>> = [];
+  private closing?: Promise<void>;
+  private closed = false;
 
   constructor(config: ConfigService) {
+    const retention = alertRetentionConfig(config);
     const path = config.get<string>('AUTH_DB_PATH') ?? resolve('data/platform.sqlite');
     if (path !== ':memory:') mkdirSync(dirname(path), { recursive: true });
     this.db = new DatabaseSync(path);
@@ -29,13 +36,29 @@ export class PlatformStore implements OnModuleDestroy {
         PRIMARY KEY(org,id), UNIQUE(org,email));
       CREATE TABLE IF NOT EXISTS teams (org TEXT, id TEXT, name TEXT NOT NULL, PRIMARY KEY(org,id));
       CREATE TABLE IF NOT EXISTS monitors (org TEXT, id TEXT, body TEXT NOT NULL, PRIMARY KEY(org,id));`);
+    this.monitorRepository = new SqliteMonitorRepository(this.db, { retentionDays: retention.days });
     this.db.exec('CREATE TABLE IF NOT EXISTS bootstrap (org TEXT, email TEXT, PRIMARY KEY(org,email));');
     this.db.exec('CREATE TABLE IF NOT EXISTS service_metadata (org TEXT, service TEXT, body TEXT NOT NULL, PRIMARY KEY(org,service));');
     this.seed(config.get<string>('AUTH_USERS_JSON'));
     this.releaseOwnership = registerTelemetryOwnership((org, service) => this.serviceTeam(org, service));
   }
 
-  onModuleDestroy() { this.releaseOwnership(); this.db.close(); }
+  registerMonitorCleanup(cleanup: () => void | Promise<void>): void { this.monitorCleanups.push(cleanup); }
+
+  onModuleDestroy(): void | Promise<void> {
+    if (this.closing) return this.closing;
+    if (this.closed) return;
+    if (!this.monitorCleanups.length) { this.close(); return; }
+    const work = this.monitorCleanups.splice(0).map(cleanup => Promise.resolve().then(cleanup));
+    this.closing = Promise.allSettled(work).then(() => this.close());
+    return this.closing;
+  }
+
+  private close(): void {
+    if (this.closed) return;
+    this.closed = true;
+    this.releaseOwnership(); this.db.close();
+  }
 
   serviceTeam(org: string, service: string): string | undefined {
     const row = this.db.prepare('SELECT body FROM service_metadata WHERE org = ? AND service = ?').get(org, service);
@@ -129,15 +152,24 @@ export class PlatformStore implements OnModuleDestroy {
     if (this.users(org).some(user => user.teamId === id)) {
       throw new ConflictException('Reassign team members before deleting this team.');
     }
-    if (this.monitors(org).some(monitor => monitor.teamId === id)) {
+    if (this.monitors(org).some(monitor => (monitor.teamId ?? monitor.team_id) === id)) {
       throw new ConflictException('Reassign monitors before deleting this team.');
     }
     this.db.prepare('DELETE FROM teams WHERE org = ? AND id = ?').run(org, id);
   }
 
   monitors(org: string): Record<string, any>[] {
-    return this.db.prepare('SELECT body FROM monitors WHERE org = ?').all(org)
-      .map(row => JSON.parse(String(row.body)));
+    return this.monitorIds(org).map(id => this.monitor(org, id)!);
+  }
+
+  monitorIds(org: string): string[] {
+    return this.db.prepare('SELECT id FROM monitors WHERE org = ? ORDER BY id').all(org).map(row => String(row.id));
+  }
+
+  monitor(org: string, id: string): Record<string, any> | undefined {
+    const record = this.monitorRepository.history.load(org, id);
+    if (!record || record.schemaVersion === 2) return record;
+    return { ...record, events: this.monitorRepository.history.legacyEvents(org, record.id) };
   }
 
   monitorOrganizations(): string[] {
@@ -145,11 +177,11 @@ export class PlatformStore implements OnModuleDestroy {
   }
 
   saveMonitor(org: string, monitor: Record<string, any>) {
-    this.db.prepare('INSERT INTO monitors VALUES (?, ?, ?) ON CONFLICT(org,id) DO UPDATE SET body=excluded.body')
-      .run(org, monitor.id, JSON.stringify(monitor));
+    this.monitorRepository.saveRecord(org, monitor);
   }
 
   deleteMonitor(org: string, id: string) {
+    this.monitorRepository.history.load(org, id);
     this.db.prepare('DELETE FROM monitors WHERE org = ? AND id = ?').run(org, id);
   }
 

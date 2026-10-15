@@ -1,10 +1,12 @@
 import type { ClickhouseService } from '../../telemetry/services/clickhouse.service';
 import type { SignalAdapter, SignalQuery } from '../signal-adapter';
 import { attributeValue } from './query-filters';
-import { prepareQuery, queryScalar, type AdapterOptions } from './adapter-query';
+import { inspectSignalQuery, prepareQuery, queryScalar, type AdapterOptions } from './adapter-query';
 
 export class LogAdapter implements SignalAdapter {
   constructor(private readonly clickhouse: ClickhouseService, private readonly options: AdapterOptions = {}) {}
+
+  validate(monitor: SignalQuery): void { inspectSignalQuery(monitor, 'LOG', this.options.warn); }
 
   async aggregate(monitor: SignalQuery, since: Date, until: Date): Promise<number> {
     return (await this.measure(monitor, since, until)).value;

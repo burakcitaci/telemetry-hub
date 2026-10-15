@@ -1,6 +1,6 @@
 import type { ClickHouseSettings } from '@clickhouse/client';
 import type { ClickhouseService } from '../../telemetry/services/clickhouse.service';
-import { AGGREGATIONS, NoDataError, type SignalMeasurement, type SignalQuery, type Aggregation } from '../signal-adapter';
+import { AGGREGATIONS, NoDataError, type SignalMeasurement, type SignalQuery, type Aggregation, type SignalType } from '../signal-adapter';
 import type { QueryWarning } from '../query-parser';
 import { compileFilters } from './query-filters';
 
@@ -9,6 +9,12 @@ export const ADAPTER_BUDGET: ClickHouseSettings = { max_execution_time: 10, max_
   max_result_rows: '10000', result_overflow_mode: 'throw' };
 export interface AdapterOptions { warn?: (warning: QueryWarning) => void; settings?: ClickHouseSettings; }
 export interface ScalarRow { value: string | number | null; samples: string | number; invalid?: string | number; }
+
+export function inspectSignalQuery(monitor: SignalQuery, expected: SignalType, warn?: AdapterOptions['warn']) {
+  if (monitor.signal_type !== expected || !AGGREGATIONS.includes(monitor.aggregation)) throw new Error('Invalid signal type or aggregation.');
+  if (monitor.aggregation !== 'COUNT' && !monitor.field) throw new Error('Numeric aggregation requires a field.');
+  return compileFilters(monitor.query, expected, {}, warn);
+}
 
 export function prepareQuery(clickhouse: ClickhouseService, monitor: SignalQuery, since: Date, until: Date,
   options: AdapterOptions, time: string, baseline = false) {
