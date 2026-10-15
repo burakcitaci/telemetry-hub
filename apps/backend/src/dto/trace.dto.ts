@@ -1,5 +1,6 @@
-import { ApiProperty } from "@nestjs/swagger";
+import { ApiProperty, IntersectionType } from "@nestjs/swagger";
 import { IsString, Matches } from "class-validator";
+import { TelemetryQueryDto } from './query.dto';
 
 export class TraceIdParamDto {
   @ApiProperty({
@@ -12,3 +13,5 @@ export class TraceIdParamDto {
   })
   traceId: string;
 }
+
+export class TraceDetailQueryDto extends IntersectionType(TraceIdParamDto, TelemetryQueryDto) {}

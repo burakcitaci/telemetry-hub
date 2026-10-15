@@ -57,6 +57,10 @@ api.defaults.adapter = async (config) => {
     query: "avg:load{*} > 80", comparator: "above", threshold: 80, evaluationWindow: "5m",
     message: "", targets: [], createdAt: "2026-10-13T00:00:00Z", updatedAt: "2026-10-13T00:00:00Z",
     status: "OK", isMuted: false,
+    events: scenario === 'monitor-history' ? Array.from({ length: 23 }, (_, index) => ({
+      id: `event-${index + 1}`, at: new Date(Date.now() - index * 60_000).toISOString(),
+      status: index % 2 ? 'OK' : 'Alert', message: `History event ${index + 1}`,
+    })) : [],
     };
     data = config.method === "put" ? { ...monitor, isMuted: true } : [monitor];
   }

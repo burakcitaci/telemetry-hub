@@ -8,7 +8,9 @@
 
 **Monitoring API:** [Unified rules for logs, metrics and traces](apps/backend/src/modules/monitors/README.md) — JSON contract, configuration, alert history and legacy migration.
 
-> **Implementation status:** This repository uses **Yarn Classic, Kind, and Helm**. `pnpm install`, `pnpm dev`, `pnpm start:example-csharp`, and `infra/docker-compose.local.yml` are not currently supported workflows or existing assets. The instructions below use actual repository commands. This is a local testing/demo platform, not a production-ready SaaS deployment without additional work.
+**Tools:** Yarn Classic **1.22.22**, Docker, Kind and Helm. This guide installs the backend in a local cluster and runs the dashboard locally.
+
+**New here?** Start with [first installation](#first-installation): install dependencies → create the cluster → [prepare the first admin](#first-admin) → start the backend → [sign in](#first-login). Architecture and application onboarding are described below.
 
 ## 1. ARCHITECTURE & COMPONENTS
 
@@ -118,7 +120,7 @@ WHERE org_slug = {tenant:String};
 
 **Isolation model:** Shared tables with server-enforced tenant filters, not a separate database per customer or automatically enforced ClickHouse row-level security. Direct database access bypasses API checks and must be secured separately.
 
-Local ClickHouse uses ephemeral pod storage and a seven-day telemetry TTL. Pod replacement or cluster deletion can remove the data; this is not a backup. User/team management uses SQLite on a backend PVC, so the chart allows only one backend replica. Deleting the local cluster also removes this local storage.
+The chart enables persistent storage by default: a 10-GiB PVC for ClickHouse and a 1-GiB PVC for the backend SQLite database. Pod replacement retains these volumes; disabling persistence uses ephemeral pod storage. The Collector configures a seven-day TTL for its telemetry tables. PVCs are not backups; deleting the local Kind cluster can remove local storage. The shared SQLite file limits the backend to one replica.
 
 ### UI and dynamic service discovery — TASK-INT-1
 
@@ -126,7 +128,9 @@ Tenant-scoped **`DISTINCT ServiceName`** queries discover services across traces
 
 Filter options load initially and refresh **every 30 seconds**. There is no guarantee that new services appear within less than 30 seconds: SDK export intervals, Collector batching, storage, and UI polling accumulate. Discovery requires stored telemetry. Trace-based performance views need traces; metrics alone do not create request spans.
 
-## 2. LOCAL SETUP & INSTALLATION
+<a id="first-installation"></a>
+
+## 2. FIRST INSTALLATION
 
 ### Prerequisites
 
@@ -137,6 +141,23 @@ Filter options load initially and refresh **every 30 seconds**. There is no guar
 
 The examples below use **Bash**, including heredocs that cannot be copied unchanged into PowerShell. Install Yarn and make it available on PATH first.
 
+On Windows, use **Git Bash** for these steps and start Docker Desktop first. If Yarn is not installed:
+
+```bash
+npm install --global yarn@1.22.22
+```
+
+Before cloning, check that the required tools are available:
+
+```bash
+node --version                 # v24 or newer
+yarn --version                 # 1.22.22
+docker version                 # client AND running engine
+kind version
+kubectl version --client
+helm version --short
+```
+
 ### TASK-SETUP-1: Clone and install
 
 ```bash
@@ -145,9 +166,9 @@ cd telemetry-hub
 yarn install --frozen-lockfile
 ```
 
-The repository specifies Yarn through `packageManager` and `yarn.lock`. `pnpm install` is not a tested alternative; switching requires a separate workspace/lockfile migration.
+The root workspaces use Yarn; `packageManager` and `yarn.lock` specify the version and dependencies. Run all Yarn commands below from the repository root.
 
-### TASK-SETUP-2: Create the cluster and provision secrets
+### TASK-SETUP-2: Create the local cluster
 
 ```bash
 yarn cluster:create
@@ -156,7 +177,25 @@ kubectl --context kind-observability create namespace telemetry-hub
 
 Skip creation if the cluster or namespace already exists. **Before Helm deployment**, provision `backend-auth` and `telemetry-ingestion`; the chart does not create these secrets.
 
-The following bootstrap is for a **fresh local installation**. It creates an administrator in organization `demo`, team `backend`, a client key, and an independent Collector token. `kubectl create` prevents accidental overwriting of existing secrets. Securely transfer the client key, printed once, to your application.
+<a id="first-admin"></a>
+
+### TASK-SETUP-3: Prepare the first administrator
+
+There is **no default admin password or public registration**. Prepare the first user through `AUTH_USERS_JSON`. On the first backend start, `PlatformStore` reads this configuration and creates the user and their teams in SQLite.
+
+The bootstrap below prepares these login details:
+
+| Login detail | Example value |
+|---|---|
+| Organization | demo |
+| Email | admin@example.com |
+| Role | admin |
+| Created team | backend |
+| Password | Prompted below without echo; 12–128 characters |
+
+To use your own values, change `tenantSlug`, `email` and `teams` in the example; the ingestion key's `orgSlug` and `teamId` must match. Remember the password you choose for signing in later. The Kubernetes Secret stores its salted scrypt hash.
+
+The block creates the `backend-auth` and `telemetry-ingestion` secrets, a random client key and an independent Collector token. It is intended for a **fresh local installation**. `kubectl create` does not overwrite existing secrets. Save the client key, displayed once, for application onboarding; it is not a dashboard password.
 
 ```bash
 read -r -s -p "Local administrator password: " HUB_ADMIN_PASSWORD
@@ -165,8 +204,8 @@ export HUB_ADMIN_PASSWORD
 node --input-type=module <<'NODE'
 import { randomBytes, createHash, scryptSync } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
-if (!process.env.HUB_ADMIN_PASSWORD || process.env.HUB_ADMIN_PASSWORD.length < 12)
-  throw new Error('Use at least 12 characters for the administrator password.');
+if (!process.env.HUB_ADMIN_PASSWORD || process.env.HUB_ADMIN_PASSWORD.length < 12 || process.env.HUB_ADMIN_PASSWORD.length > 128)
+  throw new Error('Use 12 to 128 characters for the administrator password.');
 const key = randomBytes(32).toString('base64url');
 const salt = randomBytes(16);
 const passwordHash = `scrypt$${salt.toString('hex')}$${scryptSync(process.env.HUB_ADMIN_PASSWORD, salt, 64).toString('hex')}`;
@@ -199,7 +238,15 @@ This bootstrap is not transactional: if the second creation fails, the first sec
 
 Kubernetes Secrets are base64-encoded, not encrypted by that encoding. Production requires restricted RBAC, encryption at rest, and an appropriate secret manager.
 
-### TASK-SETUP-3: Start infrastructure and dashboard
+Check that both secrets exist without displaying their contents:
+
+```bash
+kubectl --context kind-observability -n telemetry-hub get secret backend-auth telemetry-ingestion
+```
+
+`AUTH_USERS_JSON` initializes each organization/email pair once in its SQLite database. Changing the Secret does not reset an initialized user's password; deleted bootstrap users are not recreated on restart. Manage additional users and password changes through **Administration** after signing in.
+
+### TASK-SETUP-4: Start infrastructure and dashboard
 
 ```bash
 yarn cluster:init
@@ -207,8 +254,6 @@ yarn cluster:status
 ```
 
 `cluster:init` builds the backend image, loads it into Kind, and installs or upgrades Helm release `observability` in namespace `telemetry-hub`. ClickHouse, Collector, and backend run in the cluster.
-
-> `docker-compose -f infra/docker-compose.local.yml up -d` is not currently usable: that file does not exist. Kind/Helm is the available infrastructure workflow.
 
 Keep each command running in its own terminal:
 
@@ -222,7 +267,16 @@ yarn ports:backend
 yarn dev:frontend
 ```
 
-Open `http://localhost:5000`, or the fallback URL printed by Vite. The backend is at `http://localhost:3001`. Sign in with organization `demo`, `admin@example.com`, and your chosen password. Browser authentication and ingestion keys are separate mechanisms. Backend CORS permits Vite fallback ports 5000–5003; check allowed origins if another port is selected.
+<a id="first-login"></a>
+
+### TASK-SETUP-5: First login and additional users
+
+1. Open `http://localhost:5000` or Vite's printed fallback URL. Keep the backend port-forward running; the API is at `http://localhost:3001`.
+2. Sign in with organization **demo**, email **admin@example.com** and the password chosen in TASK-SETUP-3. Use your own details if you customized the bootstrap. A new account becomes available after the first backend start.
+3. Open **Administration**. The bootstrap has already created team **backend**; create additional teams and users, assign roles/teams and change passwords there.
+4. Follow section 3 to connect an application so its telemetry appears in the dashboard. Use the client key for ingestion, not the admin password.
+
+Backend CORS permits Vite fallback ports 5000–5003; check allowed origins if another port is selected. There are no usable default credentials without a successful bootstrap. For login failures, check organization/email, the backend port-forward and the SQLite database being used. The local development database and the cluster backend PVC contain separate user accounts.
 
 ### Optional: Develop NestJS locally with .env
 
@@ -258,7 +312,7 @@ yarn dev:backend
 # Start the frontend separately: yarn dev:frontend
 ```
 
-There is no root `pnpm dev` or `yarn dev` script. Use `yarn cluster:reload-backend` to rebuild and update the cluster backend after code changes.
+Start the frontend and local backend with their separate workspace commands above. Use `yarn cluster:reload-backend` to rebuild and update the cluster backend after code changes.
 
 ## 3. HOW TO: INTEGRATE A NEW BACKEND (PLUG & PLAY)
 
@@ -419,7 +473,7 @@ dotnet run --project ../TelemetryExample/TelemetryExample.csproj
 dotnet run --project ../TelemetryExample/TelemetryExample.csproj -- --fail
 ```
 
-`pnpm start:example-csharp` is not defined. `dotnet run` is the documented approach. This example emits once and is not an HTTP server. Web applications should also register suitable ASP.NET Core/HTTP instrumentation.
+Start the example with `dotnet run`. It emits once and is not an HTTP server. Web applications should also register suitable ASP.NET Core/HTTP instrumentation.
 
 ## 4. VERIFICATION & TROUBLESHOOTING
 

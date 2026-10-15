@@ -8,7 +8,9 @@
 
 **Monitoring-API:** [Einheitliche Regeln für Logs, Metriken und Traces](apps/backend/src/modules/monitors/README.md) — JSON-Vertrag, Konfiguration, Alert-Historie und Legacy-Migration.
 
-> **Implementierungsstand:** Das Repository verwendet **Yarn Classic, Kind und Helm**. `pnpm install`, `pnpm dev`, `pnpm start:example-csharp` und `infra/docker-compose.local.yml` sind derzeit kein vorhandener, unterstützter Workflow. Die Anleitung unten beschreibt tatsächlich verfügbare Befehle. Die Plattform ist eine lokale Test-/Demoumgebung, keine unverändert produktionsfertige SaaS-Installation.
+**Werkzeuge:** Yarn Classic **1.22.22**, Docker, Kind und Helm. Die Anleitung beschreibt die lokale Installation mit einem Backend im Cluster und einem lokal gestarteten Dashboard.
+
+**Neu hier?** Beginne mit der [Erstinstallation](#first-installation): Abhängigkeiten installieren → Cluster erstellen → [ersten Admin vorbereiten](#first-admin) → Backend starten → [zum ersten Mal anmelden](#first-login). Die Architektur und das Anbinden eigener Anwendungen sind weiter unten beschrieben.
 
 ## 1. ARCHITEKTUR & KOMPONENTEN
 
@@ -118,7 +120,7 @@ WHERE org_slug = {tenant:String};
 
 **Isolationsmodell:** gemeinsame Tabellen mit serverseitig erzwungenen Tenant-Filtern, keine separate Datenbank pro Kunde und keine automatisch wirksame ClickHouse Row-Level Security. Direkter Datenbankzugriff kann diese API-Prüfungen umgehen und muss separat geschützt werden.
 
-Die lokale ClickHouse-Installation verwendet temporären Pod-Speicher und eine Telemetrie-TTL von sieben Tagen. Pod-Neuerstellung oder Cluster-Löschung kann die Daten entfernen; dies ist kein Backup. Die Benutzer-/Team-Verwaltung nutzt SQLite auf einem Backend-PVC. Deshalb erlaubt das Chart nur eine Backend-Replik. Eine Cluster-Löschung entfernt auch diese lokale Datenhaltung.
+Das Chart aktiviert standardmäßig persistenten Speicher: einen 10-GiB-PVC für ClickHouse und einen 1-GiB-PVC für die SQLite-Datenbank des Backends. Pod-Neuerstellungen behalten diese Volumes; bei deaktivierter Persistenz wird temporärer Pod-Speicher verwendet. Der Collector konfiguriert für seine Telemetrie-Tabellen eine TTL von sieben Tagen. PVCs ersetzen kein Backup; beim Löschen des lokalen Kind-Clusters kann die lokale Datenhaltung verloren gehen. Die gemeinsame SQLite-Datei begrenzt das Backend auf eine Replik.
 
 ### UI Layer und dynamische Services — TASK-INT-1
 
@@ -126,7 +128,9 @@ Service-Namen werden durch mandantenbezogene **`DISTINCT ServiceName`**-Abfragen
 
 Filteroptionen werden beim Laden und anschließend **alle 30 Sekunden** aktualisiert. „Neue Services erscheinen immer in weniger als 30 Sekunden“ ist keine Garantie: SDK-Exportintervalle, Collector-Batching, Speicherung und UI-Polling addieren sich. Ein Service erscheint erst nach tatsächlich gespeicherter Telemetrie. Trace-basierte Performance-Ansichten benötigen Traces; reine Metriken erzeugen keine Request-Spans.
 
-## 2. LOCAL SETUP & INSTALLATION
+<a id="first-installation"></a>
+
+## 2. ERSTINSTALLATION
 
 ### Voraussetzungen
 
@@ -137,6 +141,23 @@ Filteroptionen werden beim Laden und anschließend **alle 30 Sekunden** aktualis
 
 Die folgenden Shell-Beispiele verwenden **Bash**. PowerShell unterstützt die Heredocs nicht unverändert. Yarn muss vorab installiert und im PATH verfügbar sein.
 
+Unter Windows diese Schritte in **Git Bash** ausführen und Docker Desktop vorher starten. Falls Yarn noch nicht installiert ist:
+
+```bash
+npm install --global yarn@1.22.22
+```
+
+Vor dem Klonen prüfen, dass alle benötigten Werkzeuge erreichbar sind:
+
+```bash
+node --version                 # mindestens v24
+yarn --version                 # 1.22.22
+docker version                 # Client UND laufende Engine
+kind version
+kubectl version --client
+helm version --short
+```
+
 ### TASK-SETUP-1: Klonen und installieren
 
 ```bash
@@ -145,9 +166,9 @@ cd telemetry-hub
 yarn install --frozen-lockfile
 ```
 
-Yarn ist durch `packageManager` und `yarn.lock` vorgegeben. `pnpm install` ist keine getestete Alternative; ein Wechsel benötigt eine eigene Workspace-/Lockfile-Migration.
+Die Workspaces im Root verwenden Yarn; `packageManager` und `yarn.lock` legen die Version und Abhängigkeiten fest. Alle folgenden Yarn-Befehle werden im Repository-Root ausgeführt.
 
-### TASK-SETUP-2: Cluster und Secrets vorbereiten
+### TASK-SETUP-2: Lokalen Cluster erstellen
 
 ```bash
 yarn cluster:create
@@ -156,7 +177,25 @@ kubectl --context kind-observability create namespace telemetry-hub
 
 Bei vorhandenem Cluster beziehungsweise Namespace diese Erstellung überspringen. **Vor dem Helm-Deployment** müssen `backend-auth` und `telemetry-ingestion` vorhanden sein; das Chart erstellt diese Secrets nicht selbst.
 
-Das folgende Bootstrap ist für eine **frische lokale Installation**. Es erzeugt einen Admin für `demo`, das Team `backend`, einen Client-Key und ein unabhängiges Collector-Token. `kubectl create` verhindert das versehentliche Überschreiben bestehender Secrets. Den einmalig ausgegebenen Client-Key sicher in die Zielanwendung übernehmen.
+<a id="first-admin"></a>
+
+### TASK-SETUP-3: Ersten Administrator vorbereiten
+
+Es gibt **kein vorgegebenes Admin-Passwort und keine öffentliche Registrierung**. Der erste Benutzer wird über `AUTH_USERS_JSON` vorbereitet. Beim ersten Backend-Start liest `PlatformStore` diese Konfiguration und legt den Benutzer sowie seine Teams in SQLite an.
+
+Das folgende Bootstrap bereitet diese Zugangsdaten vor:
+
+| Anmeldung | Wert im Beispiel |
+|---|---|
+| Organisation | demo |
+| E-Mail | admin@example.com |
+| Rolle | admin |
+| Angelegtes Team | backend |
+| Passwort | Wird unten verdeckt abgefragt; 12–128 Zeichen |
+
+Für eigene Werte `tenantSlug`, `email` und `teams` im Beispiel anpassen; `orgSlug` und `teamId` im Ingestion-Key müssen dazu passen. Den selbst gewählten Klartext des Passworts für die spätere Anmeldung merken. Im Kubernetes-Secret wird sein gesalzener scrypt-Hash gespeichert.
+
+Der Block erstellt die Secrets `backend-auth` und `telemetry-ingestion`, einen zufälligen Client-Key und ein unabhängiges Collector-Token. Er ist für eine **frische lokale Installation** gedacht. `kubectl create` überschreibt keine bestehenden Secrets. Den einmalig ausgegebenen Client-Key für die spätere Anbindung einer Anwendung aufbewahren; er ist kein Dashboard-Passwort.
 
 ```bash
 read -r -s -p "Lokales Admin-Passwort: " HUB_ADMIN_PASSWORD
@@ -165,8 +204,8 @@ export HUB_ADMIN_PASSWORD
 node --input-type=module <<'NODE'
 import { randomBytes, createHash, scryptSync } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
-if (!process.env.HUB_ADMIN_PASSWORD || process.env.HUB_ADMIN_PASSWORD.length < 12)
-  throw new Error('Bitte mindestens 12 Zeichen für das Admin-Passwort verwenden.');
+if (!process.env.HUB_ADMIN_PASSWORD || process.env.HUB_ADMIN_PASSWORD.length < 12 || process.env.HUB_ADMIN_PASSWORD.length > 128)
+  throw new Error('Bitte 12 bis 128 Zeichen für das Admin-Passwort verwenden.');
 const key = randomBytes(32).toString('base64url');
 const salt = randomBytes(16);
 const passwordHash = `scrypt$${salt.toString('hex')}$${scryptSync(process.env.HUB_ADMIN_PASSWORD, salt, 64).toString('hex')}`;
@@ -199,45 +238,15 @@ Das Bootstrap ist nicht transaktional: Scheitert die zweite Erstellung, kann das
 
 Kubernetes Secrets sind base64-kodiert, nicht dadurch verschlüsselt. Produktion benötigt eingeschränkte RBAC-Rechte, Verschlüsselung der Datenhaltung und einen geeigneten Secret Manager.
 
-### TASK-ONBOARD-1: Eigene Backends mit Environment integrieren
-
-Das Instrumentierungs-SDK liest `OTEL_RESOURCE_ATTRIBUTES`. Für Environment-Filter
-ist `deployment.environment.name` erforderlich; allein der Kubernetes-Namespace
-oder `ASPNETCORE_ENVIRONMENT` erzeugt dieses Attribut nicht automatisch.
+Nur die Existenz prüfen, ohne Secret-Inhalte auszugeben:
 
 ```bash
-node scripts/deploy-backend.mjs --name sample-api --image local/sample:v1 \
-  --service sample-api --org demo --team platform --env staging \
-  --build-context /path/to/sample
-# Plan prüfen, dann denselben Aufruf mit --apply ausführen.
+kubectl --context kind-observability -n telemetry-hub get secret backend-auth telemetry-ingestion
 ```
 
-Die Deployment-Variablen enthalten beispielsweise:
+`AUTH_USERS_JSON` ist eine einmalige Initialisierung pro Organisation/E-Mail in der jeweiligen SQLite-Datenbank. Änderungen am Secret setzen das Passwort eines bereits initialisierten Benutzers nicht zurück; gelöschte Bootstrap-Benutzer werden nicht beim Neustart neu angelegt. Weitere Benutzer und Passwortänderungen später über **Administration** verwalten.
 
-```yaml
-- name: OTEL_RESOURCE_ATTRIBUTES
-  value: deployment.environment.name=staging,org.slug=demo,team.id=platform
-- name: DEPLOY_ENV
-  value: staging
-```
-
-`--env` ist verpflichtend und wird zusätzlich im Ingestion-Key-Eintrag als `env`
-gespeichert. Die Hub-Gateway leitet dieses Environment mit den vertrauenswürdigen
-Org-/Team-Headern an den Collector weiter. Der Collector schreibt es vor dem
-Batching nach `deployment.environment.name` für Logs, Traces und Metriken.
-Ein bestehender Key ohne Environment wird beim erneuten Onboarding gebunden;
-ein bereits anders gebundener Key benötigt `--rotate-key`.
-
-Für manuelle Integrationen darf ein Key-Eintrag optional `"env": "staging"`
-enthalten. Bestehende Einträge ohne `env` funktionieren weiterhin mit den
-SDK-Resource-Attributen. Der Collector übernimmt das ältere
-`deployment.environment` nur, wenn der aktuelle Attributname fehlt.
-Ohne beide Attribute und ohne Key-Environment bleibt das Environment unbekannt;
-der Hub erfindet keinen Standardwert. Alte Telemetrie wird nicht nachträglich
-umbenannt. Das SDK muss Resource-Metadaten für alle gewünschten Signalarten
-exportieren; `OTEL_RESOURCE_ATTRIBUTES` setzt keine Instrumentierung in Gang.
-
-### TASK-SETUP-3: Infrastruktur und Dashboard starten
+### TASK-SETUP-4: Infrastruktur und Dashboard starten
 
 ```bash
 yarn cluster:init
@@ -245,34 +254,6 @@ yarn cluster:status
 ```
 
 `cluster:init` baut das Backend-Image, lädt es in Kind und installiert beziehungsweise aktualisiert das Helm-Release `observability` im Namespace `telemetry-hub`. ClickHouse, Collector und Backend laufen im Cluster.
-
-#### TASK-INFRA-METRICS-1: CPU und Speicher beobachten
-
-`cluster:deploy` installiert auch den auf Version 0.8.1 fixierten Metrics Server.
-Für einen bestehenden Kind-Cluster kann er separat mit `yarn cluster:metrics`
-installiert werden. Die Ausnahme `--kubelet-insecure-tls` gilt ausschließlich für
-den lokalen Kind-Cluster mit seinen selbst erzeugten Kubelet-Zertifikaten.
-
-- [x] Node-CPU und Speicher mit Kapazität, Allocatable, Betriebssystem und Runtime.
-- [x] Pod- und Container-Verbrauch in mCPU und MiB; Details zeigen Requests,
-  Limits, Image-ID, Readiness und Restarts.
-- [x] Workload-Verbrauch aggregiert zugehörige Pods anhand von Namespace und Label-Selector.
-- [x] Image-Ansicht aggregiert die Container des ausgewählten Namespace.
-- [x] Fehlende oder über 90 Sekunden alte Samples bleiben unbekannt; ohne
-  vollständige Container-Samples wird kein scheinbar vollständiger Gesamtwert angezeigt.
-
-```bash
-kubectl --context kind-observability top nodes
-kubectl --context kind-observability top pods -n telemetry-hub --containers
-```
-
-Die Metrics API liefert aktuelle CPU-Auslastung und Memory-Working-Set. Disk,
-Netzwerk und dauerhafte historische Infrastruktur-Metriken brauchen eine eigene
-Collector-/Kubelet-Pipeline. Images verbrauchen selbst keine CPU; die Image-Ansicht
-zeigt den Verbrauch ihrer laufenden Container. Nicht gesetzte Requests/Limits
-werden als `—` dargestellt.
-
-> `docker-compose -f infra/docker-compose.local.yml up -d` ist derzeit nicht ausführbar: Die referenzierte Datei fehlt. Kind/Helm ist der vorhandene Infrastrukturpfad.
 
 Jeweils in einem eigenen Terminal geöffnet lassen:
 
@@ -286,7 +267,16 @@ yarn ports:backend
 yarn dev:frontend
 ```
 
-Dashboard: `http://localhost:5000` oder die von Vite ausgegebene Ausweichadresse. Backend: `http://localhost:3001`. Anmeldung mit Organisation `demo`, `admin@example.com` und dem gewählten Passwort. Browser-Anmeldung und Ingestion-Key sind getrennte Mechanismen. Vite-Fallbackports 5000–5003 sind in der Backend-CORS-Konfiguration erlaubt; bei anderen Ports die Origin-Konfiguration prüfen.
+<a id="first-login"></a>
+
+### TASK-SETUP-5: Erster Login und weitere Benutzer
+
+1. `http://localhost:5000` öffnen oder die von Vite ausgegebene Ausweichadresse verwenden. Der Backend-Port-Forward muss weiterlaufen; die API ist unter `http://localhost:3001` erreichbar.
+2. Mit Organisation **demo**, E-Mail **admin@example.com** und dem in TASK-SETUP-3 gewählten Passwort anmelden. Bei angepassten Werten die eigenen Angaben verwenden. Ein frisch angelegtes Konto steht nach dem ersten Backend-Start zur Verfügung.
+3. **Administration** öffnen. Das Bootstrap hat das Team **backend** bereits angelegt; dort lassen sich weitere Teams und Benutzer mit Rolle und Team-Zuordnung anlegen sowie Passwörter ändern.
+4. Anschließend eine Anwendung gemäß Abschnitt 3 anbinden, damit eigene Telemetrie im Dashboard erscheint. Dafür den Client-Key verwenden, nicht das Admin-Passwort.
+
+Vite-Fallbackports 5000–5003 sind in der Backend-CORS-Konfiguration erlaubt; bei anderen Ports die Origin-Konfiguration prüfen. Ohne erfolgreichen Bootstrap gibt es keine nutzbaren Standard-Zugangsdaten. Bei Login-Problemen Organisation/E-Mail, laufenden Backend-Port-Forward und die verwendete SQLite-Datenbank prüfen. Die lokale Entwicklungsdatenbank und der Backend-PVC im Cluster sind getrennte Benutzerbestände.
 
 ### Optional: Backend lokal mit einer .env entwickeln
 
@@ -322,7 +312,7 @@ yarn dev:backend
 # Frontend separat: yarn dev:frontend
 ```
 
-Ein Root-Skript `pnpm dev` beziehungsweise `yarn dev` existiert nicht. Cluster-Backend nach Codeänderungen mit `yarn cluster:reload-backend` aktualisieren.
+Frontend und lokales Backend mit den getrennten Workspace-Befehlen oben starten. Das Cluster-Backend nach Codeänderungen mit `yarn cluster:reload-backend` aktualisieren.
 
 ## 3. HOW TO: NEUES BACKEND INTEGRIEREN (PLUG & PLAY)
 
@@ -481,7 +471,45 @@ dotnet run --project ../TelemetryExample/TelemetryExample.csproj
 dotnet run --project ../TelemetryExample/TelemetryExample.csproj -- --fail
 ```
 
-`pnpm start:example-csharp` ist nicht definiert und startet kein Beispiel. `dotnet run` ist hier der dokumentierte Weg. Das Beispiel sendet einmalig und ist kein HTTP-Server. Für Web-Anwendungen zusätzlich passende ASP.NET-Core-/HTTP-Instrumentierungen registrieren.
+Das Beispiel mit `dotnet run` starten. Es sendet einmalig und ist kein HTTP-Server. Für Web-Anwendungen zusätzlich passende ASP.NET-Core-/HTTP-Instrumentierungen registrieren.
+
+### TASK-ONBOARD-4: Environment beim Deployment setzen
+
+Das Instrumentierungs-SDK liest `OTEL_RESOURCE_ATTRIBUTES`. Für Environment-Filter
+ist `deployment.environment.name` erforderlich; allein der Kubernetes-Namespace
+oder `ASPNETCORE_ENVIRONMENT` erzeugt dieses Attribut nicht automatisch.
+
+```bash
+node scripts/deploy-backend.mjs --name sample-api --image local/sample:v1 \
+  --service sample-api --org demo --team platform --env staging \
+  --build-context /path/to/sample
+# Plan prüfen, dann denselben Aufruf mit --apply ausführen.
+```
+
+Die Deployment-Variablen enthalten beispielsweise:
+
+```yaml
+- name: OTEL_RESOURCE_ATTRIBUTES
+  value: deployment.environment.name=staging,org.slug=demo,team.id=platform
+- name: DEPLOY_ENV
+  value: staging
+```
+
+`--env` ist verpflichtend und wird zusätzlich im Ingestion-Key-Eintrag als `env`
+gespeichert. Die Hub-Gateway leitet dieses Environment mit den vertrauenswürdigen
+Org-/Team-Headern an den Collector weiter. Der Collector schreibt es vor dem
+Batching nach `deployment.environment.name` für Logs, Traces und Metriken.
+Ein bestehender Key ohne Environment wird beim erneuten Onboarding gebunden;
+ein bereits anders gebundener Key benötigt `--rotate-key`.
+
+Für manuelle Integrationen darf ein Key-Eintrag optional `"env": "staging"`
+enthalten. Bestehende Einträge ohne `env` funktionieren weiterhin mit den
+SDK-Resource-Attributen. Der Collector übernimmt das ältere
+`deployment.environment` nur, wenn der aktuelle Attributname fehlt.
+Ohne beide Attribute und ohne Key-Environment bleibt das Environment unbekannt;
+der Hub erfindet keinen Standardwert. Alte Telemetrie wird nicht nachträglich
+umbenannt. Das SDK muss Resource-Metadaten für alle gewünschten Signalarten
+exportieren; `OTEL_RESOURCE_ATTRIBUTES` setzt keine Instrumentierung in Gang.
 
 ## 4. VERIFIKATION UND TROUBLESHOOTING
 
@@ -523,6 +551,32 @@ Der Header wird über stdin statt als Prozessargument an curl übergeben. Keine 
 | Port-Forward: `connection refused` im Pod | Prozess lauscht nicht am Zielport. Bind-Adresse, Container-Logs und tatsächlichen HTTP-Port prüfen; `containerPort` öffnet keinen Listener. |
 | Pod: `CreateContainerConfigError` | Secret oder erforderlicher Secret-Schlüssel fehlt. Vor Helm provisionieren. |
 | Anmeldung scheitert | Org-Slug, Bootstrap-Benutzer und Passwort prüfen. Session-Cookie ist HttpOnly/Secure/SameSite=Lax: Hostnamen nicht mischen; bei Bedarf lokale HTTPS-Konfiguration verwenden. |
+
+### TASK-INFRA-METRICS-1: CPU und Speicher beobachten
+
+`cluster:deploy` installiert auch den auf Version 0.8.1 fixierten Metrics Server.
+Für einen bestehenden Kind-Cluster kann er separat mit `yarn cluster:metrics`
+installiert werden. Die Ausnahme `--kubelet-insecure-tls` gilt ausschließlich für
+den lokalen Kind-Cluster mit seinen selbst erzeugten Kubelet-Zertifikaten.
+
+- [x] Node-CPU und Speicher mit Kapazität, Allocatable, Betriebssystem und Runtime.
+- [x] Pod- und Container-Verbrauch in mCPU und MiB; Details zeigen Requests,
+  Limits, Image-ID, Readiness und Restarts.
+- [x] Workload-Verbrauch aggregiert zugehörige Pods anhand von Namespace und Label-Selector.
+- [x] Image-Ansicht aggregiert die Container des ausgewählten Namespace.
+- [x] Fehlende oder über 90 Sekunden alte Samples bleiben unbekannt; ohne
+  vollständige Container-Samples wird kein scheinbar vollständiger Gesamtwert angezeigt.
+
+```bash
+kubectl --context kind-observability top nodes
+kubectl --context kind-observability top pods -n telemetry-hub --containers
+```
+
+Die Metrics API liefert aktuelle CPU-Auslastung und Memory-Working-Set. Disk,
+Netzwerk und dauerhafte historische Infrastruktur-Metriken brauchen eine eigene
+Collector-/Kubelet-Pipeline. Images verbrauchen selbst keine CPU; die Image-Ansicht
+zeigt den Verbrauch ihrer laufenden Container. Nicht gesetzte Requests/Limits
+werden als `—` dargestellt.
 
 ### Diagnose und Qualitätschecks
 

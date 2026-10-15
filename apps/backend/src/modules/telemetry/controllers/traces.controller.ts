@@ -4,7 +4,7 @@ import { Tenant } from '../../auth/tenant-request.decorator';
 import type { TenantScope } from '../../auth/auth.types';
 import { LogsQueryDto } from "../../../dto/logs-query.dto";
 import { TelemetryQueryDto } from "../../../dto/query.dto";
-import { TraceIdParamDto } from "../../../dto/trace.dto";
+import { TraceDetailQueryDto, TraceIdParamDto } from "../../../dto/trace.dto";
 import { ClickhouseService } from "../services/clickhouse.service";
 
 @ApiTags('traces')
@@ -28,10 +28,9 @@ export class TracesController {
   @Get("detail")
   async getTraceDetail(
     @Tenant() tenant: TenantScope,
-    @Query() params: TraceIdParamDto,
-    @Query() query: TelemetryQueryDto,
+    @Query() query: TraceDetailQueryDto,
   ) {
-    return this.clickhouse.getTraceById(tenant, params.traceId, query.env);
+    return this.clickhouse.getTraceById(tenant, query.traceId, query.env);
   }
 
   @Get(":traceId")

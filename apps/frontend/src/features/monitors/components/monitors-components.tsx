@@ -6,6 +6,7 @@ import { api, unwrap } from '@/shared/api/client';
 import { monitorPayload } from '../api';
 import { MonitorHistoryChart } from './monitor-history-chart';
 import { MonitorConditionSummary } from './monitor-condition-summary';
+import { MonitorStateHistory } from './monitor-state-history';
 import { calculationLabels } from '../log-builder';
 import { displayLogQuery, resolveLogQuery } from '../log-query-input';
 import { TimeRangePicker } from '@/app/components/timer-range.picker';
@@ -411,10 +412,10 @@ export const MonitorDetail: React.FC<{
     v === undefined
       ? '—'
       : Math.abs(v) >= 1_000_000
-        ? `${(v / 1_000_000).toFixed(2)}M`
+        ? `${Number((v / 1_000_000).toFixed(2))}M`
         : Math.abs(v) >= 1_000
-          ? `${(v / 1_000).toFixed(2)}k`
-          : v.toFixed(v < 10 ? 3 : 0);
+          ? `${Number((v / 1_000).toFixed(2))}k`
+          : String(Number(v.toFixed(3)));
 
   return (
     <div className="flex h-full flex-col">
@@ -489,22 +490,7 @@ export const MonitorDetail: React.FC<{
         </section>
 
         {/* History */}
-        <section aria-label="State history" className="border-b border-border">
-          <div className="px-5 py-3">
-            <h3 className="text-xs font-semibold">
-              State history
-              <span className="ml-2 text-xs font-normal text-muted-foreground">
-                {events.length} event{events.length === 1 ? '' : 's'}
-              </span>
-            </h3>
-          </div>
-            {events.length === 0 ? (
-              <p className="px-5 pb-3 text-xs text-muted-foreground">
-                No state changes yet
-              </p>
-            ) : (
-              <ul className="divide-y">
-                {events.map((e) => (
+        <MonitorStateHistory key={monitor.id} events={events} renderEvent={(e) => (
                   <li
                     key={e.id}
                     className="flex flex-wrap items-center gap-x-3 gap-y-1 px-5 py-2 text-xs"
@@ -519,10 +505,7 @@ export const MonitorDetail: React.FC<{
                         (e.value !== undefined ? `value=${e.value}` : '')}
                     </span>
                   </li>
-                ))}
-              </ul>
-            )}
-        </section>
+        )} />
 
         <div className="px-5 py-3 text-[11px] text-muted-foreground">
           Created {new Date(monitor.createdAt).toLocaleString()} · Updated{' '}
