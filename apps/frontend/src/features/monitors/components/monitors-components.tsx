@@ -429,8 +429,6 @@ export const MonitorDetail: React.FC<{
           </div>
         </div>
         <div className="ml-auto flex max-w-full flex-wrap items-center gap-1">
-          {onEvaluate && <Button variant="outline" size="sm" className="h-8 px-2 text-xs" disabled={evaluating} onClick={onEvaluate}>
-            {evaluating ? 'Evaluating…' : 'Evaluate now'}</Button>}
           <Button variant="outline" size="sm" className="h-8 px-2 text-xs" onClick={onEdit}>Edit</Button>
           <Button
             variant="outline"

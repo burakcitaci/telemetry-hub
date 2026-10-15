@@ -13,7 +13,7 @@ import type { LogRecord } from '@/features/logs/types';
 import { AttributeSection, CopyButton, DetailField, JsonPanel } from '@/shared/components/telemetry-detail';
 import { formatTelemetryTimestamp } from '@/shared/lib/telemetry';
 import { cn } from '@/lib/utils';
-import { severityAccent } from '../severity';
+import { severityAccent } from '../../../components/utils/severity';
 
 interface LogDetailSheetProps {
   log: LogRecord | null;
@@ -23,8 +23,8 @@ interface LogDetailSheetProps {
 
 const SEVERITY_RULES = [
   { keywords: ['ERROR', 'FATAL'], variant: 'destructive' as const },
-  { keywords: ['WARN'],           variant: 'warning' as const },
-  { keywords: ['INFO'],           variant: 'info' as const },
+  { keywords: ['WARN'], variant: 'warning' as const },
+  { keywords: ['INFO'], variant: 'info' as const },
 ];
 
 function SeverityBadge({ severity }: { severity: string }) {
@@ -52,32 +52,32 @@ export function LogDetailSheet({ log, isOpen, onClose }: LogDetailSheetProps) {
           Message, correlation identifiers, and attributes for a log from {serviceName}.
         </SheetDescription>
 
-     <header className="border-b border-border bg-muted/20">
-  {/* Severity accent line */}
-  <div className={cn('h-1 w-full', severityAccent(log.SeverityText))} />
+        <header className="border-b border-border bg-muted/20">
+          {/* Severity accent line */}
+          <div className={cn('h-1 w-full', severityAccent(log.SeverityText))} />
 
-  <div className="flex items-start justify-between gap-3 px-5 py-4">
-    <div className="flex min-w-0 items-start gap-3">
-      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border bg-background">
-        <FileText className="h-4 w-4" />
-      </div>
-      <div className="min-w-0">
-        <h2 className="text-base font-semibold">Log details</h2>
-        <div className="mt-0.5 flex min-w-0 items-center gap-1">
-          <code className="truncate text-xs text-muted-foreground">
-            {log.TraceId || log.SpanId || 'Uncorrelated log record'}
-          </code>
-          {(log.TraceId || log.SpanId) && (
-            <CopyButton value={log.TraceId || log.SpanId} label="Copy correlation ID" />
-          )}
-        </div>
-      </div>
-    </div>
-    <Button variant="ghost" size="sm" className="h-8 w-8 shrink-0 p-0" onClick={onClose} aria-label="Close log details">
-      <X className="h-3.5 w-3.5" />
-    </Button>
-  </div>
-</header>
+          <div className="flex items-start justify-between gap-3 px-5 py-4">
+            <div className="flex min-w-0 items-start gap-3">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border bg-background">
+                <FileText className="h-4 w-4" />
+              </div>
+              <div className="min-w-0">
+                <h2 className="text-base font-semibold">Log details</h2>
+                <div className="mt-0.5 flex min-w-0 items-center gap-1">
+                  <code className="truncate text-xs text-muted-foreground">
+                    {log.TraceId || log.SpanId || 'Uncorrelated log record'}
+                  </code>
+                  {(log.TraceId || log.SpanId) && (
+                    <CopyButton value={log.TraceId || log.SpanId} label="Copy correlation ID" />
+                  )}
+                </div>
+              </div>
+            </div>
+            <Button variant="ghost" size="sm" className="h-8 w-8 shrink-0 p-0" onClick={onClose} aria-label="Close log details">
+              <X className="h-3.5 w-3.5" />
+            </Button>
+          </div>
+        </header>
 
         <div className="grid grid-cols-2 border-b border-border bg-background px-5 py-3 text-xs sm:grid-cols-4">
           <div className="border-r border-border pr-4">

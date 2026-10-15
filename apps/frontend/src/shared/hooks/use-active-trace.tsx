@@ -6,7 +6,7 @@ import {
   type ReactNode,
 } from "react";
 import { platformFilterSearch } from "../lib/platform-filters";
-import { TraceDetailSheet } from "@/components/shared/trace-detail-sheet";
+import { TraceDetailSheet } from "@/features/traces/components/trace-detail-sheet";
 
 interface ActiveTraceContextValue {
   activeTraceId: string | null;
