@@ -20,7 +20,8 @@ test('generic numeric log attributes execute correctly for strings, zero, missin
   skip: process.env.TEST_KIND_CLICKHOUSE !== '1', timeout: 120_000,
 }, async () => {
   const clickhouse = new ClickhouseService({ error() {} } as any, new ConfigService());
-  const fixture = `(SELECT now64(3) - INTERVAL 1 SECOND AS Timestamp, 'demo' AS org_slug,
+  // Anchor to the evaluation bound so kubectl latency cannot move fixtures outside the window.
+  const fixture = `(SELECT fromUnixTimestamp64Milli({to:Int64}) - INTERVAL 1 SECOND AS Timestamp, 'demo' AS org_slug,
     'backend' AS team_id, 'dotnet-api' AS ServiceName, map('org.slug', 'demo') AS ResourceAttributes,
     'Generated forecasts' AS Body, 9 AS SeverityNumber, 'Information' AS SeverityText,
     if(number = 4, map('RequestPath', '/WeatherForecast'),

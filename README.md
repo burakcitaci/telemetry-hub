@@ -6,6 +6,8 @@
 
 **Zielgruppen:** Entwickler integrieren Anwendungen, Administratoren verwalten Zugänge und Teams, Kunden untersuchen den ihnen zugewiesenen Datenbereich.
 
+**Monitoring-API:** [Einheitliche Regeln für Logs, Metriken und Traces](apps/backend/src/modules/monitors/README.md) — JSON-Vertrag, Konfiguration, Alert-Historie und Legacy-Migration.
+
 > **Implementierungsstand:** Das Repository verwendet **Yarn Classic, Kind und Helm**. `pnpm install`, `pnpm dev`, `pnpm start:example-csharp` und `infra/docker-compose.local.yml` sind derzeit kein vorhandener, unterstützter Workflow. Die Anleitung unten beschreibt tatsächlich verfügbare Befehle. Die Plattform ist eine lokale Test-/Demoumgebung, keine unverändert produktionsfertige SaaS-Installation.
 
 ## 1. ARCHITEKTUR & KOMPONENTEN

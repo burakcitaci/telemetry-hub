@@ -273,3 +273,31 @@ This step changes application code and isolated test databases only; it does not
 Only persisted transitions count as alerts. Notification failures are separate from evaluation errors and do not replay transitions. Instrumentation uses the existing providers and their lifecycle; monitoring creates no exporter, reader or new SDK instance. Test-only MeterProvider instances collect metrics locally and are shut down after each test.
 
 Review checkpoint: **TASK-MON-3.f is uncommitted; pause before TASK-MON-3.g** (README and final integration/cutover verification). The two inventoried live legacy monitors have not been upgraded.
+
+## TASK-MON-3.g — Final integration and operating guide (2026-10-15)
+
+- [x] Committed reviewed TASK-MON-3.f as **11161a2**. Generated Graphify files and unrelated frontend changes were excluded; no push was performed.
+- [x] TASK-PRE.1: inspected the graph before the block. Existing shared boundaries include PlatformStore (degree 53), TenantScope (degree 95), MonitorEvaluatorService (degree 16) and MonitorsController (degree 18). The graph remains an older snapshot; current source confirms AppModule imports MonitorsModule, AuthModule exports the shared store/admin/guard and TelemetryModule exports the existing ClickhouseService. No new runtime wiring was necessary beyond the already-tested production providers from 3.e/3.f.
+- [x] Added modules/monitors/README.md and linked it from both root READMEs. It documents all canonical routes, strict request fields, three signal examples, query-to-storage mapping, quantile/overflow policy, state and notification semantics, retention/configuration, operational metrics, test commands and the explicit legacy cutover/rollback procedure.
+- [x] Documented operational limits accurately: the existing form authors legacy rules, canonical authoring uses JSON, canonical rules have transition history rather than legacy chart samples, and a crash after transition commit can leave a PENDING notification without automatic replay. The single-process MVP does not promise exactly-once external delivery across crashes. Consistent SQLite backup/restore is required to recover the old JSON history view after rollback.
+- [x] Final SQL verification exposed a timing-dependent legacy fixture: server now64 minus one second could fall after the application's query bound because kubectl exec takes time. Anchored the synthetic row to the parameterized evaluation upper bound. The focused failing test then passed; production SQL and frozen legacy files were unchanged.
+- [x] Broader HTTP validation exposed an older infrastructure fixture that omitted metric timestamps and asserted a superseded response shape (test last changed in 0197c59; resource model changed in 8ca9f6c). Updated only that test's timestamp/window and resource-field expectations. No infrastructure implementation or monitoring behavior was altered to accommodate the fixture.
+- [x] Complete backend source suite and **all** HTTP integration files: **149/149 passed** after the fixture repair. Monitoring frontend contract/render tests: **10/10 passed**. Both production builds passed; the frontend retains its existing large-chunk warning. git diff --check passed.
+- [x] Real local Kind ClickHouse verification: **6/6 distinct tests passed**, comprising four unified adapter suites and two legacy SQL suites. Five passed in the combined run; the corrected timing fixture passed in its focused rerun. Fixtures cover stored signals, filters/tenant scope, scalar quantiles, cumulative/reset semantics, malformed data, histograms and overflow. Confirmed **0** remaining monitor_adapter_test databases after cleanup; existing signal tables/data were unchanged.
+- [ ] Exactly one manual Graphify refresh was attempted at block end. The installed CLI could not extract 41 document files without a configured semantic backend. No second update or hook was run; graph artifacts remain outside commits. Consequently no claim of an updated graph or measured graph-complexity reduction is made.
+
+### TASK-MON-4 — Final acceptance status
+
+| Task | Result |
+|---|---|
+| TASK-MON-3.a | Parser, bounded syntax/unknown-key warnings and both legacy freeze comments implemented |
+| TASK-MON-3.b | Three adapters reuse existing tenant query service; real ClickHouse fixtures pass |
+| TASK-MON-3.c | Pure comparisons/state and atomic transition persistence; concurrent same-monitor calls cannot duplicate event/notifier |
+| TASK-MON-3.d | DummyNotifier, mute/cooldown, failure receipts and paired recovery implemented |
+| TASK-MON-3.e | Canonical CRUD/status/history, idempotent lazy migration, file-backed restart and 30-day retention implemented |
+| TASK-MON-3.f | Validated configuration and existing OTel APIs; independent fixed metric-label allowlist test passes |
+| TASK-MON-3.g | Operating guide, production-wiring verification and final suites complete; diff awaits review |
+| Deployment / live rule upgrade | Not performed; local snapshot remains 2 inventoried legacy rules, not a production/staging inventory |
+| Graphify refresh | Attempted, unavailable due to the installed CLI's semantic-backend requirement |
+
+The implementation block is complete and ready for final diff review. **TASK-MON-3.g remains uncommitted at this checkpoint**, including the two test-fixture corrections. No deployment, live-rule conversion, push or change to ingestion/SDK initialization/signal schemas was made. Unrelated frontend edits are preserved.

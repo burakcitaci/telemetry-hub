@@ -26,10 +26,11 @@ test('infrastructure HTTP route enforces auth and admin access and returns the c
   const app = await NestFactory.create(TestApplication, { logger: false });
   app.useGlobalInterceptors(new TransformInterceptor());
   let calls = 0;
+  const observedAt = new Date().toISOString();
   Object.assign(app.get(KubernetesService), {
     nodes: async () => { calls++; return [{ metadata: { uid: 'real-node-uid', name: 'worker' },
       status: { capacity: { cpu: '4', memory: '8Gi' }, conditions: [{ type: 'Ready', status: 'True' }] } }]; },
-    metrics: async () => [{ metadata: { name: 'worker' }, usage: { cpu: '1800m', memory: '6Gi' } }],
+    metrics: async () => [{ metadata: { name: 'worker' }, timestamp: observedAt, window: '30s', usage: { cpu: '1800m', memory: '6Gi' } }],
     namespaces: async () => [{ metadata: { name: 'demo' }, status: { phase: 'Active' } }],
     pods: async () => [], services: async () => [],
     workloads: async () => ({ deployments: [], statefulSets: [], daemonSets: [] }),
@@ -55,7 +56,10 @@ test('infrastructure HTTP route enforces auth and admin access and returns the c
     assert.equal(response.headers.get('cache-control'), 'private, no-store');
     const body = await response.json() as any;
     assert.deepEqual(body.nodes, [{ id: 'real-node-uid', hostname: 'worker',
-      status: 'ok', metrics: { cpu: 45, ram: 75, disk: null } }]);
+      status: 'ok', metrics: { cpu: 45, ram: 75, disk: null },
+      usage: { cpuCores: 1.8, memoryBytes: 6 * 1024 ** 3, observedAt, window: '30s' },
+      capacity: { cpuCores: 4, memoryBytes: 8 * 1024 ** 3 },
+      allocatable: { cpuCores: null, memoryBytes: null }, info: { os: '', architecture: '', kubelet: '', runtime: '' } }]);
     assert.deepEqual(body.namespaces, [{ name: 'demo', phase: 'Active', status: 'ok' }]);
     assert.deepEqual(body.workloads, []); assert.deepEqual(body.pods, []); assert.deepEqual(body.services, []);
     assert.equal(body.metricsAvailable, true); assert.match(body.collectedAt, /^\d{4}-/);

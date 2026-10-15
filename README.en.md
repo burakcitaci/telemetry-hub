@@ -6,6 +6,8 @@
 
 **Audience:** Developers integrate applications, administrators manage access and teams, and customers inspect their authorized data scope.
 
+**Monitoring API:** [Unified rules for logs, metrics and traces](apps/backend/src/modules/monitors/README.md) — JSON contract, configuration, alert history and legacy migration.
+
 > **Implementation status:** This repository uses **Yarn Classic, Kind, and Helm**. `pnpm install`, `pnpm dev`, `pnpm start:example-csharp`, and `infra/docker-compose.local.yml` are not currently supported workflows or existing assets. The instructions below use actual repository commands. This is a local testing/demo platform, not a production-ready SaaS deployment without additional work.
 
 ## 1. ARCHITECTURE & COMPONENTS
