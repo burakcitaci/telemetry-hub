@@ -15,6 +15,10 @@ export interface Identity {
   teamId?: string; passwordHash: string; version: number;
 }
 export interface Team { id: string; name: string }
+export interface IngestionKeyRecord {
+  id: string; orgSlug: string; name: string; teamId: string; env?: string;
+  keyHash: string; createdAt: number; expiresAt: number; revokedAt?: number;
+}
 
 /** Persistent single-node control plane; organization is part of every lookup. */
 @Injectable()
@@ -35,6 +39,8 @@ export class PlatformStore implements OnModuleDestroy {
       CREATE TABLE IF NOT EXISTS users (org TEXT, id TEXT, email TEXT, body TEXT NOT NULL,
         PRIMARY KEY(org,id), UNIQUE(org,email));
       CREATE TABLE IF NOT EXISTS teams (org TEXT, id TEXT, name TEXT NOT NULL, PRIMARY KEY(org,id));
+      CREATE TABLE IF NOT EXISTS ingestion_keys (org TEXT, id TEXT, key_hash TEXT NOT NULL UNIQUE,
+        body TEXT NOT NULL, PRIMARY KEY(org,id));
       CREATE TABLE IF NOT EXISTS monitors (org TEXT, id TEXT, body TEXT NOT NULL, PRIMARY KEY(org,id));`);
     this.monitorRepository = new SqliteMonitorRepository(this.db, { retentionDays: retention.days });
     this.db.exec('CREATE TABLE IF NOT EXISTS bootstrap (org TEXT, email TEXT, PRIMARY KEY(org,email));');
@@ -156,6 +162,29 @@ export class PlatformStore implements OnModuleDestroy {
       throw new ConflictException('Reassign monitors before deleting this team.');
     }
     this.db.prepare('DELETE FROM teams WHERE org = ? AND id = ?').run(org, id);
+  }
+
+  ingestionKeys(org: string): IngestionKeyRecord[] {
+    return this.db.prepare('SELECT body FROM ingestion_keys WHERE org = ? ORDER BY id DESC').all(org)
+      .map(row => JSON.parse(String(row.body)));
+  }
+
+  ingestionKeyByHash(hash: string): IngestionKeyRecord | undefined {
+    const row = this.db.prepare('SELECT body FROM ingestion_keys WHERE key_hash = ?').get(hash);
+    return row ? JSON.parse(String(row.body)) : undefined;
+  }
+
+  createIngestionKey(record: IngestionKeyRecord): void {
+    this.db.prepare('INSERT INTO ingestion_keys VALUES (?, ?, ?, ?)')
+      .run(record.orgSlug, record.id, record.keyHash, JSON.stringify(record));
+  }
+
+  revokeIngestionKey(org: string, id: string, revokedAt: number): boolean {
+    const record = this.ingestionKeys(org).find(candidate => candidate.id === id);
+    if (!record) return false;
+    this.db.prepare('UPDATE ingestion_keys SET body = ? WHERE org = ? AND id = ?')
+      .run(JSON.stringify({ ...record, revokedAt }), org, id);
+    return true;
   }
 
   monitors(org: string): Record<string, any>[] {

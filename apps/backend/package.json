@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc && esbuild dist/main.js --bundle --platform=node --format=esm --packages=external --outfile=dist/app.js",
     "start": "node dist/app.js",
-    "dev": "tsx src/main.ts",
+    "dev": "yarn build && yarn start",
     "test": "node --import tsx --test src/**/*.test.ts",
     "typecheck": "tsc --noEmit --incremental false"
   },

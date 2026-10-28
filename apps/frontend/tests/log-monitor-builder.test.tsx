@@ -2,8 +2,9 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { buildLogQuery, readLogBuilder, logRuleSummary } from '../src/features/monitors/log-builder';
+import { buildLogQuery, readHumanLogExpression, readLogBuilder, logRuleSummary } from '../src/features/monitors/log-builder';
 import { LogRuleBuilder } from '../src/features/monitors/components/log-rule-builder';
+import { displayLogQuery, resolveLogQuery } from '../src/features/monitors/log-query-input';
 Object.assign(globalThis, { React });
 
 test('guided filters serialize safely and reopen without losing parameter values', () => {
@@ -20,6 +21,21 @@ test('guided filters serialize safely and reopen without losing parameter values
   assert.equal(readLogBuilder('@value:>bad').advanced, true);
   assert.equal(logRuleSummary('ForecastCount', 'sum'), 'Total of ForecastCount');
   assert.equal(logRuleSummary('', 'count'), 'Number of matching log records');
+});
+
+test('mixed numeric and text predicates normalize to parameterized log filters', () => {
+  const expression = 'input_tokens > 10 AND Sku = "DSK-STD-01" AND language = en';
+  const state = readHumanLogExpression(expression)!;
+  assert.deepEqual(state.filters, [
+    { parameter: 'input_tokens', operator: '>', value: '10' },
+    { parameter: 'Sku', operator: 'equals', value: 'DSK-STD-01' },
+    { parameter: 'language', operator: 'equals', value: 'en' },
+  ]);
+  const resolved = resolveLogQuery(expression, 'count');
+  assert.equal(resolved.query, '@input_tokens:>10 AND @Sku:"DSK-STD-01" AND @language:"en"');
+  assert.equal(resolved.attribute, undefined);
+  assert.equal(displayLogQuery(resolved.query), 'input_tokens > 10 AND Sku = "DSK-STD-01" AND language = "en"');
+  assert.ok(resolveLogQuery('input_tokens > 10 AND Sku != "DSK-STD-01"', 'count').error);
 });
 
 test('guided numeric measure explains value aggregation and optional filters without exposing raw syntax by default', () => {

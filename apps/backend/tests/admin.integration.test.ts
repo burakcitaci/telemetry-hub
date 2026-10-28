@@ -9,6 +9,8 @@ import { MonitorsController } from '../dist/modules/auth/monitors.controller.js'
 import { PlatformStore } from '../dist/modules/auth/platform-store.service.js';
 import { ValidationPipe } from '../dist/common/pipes/validation.pipe.js';
 import { hashPassword } from '../dist/modules/auth/password.js';
+import { IngestionModule } from '../dist/modules/ingestion/ingestion.module.js';
+import { IngestionKeysService } from '../dist/modules/ingestion/ingestion-keys.service.js';
 
 // Run after the backend TypeScript build: tests exercise emitted Nest DI metadata and HTTP routing.
 test('HTTP login, admin CRUD, member authorization, monitor filters and session revocation', async () => {
@@ -21,7 +23,7 @@ test('HTTP login, admin CRUD, member authorization, monitor filters and session 
     ]) };
   class TestApplication {}
   Module({ imports: [ConfigModule.forRoot({ isGlobal: true, ignoreEnvFile: true,
-    skipProcessEnv: true, load: [() => settings] }), AuthModule], controllers: [MonitorsController] })(TestApplication);
+    skipProcessEnv: true, load: [() => settings] }), AuthModule, IngestionModule], controllers: [MonitorsController] })(TestApplication);
   const app = await NestFactory.create(TestApplication, { logger: false });
   app.useGlobalPipes(new ValidationPipe());
   await app.listen(0, '127.0.0.1');
@@ -53,6 +55,19 @@ test('HTTP login, admin CRUD, member authorization, monitor filters and session 
     assert.equal(app.get(PlatformStore).identity('other', 'member@example.com'), undefined);
     const memberCookie = await login('demo', 'member@example.com');
     assert.equal((await call('/admin/users', 'GET', undefined, memberCookie)).status, 403);
+    assert.equal((await call('/admin/ingestion-keys', 'POST', { name: 'denied', teamId: 'platform', expiresInDays: 30 }, memberCookie)).status, 403);
+    const keyResponse = await call('/admin/ingestion-keys', 'POST',
+      { name: 'orders-production', teamId: 'platform', env: 'production', expiresInDays: 30 }, admin);
+    assert.equal(keyResponse.status, 201);
+    const generatedKey = await keyResponse.json();
+    assert.match(generatedKey.key, /^[A-Za-z0-9_-]{43}$/);
+    assert.equal(generatedKey.teamId, 'platform'); assert.equal(generatedKey.env, 'production');
+    const listedKeys = await (await call('/admin/ingestion-keys', 'GET', undefined, admin)).json();
+    assert.equal(listedKeys.length, 1); assert.equal('key' in listedKeys[0], false); assert.equal('keyHash' in listedKeys[0], false);
+    assert.equal((await (await call('/admin/ingestion-keys', 'GET', undefined, other)).json()).length, 0);
+    assert.equal(app.get(IngestionKeysService).resolve(generatedKey.key)?.orgSlug, 'demo');
+    assert.equal((await call(`/admin/ingestion-keys/${generatedKey.id}`, 'DELETE', undefined, admin)).status, 200);
+    assert.equal(app.get(IngestionKeysService).resolve(generatedKey.key), undefined);
     const session = await (await call('/auth/session', 'GET', undefined, memberCookie)).json();
     assert.deepEqual(session.teams.sort(), ['frontend', 'platform']);
     const dto = { name: 'Latency', type: 'metric', query: 'avg:latency', comparator: 'above', threshold: 10,

@@ -32,6 +32,15 @@ test('generic structured log filters and shorthand are validated and parameteriz
   assert.throws(() => validateMonitor({ ...rule, query: 'max(bad name)' }));
 });
 
+test('mixed numeric and text log attributes use AND with case-sensitive parameter keys', () => {
+  const params: Record<string, unknown> = {};
+  const sql = logSearch('@input_tokens:>10 AND @Sku:"DSK-STD-01" AND @language:"en"', params);
+  assert.match(sql, /toFloat64OrNull/); assert.match(sql, / AND /);
+  assert.deepEqual(params, { logKey0: 'input_tokens', logValue0: 10,
+    logKey1: 'Sku', logValue1: 'DSK-STD-01', logKey2: 'language', logValue2: 'en' });
+  assert.doesNotMatch(sql, /DSK-STD-01|input_tokens/);
+});
+
 test('numeric log measures use finite parsed attributes and never fabricate missing values as zero', async () => {
   const measured = { ...rule, query: '@RequestPath:/WeatherForecast', logAttribute: 'order.total', aggregation: 'max', threshold: 5 };
   const fixture = queryFixture([{ ...row(8), unit: 'order.total' }]);

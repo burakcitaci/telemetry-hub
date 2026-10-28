@@ -14,6 +14,8 @@ const records = (scenario === "current" ? [10, 99] : scenario === "temporal" ? [
     : `2026-10-13T00:0${index}:00Z`, count: 1, sum,
 }));
 (window as any).__requests = [];
+const generatedIngestionKey = "fixture_generated_ingestion_key_1234567890";
+const fixtureIngestionKeys: any[] = [];
 api.defaults.adapter = async (config) => {
   (window as any).__requests.push({ url: config.url, method: config.method, body: config.data, params: config.params, headers: config.headers.toJSON() });
   let data: unknown = [];
@@ -34,6 +36,14 @@ api.defaults.adapter = async (config) => {
     { ServiceName: "worker" },
   ];
   else if (config.url?.startsWith("/service-metadata")) data = [];
+  else if (config.url === "/admin/ingestion-keys" && config.method === "post") {
+    const body = JSON.parse(String(config.data));
+    const created = { id: "key-a", ...body, createdAt: Date.now(),
+      expiresAt: Date.now() + body.expiresInDays * 86400000 };
+    fixtureIngestionKeys.splice(0, fixtureIngestionKeys.length, created);
+    data = { ...created, key: generatedIngestionKey };
+  }
+  else if (config.url?.startsWith("/admin/ingestion-keys")) data = fixtureIngestionKeys;
   else if (config.url?.startsWith("/admin/users")) {
     if (scenario === "admin-loading") await new Promise((resolve) => setTimeout(resolve, 500));
     const attempts = (window as any).__requests.filter((request: any) => request.url === "/admin/users").length;

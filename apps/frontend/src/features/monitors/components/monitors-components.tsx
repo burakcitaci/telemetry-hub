@@ -694,7 +694,8 @@ export const MonitorForm: React.FC<{
         <section className="space-y-3 rounded-md border bg-background p-4">
           <h3 className="text-sm font-semibold">Query</h3>
           <Input id="monitor-query" aria-label="Monitor query" value={query} onChange={event => setQuery(event.target.value)}
-            placeholder={type === 'log' ? 'ForecastCount > 5' : type === 'metric' ? 'http.server.request.duration' : '* or span name'} maxLength={4000} />
+            placeholder={type === 'log' ? 'input_tokens > 10 AND Sku = "DSK-STD-01"' : type === 'metric' ? 'http.server.request.duration' : '* or span name'} maxLength={4000} />
+          {type === 'log' && <p className="text-xs text-muted-foreground">Combine numeric and text attributes with AND. Attribute names are case-sensitive: use <code>Sku</code>, not <code>sku</code>, for the sample log. The alert condition below applies to the resulting count or numeric aggregate.</p>}
           {logBuilderError && <p role="alert" className="text-xs text-destructive">{logBuilderError}</p>}
           <details open={type === 'metric'} className="space-y-2"><summary className="cursor-pointer text-xs text-muted-foreground">Optional settings</summary>
             {type === 'metric' ? <label className="block space-y-1 text-xs">Metric stream type

@@ -25,7 +25,7 @@ test('monitor page uses the canonical feature header', () => {
 
 test('monitor authoring follows the shared sheet structure', () => {
   const view = source('features/monitors/components/monitors-view.tsx');
-  const trace = source('components/shared/trace-detail-sheet.tsx');
+  const trace = source('features/traces/components/trace-detail-sheet.tsx');
   const form = source('features/monitors/components/monitors-components.tsx');
   const workSurface = /className="(flex w-\[min\(96vw,1080px\)\][^"]+)"/;
 

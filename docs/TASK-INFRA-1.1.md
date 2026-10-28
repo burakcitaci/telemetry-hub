@@ -10,6 +10,7 @@
 - [x] Patch only backend storage; preserve service name, environment, secrets, unrelated volumes and other deployments.
 - [x] Retain backup on success/failure and provide an explicit recovery command.
 - [x] Validate snapshot WAL contents and storage configuration with Node tests.
+- [x] Run reload orchestration directly through Node on Windows, Linux and macOS; Bash/WSL is not required.
 - [ ] Live migration/rollout: not executed as part of implementing this automation.
 
 ## Usage
@@ -18,7 +19,7 @@
 yarn cluster:reload-backend
 ```
 
-The first run briefly interrupts the backend. Later runs skip migration if storage is already persistent. Requires kubectl, local Node 24, one running backend replica with Node as PID 1 and the fixed kind-observability context / telemetry-hub namespace. A missing PVC is created with 1Gi/default StorageClass and Helm ownership matching the existing observability chart. Existing PVC configuration is retained.
+The first run briefly interrupts the backend. Later runs skip migration if storage is already persistent. Requires Docker, kind, kubectl, local Node 24, one running backend replica with Node as PID 1 and the fixed kind-observability context / telemetry-hub namespace. Bash and WSL are not required. A missing PVC is created with 1Gi/default StorageClass and Helm ownership matching the existing observability chart. Existing PVC configuration is retained.
 
 Backups contain credential hashes and platform settings: keep data/platform-backups private (POSIX modes 0700/0600; on Windows also rely on your user-directory ACLs). They are not removed automatically.
 
@@ -32,4 +33,4 @@ No team assignments are guessed and no ClickHouse records are rewritten. This on
 
 ## Dependency validation
 
-Graphify skill used. Existing graph has no reload/migration/storage nodes; direct script/chart dependencies inspected. Graph refresh attempted but CLI is unavailable. No frontend/root tooling refactor required.
+Graphify skill used. The existing graph's migration/storage community and direct script dependencies were inspected. The single refresh attempt stopped because the document corpus has no configured semantic backend; no retry or hook was run and generated artifacts remain excluded.

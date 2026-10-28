@@ -52,7 +52,7 @@ Fremd-Backend: Go / Python / .NET / Java / ...
 
 ### Ingestion Gateway und Anti-Spoofing — TASK-INT-2
 
-Das Gateway erwartet einen zufälligen Client-Key im Header **`X-API-Key`**. Es berechnet SHA-256 über den unveränderten Key und sucht den Hex-Hash in `INGESTION_KEYS_JSON`. Der passende Eintrag liefert `orgSlug` und `teamId`; unbekannte, abgelaufene oder widerrufene Keys werden abgewiesen.
+Das Gateway erwartet einen zufälligen Client-Key im Header **`X-API-Key`**. Es berechnet SHA-256 über den unveränderten Key und sucht den Hex-Hash im persistenten Admin-Key-Store oder im Bootstrap `INGESTION_KEYS_JSON`. Der passende Eintrag liefert `orgSlug` und `teamId`; unbekannte, abgelaufene oder widerrufene Keys werden abgewiesen.
 
 **Aktuell erfolgt die Prüfung synchron:** Die Registry wird beim Start in eine In-Memory-Map geladen; Hashbildung und Lookup benötigen keinen Datenbankzugriff pro Request. Asynchron ist die HTTP-Weiterleitung. Eine asynchrone Datenbankauflösung mit Cache und sofortiger Invalidierung ist ein möglicher Produktionsausbau, aber nicht implementiert.
 
@@ -312,11 +312,15 @@ yarn dev:backend
 # Frontend separat: yarn dev:frontend
 ```
 
+`dev:backend` kompiliert zuerst mit TypeScript und startet danach das gebündelte Backend. Damit bleiben die Decorator-Metadaten erhalten, die Nest für Dependency Injection und DTO-Validierung benötigt. Nach Backend-Codeänderungen den Befehl erneut starten.
+
 Frontend und lokales Backend mit den getrennten Workspace-Befehlen oben starten. Das Cluster-Backend nach Codeänderungen mit `yarn cluster:reload-backend` aktualisieren.
 
 ## 3. HOW TO: NEUES BACKEND INTEGRIEREN (PLUG & PLAY)
 
 ### TASK-ONBOARD-1: Zugang provisionieren
+
+Empfohlen: Als Organisationsadministrator anmelden, **Administration → Ingestion-Keys** öffnen, Team und Gültigkeit wählen und den Key erzeugen sowie sofort kopieren. Der Klartext wird nur einmal angezeigt; gespeichert wird ausschließlich sein SHA-256-Hash. Diesen Klartext an das externe Backend übergeben und bei OTLP-HTTP-Anfragen als `X-API-Key` senden. Nicht mehr benötigte Keys lassen sich in derselben Tabelle widerrufen.
 
 **Kein proprietäres SDK erforderlich:** Anwendungen verwenden ihr OpenTelemetry-SDK oder eine passende Auto-Instrumentierung. Die Plattform benötigt keine sprachspezifischen Controller für Go, Python oder .NET.
 

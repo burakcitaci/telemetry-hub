@@ -52,7 +52,7 @@ External backend: Go / Python / .NET / Java / ...
 
 ### Ingestion Gateway and anti-spoofing — TASK-INT-2
 
-The gateway expects a random client key in **`X-API-Key`**. It computes SHA-256 over the exact key and looks up the hexadecimal digest in `INGESTION_KEYS_JSON`. A matching record supplies `orgSlug` and `teamId`. Unknown, expired, and revoked keys are rejected.
+The gateway expects a random client key in **`X-API-Key`**. It computes SHA-256 over the exact key and looks up the hexadecimal digest in the persistent admin key store or the bootstrap `INGESTION_KEYS_JSON`. A matching record supplies `orgSlug` and `teamId`. Unknown, expired, and revoked keys are rejected.
 
 **Validation is currently synchronous:** The registry is loaded into an in-memory map at startup. Hashing and lookup do not access a database per request. HTTP forwarding is asynchronous. An asynchronous database lookup with caching and immediate invalidation would be a production enhancement, not an existing feature.
 
@@ -312,11 +312,15 @@ yarn dev:backend
 # Start the frontend separately: yarn dev:frontend
 ```
 
+`dev:backend` first compiles with TypeScript, then starts the bundled backend. This preserves the decorator metadata Nest needs for dependency injection and DTO validation. Restart the command after backend code changes.
+
 Start the frontend and local backend with their separate workspace commands above. Use `yarn cluster:reload-backend` to rebuild and update the cluster backend after code changes.
 
 ## 3. HOW TO: INTEGRATE A NEW BACKEND (PLUG & PLAY)
 
 ### TASK-ONBOARD-1: Provision access
+
+Recommended: sign in as an organization administrator, open **Administration → Ingestion Keys**, select the owning team and expiry, then generate and immediately copy the key. The plaintext is shown once; only its SHA-256 digest is stored. Pass that plaintext to the external backend and send it as `X-API-Key` on OTLP HTTP requests. Revoke the key from the same table when it is no longer needed.
 
 **No proprietary SDK is required.** Use your language's OpenTelemetry SDK or appropriate automatic instrumentation. No language-specific ingestion controller is needed for Go, Python, or .NET.
 

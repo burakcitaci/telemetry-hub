@@ -6,6 +6,7 @@ import type { Server } from 'node:http';
 import { ConfigService } from '@nestjs/config';
 import { IngestionKeysService } from './ingestion-keys.service';
 import { IngestionMiddleware } from './ingestion.middleware';
+import type { PlatformStore } from '../auth/platform-store.service';
 
 const apiKey = 'test-client-key-with-32-random-chars';
 const token = 'test-private-collector-token-with-32-chars';
@@ -15,7 +16,7 @@ const record = { keyHash, orgSlug: 'acme', teamId: 'platform', expiresAt: Date.n
 function keyStore(overrides = {}) {
   return new IngestionKeysService(new ConfigService({
     INGESTION_KEYS_JSON: JSON.stringify([{ ...record, ...overrides }]),
-  }));
+  }), { ingestionKeyByHash: () => undefined } as unknown as PlatformStore);
 }
 
 async function listen(app: ReturnType<typeof express>): Promise<{ server: Server; url: string }> {

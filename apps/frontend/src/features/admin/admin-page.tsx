@@ -6,6 +6,7 @@ import { api, unwrap } from '@/shared/api/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { QueryError, ViewSkeleton } from '@/components/shared/view-skeleton';
+import { IngestionKeysPanel } from './ingestion-keys-panel';
 
 interface Team { id: string; name: string }
 interface User { id: string; email: string; role: UserRole; teamId?: string }
@@ -102,6 +103,7 @@ export default function AdminPage() {
             <Button size="sm" variant="ghost" disabled={busy} className="h-7 text-xs text-destructive" onClick={() => { if (confirm(`${user.email} löschen?`)) void execute(() => api.delete(`/admin/users/${user.id}`)); }}>Löschen</Button>
           </td></tr>)}</tbody></table></div>
       </section>
+      <IngestionKeysPanel teams={teams} />
     </div>
   </main>;
 }
