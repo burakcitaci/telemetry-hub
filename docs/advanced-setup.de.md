@@ -1,4 +1,4 @@
-> Erweiterte Kubernetes-/Kind-Anleitung. Für den einfacheren Compose-Einstieg und den ersten Administrator siehe [README.de.md](../README.de.md).
+> Erweiterte Kubernetes-/Kind-Anleitung. Informationen zur Erstinstallation und zum Onboarding stehen in der [README.de.md](../README.de.md).
 
 # Telemetry Hub
 
@@ -52,7 +52,7 @@ Fremd-Backend: Go / Python / .NET / Java / ...
       dynamische Service-Erkennung aus gespeicherter Telemetrie
 ```
 
-### Ingestion Gateway und Anti-Spoofing — TASK-INT-2
+### Ingestion-Gateway und Tenant-Isolation
 
 Das Gateway erwartet einen zufälligen Client-Key im Header **`X-API-Key`**. Es berechnet SHA-256 über den unveränderten Key und sucht den Hex-Hash im persistenten Admin-Key-Store oder im Bootstrap `INGESTION_KEYS_JSON`. Der passende Eintrag liefert `orgSlug` und `teamId`; unbekannte, abgelaufene oder widerrufene Keys werden abgewiesen.
 
@@ -66,9 +66,9 @@ Die Middleware erzeugt für die Weiterleitung einen neuen Header-Satz:
 
 Client-Cookies, Client-Key, selbst gesetzte Tenant-Header und sonstige Client-Header werden **nicht weitergereicht**. Der OTLP-Body bleibt unverändert; seine Resource-Attribute bereinigt der Collector. Akzeptiert werden HTTP POST, maximal 8 MiB Body sowie `application/x-protobuf` oder `application/json`. Für SDK-Integrationen wird HTTP/protobuf verwendet.
 
-| Geheimnis | Zweck | Empfänger |
-| --- | --- | --- |
-| Client-Key | Identifiziert ein Backend und dessen Org/Team | Nur das betreffende Backend |
+| Geheimnis                   | Zweck                                            | Empfänger                                |
+| --------------------------- | ------------------------------------------------ | ---------------------------------------- |
+| Client-Key                  | Identifiziert ein Backend und dessen Org/Team    | Nur das betreffende Backend              |
 | `INGESTION_COLLECTOR_TOKEN` | Authentifiziert vertrauenswürdige interne Sender | Gateway und interne Plattformkomponenten |
 
 **Ein Hash wird nicht entschlüsselt.** Telemetry Hub hasht jeden eingehenden Key erneut und vergleicht das Ergebnis mit der Registry. Der Hash gehört in die serverseitige Registry, der Klartext-Key in den Secret Store der Anwendung. Der interne Collector-Token darf niemals an Fremd-Backends ausgegeben werden.
@@ -124,7 +124,7 @@ WHERE org_slug = {tenant:String};
 
 Das Chart aktiviert standardmäßig persistenten Speicher: einen 10-GiB-PVC für ClickHouse und einen 1-GiB-PVC für die SQLite-Datenbank des Backends. Pod-Neuerstellungen behalten diese Volumes; bei deaktivierter Persistenz wird temporärer Pod-Speicher verwendet. Der Collector konfiguriert für seine Telemetrie-Tabellen eine TTL von sieben Tagen. PVCs ersetzen kein Backup; beim Löschen des lokalen Kind-Clusters kann die lokale Datenhaltung verloren gehen. Die gemeinsame SQLite-Datei begrenzt das Backend auf eine Replik.
 
-### UI Layer und dynamische Services — TASK-INT-1
+### UI Layer und dynamische Services
 
 Service-Namen werden durch mandantenbezogene **`DISTINCT ServiceName`**-Abfragen über Traces, Logs und unterstützte Gauge-/Sum-/Histogram-Metriktabellen ermittelt. Neue Anwendungen benötigen keine Änderung einer hartcodierten Service-Liste. Filter berücksichtigen den jeweiligen Datenbereich und die Benutzerberechtigungen.
 
@@ -138,12 +138,12 @@ Filteroptionen werden beim Laden und anschließend **alle 30 Sekunden** aktualis
 
 - Node.js **24 oder neuer**, Yarn **1.22.22**, Git;
 - Docker mit laufender Engine, Kind, kubectl und Helm;
-- Bash für die Infrastruktur-Skripte; unter Windows beispielsweise Git Bash mit diesen Werkzeugen im PATH;
+- Bash nur für optionale Shell-Beispiele; unter Windows dafür Git Bash verwenden;
 - optional das .NET-8-SDK für das Beispiel in Abschnitt 3.
 
-Die folgenden Shell-Beispiele verwenden **Bash**. PowerShell unterstützt die Heredocs nicht unverändert. Yarn muss vorab installiert und im PATH verfügbar sein.
+Die Standardbefehle funktionieren in PowerShell, macOS Terminal und Linux-Terminals. Yarn muss vorab installiert und im PATH verfügbar sein. Docker Desktop vor dem Setup starten.
 
-Unter Windows diese Schritte in **Git Bash** ausführen und Docker Desktop vorher starten. Falls Yarn noch nicht installiert ist:
+Falls Yarn noch nicht installiert ist:
 
 ```bash
 npm install --global yarn@1.22.22
@@ -160,7 +160,7 @@ kubectl version --client
 helm version --short
 ```
 
-### TASK-SETUP-1: Klonen und installieren
+### Klonen und installieren
 
 ```bash
 git clone https://github.com/burakcitaci/telemetry-hub.git
@@ -170,92 +170,26 @@ yarn install --frozen-lockfile
 
 Die Workspaces im Root verwenden Yarn; `packageManager` und `yarn.lock` legen die Version und Abhängigkeiten fest. Alle folgenden Yarn-Befehle werden im Repository-Root ausgeführt.
 
-### TASK-SETUP-2: Lokalen Cluster erstellen
+### Ersten Administrator einrichten
 
 ```bash
-yarn cluster:create
-kubectl --context kind-observability create namespace telemetry-hub
+yarn setup
 ```
 
-Bei vorhandenem Cluster beziehungsweise Namespace diese Erstellung überspringen. **Vor dem Helm-Deployment** müssen `backend-auth` und `telemetry-ingestion` vorhanden sein; das Chart erstellt diese Secrets nicht selbst.
+Der Assistent fragt nach Organisations-Slug, E-Mail, erstem Team und Passwort. Er speichert die lokalen Kubernetes-Secrets in `.local/helm-secrets.json` und zeigt einmalig einen Ingestion-Key an. Diesen Key für die spätere Anbindung einer Anwendung sicher speichern; die Datei nicht committen oder weitergeben.
 
 <a id="first-admin"></a>
 
-### TASK-SETUP-3: Ersten Administrator vorbereiten
+Es gibt **kein Standardpasswort und keine öffentliche Registrierung**. Kubernetes-Secrets sind base64-kodiert und dadurch nicht verschlüsselt. Produktion erfordert eingeschränkte RBAC-Rechte, Verschlüsselung der Datenhaltung und einen geeigneten Secret Manager.
 
-Es gibt **kein vorgegebenes Admin-Passwort und keine öffentliche Registrierung**. Der erste Benutzer wird über `AUTH_USERS_JSON` vorbereitet. Beim ersten Backend-Start liest `PlatformStore` diese Konfiguration und legt den Benutzer sowie seine Teams in SQLite an.
-
-Das folgende Bootstrap bereitet diese Zugangsdaten vor:
-
-| Anmeldung | Wert im Beispiel |
-|---|---|
-| Organisation | demo |
-| E-Mail | admin@example.com |
-| Rolle | admin |
-| Angelegtes Team | backend |
-| Passwort | Wird unten verdeckt abgefragt; 12–128 Zeichen |
-
-Für eigene Werte `tenantSlug`, `email` und `teams` im Beispiel anpassen; `orgSlug` und `teamId` im Ingestion-Key müssen dazu passen. Den selbst gewählten Klartext des Passworts für die spätere Anmeldung merken. Im Kubernetes-Secret wird sein gesalzener scrypt-Hash gespeichert.
-
-Der Block erstellt die Secrets `backend-auth` und `telemetry-ingestion`, einen zufälligen Client-Key und ein unabhängiges Collector-Token. Er ist für eine **frische lokale Installation** gedacht. `kubectl create` überschreibt keine bestehenden Secrets. Den einmalig ausgegebenen Client-Key für die spätere Anbindung einer Anwendung aufbewahren; er ist kein Dashboard-Passwort.
-
-```bash
-read -r -s -p "Lokales Admin-Passwort: " HUB_ADMIN_PASSWORD
-echo
-export HUB_ADMIN_PASSWORD
-node --input-type=module <<'NODE'
-import { randomBytes, createHash, scryptSync } from 'node:crypto';
-import { spawnSync } from 'node:child_process';
-if (!process.env.HUB_ADMIN_PASSWORD || process.env.HUB_ADMIN_PASSWORD.length < 12 || process.env.HUB_ADMIN_PASSWORD.length > 128)
-  throw new Error('Bitte 12 bis 128 Zeichen für das Admin-Passwort verwenden.');
-const key = randomBytes(32).toString('base64url');
-const salt = randomBytes(16);
-const passwordHash = `scrypt$${salt.toString('hex')}$${scryptSync(process.env.HUB_ADMIN_PASSWORD, salt, 64).toString('hex')}`;
-const secrets = [
-  ['backend-auth', {
-    AUTH_JWT_SECRET: randomBytes(48).toString('base64url'),
-    AUTH_USERS_JSON: JSON.stringify([{ tenantSlug: 'demo', email: 'admin@example.com',
-      role: 'admin', teams: ['backend'], passwordHash }]),
-  }],
-  ['telemetry-ingestion', {
-    INGESTION_COLLECTOR_TOKEN: randomBytes(32).toString('base64url'),
-    INGESTION_KEYS_JSON: JSON.stringify([{ keyHash: createHash('sha256').update(key).digest('hex'),
-      orgSlug: 'demo', teamId: 'backend', expiresAt: Date.now() + 30 * 86400000 }]),
-  }],
-];
-for (const [name, stringData] of secrets) {
-  const manifest = { apiVersion: 'v1', kind: 'Secret', type: 'Opaque',
-    metadata: { name, namespace: 'telemetry-hub' }, stringData };
-  const result = spawnSync('kubectl', ['--context', 'kind-observability', 'create', '-f', '-'],
-    { input: JSON.stringify(manifest), encoding: 'utf8' });
-  if (result.error || result.status !== 0)
-    throw new Error(`Secret ${name} nicht erstellt; bestehende Secrets und Cluster prüfen. Details aus Sicherheitsgründen unterdrückt.`);
-}
-console.log('Client-Key einmalig sicher übernehmen:', key);
-NODE
-unset HUB_ADMIN_PASSWORD
-```
-
-Das Bootstrap ist nicht transaktional: Scheitert die zweite Erstellung, kann das erste Secret schon existieren. Bestehende Konfiguration prüfen, nicht blind überschreiben. Keine Secrets in Tickets, öffentliche Logs oder Git kopieren.
-
-Kubernetes Secrets sind base64-kodiert, nicht dadurch verschlüsselt. Produktion benötigt eingeschränkte RBAC-Rechte, Verschlüsselung der Datenhaltung und einen geeigneten Secret Manager.
-
-Nur die Existenz prüfen, ohne Secret-Inhalte auszugeben:
-
-```bash
-kubectl --context kind-observability -n telemetry-hub get secret backend-auth telemetry-ingestion
-```
-
-`AUTH_USERS_JSON` ist eine einmalige Initialisierung pro Organisation/E-Mail in der jeweiligen SQLite-Datenbank. Änderungen am Secret setzen das Passwort eines bereits initialisierten Benutzers nicht zurück; gelöschte Bootstrap-Benutzer werden nicht beim Neustart neu angelegt. Weitere Benutzer und Passwortänderungen später über **Administration** verwalten.
-
-### TASK-SETUP-4: Infrastruktur und Dashboard starten
+### Lokalen Cluster starten
 
 ```bash
 yarn cluster:init
 yarn cluster:status
 ```
 
-`cluster:init` baut das Backend-Image, lädt es in Kind und installiert beziehungsweise aktualisiert das Helm-Release `observability` im Namespace `telemetry-hub`. ClickHouse, Collector und Backend laufen im Cluster.
+`cluster:init` erstellt bei Bedarf Kind-Cluster und Namespace, installiert den Metrics Server, wendet die generierten Secrets an, baut und lädt das Backend-Image und installiert beziehungsweise aktualisiert das Helm-Release `observability`. ClickHouse, Collector und Backend laufen im Cluster. Beim ersten Start kann dies einige Minuten dauern.
 
 Jeweils in einem eigenen Terminal geöffnet lassen:
 
@@ -271,11 +205,11 @@ yarn dev:frontend
 
 <a id="first-login"></a>
 
-### TASK-SETUP-5: Erster Login und weitere Benutzer
+### Erster Login und weitere Benutzer
 
 1. `http://localhost:5000` öffnen oder die von Vite ausgegebene Ausweichadresse verwenden. Der Backend-Port-Forward muss weiterlaufen; die API ist unter `http://localhost:3001` erreichbar.
-2. Mit Organisation **demo**, E-Mail **admin@example.com** und dem in TASK-SETUP-3 gewählten Passwort anmelden. Bei angepassten Werten die eigenen Angaben verwenden. Ein frisch angelegtes Konto steht nach dem ersten Backend-Start zur Verfügung.
-3. **Administration** öffnen. Das Bootstrap hat das Team **backend** bereits angelegt; dort lassen sich weitere Teams und Benutzer mit Rolle und Team-Zuordnung anlegen sowie Passwörter ändern.
+2. Mit der Organisation, E-Mail und dem Passwort aus dem Setup-Assistenten anmelden. Das Konto steht nach dem ersten Backend-Start zur Verfügung.
+3. **Administration** öffnen. Der Assistent hat bereits das erste Team angelegt; dort lassen sich weitere Teams und Benutzer mit Rolle und Team-Zuordnung anlegen sowie Passwörter ändern.
 4. Anschließend eine Anwendung gemäß Abschnitt 3 anbinden, damit eigene Telemetrie im Dashboard erscheint. Dafür den Client-Key verwenden, nicht das Admin-Passwort.
 
 Vite-Fallbackports 5000–5003 sind in der Backend-CORS-Konfiguration erlaubt; bei anderen Ports die Origin-Konfiguration prüfen. Ohne erfolgreichen Bootstrap gibt es keine nutzbaren Standard-Zugangsdaten. Bei Login-Problemen Organisation/E-Mail, laufenden Backend-Port-Forward und die verwendete SQLite-Datenbank prüfen. Die lokale Entwicklungsdatenbank und der Backend-PVC im Cluster sind getrennte Benutzerbestände.
@@ -301,13 +235,13 @@ CLICKHOUSE_USERNAME=default
 CLICKHOUSE_PASSWORD=
 AUTH_DB_PATH=./platform.sqlite
 AUTH_JWT_SECRET=<mindestens-32-zufaellige-Zeichen>
-AUTH_USERS_JSON=[{"tenantSlug":"demo","email":"admin@example.com","role":"admin","teams":["backend"],"passwordHash":"<scrypt$SALTHEX$HASHHEX-aus-dem-Bootstrap>"}]
+AUTH_USERS_JSON=[{"tenantSlug":"demo","email":"<E-Mail-aus-dem-Setup>","role":"admin","teams":["backend"],"passwordHash":"<scrypt$SALTHEX$HASHHEX-aus-.local/helm-secrets.json>"}]
 INGESTION_COLLECTOR_ENDPOINT=http://localhost:4319
 INGESTION_COLLECTOR_TOKEN=<identisches-internes-Token-wie-im-Collector>
 INGESTION_KEYS_JSON=[{"keyHash":"<SHA256_HEX_OF_PROVISIONED_CLIENT_KEY>","orgSlug":"demo","teamId":"backend","expiresAt":1893456000000}]
 ```
 
-`<SHA256_HEX_OF_PROVISIONED_CLIENT_KEY>` ist ein **nicht ausführbarer Platzhalter**. Vor dem Start durch den lowercase SHA-256-Hex-Hash des zufälligen, provisionierten Client-Keys ersetzen (genau 64 Hex-Zeichen), beispielsweise mit dem Bootstrap oben. Die lokale SQLite-Datei ist eine separate Benutzer-/Team-Datenbank, nicht die Datenbank des Cluster-Backends. `.env` und Datenbankdateien nicht committen.
+`<SHA256_HEX_OF_PROVISIONED_CLIENT_KEY>` ist ein **nicht ausführbarer Platzhalter**. Vor dem Start durch den lowercase SHA-256-Hex-Hash eines provisionierten Client-Keys ersetzen (genau 64 Hex-Zeichen); die Setup-Daten stehen in `.local/helm-secrets.json`. Die lokale SQLite-Datei ist eine separate Benutzer-/Team-Datenbank, nicht die Datenbank des Cluster-Backends. `.env` und Datenbankdateien nicht committen.
 
 ```bash
 yarn dev:backend
@@ -320,7 +254,9 @@ Frontend und lokales Backend mit den getrennten Workspace-Befehlen oben starten.
 
 ## 3. HOW TO: NEUES BACKEND INTEGRIEREN (PLUG & PLAY)
 
-### TASK-ONBOARD-1: Zugang provisionieren
+<a id="backend-onboarding"></a>
+
+### Zugang provisionieren
 
 Empfohlen: Als Organisationsadministrator anmelden, **Administration → Ingestion-Keys** öffnen, Team und Gültigkeit wählen und den Key erzeugen sowie sofort kopieren. Der Klartext wird nur einmal angezeigt; gespeichert wird ausschließlich sein SHA-256-Hash. Diesen Klartext an das externe Backend übergeben und bei OTLP-HTTP-Anfragen als `X-API-Key` senden. Nicht mehr benötigte Keys lassen sich in derselben Tabelle widerrufen.
 
@@ -340,7 +276,7 @@ Ein Administrator erstellt das Zielteam, generiert einen zufälligen URL-sichere
 ]
 ```
 
-`expiresAt` ist **Pflicht** und verwendet Unix-Zeit in **Millisekunden**; der Beispielwert entspricht dem 1. Januar 2030 UTC und muss zur gewünschten Laufzeit passen. Das Bootstrap oben setzt 30 Tage Gültigkeit. Vorhandene Einträge beim Ergänzen erhalten. Das Fremd-Backend erhält nur den Klartext-Key und entscheidet nicht selbst über Org/Team. Das Gateway prüft die Registry-Zuordnung, nicht pro Request die Team-Existenz in SQLite: Eine autorisierte, gültige Zuordnung ist Verantwortung des Provisionierungsprozesses.
+`expiresAt` ist **Pflicht** und verwendet Unix-Zeit in **Millisekunden**; der Beispielwert entspricht dem 1. Januar 2030 UTC und muss zur gewünschten Laufzeit passen. Den Ablaufzeitpunkt beim Provisionieren festlegen und bestehende Einträge beim Ergänzen erhalten. Das Fremd-Backend erhält nur den Klartext-Key und entscheidet nicht selbst über Org/Team. Das Gateway prüft die Registry-Zuordnung, nicht pro Request die Team-Existenz in SQLite: Eine autorisierte, gültige Zuordnung ist Verantwortung des Provisionierungsprozesses.
 
 Im Helm-Betrieb liegt die Registry im Secret `telemetry-ingestion`. Nach Änderungen Backend neu starten, weil Secret-Umgebungsvariablen und die Map nicht live aktualisiert werden:
 
@@ -351,7 +287,7 @@ kubectl --context kind-observability -n telemetry-hub rollout status deployment/
 
 Auch Widerruf und Rotation greifen erst nach dem Reload. Eine Rotation des internen Collector-Tokens erfordert eine koordinierte Aktualisierung aller internen Sender und des Collectors.
 
-### TASK-ONBOARD-2: Vier standardisierte Umgebungsvariablen
+### OpenTelemetry konfigurieren
 
 ```bash
 export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:3001/api/ingest"
@@ -360,12 +296,12 @@ export OTEL_EXPORTER_OTLP_PROTOCOL="http/protobuf"
 export OTEL_SERVICE_NAME="customer-orders-api"
 ```
 
-| Variable | Bedeutung |
-| --- | --- |
+| Variable                      | Bedeutung                                    |
+| ----------------------------- | -------------------------------------------- |
 | `OTEL_EXPORTER_OTLP_ENDPOINT` | Basis-URL des Gateways, nicht des Collectors |
-| `OTEL_EXPORTER_OTLP_HEADERS` | Client-Key im Headerformat `name=value` |
-| `OTEL_EXPORTER_OTLP_PROTOCOL` | HTTP/protobuf statt gRPC |
-| `OTEL_SERVICE_NAME` | Stabile technische Service-Identität |
+| `OTEL_EXPORTER_OTLP_HEADERS`  | Client-Key im Headerformat `name=value`      |
+| `OTEL_EXPORTER_OTLP_PROTOCOL` | HTTP/protobuf statt gRPC                     |
+| `OTEL_SERVICE_NAME`           | Stabile technische Service-Identität         |
 
 Die SDK-Integration muss diese Variablen unterstützen oder explizit auslesen. Die Signalpfade lauten `/api/ingest/v1/traces`, `/api/ingest/v1/logs` und `/api/ingest/v1/metrics`. Bei signalspezifischen Endpoint-Variablen beziehungsweise expliziten Exporter-URLs den vollständigen Signalpfad setzen.
 
@@ -373,7 +309,7 @@ Die SDK-Integration muss diese Variablen unterstützen oder explizit auslesen. D
 
 Service-Namen pro fachlichem Backend eindeutig wählen. Instanzen derselben Anwendung dürfen denselben Namen mit unterschiedlichen `service.instance.id` verwenden. Das Gateway erzwingt keine Namenseindeutigkeit. Keine Keys oder personenbezogenen Daten in Namen, Tags oder Logs schreiben.
 
-### TASK-ONBOARD-3: Eigenständiges C#-Beispiel (.NET 8)
+### Eigenständiges C#-Beispiel (.NET 8)
 
 Mit installiertem .NET-8-SDK ein separates Projekt außerhalb des Repositorys anlegen:
 
@@ -479,14 +415,14 @@ dotnet run --project ../TelemetryExample/TelemetryExample.csproj -- --fail
 
 Das Beispiel mit `dotnet run` starten. Es sendet einmalig und ist kein HTTP-Server. Für Web-Anwendungen zusätzlich passende ASP.NET-Core-/HTTP-Instrumentierungen registrieren.
 
-### TASK-ONBOARD-4: Environment beim Deployment setzen
+### Environment beim Deployment setzen
 
 Das Instrumentierungs-SDK liest `OTEL_RESOURCE_ATTRIBUTES`. Für Environment-Filter
 ist `deployment.environment.name` erforderlich; allein der Kubernetes-Namespace
 oder `ASPNETCORE_ENVIRONMENT` erzeugt dieses Attribut nicht automatisch.
 
 ```bash
-node scripts/deploy-backend.mjs --name sample-api --image local/sample:v1 \
+yarn backend:deploy --name sample-api --image local/sample:v1 \
   --service sample-api --org demo --team platform --env staging \
   --build-context /path/to/sample
 # Plan prüfen, dann denselben Aufruf mit --apply ausführen.
@@ -519,7 +455,7 @@ exportieren; `OTEL_RESOURCE_ATTRIBUTES` setzt keine Instrumentierung in Gang.
 
 ## 4. VERIFIKATION UND TROUBLESHOOTING
 
-### TASK-VERIFY-1: Ende-zu-Ende-Prüfung
+### Ende-zu-Ende-Prüfung
 
 - [ ] Backend, Collector und ClickHouse sind laut `yarn cluster:status` bereit.
 - [ ] Backend-Port-Forward läuft; `http://localhost:3001/health` ist erreichbar.
@@ -545,20 +481,20 @@ Der Header wird über stdin statt als Prozessargument an curl übergeben. Keine 
 
 ### Typische Fehler
 
-| Symptom | Ursache / Prüfung |
-| --- | --- |
-| **401 Unauthorized** | Key fehlt, Format ungültig, Hash unbekannt, Key widerrufen oder abgelaufen. Klartext-Key senden, nicht den Hash; nach Registry-Änderungen Backend neu starten. Eine Upstream-401 kann auch ein falsches internes Collector-Token bedeuten. |
-| **415 Unsupported Media Type** | Gateway erwartet JSON oder Protobuf über HTTP; `application/grpc` wird nicht akzeptiert. Protokoll auf `http/protobuf` setzen. Echte gRPC-Verbindungen können bereits mit Transportfehlern statt HTTP-415 scheitern. |
-| **404** | Signalpfad oder HTTP-Methode falsch. POST auf `/api/ingest/v1/{signal}` verwenden. |
-| **400 / 413** | Leerer beziehungsweise ungültiger OTLP-Body oder Überschreitung des 8-MiB-Limits. SDK und Batchgrößen prüfen. |
-| **503 / Export-Timeout** | Token fehlt, Collector nicht erreichbar oder Upstream-Verbindung fehlgeschlagen. Endpoint, Pods, Port-Forward und Netzwerkregeln prüfen. |
-| Service fehlt | Noch keine gespeicherten Daten, falsche Zuordnung, fehlende Berechtigung oder zu enger Zeit-/Umgebungsfilter. Exportintervalle und Batching berücksichtigen. |
-| Metriken sichtbar, keine Traces | Meter-Provider erzeugt keine Spans. ActivitySource-Registrierung, Instrumentierung und Sampling prüfen. |
-| Port-Forward: `connection refused` im Pod | Prozess lauscht nicht am Zielport. Bind-Adresse, Container-Logs und tatsächlichen HTTP-Port prüfen; `containerPort` öffnet keinen Listener. |
-| Pod: `CreateContainerConfigError` | Secret oder erforderlicher Secret-Schlüssel fehlt. Vor Helm provisionieren. |
-| Anmeldung scheitert | Org-Slug, Bootstrap-Benutzer und Passwort prüfen. Session-Cookie ist HttpOnly/Secure/SameSite=Lax: Hostnamen nicht mischen; bei Bedarf lokale HTTPS-Konfiguration verwenden. |
+| Symptom                                   | Ursache / Prüfung                                                                                                                                                                                                                          |
+| ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **401 Unauthorized**                      | Key fehlt, Format ungültig, Hash unbekannt, Key widerrufen oder abgelaufen. Klartext-Key senden, nicht den Hash; nach Registry-Änderungen Backend neu starten. Eine Upstream-401 kann auch ein falsches internes Collector-Token bedeuten. |
+| **415 Unsupported Media Type**            | Gateway erwartet JSON oder Protobuf über HTTP; `application/grpc` wird nicht akzeptiert. Protokoll auf `http/protobuf` setzen. Echte gRPC-Verbindungen können bereits mit Transportfehlern statt HTTP-415 scheitern.                       |
+| **404**                                   | Signalpfad oder HTTP-Methode falsch. POST auf `/api/ingest/v1/{signal}` verwenden.                                                                                                                                                         |
+| **400 / 413**                             | Leerer beziehungsweise ungültiger OTLP-Body oder Überschreitung des 8-MiB-Limits. SDK und Batchgrößen prüfen.                                                                                                                              |
+| **503 / Export-Timeout**                  | Token fehlt, Collector nicht erreichbar oder Upstream-Verbindung fehlgeschlagen. Endpoint, Pods, Port-Forward und Netzwerkregeln prüfen.                                                                                                   |
+| Service fehlt                             | Noch keine gespeicherten Daten, falsche Zuordnung, fehlende Berechtigung oder zu enger Zeit-/Umgebungsfilter. Exportintervalle und Batching berücksichtigen.                                                                               |
+| Metriken sichtbar, keine Traces           | Meter-Provider erzeugt keine Spans. ActivitySource-Registrierung, Instrumentierung und Sampling prüfen.                                                                                                                                    |
+| Port-Forward: `connection refused` im Pod | Prozess lauscht nicht am Zielport. Bind-Adresse, Container-Logs und tatsächlichen HTTP-Port prüfen; `containerPort` öffnet keinen Listener.                                                                                                |
+| Pod: `CreateContainerConfigError`         | Secret oder erforderlicher Secret-Schlüssel fehlt. Vor Helm provisionieren.                                                                                                                                                                |
+| Anmeldung scheitert                       | Org-Slug, Bootstrap-Benutzer und Passwort prüfen. Session-Cookie ist HttpOnly/Secure/SameSite=Lax: Hostnamen nicht mischen; bei Bedarf lokale HTTPS-Konfiguration verwenden.                                                               |
 
-### TASK-INFRA-METRICS-1: CPU und Speicher beobachten
+### CPU und Speicher beobachten
 
 `cluster:deploy` installiert auch den auf Version 0.8.1 fixierten Metrics Server.
 Für einen bestehenden Kind-Cluster kann er separat mit `yarn cluster:metrics`
@@ -567,11 +503,11 @@ den lokalen Kind-Cluster mit seinen selbst erzeugten Kubelet-Zertifikaten.
 
 - [x] Node-CPU und Speicher mit Kapazität, Allocatable, Betriebssystem und Runtime.
 - [x] Pod- und Container-Verbrauch in mCPU und MiB; Details zeigen Requests,
-  Limits, Image-ID, Readiness und Restarts.
+      Limits, Image-ID, Readiness und Restarts.
 - [x] Workload-Verbrauch aggregiert zugehörige Pods anhand von Namespace und Label-Selector.
 - [x] Image-Ansicht aggregiert die Container des ausgewählten Namespace.
 - [x] Fehlende oder über 90 Sekunden alte Samples bleiben unbekannt; ohne
-  vollständige Container-Samples wird kein scheinbar vollständiger Gesamtwert angezeigt.
+      vollständige Container-Samples wird kein scheinbar vollständiger Gesamtwert angezeigt.
 
 ```bash
 kubectl --context kind-observability top nodes

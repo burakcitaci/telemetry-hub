@@ -33,6 +33,36 @@ spec:
       securityContext:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- if .Values.backend.persistence.enabled }}
+      initContainers:
+        - name: fix-platform-store-ownership
+          image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag }}"
+          imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
+          command:
+            - sh
+            - -c
+            - |
+              for file in \
+                /var/lib/telemetry-hub/platform.sqlite \
+                /var/lib/telemetry-hub/platform.sqlite-wal \
+                /var/lib/telemetry-hub/platform.sqlite-shm; do
+                if [ -e "$file" ]; then
+                  chown {{ .Values.backend.podSecurityContext.runAsUser }}:{{ .Values.backend.podSecurityContext.runAsGroup }} "$file"
+                fi
+              done
+          securityContext:
+            runAsNonRoot: false
+            runAsUser: 0
+            runAsGroup: 0
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]
+              add: [CHOWN]
+          volumeMounts:
+            - name: platform-store
+              mountPath: /var/lib/telemetry-hub
+      {{- end }}
       containers:
         - name: {{ .Values.backend.name }}
           image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag }}"

@@ -1,4 +1,4 @@
-> Historical review. See [the current improvement plan](docs/repository-improvement-plan.md) and [operations runbook](docs/operations.md) for current implementation and verification status.
+> Historical review. See the [operations runbook](docs/operations.md) for current verification and deployment guidance.
 
 # UI_REVIEW.md
 
@@ -1928,4 +1928,3 @@ TASK-FE-FIX-2 · 2026-10-14. Backend and deployment code were not changed. No de
 | FE-B6 — Admin load recovery | Fixed | `git log --grep=FE-B6 -1` | admin.browser.test.mjs | Initial skeleton prevents false zero state; retry preserves entered form data. |
 
 All five findings were observed failing before their corrections. The combined frontend runner passes 34/34 tests. TypeScript and the Vite production build pass; Vite retains the pre-existing warning for a minified chunk over 500 kB.
-

@@ -68,11 +68,11 @@ No live collector, credentials, cluster, or database is used.
 
 The runtime image installs only production dependencies and runs as the Node user.
 Helm backend security settings use UID/GID/fsGroup 1000, disable privilege escalation,
-drop capabilities and use a read-only root filesystem. SQLite storage remains mounted
-at `/var/lib/telemetry-hub`; keep that path writable. Confirm that the CSI driver honors
-fsGroup and that an existing PVC is group-writable before upgrading an old root-owned
-deployment. If it does not, arrange an offline ownership migration after a verified
-backup. Do not apply recursive ownership changes to an unrelated volume.
+drop capabilities and use a read-only root filesystem. An init container changes the
+ownership of the SQLite database and its WAL/SHM sidecars to the backend UID/GID before
+startup; it does not recursively change the volume or modify database contents. SQLite
+storage remains mounted at `/var/lib/telemetry-hub`. The init container needs the
+`CHOWN` capability to repair files left root-owned by older deployments.
 
 The backend remains **one replica** with persistent-storage Recreate deployment strategy.
 Do not increase replica count: in-process scheduling and synchronous SQLite are part of

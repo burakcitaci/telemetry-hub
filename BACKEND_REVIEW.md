@@ -1,4 +1,4 @@
-> Historical review. See [the current improvement plan](docs/repository-improvement-plan.md) and [operations runbook](docs/operations.md) for current implementation and verification status.
+> Historical review. See the [operations runbook](docs/operations.md) for current verification and deployment guidance.
 
 # BACKEND_REVIEW.md
 
@@ -749,4 +749,3 @@ Suggestions only, not a refactor work order. P0 = production incident gate; P1 =
 - Keep monitor **No Data** until an evaluator actually evaluates. Never substitute response time, configuration edit time, a missing metric or an unqueried table with a reassuring OK/0/empty. [monitors.controller.ts:35](C:/Users/burak/source/repos/telemetry-hub/apps/backend/src/modules/auth/monitors.controller.ts:35), [infrastructure.model.ts:29](C:/Users/burak/source/repos/telemetry-hub/apps/backend/src/modules/infrastructure/infrastructure.model.ts:29), [metrics.service.ts:393](C:/Users/burak/source/repos/telemetry-hub/apps/backend/src/modules/telemetry/services/metrics.service.ts:393)
 
 The common standard with UI_REVIEW.md is epistemic honesty: return unknown as unknown, reject unsupported/out-of-range input, disclose partial coverage, and attach observation/evaluation time only when there was an observation/evaluation. Existing safeguards deserve preservation; successful response syntax is not evidence that the backend measured what the operator asked.
-

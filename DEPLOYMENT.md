@@ -9,15 +9,16 @@ Install JavaScript dependencies once:
 ```bash
 corepack enable
 yarn install --frozen-lockfile
+yarn setup
 ```
 
-Create or update the local stack:
+The setup wizard creates the first administrator and local Kubernetes secrets. Create or update the local stack:
 
 ```bash
 yarn cluster:init
 ```
 
-The command is safe to run when the Kind cluster already exists. Helm waits up to five minutes for the backend, collector, and ClickHouse Deployments, then the script restarts the backend so the newly loaded `local/backend:latest` image is actually used.
+The command is safe to run when the Kind cluster already exists. It installs the metrics server, builds the backend image, and deploys the Helm release. Helm waits for the backend, collector, and ClickHouse Deployments; the script then restarts the backend so the newly loaded `local/backend:latest` image is used.
 
 Check the result:
 
@@ -67,10 +68,11 @@ curl http://localhost:3001/health
 Configure an instrumented application to export OTLP data to
 `http://localhost:3001/api/ingest`. Signal-specific requests use
 `/api/ingest/v1/traces`, `/api/ingest/v1/logs`, and
-`/api/ingest/v1/metrics`. See `docs/ingestion-onboarding.md` for the required
-authentication and exporter configuration. After the application emits real
-traffic, allow a few seconds for collector batching and inspect the dashboard's
-Traces, Logs, Metrics, and Services screens.
+`/api/ingest/v1/metrics`. See the
+[Kind onboarding guide](docs/advanced-setup.en.md#backend-onboarding)
+for the required authentication and exporter configuration. After the application emits real
+traffic, allow a few seconds for collector batching and inspect the dashboard's Traces, Logs,
+Metrics, and Services screens.
 
 ClickHouse stores timestamps in UTC. The dashboard displays those timestamps in the browser's local timezone, so a user in Germany during summer time should see UTC records shifted forward by two hours.
 
@@ -92,7 +94,7 @@ yarn cluster:reload-backend
 To force a clean Docker rebuild without using cached layers:
 
 ```bash
-yarn cluster:reload-backend:no-cache
+yarn cluster:reload-backend --no-cache
 ```
 
 After changing Helm templates or values, deploy the chart and reload the backend:

@@ -17,13 +17,16 @@ The normal deployment runs the backend, Collector, and ClickHouse in Kind. The R
 git clone https://github.com/burakcitaci/telemetry-hub.git
 cd telemetry-hub
 yarn install --frozen-lockfile
-node scripts/setup.mjs
+yarn setup
 yarn cluster:init
 yarn ports:backend
 ```
 
 In another terminal, start the frontend with `yarn dev:frontend`, then open the Vite URL, normally **[http://localhost:5000](http://localhost:5000)**.
-The first Kind start builds the backend image and installs the Helm release; allow several minutes.
+The setup wizard creates your first administrator and local secrets. `yarn cluster:init` creates the
+Kind cluster and namespace if needed, installs the metrics server, builds the backend image, and
+deploys the platform; allow several minutes on the first run. No manual Kubernetes or secret
+commands are needed.
 
 <a id="first-admin"></a>
 
@@ -38,14 +41,15 @@ The setup wizard asks for:
 | First team                | Enter selects `backend`, or choose your own team slug          |
 | Password and confirmation | Your own password, 12–128 characters; input is hidden          |
 
-There is **no default password and no public sign-up form**. For Helm, follow the
-[first-admin bootstrap](docs/advanced-setup.en.md#first-admin) to create Kubernetes secrets before starting the cluster.
+There is **no default password and no public sign-up form**. The setup wizard prepares the first
+administrator and Kubernetes secrets. For a manually managed Helm installation, see the
+[first-admin bootstrap](docs/advanced-setup.en.md#first-admin).
 
 <a id="first-login"></a>
 
 ### First sign-in
 
-Enter the **organization slug, email, and password you chose** during the Helm bootstrap.
+Sign in with the **organization slug, email, and password you entered in setup**.
 
 1. Open **Administration**. Your first administrator and team should already be listed.
 2. Create additional teams, then users, and choose their role/team.
@@ -74,9 +78,29 @@ Run the application and generate requests/logs/measurements. Open **Services**, 
 Metrics alone do not create traces.
 
 In another Docker container, `localhost` means that container. Use `host.docker.internal:3001` where
-supported, or use the Kind backend's published port-forward from the host.
-The [detailed integration guide](docs/advanced-setup.en.md#3-how-to-integrate-a-new-backend-plug--play)
-includes a C# example and signal-specific endpoints.
+supported, or use the Kind backend's port-forward from the host.
+
+## Deploy an instrumented backend to Kind
+
+The OTLP settings above send telemetry from an app already running on your machine. To deploy an
+already-instrumented app as a workload in the local Kind cluster, first create its organization and
+team in **Administration**, then run from the repository root:
+
+```sh
+yarn backend:deploy --name orders-api --image registry.example.com/orders-api:1.0 \
+  --org my-company --team backend --env production
+```
+
+This prints a plan and makes **no cluster changes** by default. Review it, then repeat the command
+with `--apply` to deploy. To build and load a local image, add `--build-context <app-directory>` and
+use a local image tag. The onboarding tool creates or reuses a short-lived ingestion key and keeps
+it in a Kubernetes Secret; it does not print the key. It deploys a Kubernetes workload only (no
+public Service or ingress), so it is intended for workers or apps that do not need inbound traffic.
+
+The app must already use an OpenTelemetry SDK or auto-instrumentation. The tool sets its service,
+organization/team identity, and environment; the gateway verifies ownership from the ingestion key,
+so clients should not set `org.slug` or `team.id` themselves. For exact options, credential rotation,
+and a .NET example, see [backend onboarding in the Kind guide](docs/advanced-setup.en.md#backend-onboarding).
 
 ## Everyday Kind commands
 
@@ -114,20 +138,20 @@ Use **Administration** for new users and password changes. Back up installations
 | Docker/Kind is not ready      | Start Docker Desktop in Linux-container mode and check `docker info`, `kind version`, and `kubectl version --client`.            |
 | Helm release is unhealthy     | Run `yarn cluster:status` and inspect `yarn logs:backend` or `kubectl --context kind-observability get events -n telemetry-hub`. |
 | Frontend cannot reach API     | Keep `yarn ports:backend` running while using `yarn dev:frontend`; verify `http://localhost:3001/health`.                        |
-| Login fails                   | Use the organization/email/password chosen during Helm bootstrap and confirm the backend port-forward is running.                |
+| Login fails                   | Use the organization/email/password chosen during setup and confirm the backend port-forward is running.                         |
 | Forgot the password           | Ask another organization administrator to change it in Administration. Do not delete volumes as a password-recovery procedure.   |
 | Dashboard is empty            | Generate an ingestion key, configure actual OpenTelemetry instrumentation, exercise your application, and check filters.         |
 | Infrastructure is unavailable | Run `kubectl --context kind-observability get pods -n telemetry-hub` and check that the Kind cluster is running.                 |
 
-Do not paste `.env`, rendered Compose configuration, passwords, or ingestion keys into GitHub issues.
+Do not paste `.env`, rendered configuration, passwords, or ingestion keys into GitHub issues.
 Share service status and relevant logs with secrets removed.
 
 ## Development and advanced installation
 
 - [Kubernetes/Kind setup, architecture, and detailed integration examples](docs/advanced-setup.en.md)
-- [Optional all-in-one Docker Compose setup](docs/advanced-setup.en.md#optional-docker-compose)
 - [Local backend development](docs/backend-dev-startup.md)
 - [Verification, containers, storage, backup and restore](docs/operations.md)
+- [Documentation index](docs/README.md)
 - [Monitor rule API](apps/backend/src/modules/monitors/README.md)
 
 Developers can install Yarn 1.22.22, run `yarn install --frozen-lockfile`, then `yarn verify`.

@@ -52,7 +52,7 @@ External backend: Go / Python / .NET / Java / ...
       Dynamic service discovery from stored telemetry
 ```
 
-### Ingestion Gateway and anti-spoofing — TASK-INT-2
+### Ingestion gateway and tenant isolation
 
 The gateway expects a random client key in **`X-API-Key`**. It computes SHA-256 over the exact key and looks up the hexadecimal digest in the persistent admin key store or the bootstrap `INGESTION_KEYS_JSON`. A matching record supplies `orgSlug` and `teamId`. Unknown, expired, and revoked keys are rejected.
 
@@ -124,7 +124,7 @@ WHERE org_slug = {tenant:String};
 
 The chart enables persistent storage by default: a 10-GiB PVC for ClickHouse and a 1-GiB PVC for the backend SQLite database. Pod replacement retains these volumes; disabling persistence uses ephemeral pod storage. The Collector configures a seven-day TTL for its telemetry tables. PVCs are not backups; deleting the local Kind cluster can remove local storage. The shared SQLite file limits the backend to one replica.
 
-### UI and dynamic service discovery — TASK-INT-1
+### UI and dynamic service discovery
 
 Tenant-scoped **`DISTINCT ServiceName`** queries discover services across traces, logs, and supported gauge/sum/histogram metric tables. No hardcoded service-list edit is necessary. Filters respect their data scope and user permissions.
 
@@ -138,12 +138,12 @@ Filter options load initially and refresh **every 30 seconds**. There is no guar
 
 - Node.js **24 or newer**, Yarn **1.22.22**, and Git;
 - A running Docker engine, Kind, kubectl, and Helm;
-- Bash for infrastructure scripts; on Windows, for example Git Bash with these tools on PATH;
+- Bash only for optional shell examples; on Windows, use Git Bash for those examples;
 - Optionally the .NET 8 SDK for section 3.
 
-The examples below use **Bash**, including heredocs that cannot be copied unchanged into PowerShell. Install Yarn and make it available on PATH first.
+The standard setup commands work in PowerShell, macOS Terminal, and Linux terminals. Install Yarn and make it available on PATH first. Start Docker Desktop before setup.
 
-On Windows, use **Git Bash** for these steps and start Docker Desktop first. If Yarn is not installed:
+If Yarn is not installed:
 
 ```bash
 npm install --global yarn@1.22.22
@@ -160,7 +160,7 @@ kubectl version --client
 helm version --short
 ```
 
-### TASK-SETUP-1: Clone and install
+### Clone and install
 
 ```bash
 git clone https://github.com/burakcitaci/telemetry-hub.git
@@ -170,92 +170,26 @@ yarn install --frozen-lockfile
 
 The root workspaces use Yarn; `packageManager` and `yarn.lock` specify the version and dependencies. Run all Yarn commands below from the repository root.
 
-### TASK-SETUP-2: Create the local cluster
+### Configure the first administrator
 
 ```bash
-yarn cluster:create
-kubectl --context kind-observability create namespace telemetry-hub
+yarn setup
 ```
 
-Skip creation if the cluster or namespace already exists. **Before Helm deployment**, provision `backend-auth` and `telemetry-ingestion`; the chart does not create these secrets.
+The wizard asks for your organization slug, email, first team, and a password. It writes local Kubernetes secrets to `.local/helm-secrets.json` and displays an initial ingestion key once; save the key for application setup. The file is local-only and must not be committed or shared.
 
 <a id="first-admin"></a>
 
-### TASK-SETUP-3: Prepare the first administrator
+There is **no default password or public registration**. Kubernetes Secrets are base64-encoded, not encrypted by that encoding. Production requires restricted RBAC, encryption at rest, and an appropriate secret manager.
 
-There is **no default admin password or public registration**. Prepare the first user through `AUTH_USERS_JSON`. On the first backend start, `PlatformStore` reads this configuration and creates the user and their teams in SQLite.
-
-The bootstrap below prepares these login details:
-
-| Login detail | Example value                                  |
-| ------------ | ---------------------------------------------- |
-| Organization | demo                                           |
-| Email        | admin@example.com                              |
-| Role         | admin                                          |
-| Created team | backend                                        |
-| Password     | Prompted below without echo; 12–128 characters |
-
-To use your own values, change `tenantSlug`, `email` and `teams` in the example; the ingestion key's `orgSlug` and `teamId` must match. Remember the password you choose for signing in later. The Kubernetes Secret stores its salted scrypt hash.
-
-The block creates the `backend-auth` and `telemetry-ingestion` secrets, a random client key and an independent Collector token. It is intended for a **fresh local installation**. `kubectl create` does not overwrite existing secrets. Save the client key, displayed once, for application onboarding; it is not a dashboard password.
-
-```bash
-read -r -s -p "Local administrator password: " HUB_ADMIN_PASSWORD
-echo
-export HUB_ADMIN_PASSWORD
-node --input-type=module <<'NODE'
-import { randomBytes, createHash, scryptSync } from 'node:crypto';
-import { spawnSync } from 'node:child_process';
-if (!process.env.HUB_ADMIN_PASSWORD || process.env.HUB_ADMIN_PASSWORD.length < 12 || process.env.HUB_ADMIN_PASSWORD.length > 128)
-  throw new Error('Use 12 to 128 characters for the administrator password.');
-const key = randomBytes(32).toString('base64url');
-const salt = randomBytes(16);
-const passwordHash = `scrypt$${salt.toString('hex')}$${scryptSync(process.env.HUB_ADMIN_PASSWORD, salt, 64).toString('hex')}`;
-const secrets = [
-  ['backend-auth', {
-    AUTH_JWT_SECRET: randomBytes(48).toString('base64url'),
-    AUTH_USERS_JSON: JSON.stringify([{ tenantSlug: 'demo', email: 'admin@example.com',
-      role: 'admin', teams: ['backend'], passwordHash }]),
-  }],
-  ['telemetry-ingestion', {
-    INGESTION_COLLECTOR_TOKEN: randomBytes(32).toString('base64url'),
-    INGESTION_KEYS_JSON: JSON.stringify([{ keyHash: createHash('sha256').update(key).digest('hex'),
-      orgSlug: 'demo', teamId: 'backend', expiresAt: Date.now() + 30 * 86400000 }]),
-  }],
-];
-for (const [name, stringData] of secrets) {
-  const manifest = { apiVersion: 'v1', kind: 'Secret', type: 'Opaque',
-    metadata: { name, namespace: 'telemetry-hub' }, stringData };
-  const result = spawnSync('kubectl', ['--context', 'kind-observability', 'create', '-f', '-'],
-    { input: JSON.stringify(manifest), encoding: 'utf8' });
-  if (result.error || result.status !== 0)
-    throw new Error(`Secret ${name} was not created; check existing secrets and cluster. Diagnostics suppressed for security.`);
-}
-console.log('Securely save this client key; displayed once:', key);
-NODE
-unset HUB_ADMIN_PASSWORD
-```
-
-This bootstrap is not transactional: if the second creation fails, the first secret may already exist. Inspect existing configuration instead of blindly overwriting it. Never publish secrets in tickets, logs, or Git.
-
-Kubernetes Secrets are base64-encoded, not encrypted by that encoding. Production requires restricted RBAC, encryption at rest, and an appropriate secret manager.
-
-Check that both secrets exist without displaying their contents:
-
-```bash
-kubectl --context kind-observability -n telemetry-hub get secret backend-auth telemetry-ingestion
-```
-
-`AUTH_USERS_JSON` initializes each organization/email pair once in its SQLite database. Changing the Secret does not reset an initialized user's password; deleted bootstrap users are not recreated on restart. Manage additional users and password changes through **Administration** after signing in.
-
-### TASK-SETUP-4: Start infrastructure and dashboard
+### Start the local cluster
 
 ```bash
 yarn cluster:init
 yarn cluster:status
 ```
 
-`cluster:init` builds the backend image, loads it into Kind, and installs or upgrades Helm release `observability` in namespace `telemetry-hub`. ClickHouse, Collector, and backend run in the cluster.
+`cluster:init` creates the Kind cluster and namespace if needed, installs the metrics server, applies the generated secrets, builds and loads the backend image, and installs or upgrades Helm release `observability`. ClickHouse, Collector, and backend run in the cluster. The first run can take several minutes.
 
 Keep each command running in its own terminal:
 
@@ -271,14 +205,16 @@ yarn dev:frontend
 
 <a id="first-login"></a>
 
-### TASK-SETUP-5: First login and additional users
+### First login and additional users
 
 1. Open `http://localhost:5000` or Vite's printed fallback URL. Keep the backend port-forward running; the API is at `http://localhost:3001`.
-2. Sign in with organization **demo**, email **admin@example.com** and the password chosen in TASK-SETUP-3. Use your own details if you customized the bootstrap. A new account becomes available after the first backend start.
-3. Open **Administration**. The bootstrap has already created team **backend**; create additional teams and users, assign roles/teams and change passwords there.
+2. Sign in with the organization, email, and password entered in the setup wizard. The account becomes available after the first backend start.
+3. Open **Administration**. The setup wizard has already created your first team; create additional teams and users, assign roles/teams and change passwords there.
 4. Follow section 3 to connect an application so its telemetry appears in the dashboard. Use the client key for ingestion, not the admin password.
 
 Backend CORS permits Vite fallback ports 5000–5003; check allowed origins if another port is selected. There are no usable default credentials without a successful bootstrap. For login failures, check organization/email, the backend port-forward and the SQLite database being used. The local development database and the cluster backend PVC contain separate user accounts.
+
+<a id="local-backend-development"></a>
 
 ### Optional: Develop NestJS locally with .env
 
@@ -307,7 +243,7 @@ INGESTION_COLLECTOR_TOKEN=<same-internal-token-as-the-Collector>
 INGESTION_KEYS_JSON=[{"keyHash":"<SHA256_HEX_OF_PROVISIONED_CLIENT_KEY>","orgSlug":"demo","teamId":"backend","expiresAt":1893456000000}]
 ```
 
-`<SHA256_HEX_OF_PROVISIONED_CLIENT_KEY>` is a **nonfunctional placeholder**. Before starting, replace it with the lowercase SHA-256 hexadecimal digest of your randomly generated, provisioned client key (exactly 64 hexadecimal characters), for example using the bootstrap above. Local SQLite is a separate user/team database, not the cluster backend's database. Do not commit `.env` or database files.
+`<SHA256_HEX_OF_PROVISIONED_CLIENT_KEY>` is a **nonfunctional placeholder**. Before starting, replace it with the lowercase SHA-256 hexadecimal digest of a provisioned client key (exactly 64 hexadecimal characters); the setup wizard stores the corresponding bootstrap data in `.local/helm-secrets.json`. Local SQLite is a separate user/team database, not the cluster backend's database. Do not commit `.env` or database files.
 
 ```bash
 yarn dev:backend
@@ -318,15 +254,11 @@ yarn dev:backend
 
 Start the frontend and local backend with their separate workspace commands above. Use `yarn cluster:reload-backend` to rebuild and update the cluster backend after code changes.
 
-### Optional: Docker Compose
-
-`compose.yaml` is a separate all-in-one convenience deployment. It starts frontend, backend, Collector,
-and ClickHouse as Docker Compose services. Do not run it together with the Kind release when following
-this guide; use it only when you explicitly want the Compose workflow documented in the main README.
-
 ## 3. HOW TO: INTEGRATE A NEW BACKEND (PLUG & PLAY)
 
-### TASK-ONBOARD-1: Provision access
+<a id="backend-onboarding"></a>
+
+### Provision access
 
 Recommended: sign in as an organization administrator, open **Administration → Ingestion Keys**, select the owning team and expiry, then generate and immediately copy the key. The plaintext is shown once; only its SHA-256 digest is stored. Pass that plaintext to the external backend and send it as `X-API-Key` on OTLP HTTP requests. Revoke the key from the same table when it is no longer needed.
 
@@ -359,7 +291,7 @@ kubectl --context kind-observability -n telemetry-hub rollout status deployment/
 
 Revocation and rotation also take effect after reload. Rotating the internal Collector token requires coordinated updates of all internal senders and the Collector.
 
-### TASK-ONBOARD-2: Four standard environment variables
+### Configure OpenTelemetry
 
 ```bash
 export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:3001/api/ingest"
@@ -381,7 +313,7 @@ Your SDK integration must support or explicitly read these variables. Signal pat
 
 Choose distinct names for distinct logical backends. Instances of the same application may share a service name and use different `service.instance.id` values. The gateway does not enforce unique names. Never put keys or personal data into names, tags, or logs.
 
-### TASK-ONBOARD-3: Standalone C# example (.NET 8)
+### Standalone C# example (.NET 8)
 
 With the .NET 8 SDK installed, create a separate project outside the repository:
 
@@ -489,7 +421,7 @@ Start the example with `dotnet run`. It emits once and is not an HTTP server. We
 
 ## 4. VERIFICATION & TROUBLESHOOTING
 
-### TASK-VERIFY-1: End-to-end verification
+### End-to-end verification
 
 - [ ] Backend, Collector, and ClickHouse are ready according to `yarn cluster:status`.
 - [ ] Backend forwarding is running; `http://localhost:3001/health` is reachable.

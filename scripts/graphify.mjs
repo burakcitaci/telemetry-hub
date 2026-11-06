@@ -6,7 +6,11 @@ import { spawnSync } from 'node:child_process';
 // Resolve uv's installed tool even when the parent application's PATH is stale.
 const windowsPython = join(
   process.env.APPDATA ?? join(homedir(), 'AppData', 'Roaming'),
-  'uv', 'tools', 'graphifyy', 'Scripts', 'python.exe',
+  'uv',
+  'tools',
+  'graphifyy',
+  'Scripts',
+  'python.exe',
 );
 const usePython = process.platform === 'win32' && existsSync(windowsPython);
 const command = usePython ? windowsPython : 'graphify';
