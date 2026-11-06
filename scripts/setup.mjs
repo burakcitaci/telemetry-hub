@@ -1,4 +1,4 @@
-import { randomBytes } from 'node:crypto';
+import { createHash, randomBytes } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -8,12 +8,10 @@ import { spawnSync } from 'node:child_process';
 
 export const root = fileURLToPath(new URL('../', import.meta.url));
 
-export function startCommand(output) {
-  const path = relative(root, resolve(output)).replaceAll('\\', '/');
-  if (path.includes("'"))
-    return 'Run docker compose with --env-file set to the configuration path printed above (quoted for your shell), followed by up --build -d --wait.';
+export function startCommand(secretFile) {
+  const path = relative(root, resolve(secretFile)).replaceAll('\\', '/');
   const file = /^[A-Za-z0-9_./-]+$/.test(path) ? path : `'${path}'`;
-  return `docker compose${path === '.env' ? '' : ` --env-file ${file}`} up --build -d --wait`;
+  return `yarn cluster:init${path === '.local/helm-secrets.json' ? '' : ` && kubectl --context kind-observability apply -f ${file}`}`;
 }
 
 export function validateSettings(settings) {
@@ -71,6 +69,55 @@ export async function environmentFor(settings) {
   };
 }
 
+export async function helmSecretsFor(settings) {
+  validateSettings(settings);
+  const { hashPassword } = await import('../apps/backend/src/modules/auth/password.ts');
+  const passwordHash = await hashPassword(settings.password);
+  const clientKey = randomBytes(32).toString('base64url');
+  return {
+    apiVersion: 'v1',
+    kind: 'List',
+    items: [
+      {
+        apiVersion: 'v1',
+        kind: 'Secret',
+        metadata: { name: 'backend-auth', namespace: 'telemetry-hub' },
+        type: 'Opaque',
+        stringData: {
+          AUTH_JWT_SECRET: randomBytes(48).toString('base64url'),
+          AUTH_USERS_JSON: JSON.stringify([
+            {
+              tenantSlug: settings.org,
+              email: settings.email.trim().toLowerCase(),
+              role: 'admin',
+              teams: [settings.team],
+              passwordHash,
+            },
+          ]),
+        },
+      },
+      {
+        apiVersion: 'v1',
+        kind: 'Secret',
+        metadata: { name: 'telemetry-ingestion', namespace: 'telemetry-hub' },
+        type: 'Opaque',
+        stringData: {
+          INGESTION_COLLECTOR_TOKEN: randomBytes(32).toString('base64url'),
+          INGESTION_KEYS_JSON: JSON.stringify([
+            {
+              keyHash: createHash('sha256').update(clientKey).digest('hex'),
+              orgSlug: settings.org,
+              teamId: settings.team,
+              expiresAt: Date.now() + 30 * 86400000,
+            },
+          ]),
+        },
+      },
+    ],
+    clientKey,
+  };
+}
+
 function saveCollector(configuration = resolve(root, '.local/collector.yaml')) {
   mkdirSync(dirname(configuration), { recursive: true });
   writeFileSync(
@@ -96,6 +143,17 @@ export async function saveSetup(
       .join('\n') +
     '\n';
   writeFileSync(output, text, { mode: 0o600, flag: 'wx' });
+}
+
+export async function saveHelmSetup(settings, output = resolve(root, '.local/helm-secrets.json')) {
+  if (existsSync(output))
+    throw new Error('Helm secret configuration already exists; nothing was overwritten.');
+  const manifest = await helmSecretsFor(settings);
+  const clientKey = manifest.clientKey;
+  delete manifest.clientKey;
+  mkdirSync(dirname(output), { recursive: true });
+  writeFileSync(output, JSON.stringify(manifest, null, 2) + '\n', { mode: 0o600, flag: 'wx' });
+  return clientKey;
 }
 
 function options(args) {
@@ -129,15 +187,17 @@ function options(args) {
   return values;
 }
 
-export function checkDocker(run = spawnSync) {
+export function checkPrerequisites(run = spawnSync) {
   for (const args of [
-    ['compose', 'version'],
     ['info', '--format', '{{.OSType}}'],
+    ['kind', 'version'],
+    ['kubectl', 'version', '--client'],
+    ['helm', 'version', '--short'],
   ]) {
     const result = run('docker', args, { encoding: 'utf8', windowsHide: true });
     if (result.error || result.status !== 0)
       throw new Error(
-        'Docker with Compose is not ready. Install/start Docker Desktop (Linux containers), then rerun setup.',
+        'Docker, Kind, kubectl and Helm are required. Install/start them, then rerun setup.',
       );
     if (args[0] === 'info' && result.stdout.trim() !== 'linux')
       throw new Error('Switch Docker Desktop to Linux containers, then rerun setup.');
@@ -209,22 +269,22 @@ async function main() {
   if (Number(process.versions.node.split('.')[0]) < 24)
     throw new Error('Install Node.js 24 or newer, then rerun setup.');
   const settings = options(process.argv.slice(2));
-  if (existsSync(settings.output)) {
-    saveCollector();
+  const secretFile = resolve(root, '.local/helm-secrets.json');
+  if (existsSync(secretFile)) {
     console.log(
-      `Existing ${settings.output} preserved. Setup does not reset accounts.\nRun: ${startCommand(settings.output)}`,
+      `Existing ${secretFile} preserved. Setup does not reset accounts.\nRun: ${startCommand(secretFile)}`,
     );
     return;
   }
-  checkDocker();
+  checkPrerequisites();
   console.log(
     'Telemetry Hub — local setup\nThis creates your first administrator and generates private local secrets.',
   );
   if (settings.passwordStdin) settings.password = await passwordFromStdin();
   else await interactive(settings);
-  await saveSetup(settings, settings.output);
+  const clientKey = await saveHelmSetup(settings, secretFile);
   console.log(
-    `\nSetup saved to ${settings.output}\nOrganization: ${settings.org}\nEmail: ${settings.email.trim().toLowerCase()}\nYour password was not saved in plaintext.\n\nNext: ${startCommand(settings.output)}\nOpen: http://localhost:${settings.port}\nIngestion endpoint: http://localhost:${settings.apiPort}/api/ingest\nSign in with the organization, email and password you just chose.\nUse Administration to add users and generate ingestion keys.`,
+    `\nHelm secrets saved to ${secretFile}\nOrganization: ${settings.org}\nEmail: ${settings.email.trim().toLowerCase()}\nYour password was not saved in plaintext.\n\nNext: ${startCommand(secretFile)}\nThen run in another terminal: yarn dev:frontend\nOpen: http://localhost:${settings.port}\nIngestion endpoint: http://localhost:${settings.apiPort}/api/ingest\nInitial ingestion key (save now): ${clientKey}\nSign in with the organization, email and password you just chose.\nUse Administration to add users and generate ingestion keys.`,
   );
 }
 

@@ -10,7 +10,8 @@ import {
   environmentFor,
   saveSetup,
   startCommand,
-  checkDocker,
+  checkPrerequisites,
+  saveHelmSetup,
   root,
 } from './setup.mjs';
 import { passwordMatches } from '../apps/backend/src/modules/auth/password.ts';
@@ -95,24 +96,41 @@ test('setup help works before dependencies, Docker access or user input', () => 
   assert.match(result.stdout, /never overwritten/);
 });
 
-test('printed startup commands use the selected configuration without shell interpolation', () => {
-  assert.equal(startCommand(join(root, '.env')), 'docker compose up --build -d --wait');
-  assert.equal(
-    startCommand(join(root, '.env.compose')),
-    'docker compose --env-file .env.compose up --build -d --wait',
+test('printed startup commands apply Helm secrets without shell interpolation', () => {
+  assert.equal(startCommand(join(root, '.local/helm-secrets.json')), 'yarn cluster:init');
+  assert.ok(
+    startCommand(join(root, 'a folder', 'secrets.json')).includes(
+      "kubectl --context kind-observability apply -f 'a folder/secrets.json'",
+    ),
   );
-  assert.ok(startCommand(join(root, 'a folder', '.env')).includes("--env-file 'a folder/.env'"));
 });
 
 test('prerequisite checks explain unavailable Docker and Windows-container mode', () => {
-  assert.throws(() => checkDocker(() => ({ status: 1 })), /Docker with Compose is not ready/);
-  assert.throws(() => checkDocker(() => ({ status: 0, stdout: 'windows' })), /Linux containers/);
+  assert.throws(() => checkPrerequisites(() => ({ status: 1 })), /Docker, Kind, kubectl and Helm/);
+  assert.throws(
+    () => checkPrerequisites(() => ({ status: 0, stdout: 'windows' })),
+    /Linux containers/,
+  );
   const commands = [];
-  checkDocker((tool, args) => {
+  checkPrerequisites((tool, args) => {
     commands.push([tool, ...args]);
     return { status: 0, stdout: 'linux' };
   });
-  assert.equal(commands.length, 2);
+  assert.equal(commands.length, 4);
+});
+
+test('Helm setup writes Kubernetes secrets and never plaintext passwords', async () => {
+  const folder = mkdtempSync(join(tmpdir(), 'telemetry-helm-'));
+  try {
+    const key = await saveHelmSetup(settings, join(folder, 'helm-secrets.json'));
+    const content = readFileSync(join(folder, 'helm-secrets.json'), 'utf8');
+    assert.match(content, /backend-auth/);
+    assert.match(content, /telemetry-ingestion/);
+    assert.equal(content.includes(settings.password), false);
+    assert.match(key, /^[A-Za-z0-9_-]{43}$/);
+  } finally {
+    removeTestFolder(folder);
+  }
 });
 
 test('password validation counts Unicode characters consistently', async () => {

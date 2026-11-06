@@ -17,6 +17,7 @@ Diese Befehle funktionieren in PowerShell, macOS Terminal und Linux-Terminals:
 git clone https://github.com/burakcitaci/telemetry-hub.git
 cd telemetry-hub
 yarn install --frozen-lockfile
+node scripts/setup.mjs
 yarn cluster:init
 yarn ports:backend
 ```

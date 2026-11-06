@@ -17,6 +17,7 @@ The normal deployment runs the backend, Collector, and ClickHouse in Kind. The R
 git clone https://github.com/burakcitaci/telemetry-hub.git
 cd telemetry-hub
 yarn install --frozen-lockfile
+node scripts/setup.mjs
 yarn cluster:init
 yarn ports:backend
 ```
