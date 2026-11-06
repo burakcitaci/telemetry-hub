@@ -56,7 +56,7 @@ export function IngestionKeysPanel({ teams }: { teams: Team[] }) {
     finally { setBusy(false); }
   };
 
-  return <section className={`${PANEL} xl:col-span-2`}>
+  return <section className={PANEL}>
     <div className="mb-4"><h2 className="text-sm font-semibold">Ingestion-Keys</h2>
       <p className="mt-1 text-xs text-muted-foreground">Client-Key für ein externes Backend erzeugen. Der Klartext wird nur einmal angezeigt; gespeichert wird ausschließlich sein SHA-256-Hash.</p></div>
     {confirmation}
@@ -72,7 +72,10 @@ export function IngestionKeysPanel({ teams }: { teams: Team[] }) {
       <label className="space-y-1"><span className={LABEL}>Team</span><select name="teamId" required className={`${FIELD} w-full border px-2`}><option value="">Team wählen</option>{teams.map(team => <option key={team.id} value={team.id}>{team.name}</option>)}</select></label>
       <label className="space-y-1"><span className={LABEL}>Umgebung (optional)</span><Input name="env" pattern="[A-Za-z0-9][A-Za-z0-9._-]{0,63}" maxLength={64} placeholder="production" className={FIELD} /></label>
       <label className="space-y-1"><span className={LABEL}>Gültigkeit (Tage)</span><Input name="expiresInDays" type="number" min={1} max={3650} defaultValue={30} required className={FIELD} /></label>
-      <div className="md:col-span-4"><Button disabled={busy || teams.length === 0} size="sm" className="h-8 rounded-sm text-xs">Key erzeugen</Button></div>
+      <div className="md:col-span-4 space-y-2">
+        {teams.length === 0 && <p className="text-xs text-muted-foreground">Lege zuerst ein Team an, um einen Ingestion-Key zu erstellen.</p>}
+        <Button disabled={busy || teams.length === 0} size="sm" className="h-8 rounded-sm text-xs">Key erzeugen</Button>
+      </div>
     </form>
     <div className="mt-5 overflow-x-auto"><table className="w-full text-left text-xs"><thead className="border-b border-border text-muted-foreground"><tr><th className="py-2">Bezeichnung</th><th>Team</th><th>Umgebung</th><th>Läuft ab</th><th>Status</th><th><span className="sr-only">Aktionen</span></th></tr></thead>
       <tbody>{keys.map(key => <tr key={key.id} className="border-b border-border/60"><td className="py-3 pr-2">{key.name}</td><td>{key.teamId}</td><td>{key.env || 'Alle'}</td><td>{new Date(key.expiresAt).toLocaleString()}</td><td>{key.revokedAt ? 'Widerrufen' : key.expiresAt <= Date.now() ? 'Abgelaufen' : 'Aktiv'}</td><td className="text-right">{!key.revokedAt && <Button type="button" size="sm" variant="ghost" disabled={busy} className="h-7 text-xs text-destructive" onClick={() => void revoke(key)}>Widerrufen</Button>}</td></tr>)}</tbody></table>

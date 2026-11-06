@@ -7,8 +7,8 @@ test("FE-B6: admin distinguishes initial loading from empty data", { timeout: 60
   try {
     await browser.navigate("/org/demo/admin?case=admin-loading");
     await browser.wait("document.body.innerText.includes('Loading administration')");
-    assert.equal(await browser.evaluate("document.body.innerText.includes('Teams (0)')"), false);
-    await browser.wait("document.body.innerText.includes('Teams (1)')");
+    assert.equal(await browser.evaluate(`[...document.querySelectorAll('[role="tab"][aria-controls$="content-teams"]')][0]?.querySelector('.rounded-full')?.textContent === '0'`), false);
+    await browser.wait(`[...document.querySelectorAll('[role="tab"][aria-controls$="content-teams"]')][0]?.querySelector('.rounded-full')?.textContent === '1'`);
   } finally { await browser.close(); }
 });
 
@@ -21,7 +21,7 @@ test("FE-B6: admin retry preserves entered form state", { timeout: 60000 }, asyn
       Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(input, 'keep-me');
       input.dispatchEvent(new Event('input', { bubbles: true }));`);
     await browser.evaluate("[...document.querySelectorAll('button')].find(button => button.innerText.includes('Wiederholen')).click()");
-    await browser.wait("document.body.innerText.includes('Teams (1)')");
+    await browser.wait(`[...document.querySelectorAll('[role="tab"][aria-controls$="content-teams"]')][0]?.querySelector('.rounded-full')?.textContent === '1'`);
     assert.equal(await browser.evaluate("document.querySelector('input[name=\"id\"]').value"), "keep-me");
   } finally { await browser.close(); }
 });
@@ -31,6 +31,13 @@ test("TASK-INGESTION-KEY-1: admin generates a one-time client key", { timeout: 6
   try {
     await browser.navigate("/org/demo/admin");
     await browser.wait("Boolean(document.querySelector('[name=teamId] option[value=platform]')) && document.body.innerText.includes('Ingestion-Keys')");
+    await browser.evaluate(`(() => {
+      const tab = Array.from(document.querySelectorAll('[role="tab"]'))
+        .find(tab => tab.textContent.includes('Ingestion-Keys'));
+      tab.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, button: 0 }));
+    })()`);
+    await browser.wait(`document.querySelector('[role="tab"][aria-selected="true"]')
+      ?.textContent.includes('Ingestion-Keys')`);
     await browser.evaluate(`const set = (name, value) => { const input = document.querySelector('input[name="expiresInDays"]').closest('form').querySelector('[name="' + name + '"]');
       Object.getOwnPropertyDescriptor(input instanceof HTMLSelectElement ? HTMLSelectElement.prototype : HTMLInputElement.prototype, 'value').set.call(input, value);
       input.dispatchEvent(new Event('change', { bubbles: true })); };
@@ -49,6 +56,21 @@ test("TASK-INGESTION-KEY-1: admin generates a one-time client key", { timeout: 6
     await browser.evaluate(`navigator.clipboard.writeText = async () => { throw new Error('Fixture clipboard denied'); };
       [...document.querySelectorAll('button')].find(button => button.innerText === 'Kopieren').click();`);
     await browser.wait("document.body.innerText.includes('Copy failed.')");
+    await browser.evaluate(`(() => {
+      const tab = Array.from(document.querySelectorAll('[role="tab"]'))
+        .find(tab => tab.textContent.includes('Benutzer'));
+      tab.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, button: 0 }));
+    })()`);
+    await browser.wait(`document.querySelector('[role="tab"][aria-selected="true"]')
+      ?.textContent.includes('Benutzer')`);
+    await browser.evaluate(`(() => {
+      const tab = Array.from(document.querySelectorAll('[role="tab"]'))
+        .find(tab => tab.textContent.includes('Ingestion-Keys'));
+      tab.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, button: 0 }));
+    })()`);
+    await browser.wait(`document.querySelector('[role="tab"][aria-selected="true"]')
+      ?.textContent.includes('Ingestion-Keys')`);
+    assert.equal(await browser.evaluate("document.querySelector('[aria-label=\"Generated ingestion key\"]').value.includes('fixture_generated')"), true);
 
   } finally { await browser.close(); }
 });
