@@ -256,6 +256,63 @@ Frontend und lokales Backend mit den getrennten Workspace-Befehlen oben starten.
 
 <a id="backend-onboarding"></a>
 
+### Anwendung im lokalen Kind-Cluster bereitstellen
+
+Diesen Repository-Befehl verwenden, wenn die Anwendung selbst im Kind-Cluster dieses Clones laufen
+soll. Das ist etwas anderes als eine Anwendung auf dem eigenen Rechner oder einem anderen Server
+zu konfigurieren.
+
+Voraussetzungen:
+
+- Das Hub wurde mit `yarn setup` und `yarn cluster:init` installiert; der Cluster läuft.
+- Im Dashboard anmelden und die exakten Organisations- und Team-Slugs notieren. Das Setup erstellt
+  das erste Team (Standard: `backend`); weitere Teams bei Bedarf unter **Administration** anlegen.
+- Die Anwendung besitzt ein Dockerfile und sendet bereits OTLP mit einem OpenTelemetry-SDK oder
+  Auto-Instrumentierung, die standardmäßige `OTEL_*`-Umgebungsvariablen liest. Der App-Prozess muss
+  als Worker/Service weiterlaufen.
+- Das Image ist für Kind abrufbar, oder es wird mit `--build-context` lokal gebaut.
+
+Zuerst im Repository-Root den Plan anzeigen. Beispiel-Slugs, Umgebung und Image ersetzen:
+
+```bash
+yarn backend:deploy --name orders-api --image registry.example.com/orders-api:1.0 \
+  --org demo --team backend --env dev
+```
+
+`--name` ist der DNS-kompatible Kubernetes-Deploymentname und standardmäßig auch der
+OpenTelemetry-Service-Name. `--service <service-name>` überschreibt den Service-Namen.
+Organisation und Team müssen im Hub bereits existieren. `--env` ist eine explizite Bezeichnung,
+zum Beispiel `dev`, `staging` oder `production`.
+
+Für einen lokalen Docker-Build einen lokalen Image-Tag und den Ordner mit dem Dockerfile verwenden:
+
+```bash
+yarn backend:deploy --name orders-api --image orders-api:dev \
+  --build-context <pfad-zur-anwendung> --org demo --team backend --env dev
+```
+
+Im Build-Kontext wird standardmäßig `Dockerfile` verwendet; mit `--dockerfile <datei>` lässt sich
+ein anderer Name angeben. Ohne `--apply` zeigt der Befehl nur den Plan und ändert nichts. Plan
+prüfen und denselben Befehl mit `--apply` ausführen. Dabei wird bei lokalem Build das Image gebaut
+und geladen, ein sieben Tage gültiger Key als Kubernetes-Secret angelegt oder wiederverwendet und
+der Workload bereitgestellt. Der Klartext-Key wird nicht ausgegeben. Key-Rotation erfolgt nur
+explizit mit `--rotate-key`.
+
+Der Befehl konfiguriert OTLP-Gateway-Endpoint, HTTP/protobuf, Service-Name, Umgebung und Key und
+fügt einen lokalen Proxy-Sidecar zum Hub hinzu. Der Key bestimmt die autorisierte Organisation/das
+Team; diese Identitätsattribute nicht selbst im Client setzen. Es wird kein eingehender Service und
+kein Ingress erstellt. Workload und App-Logs prüfen, anschließend Telemetrie erzeugen und im
+Dashboard dieselbe Organisation, dasselbe Team, denselben Service und dieselbe Umgebung auswählen:
+
+```bash
+kubectl --context kind-observability get pods -n telemetry-hub
+kubectl --context kind-observability logs -n telemetry-hub deployment/orders-api -c worker
+```
+
+Authentifizierung für private Registry-Images muss bereits für den Kind-Cluster eingerichtet sein.
+Alle Optionen zeigt `yarn backend:deploy --help`. Für Anwendungen außerhalb von Kind die folgenden
+manuellen Zugangs- und OTLP-Schritte verwenden.
+
 ### Zugang provisionieren
 
 Empfohlen: Als Organisationsadministrator anmelden, **Administration → Ingestion-Keys** öffnen, Team und Gültigkeit wählen und den Key erzeugen sowie sofort kopieren. Der Klartext wird nur einmal angezeigt; gespeichert wird ausschließlich sein SHA-256-Hash. Diesen Klartext an das externe Backend übergeben und bei OTLP-HTTP-Anfragen als `X-API-Key` senden. Nicht mehr benötigte Keys lassen sich in derselben Tabelle widerrufen.

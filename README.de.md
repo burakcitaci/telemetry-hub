@@ -59,23 +59,59 @@ die lokale Portweiterleitung ist nicht öffentlich.
 
 ## Ein instrumentiertes Backend in Kind bereitstellen
 
-Für ein bereits instrumentiertes Backend, das als Workload in deinem lokalen Kind-Cluster laufen soll,
-zuerst Organisation und Team unter **Administration** anlegen. Dann im Repository-Root einen Plan erstellen:
+Das unterscheidet sich von **Erste Anwendung anbinden** weiter oben: Dort sendet eine Anwendung auf
+deinem Rechner Telemetrie. Hier wird die Anwendung selbst als Workload im lokalen Kind-Cluster
+bereitgestellt. Das eignet sich für Worker oder Services ohne eingehende Verbindungen.
+
+Vorher:
+
+1. [Erstinstallation](README.de.md#erstinstallation) abschließen und den Kind-Cluster laufen lassen.
+2. Im Dashboard anmelden. Die Organisation aus dem Setup und ein vorhandenes Team verwenden
+   (standardmäßig `backend`) oder unter **Administration** ein Team erstellen.
+3. Sicherstellen, dass die Anwendung ein Dockerfile hat und bereits OpenTelemetry OTLP über
+   HTTP/protobuf verwendet. Das SDK oder die Auto-Instrumentierung muss die standardmäßigen
+   `OTEL_*`-Variablen lesen.
+
+Im Repository-Root zunächst den Bereitstellungsplan anzeigen. Beispielwerte für Image,
+Organisations-Slug, Team-Slug und Umgebung durch eigene Werte ersetzen:
 
 ```sh
 yarn backend:deploy --name orders-api --image registry.example.com/orders-api:1.0 \
-  --org my-company --team backend --env production
+  --org demo --team backend --env dev
 ```
 
-Der Befehl ändert standardmäßig nichts. Plan prüfen und denselben Befehl mit `--apply` wiederholen.
-Ein lokales Image lässt sich mit `--build-context <app-ordner>` bauen und in Kind laden. Das Werkzeug
-erstellt oder erneuert einen kurzlebigen Ingestion-Key und speichert ihn als Kubernetes-Secret; der
-Klartext-Key wird nicht ausgegeben. Es erstellt nur einen Kubernetes-Deployment-Workload, keinen
-öffentlichen Service oder Ingress. Geeignet für Worker oder Anwendungen ohne eingehenden Netzwerkverkehr.
+`--name` ist der Kubernetes-Deploymentname und zugleich standardmäßig der OpenTelemetry-Service-Name;
+er muss DNS-kompatibel sein. `--image` muss für den Kind-Node erreichbar sein. `--org` und `--team`
+müssen vorhandenen Dashboard-Slugs entsprechen; `--env` ist eine Bezeichnung wie `dev`, `staging`
+oder `production`. `--service` ist optional und verwendet standardmäßig `--name`.
 
-Das Backend muss OpenTelemetry bereits unterstützen. Das Werkzeug setzt Service-, Environment- und
-vertrauenswürdige Org-/Team-Zuordnung. Details zu Parametern, Key-Rotation und einem .NET-Beispiel:
-[Kind- und Onboarding-Leitfaden](docs/advanced-setup.de.md#backend-onboarding).
+Um das Image mit dem Dockerfile der Anwendung zu bauen und in Kind zu laden, einen lokalen Image-Tag
+und den Pfad zum Docker-Build-Kontext verwenden:
+
+```sh
+yarn backend:deploy --name orders-api --image orders-api:dev \
+  --build-context <pfad-zur-anwendung> --org demo --team backend --env dev
+```
+
+Der Pfad muss ein `Dockerfile` enthalten (alternativ `--dockerfile <datei>` angeben). Standardmäßig
+wird nur ein Plan angezeigt. Plan prüfen und denselben Befehl mit `--apply` ausführen, um zu bauen
+und bereitzustellen. Dabei wird ein sieben Tage gültiger Ingestion-Key in einem Kubernetes-Secret
+angelegt oder wiederverwendet; bei einer Key-Änderung startet das Hub-Backend neu. Der Klartext-Key
+wird nie ausgegeben. Keine Zugangsdaten committen oder in Logs kopieren.
+
+Endpoint, HTTP/protobuf, Service-Name, Umgebung, Team und Key werden dem Workload automatisch
+übergeben. Der Key bestimmt den autorisierten Mandanten; Org/Team nicht selbst in der Anwendung
+setzen. Der App-Container muss weiterlaufen. Das Werkzeug erstellt keinen eingehenden Service und
+keinen Ingress. Status und Logs prüfen:
+
+```sh
+kubectl --context kind-observability get pods -n telemetry-hub
+kubectl --context kind-observability logs -n telemetry-hub deployment/orders-api -c worker
+```
+
+Telemetrie erzeugen und im Dashboard Organisation, Team, Service und Umgebung auswählen. Key-Rotation,
+weitere Optionen und externe (nicht in Kind laufende) Anwendungen beschreibt der
+[Kind-Onboarding-Leitfaden](docs/advanced-setup.de.md#backend-onboarding).
 
 ## Betrieb und Hilfe
 

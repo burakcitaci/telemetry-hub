@@ -258,6 +258,59 @@ Start the frontend and local backend with their separate workspace commands abov
 
 <a id="backend-onboarding"></a>
 
+### Deploy an app into the local Kind cluster
+
+Use the repository command when the application itself should run inside this clone's Kind cluster.
+This is separate from configuring an app running on your workstation or another server.
+
+Prerequisites:
+
+- The Hub has been installed with `yarn setup` and `yarn cluster:init`; keep the cluster running.
+- Sign in to the dashboard and note the exact organization and team slugs. The setup wizard creates
+  the initial team (default: `backend`); create another team under **Administration** if needed.
+- The app has a Dockerfile and already emits OTLP using an OpenTelemetry SDK or auto-instrumentation
+  that reads standard `OTEL_*` environment variables. The app must remain running as a worker/service.
+- The image is pullable by Kind, or you will build it locally with `--build-context`.
+
+Preview first from the repository root. Replace the example slugs, environment and image:
+
+```bash
+yarn backend:deploy --name orders-api --image registry.example.com/orders-api:1.0 \
+  --org demo --team backend --env dev
+```
+
+`--name` is a DNS-safe Kubernetes Deployment name and the default OpenTelemetry service name.
+`--service <service-name>` can override the service name. The organization and team must already
+exist in the Hub. `--env` is an explicit label such as `dev`, `staging`, or `production`.
+
+For a local Docker build, use a local image tag and the directory containing the app's Dockerfile:
+
+```bash
+yarn backend:deploy --name orders-api --image orders-api:dev \
+  --build-context <path-to-app> --org demo --team backend --env dev
+```
+
+The build context defaults to `Dockerfile`; use `--dockerfile <file>` for another filename.
+The plan-only command does not change anything. Review the plan, then add `--apply` to execute the
+same command. Applying builds/loads the local image if requested, creates or reuses a seven-day
+client key in Kubernetes Secrets, and deploys the workload. Key plaintext is not printed. Key
+rotation is explicit with `--rotate-key`.
+
+The tool supplies the OTLP gateway endpoint, HTTP/protobuf protocol, service name, environment and
+key to the app container, plus a local proxy sidecar to reach the Hub. The key determines the
+authorized organization/team; do not set those identity attributes in the client. No inbound Service
+or Ingress is created. Check the workload and app logs, then generate telemetry and select the same
+organization, team, service and environment in the dashboard:
+
+```bash
+kubectl --context kind-observability get pods -n telemetry-hub
+kubectl --context kind-observability logs -n telemetry-hub deployment/orders-api -c worker
+```
+
+Private registry authentication must already be configured for the Kind cluster. For all flags, run
+`yarn backend:deploy --help`. Use the manual access and OTLP setup below for an app that runs outside
+Kind.
+
 ### Provision access
 
 Recommended: sign in as an organization administrator, open **Administration → Ingestion Keys**, select the owning team and expiry, then generate and immediately copy the key. The plaintext is shown once; only its SHA-256 digest is stored. Pass that plaintext to the external backend and send it as `X-API-Key` on OTLP HTTP requests. Revoke the key from the same table when it is no longer needed.

@@ -82,25 +82,52 @@ supported, or use the Kind backend's port-forward from the host.
 
 ## Deploy an instrumented backend to Kind
 
-The OTLP settings above send telemetry from an app already running on your machine. To deploy an
-already-instrumented app as a workload in the local Kind cluster, first create its organization and
-team in **Administration**, then run from the repository root:
+This is different from the earlier **Connect your first application** steps: those send telemetry
+from an app running on your computer. This section deploys your app as a workload in the local Kind
+cluster. It is intended for workers or services that do not need inbound connections.
+
+Before you start:
+
+1. Complete [First installation](#first-installation), and leave the Kind cluster running.
+2. Sign in to the dashboard. Use the organization from setup and an existing team (the setup default
+   is `backend`), or create a team in **Administration**.
+3. Make sure your app has a Dockerfile and already uses OpenTelemetry OTLP over HTTP/protobuf. Its
+   SDK or auto-instrumentation must read the standard `OTEL_*` variables.
+
+From the repository root, preview the deployment plan. Replace the example values with your image,
+organization slug, team slug, and environment:
 
 ```sh
 yarn backend:deploy --name orders-api --image registry.example.com/orders-api:1.0 \
-  --org my-company --team backend --env production
+  --org demo --team backend --env dev
 ```
 
-This prints a plan and makes **no cluster changes** by default. Review it, then repeat the command
-with `--apply` to deploy. To build and load a local image, add `--build-context <app-directory>` and
-use a local image tag. The onboarding tool creates or reuses a short-lived ingestion key and keeps
-it in a Kubernetes Secret; it does not print the key. It deploys a Kubernetes workload only (no
-public Service or ingress), so it is intended for workers or apps that do not need inbound traffic.
+`--name` is the Kubernetes deployment name and defaults to the OpenTelemetry service name; use a
+DNS-safe name. `--image` must be a container image the Kind node can pull. `--org` and `--team` must
+match existing dashboard slugs, and `--env` is a label such as `dev`, `staging`, or `production`.
+`--service` is optional and defaults to `--name`.
 
-The app must already use an OpenTelemetry SDK or auto-instrumentation. The tool sets its service,
-organization/team identity, and environment; the gateway verifies ownership from the ingestion key,
-so clients should not set `org.slug` or `team.id` themselves. For exact options, credential rotation,
-and a .NET example, see [backend onboarding in the Kind guide](docs/advanced-setup.en.md#backend-onboarding).
+To build the image from your app's Dockerfile and load it into Kind, use a local tag and the path to
+the Docker build context instead:
+
+```sh
+yarn backend:deploy --name orders-api --image orders-api:dev \
+  --build-context <path-to-your-app> --org demo --team backend --env dev
+```
+
+The path must contain a `Dockerfile` (or pass `--dockerfile <file>`). The default command only prints
+a plan; inspect it, then add `--apply` to the same command to build and deploy. Applying creates or
+reuses a seven-day ingestion key in Kubernetes Secrets and restarts the Hub backend if the key changes.
+The key is never printed. Do not commit credentials or paste them into logs.
+
+The workload gets its OTLP endpoint, HTTP/protobuf protocol, service name, environment, team, and
+key automatically. The key—not client-set organization/team attributes—determines its authorized
+tenant. The app container must stay running; this tool does not create an inbound Service or Ingress.
+Verify it with `kubectl --context kind-observability get pods -n telemetry-hub` and
+`kubectl --context kind-observability logs -n telemetry-hub deployment/orders-api -c worker`.
+Then generate telemetry and select the matching organization, team, service, and environment in the
+dashboard. For key rotation, other options, and an external (non-Kind) app, see
+[backend onboarding in the Kind guide](docs/advanced-setup.en.md#backend-onboarding).
 
 ## Everyday Kind commands
 
