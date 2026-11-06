@@ -7,10 +7,13 @@ import { MetricCard } from '@/shared/components/telemetry-primitives';
 import { ModeToggle } from '@/app/components/mode-toggle';
 import { getErrorMessage } from '@/shared/lib/errors';
 import { useAuth } from './auth-context';
+import { useTranslation } from 'react-i18next';
+import { LanguageToggle } from '@/shared/components/language-toggle';
 
 export default function LoginPage() {
   const navigate = useNavigate();
   const { session, login } = useAuth();
+  const { t } = useTranslation();
   const [tenantSlug, setTenantSlug] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -27,7 +30,7 @@ export default function LoginPage() {
       const next = await login({ tenantSlug, email, password });
       navigate(`/org/${next.tenantSlug}/metrics`, { replace: true });
     } catch (cause) {
-      setError(getErrorMessage(cause, 'Anmeldung fehlgeschlagen.'));
+      setError(getErrorMessage(cause, t('auth.failed')));
     } finally {
       setIsSubmitting(false);
     }
@@ -43,17 +46,20 @@ export default function LoginPage() {
             </span>
             <div>
               <h1 className="text-sm font-semibold tracking-tight">Telemetry Hub</h1>
-              <p className="text-xs text-muted-foreground">Sign in to your organization</p>
+              <p className="text-xs text-muted-foreground">{t('auth.title')}</p>
             </div>
           </div>
-          <ModeToggle />
+          <div className="flex items-center gap-2">
+            <LanguageToggle />
+            <ModeToggle />
+          </div>
         </div>
 
         <form className="space-y-4" onSubmit={submit}>
           <LoginField
-            label="Organisation (Tenant)"
+            label={t('auth.organization')}
             name="tenantSlug"
-            description="Use the organization URL slug provided by your administrator, for example acme-observability."
+            description={t('auth.organizationHelp')}
           >
             <Input
               id="tenantSlug"
@@ -66,7 +72,7 @@ export default function LoginPage() {
               className="h-9 rounded-sm border-input bg-background text-sm text-foreground"
             />
           </LoginField>
-          <LoginField label="E-Mail-Adresse" name="email">
+          <LoginField label={t('auth.email')} name="email">
             <Input
               id="email"
               type="email"
@@ -78,7 +84,7 @@ export default function LoginPage() {
               className="h-9 rounded-sm border-input bg-background text-sm text-foreground"
             />
           </LoginField>
-          <LoginField label="Passwort" name="password">
+          <LoginField label={t('auth.password')} name="password">
             <Input
               id="password"
               type="password"
@@ -91,10 +97,18 @@ export default function LoginPage() {
             />
           </LoginField>
 
-          {error && <p role="alert" className="text-xs text-destructive">{error}</p>}
-          <Button type="submit" disabled={isSubmitting} className="h-9 w-full rounded-sm text-xs font-bold">
+          {error && (
+            <p role="alert" className="text-xs text-destructive">
+              {error}
+            </p>
+          )}
+          <Button
+            type="submit"
+            disabled={isSubmitting}
+            className="h-9 w-full rounded-sm text-xs font-bold"
+          >
             {isSubmitting ? <LoaderCircle className="animate-spin" /> : <ArrowRight />}
-            {isSubmitting ? 'Anmeldung läuft…' : 'Anmelden'}
+            {isSubmitting ? t('auth.signingIn') : t('auth.signIn')}
           </Button>
         </form>
       </MetricCard>
@@ -115,7 +129,10 @@ function LoginField({
 }) {
   return (
     <div className="space-y-1.5">
-      <label htmlFor={name} className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+      <label
+        htmlFor={name}
+        className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground"
+      >
         {label}
       </label>
       {children}

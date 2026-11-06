@@ -1,66 +1,61 @@
-import { ModeToggle } from "@/app/components/mode-toggle";
+import { ModeToggle } from '@/app/components/mode-toggle';
 import {
-Sidebar,
-SidebarContent,
-SidebarFooter,
-SidebarGroup,
-SidebarGroupContent,
-SidebarGroupLabel,
-SidebarHeader,
-SidebarMenu,
-SidebarMenuButton,
-SidebarMenuItem,
-SidebarRail,
-SidebarTrigger,
-useSidebar,
-} from "@/components/ui/sidebar";
-import { useAuth } from "@/features/auth/auth-context";
-import { cn } from "@/lib/utils";
-import { platformFilterSearch as filterSearch } from "@/shared/lib/platform-filters";
-import {
-Activity,
-ChartArea,
-FileText,
-Monitor,
-Server,
-Shield
-} from "lucide-react";
-import { Link,useLocation } from "react-router-dom";
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarRail,
+  SidebarTrigger,
+  useSidebar,
+} from '@/components/ui/sidebar';
+import { useAuth } from '@/features/auth/auth-context';
+import { cn } from '@/lib/utils';
+import { platformFilterSearch as filterSearch } from '@/shared/lib/platform-filters';
+import { Activity, ChartArea, FileText, Monitor, Server, Shield } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 const navItems = [
   {
-    path: "/services",
-    label: "Services",
-    description: "Service health",
+    path: '/services',
+    label: 'nav.services',
+    description: 'nav.serviceHealth',
     icon: Server,
   },
   {
-    path: "/metrics",
-    label: "Metrics",
-    description: "Collected metrics",
+    path: '/metrics',
+    label: 'nav.metrics',
+    description: 'nav.collectedMetrics',
     icon: ChartArea,
   },
   {
-    path: "/traces",
-    label: "Traces",
-    description: "Distributed requests",
+    path: '/traces',
+    label: 'nav.traces',
+    description: 'nav.distributedRequests',
     icon: Activity,
   },
   {
-    path: "/logs",
-    label: "Logs",
-    description: "Application events",
+    path: '/logs',
+    label: 'nav.logs',
+    description: 'nav.applicationEvents',
     icon: FileText,
   },
   {
-    path: "/monitors",
-    label: "Monitors",
-    description: "Application events",
+    path: '/monitors',
+    label: 'nav.monitors',
+    description: 'nav.applicationEvents',
     icon: Monitor,
   },
 ];
 
 export function AppSidebar() {
+  const { t } = useTranslation();
   const location = useLocation();
   const { isMobile, setOpenMobile } = useSidebar();
   const { session } = useAuth();
@@ -70,18 +65,11 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar
-      collapsible="icon"
-      className="border-r border-sidebar-border bg-secondary"
-    >
+    <Sidebar collapsible="icon" className="border-r border-sidebar-border bg-secondary">
       <SidebarHeader className="border-b border-sidebar-border p-3">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton
-              asChild
-              tooltip="Telemetry Hub"
-              className="h-10 px-1.5 text-xs"
-            >
+            <SidebarMenuButton asChild tooltip="Telemetry Hub" className="h-10 px-1.5 text-xs">
               <Link
                 to={{
                   pathname: `${orgPath}/metrics`,
@@ -94,12 +82,8 @@ export function AppSidebar() {
                   <Activity className="size-4" />
                 </span>
                 <span className="grid min-w-0 flex-1 text-left leading-tight">
-                  <span className="truncate text-xs font-semibold">
-                    Telemetry Hub
-                  </span>
-                  <span className="truncate text-[12px] text-muted-foreground">
-                    Observability
-                  </span>
+                  <span className="truncate text-xs font-semibold">Telemetry Hub</span>
+                  <span className="truncate text-[12px] text-muted-foreground">Observability</span>
                 </span>
               </Link>
             </SidebarMenuButton>
@@ -110,24 +94,24 @@ export function AppSidebar() {
       <SidebarContent>
         <SidebarGroup className="p-1.5">
           <SidebarGroupLabel className="h-7 px-1.5 text-[12px] uppercase tracking-wide">
-            Explorer
+            {t('nav.explorer')}
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {[
                 ...navItems,
-                ...(session?.role === "admin"
+                ...(session?.role === 'admin'
                   ? [
                       {
-                        path: "/infrastructure",
-                        label: "Infrastructure",
-                        description: "Kubernetes hosts",
+                        path: '/infrastructure',
+                        label: 'nav.infrastructure',
+                        description: 'nav.kubernetesHosts',
                         icon: Server,
                       },
                       {
-                        path: "/admin",
-                        label: "Administration",
-                        description: "Organization settings",
+                        path: '/admin',
+                        label: 'nav.administration',
+                        description: 'nav.organizationSettings',
                         icon: Shield,
                       },
                     ]
@@ -135,25 +119,21 @@ export function AppSidebar() {
               ].map((item) => {
                 const Icon = item.icon;
                 const path = `${orgPath}${item.path}`;
-                const active = location.pathname === path || location.pathname.startsWith(path + "/");
+                const active =
+                  location.pathname === path || location.pathname.startsWith(path + '/');
                 return (
                   <SidebarMenuItem key={item.path}>
-                    <SidebarMenuButton
-                      asChild
-                      size="sm"
-                      isActive={active}
-                      tooltip={item.label}
-                    >
+                    <SidebarMenuButton asChild size="sm" isActive={active} tooltip={t(item.label)}>
                       <Link
                         to={{
                           pathname: path,
                           search: filterSearch(location.search),
                         }}
                         onClick={closeMobileSidebar}
-                        aria-current={active ? "page" : undefined}
+                        aria-current={active ? 'page' : undefined}
                       >
                         <Icon className="size-4 shrink-0" aria-hidden="true" />
-                        <span>{item.label}</span>
+                        <span>{t(item.label)}</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -183,6 +163,7 @@ export function AppSidebar() {
 export function MobileAppSidebar() {
   const location = useLocation();
   const { session } = useAuth();
+  const { t } = useTranslation();
   const orgPath = `/org/${session?.tenantSlug}`;
 
   return (
@@ -201,24 +182,21 @@ export function MobileAppSidebar() {
         </span>
       </Link>
 
-      <nav
-        className="flex flex-1 flex-col items-center gap-1 py-2"
-        aria-label="Primary navigation"
-      >
+      <nav className="flex flex-1 flex-col items-center gap-1 py-2" aria-label="Primary navigation">
         {[
           ...navItems,
-          ...(session?.role === "admin"
+          ...(session?.role === 'admin'
             ? [
                 {
-                  path: "/infrastructure",
-                  label: "Infrastructure",
-                  description: "Kubernetes hosts",
+                  path: '/infrastructure',
+                  label: 'nav.infrastructure',
+                  description: 'nav.kubernetesHosts',
                   icon: Server,
                 },
                 {
-                  path: "/admin",
-                  label: "Administration",
-                  description: "Organization settings",
+                  path: '/admin',
+                  label: 'nav.administration',
+                  description: 'nav.organizationSettings',
                   icon: Shield,
                 },
               ]
@@ -226,18 +204,18 @@ export function MobileAppSidebar() {
         ].map((item) => {
           const Icon = item.icon;
           const path = `${orgPath}${item.path}`;
-          const active = location.pathname === path || location.pathname.startsWith(path + "/");
+          const active = location.pathname === path || location.pathname.startsWith(path + '/');
           return (
             <Link
               key={item.path}
               to={{ pathname: path, search: filterSearch(location.search) }}
               className={cn(
-                "flex size-9 items-center justify-center rounded-md text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                active && "bg-sidebar-accent text-sidebar-accent-foreground",
+                'flex size-9 items-center justify-center rounded-md text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
+                active && 'bg-sidebar-accent text-sidebar-accent-foreground',
               )}
-              aria-label={item.label}
-              aria-current={active ? "page" : undefined}
-              title={item.label}
+              aria-label={t(item.label)}
+              aria-current={active ? 'page' : undefined}
+              title={t(item.label)}
             >
               <Icon className="size-4" aria-hidden="true" />
             </Link>

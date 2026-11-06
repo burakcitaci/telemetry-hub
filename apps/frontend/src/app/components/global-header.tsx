@@ -2,10 +2,13 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/features/auth/auth-context';
 import { Building2 } from 'lucide-react';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { LanguageToggle } from '@/shared/components/language-toggle';
 
 export function GlobalHeader() {
   const { session, logout } = useAuth();
   const [logoutError, setLogoutError] = useState(false);
+  const { t } = useTranslation();
   if (!session) return null;
 
   return (
@@ -17,12 +20,23 @@ export function GlobalHeader() {
           {session.role}
         </span>
       </div>
-      <div>
-          <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => {
-          void logout().catch(() => setLogoutError(true));
-        }}>Log out</Button>
-        {logoutError && <span role="alert" className="text-destructive">Logout failed.</span>}
-
+      <div className="flex items-center gap-3">
+        <LanguageToggle />
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-7 text-xs"
+          onClick={() => {
+            void logout().catch(() => setLogoutError(true));
+          }}
+        >
+          {t('header.logout')}
+        </Button>
+        {logoutError && (
+          <span role="alert" className="text-destructive">
+            {t('header.logoutFailed')}
+          </span>
+        )}
       </div>
     </header>
   );
