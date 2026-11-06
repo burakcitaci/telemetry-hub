@@ -1,51 +1,49 @@
-import { FeatureRefreshButton } from "@/shared/components/feature-actions";
-import { useState } from "react";
-import { TelemetryGrid } from "@/components/shared/telemetry-widget";
-import { FeatureHeader } from "@/components/shared/feature-header";
-import { QueryError, ViewSkeleton } from "@/components/shared/view-skeleton";
-import {
-  FeaturePage,
-  FeatureBody,
-  FeatureContent,
-  FeaturePanel,
-  FeaturePanelHeader,
-  FeatureSearch,
-} from "@/shared/components/feature-layout";
-import { AppFilterSidebar } from "@/components/shared/app-filter-sidebar";
-import type { useMetrics } from "../hooks/use-metrics";
+import { Alert,AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { CardContent,CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  BarChart,
-  Bar,
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  ComposedChart,
-  Area,
-} from "recharts";
-import {
-  AlertCircle,
-  ArrowLeft,
-  Info,
-  PanelLeft,
-  RefreshCw,
-} from "lucide-react";
+import { AppFilterSidebar } from "@/shared/components/app-filter-sidebar";
 import { DataTable } from "@/shared/components/data-table";
 import { FacetQueryBar } from "@/shared/components/facet-query-bar";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
-import { CardContent, CardTitle } from "@/components/ui/card";
-
-import { makeSeriesId, formatValue, formatTime } from "@/features/metrics/model";
+import { FeatureRefreshButton } from "@/shared/components/feature-actions";
+import { FeatureHeader } from "@/shared/components/feature-header";
 import {
-  MetricStatCard,
-  CustomTooltip,
-  SeriesLegend,
+FeatureBody,
+FeatureContent,
+FeaturePage,
+FeaturePanel,
+FeaturePanelHeader,
+FeatureSearch,
+} from "@/shared/components/feature-layout";
+import { TelemetryGrid } from "@/shared/components/telemetry-widget";
+import { QueryError,ViewSkeleton } from "@/shared/components/view-skeleton";
+import {
+AlertCircle,
+Info,
+RefreshCw
+} from "lucide-react";
+import { useState } from "react";
+import {
+Area,
+Bar,
+BarChart,
+CartesianGrid,
+ComposedChart,
+Line,
+LineChart,
+ResponsiveContainer,
+Tooltip,
+XAxis,
+YAxis,
+} from "recharts";
+import type { useMetrics } from "../hooks/use-metrics";
+
+import {
+CustomTooltip,
+MetricStatCard,
+SeriesLegend,
 } from "@/features/metrics/components/metrics-components";
+import { formatTime,formatValue,makeSeriesId } from "@/features/metrics/model";
 
 type MetricsViewProps = ReturnType<typeof useMetrics>;
 

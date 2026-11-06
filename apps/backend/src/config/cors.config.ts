@@ -1,3 +1,4 @@
+import { configuredOrigins } from './environment';
 import { registerAs } from "@nestjs/config";
 
 export interface CorsConfig {
@@ -7,7 +8,7 @@ export interface CorsConfig {
 }
 
 export default registerAs("cors", (): CorsConfig => ({
-  origin: [
+  origin: configuredOrigins([
     "http://localhost:5000",
     "http://localhost:5001",
     "http://localhost:5002",
@@ -24,7 +25,7 @@ export default registerAs("cors", (): CorsConfig => ({
     "http://127.0.0.1:5173",
     "http://127.0.0.1:3000",
     "http://127.0.0.1:4000"
-  ],
+  ]),
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
   credentials: true,
 }));

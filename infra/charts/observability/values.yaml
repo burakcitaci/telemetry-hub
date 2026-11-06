@@ -73,10 +73,16 @@ backend:
       cpu: "500m"
 
   podSecurityContext:
-    runAsNonRoot: false
+    runAsNonRoot: true
+    runAsUser: 1000
+    runAsGroup: 1000
+    fsGroup: 1000
 
   containerSecurityContext:
-    readOnlyRootFilesystem: false
+    readOnlyRootFilesystem: true
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop: [ALL]
 
   affinity: {}
   nodeSelector: {}

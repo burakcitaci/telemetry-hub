@@ -1,26 +1,26 @@
-import { context } from '@opentelemetry/api';
-import { suppressTracing } from '@opentelemetry/core';
 import {
-  createClient,
-  type ClickHouseClient,
-  type ClickHouseSettings,
+createClient,
+type ClickHouseClient,
+type ClickHouseSettings,
 } from '@clickhouse/client';
 import {
-  Injectable,
-  Inject,
-  OnModuleDestroy,
-  OnModuleInit,
-  ServiceUnavailableException,
-  UnauthorizedException,
+Inject,
+Injectable,
+OnModuleDestroy,
+OnModuleInit,
+ServiceUnavailableException
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { telemetryTimeWindow } from './telemetry-time-window';
-import { telemetryEnvironment } from './telemetry-environment';
-import type { ClickhouseConfig } from '../../../config/clickhouse.config';
+import { context } from '@opentelemetry/api';
+import { suppressTracing } from '@opentelemetry/core';
 import { CentralLoggerService } from '../../../common/logger/central-logger.service';
+import type { ClickhouseConfig } from '../../../config/clickhouse.config';
 import type { TenantScope } from '../../auth/auth.types';
-import { PlatformStore } from '../../auth/platform-store.service';
 import { filterValues } from '../../auth/platform-filters';
+import { PlatformStore } from '../../auth/platform-store.service';
+import { buildClickhouseUrl } from './clickhouse-url';
+import { telemetryEnvironment } from './telemetry-environment';
+import { telemetryTimeWindow } from './telemetry-time-window';
 
 const DEFAULT_LIMIT = 100;
 const MAX_LIMIT = 500;
@@ -52,33 +52,8 @@ const ENVIRONMENT_QUERY_SETTINGS: ClickHouseSettings = {
   max_result_rows: '1000',
 };
 
-export interface TelemetryListOptions {
-  env?: string;
-  limit?: number;
-  offset?: number;
-  service?: string;
-}
-
-export interface LogsListOptions extends TelemetryListOptions {
-  from?: string;
-  to?: string;
-}
-
-export interface TelemetryStreamOptions {
-  since: Date;
-  until: Date;
-}
-
-export interface TelemetryChangeSignal {
-  eventCount: number;
-  fingerprint: string;
-}
-
-export interface TenantQueryFilter {
-  predicate: string;
-  where: string;
-  params: Record<string, string | string[]>;
-}
+import type { LogsListOptions,TelemetryChangeSignal,TelemetryListOptions,TelemetryStreamOptions,TenantQueryFilter } from './clickhouse.types';
+export type { LogsListOptions,TelemetryChangeSignal,TelemetryListOptions,TelemetryStreamOptions,TenantQueryFilter } from './clickhouse.types';
 
 @Injectable()
 export class ClickhouseService implements OnModuleInit, OnModuleDestroy {
@@ -95,7 +70,7 @@ export class ClickhouseService implements OnModuleInit, OnModuleDestroy {
   async onModuleInit(): Promise<void> {
     const config =
       this.configService.getOrThrow<ClickhouseConfig>('clickhouse');
-    const url = this.buildUrl(config.host, config.port);
+    const url = buildClickhouseUrl(config.host, config.port);
 
     this.database = config.database;
     this.client = createClient({
@@ -694,19 +669,6 @@ export class ClickhouseService implements OnModuleInit, OnModuleDestroy {
 
   private clamp(value: number, minimum: number, maximum: number): number {
     return Math.min(Math.max(Math.trunc(value), minimum), maximum);
-  }
-
-  private buildUrl(host: string, port: number): string {
-    const normalizedHost = host.replace(/\/+$/, '');
-    if (/^https?:\/\//i.test(normalizedHost)) {
-      const url = new URL(normalizedHost);
-      if (!url.port) {
-        url.port = String(port);
-      }
-      return url.toString().replace(/\/$/, '');
-    }
-
-    return `http://${normalizedHost}:${port}`;
   }
 
   private errorDetails(error: unknown): { message: string; stack?: string } {

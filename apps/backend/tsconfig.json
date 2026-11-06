@@ -1,32 +1,23 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "../../tsconfig.node.json",
   "compilerOptions": {
-    "module": "ESNext",
     "declaration": true,
+    "sourceMap": true,
     "removeComments": true,
-    "target": "ES2022",
     "rootDir": "./src",
     "outDir": "./dist",
-    "moduleResolution": "bundler",
-    "ignoreDeprecations": "6.0",
     "incremental": false,
-    "skipLibCheck": true,
     "noEmit": false,
-    "skipDefaultLibCheck": true,
-    "allowJs": false,
-    "strict": false,
-    "noImplicitAny": false,
-    "strictNullChecks": false,
-    "strictBindCallApply": false,
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "types": ["node"],
     "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "noImplicitReturns": false,
-    "noFallthroughCasesInSwitch": false,
-    "lib": ["ES2022", "dom"]
+    "emitDecoratorMetadata": true
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "**/*.spec.ts", "**/*.test.ts"]
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "**/*.spec.ts",
+    "**/*.test.ts"
+  ]
 }

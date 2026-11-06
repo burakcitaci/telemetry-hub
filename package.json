@@ -31,7 +31,19 @@
     "ports:backend": "kubectl --context kind-observability port-forward svc/backend 3001:3001 -n telemetry-hub",
     "ports:clickhouse": "kubectl --context kind-observability port-forward svc/clickhouse 8123:8123 -n telemetry-hub",
     "logs:backend": "kubectl --context kind-observability logs -n telemetry-hub -l app.kubernetes.io/name=backend --tail=100 -f",
-    "logs:collector": "kubectl --context kind-observability logs -n telemetry-hub -l app.kubernetes.io/name=opentelemetry-collector --tail=100 -f"
+    "logs:collector": "kubectl --context kind-observability logs -n telemetry-hub -l app.kubernetes.io/name=opentelemetry-collector --tail=100 -f",
+    "test:frontend": "yarn workspace frontend test",
+    "test:integration": "yarn workspace backend test:integration",
+    "test:infra": "node --test \"infra/kind/*.test.mjs\"",
+    "test": "yarn test:backend && yarn test:integration && yarn test:frontend && yarn test:onboarding && yarn test:infra",
+    "lint": "eslint apps scripts infra --max-warnings 0",
+    "format:check": "prettier --check \"*.json\" \"*.mjs\" \".github/**/*.yml\" \"docs/operations.md\" \"*.yaml\" \"README*.md\" \"scripts/setup*.mjs\"",
+    "format": "prettier --write \"*.json\" \"*.mjs\" \".github/**/*.yml\" \"docs/operations.md\" \"*.yaml\" \"README*.md\" \"scripts/setup*.mjs\"",
+    "check:config": "yarn workspace frontend tsc --project tsconfig.node.json --noEmit",
+    "verify": "yarn lint && yarn format:check && yarn check:all && yarn check:config && yarn build && yarn test:backend && yarn workspace backend test:integration:compiled && yarn test:frontend && yarn test:onboarding && yarn test:infra && yarn test:setup",
+    "test:coverage": "yarn workspace backend test:coverage",
+    "setup": "node scripts/setup.mjs",
+    "test:setup": "node --test scripts/setup.test.mjs"
   },
   "workspaces": [
     "apps/*"
@@ -40,10 +52,17 @@
     "node": ">=24.0.0"
   },
   "devDependencies": {
+    "@eslint/js": "^9",
     "@tailwindcss/vite": "^4.1.16",
     "@types/node": "^24.9.1",
     "@vitejs/plugin-react": "^5.1.0",
-    "typescript": "^7.0.2",
-    "vite": "^7.1.12"
+    "eslint": "^9",
+    "eslint-plugin-react-hooks": "^7",
+    "globals": "^16",
+    "prettier": "^3",
+    "typescript": "npm:@typescript/typescript6@^6.0.2",
+    "typescript-eslint": "^8",
+    "vite": "^7.1.12",
+    "@typescript/native": "npm:typescript@^7.0.2"
   }
 }

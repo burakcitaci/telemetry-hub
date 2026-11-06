@@ -12,7 +12,13 @@ coverage
 .env.*
 !.env.example
 
-# The backend image does not need the local frontend or deployment sources.
-apps/frontend
+# Deployment files stay on the host; application Dockerfiles copy only their own source.
 infra
 *.md
+
+.codex-tools
+.local
+**/graphify-out
+data
+**/data/*.sqlite*
+apps/frontend/errors.txt

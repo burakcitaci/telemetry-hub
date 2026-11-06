@@ -47,7 +47,7 @@ export function useMonitors() {
         SIDEBAR_STORAGE_KEY,
         sidebarOpen ? 'expanded' : 'collapsed',
       );
-    } catch {}
+    } catch { /* Browser storage can be unavailable. */ }
   }, [sidebarOpen]);
 
   const [openId, setOpenId] = useState<string | null>(searchParams.get('id'));
@@ -59,7 +59,6 @@ export function useMonitors() {
     if (openId) next.set('id', openId);
     else next.delete('id');
     setSearchParams(next, { replace: true });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [openId]);
 
   useEffect(() => {

@@ -31,14 +31,14 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { TimeRangePicker } from '@/app/components/timer-range.picker';
-import { QueryError, ViewSkeleton } from '@/components/shared/view-skeleton';
-import { PageLayout } from '@/components/shared/page-layout';
+import { QueryError, ViewSkeleton } from '@/shared/components/view-skeleton';
+import { PageLayout } from '@/shared/components/page-layout';
 import { EnvironmentFilter } from '@/shared/components/environment-filter';
-import { TelemetryWidget as Card } from '@/components/shared/telemetry-widget';
+import { TelemetryWidget as Card } from '@/shared/components/telemetry-widget';
 import {
   DataValue,
   MetricCard,
-} from '@/components/shared/telemetry-primitives';
+} from '@/shared/components/telemetry-primitives';
 import { formatDuration } from '@/shared/lib/telemetry';
 import { ServiceMetadataSheet } from './components/service-metadata-sheet';
 import { EMPTY_METADATA, type ServiceMetadata } from './types';

@@ -4,7 +4,7 @@ import { NestFactory } from '@nestjs/core';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthModule } from '../../dist/modules/auth/auth.module.js';
 import { PlatformStore } from '../../dist/modules/auth/platform-store.service.js';
-import { MonitorsController } from '../../dist/modules/auth/monitors.controller.js';
+import { MonitorsController } from '../../dist/modules/monitors/monitors.controller.js';
 import { MonitorEvaluatorService } from '../../dist/modules/monitors/monitor-evaluator.service.js';
 import { MonitorQueryService } from '../../dist/modules/monitors/monitor-query.service.js';
 import { MonitoringService } from '../../dist/modules/monitors/monitoring.service.js';

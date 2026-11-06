@@ -1,53 +1,45 @@
-import { FeatureRefreshButton } from '@/shared/components/feature-actions';
-import { useState } from 'react';
-import { FeatureHeader } from '@/components/shared/feature-header';
+import { Alert,AlertDescription } from '@/components/ui/alert';
 import {
-  FeaturePage,
-  FeatureBody,
-  FeatureContent,
-  FeaturePanel,
-  FeatureSearch,
-  FeatureLoading,
-  FeatureEmptyState,
-} from '@/shared/components/feature-layout';
-import { AppFilterSidebar } from '@/components/shared/app-filter-sidebar';
-import type { useMonitors } from '../hooks/use-monitors';
-import {
-  AlertCircle,
-  Bell,
-  Plus,
-  X,
-} from 'lucide-react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
+AlertDialog,
+AlertDialogAction,
+AlertDialogCancel,
+AlertDialogContent,
+AlertDialogDescription,
+AlertDialogFooter,
+AlertDialogHeader,
+AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
+import { AppFilterSidebar } from '@/shared/components/app-filter-sidebar';
+import { FeatureRefreshButton } from '@/shared/components/feature-actions';
+import { FeatureHeader } from '@/shared/components/feature-header';
+import {
+FeatureBody,
+FeatureContent,
+FeatureEmptyState,
+FeatureLoading,
+FeaturePage,
+FeaturePanel
+} from '@/shared/components/feature-layout';
+import {
+AlertCircle,
+Bell,
+Plus,
+X,
+} from 'lucide-react';
+import { useState } from 'react';
+import type { useMonitors } from '../hooks/use-monitors';
 
 import {
-  Sheet,
-  SheetContent,
-  SheetTitle,
-  SheetDescription,
+Sheet,
+SheetContent,
+SheetDescription,
+SheetTitle,
 } from '@/components/ui/sheet';
 import {
-  MonitorType,
-  statusBg,
-  statusLabel,
-  STATUS_FILTERS,
-} from '@/features/monitors/model';
-import {
-  typeIcon,
-  MonitorRow,
-  MonitorDetail,
-  MonitorForm,
+MonitorDetail,
+MonitorForm,
+MonitorRow
 } from '@/features/monitors/components/monitors-components';
 
 type MonitorsViewProps = ReturnType<typeof useMonitors>;

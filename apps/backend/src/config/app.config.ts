@@ -1,3 +1,4 @@
+import { positiveInteger } from './environment';
 import { registerAs } from "@nestjs/config";
 
 export interface AppConfig {
@@ -9,7 +10,7 @@ export interface AppConfig {
 }
 
 export default registerAs("app", (): AppConfig => ({
-  port: parseInt(process.env.PORT) || 3001,
+  port: positiveInteger('PORT', 3001, 65535),
   nodeEnv: process.env.NODE_ENV || "development",
   host: process.env.HOST || "0.0.0.0",
   name: process.env.APP_NAME || "telemetry-backend",

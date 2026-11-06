@@ -30,7 +30,7 @@ test("FE-B1: Tab then Enter/Space opens log, trace and monitor details without n
     await browser.wait("Boolean(document.querySelector('button[title=Mute]'))");
     await browser.evaluate("document.querySelector('button[title=Mute]').focus()");
     await browser.key(" ", "Space", 32);
-    await browser.wait("window.__requests.some(request => request.url === '/monitors/monitor-a')");
+    await browser.wait("window.__requests.some(request => request.url === '/monitors/monitor-a/mute')");
     assert.equal(await browser.evaluate("Boolean(document.querySelector('[role=dialog]'))"), false);
     await browser.evaluate("window.confirm = () => false; document.querySelector('button[title=Delete]').focus()");
     await browser.key("Enter");

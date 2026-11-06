@@ -17,7 +17,7 @@ test('monitor history uses valid HSL theme colors for visible value and threshol
 test('monitor page uses the canonical feature header', () => {
   const view = source('features/monitors/components/monitors-view.tsx');
 
-  assert.match(view, /components\/shared\/feature-header/);
+  assert.match(view, /shared\/components\/feature-header/);
   assert.doesNotMatch(view, /aria-label="Go back"/);
   assert.doesNotMatch(view, /aria-label=\{sidebarOpen/);
   assert.match(view, /onFiltersOpen/);

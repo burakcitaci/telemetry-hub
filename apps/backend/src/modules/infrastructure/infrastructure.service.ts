@@ -17,7 +17,7 @@ export class InfrastructureService {
   async status(): Promise<InfrastructureSnapshot> {
     if (Date.now() < this.expiresAt) {
       if (this.failure) throw this.failure;
-      return this.cached;
+      return this.cached!;
     }
     if (!this.pending) this.pending = this.refresh().finally(() => { this.pending = undefined; });
     return this.pending;
@@ -32,7 +32,7 @@ export class InfrastructureService {
       ]);
       const usage = new Map(metrics.map(item => [item.metadata.name, item]));
       const podUsage = new Map(podMetrics.map(item => [`${item.metadata.namespace}/${item.metadata.name}`, item]));
-      const mappedNodes = nodes.map(node => mapNode(node, usage.get(node.metadata.name)));
+      const mappedNodes = nodes.map(node => mapNode(node, usage.get(node.metadata!.name!)));
       const mappedPods = pods.map(pod => mapPod(pod, podUsage.get(`${pod.metadata?.namespace}/${pod.metadata?.name}`)));
       this.cached = { collectedAt: new Date().toISOString(),
         metricsAvailable: mappedNodes.some(node => node.metrics.cpu !== null && node.metrics.ram !== null), nodes: mappedNodes,

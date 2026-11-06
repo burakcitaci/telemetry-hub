@@ -9,7 +9,7 @@ declare module 'axios' {
   }
 }
 
-export const BACKEND_URL = 'http://localhost:3001';
+export const BACKEND_URL = (import.meta.env?.VITE_BACKEND_URL || 'http://localhost:3001').replace(/\/+$/, '');
 
 export const api = axios.create({
   baseURL: `${BACKEND_URL}/api`,

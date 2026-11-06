@@ -18,9 +18,9 @@ test('monitor authoring previews its rule and protects dirty drafts', () => {
   const form = source('features/monitors/components/monitors-components.tsx');
   const view = source('features/monitors/components/monitors-view.tsx');
 
-  assert.match(form, /Rule preview/);
+  assert.match(form, /Preview against real data/);
   assert.match(form, /htmlFor="monitor-name"/);
-  assert.match(form, /htmlFor="monitor-query"/);
+  assert.match(form, /aria-label="Monitor query"/);
   assert.match(form, /onDirtyChange/);
   assert.match(view, /Discard unsaved monitor changes\?/);
   assert.doesNotMatch(view, /window\.confirm/);

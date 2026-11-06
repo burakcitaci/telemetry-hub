@@ -23,6 +23,6 @@ test("FE-B5: absent service summary has an explicit retry state", { timeout: 600
   try {
     await browser.navigate("/org/demo/services/api?case=service-empty");
     await browser.wait("document.body.innerText.includes('No service summary available')");
-    assert.equal(await browser.evaluate("Boolean([...document.querySelectorAll('button')].find(button => button.innerText.includes('Retry')))"), true);
+    await browser.wait("Boolean([...document.querySelectorAll('button')].find(button => button.innerText.includes('Retry')))" );
   } finally { await browser.close(); }
 });

@@ -6,7 +6,7 @@ import { ClickhouseService } from '../services/clickhouse.service';
 import { IsIn, IsISO8601, IsOptional } from 'class-validator';
 import { telemetryTimeWindow } from '../services/telemetry-time-window';
 import { PlatformStore } from '../../auth/platform-store.service';
-import { listFilteredMonitors } from '../../auth/monitors.controller';
+import { listFilteredMonitors } from '../../monitors/monitors.controller';
 
 export class FilterOptionsDto {
   @IsIn(['all', 'metrics', 'logs', 'traces', 'services', 'monitors']) source: string = 'all';

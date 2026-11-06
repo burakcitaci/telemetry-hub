@@ -1,3 +1,5 @@
+> Historical review. See [the current improvement plan](docs/repository-improvement-plan.md) and [operations runbook](docs/operations.md) for current implementation and verification status.
+
 # BACKEND_REVIEW.md
 
 # 1. Executive summary

@@ -1,58 +1,17 @@
 import type { ComponentProps, ReactNode } from "react";
-import { Search, type LucideIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Search } from "lucide-react";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-import { PageLayout } from "@/components/shared/page-layout";
-import { TelemetryWidget } from "@/components/shared/telemetry-widget";
+import { PageLayout } from "@/shared/components/page-layout";
+import { TelemetryWidget } from "@/shared/components/telemetry-widget";
 
 type LayoutProps = ComponentProps<"div">;
 
 export function FeaturePage({ className, ...props }: LayoutProps) {
   return (
     <PageLayout className={cn("flex min-w-0 flex-col", className)} {...props} />
-  );
-}
-
-type HeaderProps = {
-  title: string;
-  icon: LucideIcon;
-  description?: ReactNode;
-  leading?: ReactNode;
-  actions?: ReactNode;
-};
-
-export function FeatureHeader({
-  title,
-  icon: Icon,
-  description,
-  leading,
-  actions,
-}: HeaderProps) {
-  return (
-    <header className="flex shrink-0 flex-col gap-3 border-b border-border pb-3 xl:flex-row xl:items-center">
-      <div className="flex min-h-10 min-w-0 flex-1 items-center gap-3">
-        {leading && (
-          <div className="flex shrink-0 items-center gap-1">{leading}</div>
-        )}
-        <Icon className="size-5 shrink-0 text-primary" aria-hidden="true" />
-        <div className="min-w-0 flex-1">
-          <h1 className="text-base font-semibold tracking-tight">{title}</h1>
-          {description && (
-            <div className="truncate text-xs text-muted-foreground">
-              {description}
-            </div>
-          )}
-        </div>
-      </div>
-      {actions && (
-        <div className="flex min-h-9 max-w-full flex-wrap items-center justify-end gap-2 xl:ml-auto">
-          {actions}
-        </div>
-      )}
-    </header>
   );
 }
 

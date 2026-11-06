@@ -16,17 +16,24 @@ RUN yarn install --frozen-lockfile
 COPY apps/backend/ ./apps/backend/
 
 # Copy shared TypeScript configuration
-COPY tsconfig.base.json ./
+COPY tsconfig.base.json tsconfig.node.json ./
 
 # Build backend
 RUN yarn workspace backend build
+
+FROM node:24-alpine AS production-dependencies
+
+WORKDIR /app
+RUN apk add --no-cache yarn
+COPY package.json yarn.lock ./
+COPY apps/backend/package.json ./apps/backend/
+RUN yarn install --production --frozen-lockfile --non-interactive
 
 FROM node:24-alpine AS runtime
 
 WORKDIR /app
 
-# Copy node_modules from builder stage (which has all dependencies)
-COPY --from=builder /app/node_modules ./node_modules
+COPY --from=production-dependencies /app/node_modules ./node_modules
 
 # Copy built backend from builder stage
 COPY --from=builder /app/apps/backend/dist/app.js ./dist/app.js
@@ -37,5 +44,9 @@ EXPOSE 3001
 ENV PORT=3001
 ENV HOST=0.0.0.0
 ENV NODE_ENV=production
+
+RUN mkdir -p /var/lib/telemetry-hub && chown node:node /var/lib/telemetry-hub /app
+ENV AUTH_DB_PATH=/var/lib/telemetry-hub/platform.sqlite
+USER node
 
 CMD ["node", "dist/app.js"]

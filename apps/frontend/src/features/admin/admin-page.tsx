@@ -1,20 +1,18 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { Navigate } from 'react-router-dom';
-import axios from 'axios';
+import { FIELD, LABEL, PANEL, errorMessage as sharedErrorMessage, type Team } from './presentation';
+import { useConfirmAction } from '@/shared/components/confirm-action';
 import { useAuth, type UserRole } from '@/features/auth/auth-context';
 import { api, unwrap } from '@/shared/api/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { QueryError, ViewSkeleton } from '@/components/shared/view-skeleton';
+import { QueryError, ViewSkeleton } from '@/shared/components/view-skeleton';
 import { IngestionKeysPanel } from './ingestion-keys-panel';
 
-interface Team { id: string; name: string }
 interface User { id: string; email: string; role: UserRole; teamId?: string }
-const FIELD = 'h-8 rounded-sm border-border bg-background text-xs';
-const LABEL = 'text-[11px] font-bold uppercase tracking-wider text-muted-foreground';
-const PANEL = 'rounded-sm border border-border bg-card p-5 text-card-foreground';
 
 export default function AdminPage() {
+  const { confirmAction, confirmation } = useConfirmAction();
   const { session, refreshSession } = useAuth();
   const [users, setUsers] = useState<User[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
@@ -83,8 +81,8 @@ export default function AdminPage() {
         </form>
         <ul className="divide-y divide-border">{teams.map(team => <li key={team.id} className="flex items-center justify-between gap-2 py-2 text-xs">
           <span>{team.name}<span className="ml-2 text-muted-foreground">{team.id}</span></span>
-          <Button size="sm" variant="ghost" disabled={busy} className="h-7 text-xs text-destructive" onClick={() => {
-            if (confirm(`Team ${team.name} löschen? Bestehende Telemetrie bleibt erhalten.`)) void execute(() => api.delete(`/admin/teams/${encodeURIComponent(team.id)}`));
+          <Button size="sm" variant="ghost" disabled={busy} className="h-7 text-xs text-destructive" onClick={async () => {
+            if (await confirmAction(`Team ${team.name} löschen? Bestehende Telemetrie bleibt erhalten.`)) void execute(() => api.delete(`/admin/teams/${encodeURIComponent(team.id)}`));
           }}>Löschen</Button>
         </li>)}</ul>
       </section>
@@ -100,18 +98,13 @@ export default function AdminPage() {
         <div className="mt-5 overflow-x-auto"><table className="w-full text-left text-xs"><thead className="border-b border-border text-muted-foreground"><tr><th className="py-2">Benutzer</th><th>Rolle</th><th>Team</th><th><span className="sr-only">Aktionen</span></th></tr></thead>
           <tbody>{users.map(user => <tr key={user.id} className="border-b border-border/60"><td className="py-3 pr-2">{user.email}</td><td>{user.role === 'admin' ? 'Org-Admin' : 'Member'}</td><td>{user.teamId || '—'}</td><td className="text-right whitespace-nowrap">
             <Button size="sm" variant="ghost" disabled={busy} className="h-7 text-xs" onClick={() => setEditing(user)}>Bearbeiten</Button>
-            <Button size="sm" variant="ghost" disabled={busy} className="h-7 text-xs text-destructive" onClick={() => { if (confirm(`${user.email} löschen?`)) void execute(() => api.delete(`/admin/users/${user.id}`)); }}>Löschen</Button>
+            <Button size="sm" variant="ghost" disabled={busy} className="h-7 text-xs text-destructive" onClick={async () => { if (await confirmAction(`${user.email} löschen?`)) void execute(() => api.delete(`/admin/users/${user.id}`)); }}>Löschen</Button>
           </td></tr>)}</tbody></table></div>
       </section>
+      {confirmation}
       <IngestionKeysPanel teams={teams} />
     </div>
   </main>;
 }
 
-function errorMessage(error: unknown): string {
-  if (axios.isAxiosError(error)) {
-    const message = error.response?.data?.errors ?? error.response?.data?.message;
-    return Array.isArray(message) ? message.join(' · ') : message || error.message;
-  }
-  return error instanceof Error ? error.message : 'Änderung fehlgeschlagen.';
-}
+const errorMessage = (error: unknown) => sharedErrorMessage(error, 'Änderung fehlgeschlagen.');

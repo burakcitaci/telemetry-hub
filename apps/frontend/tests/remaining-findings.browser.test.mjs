@@ -25,7 +25,7 @@ test("dirty monitor drafts require confirmation before closing", { timeout: 6000
     await browser.wait("document.body.innerText.includes('New monitor')");
     await browser.evaluate("[...document.querySelectorAll('button')].find((button) => button.innerText.includes('New monitor')).click()");
     await browser.wait("Boolean(document.getElementById('monitor-name'))");
-    assert.match(await browser.evaluate("document.body.innerText"), /Rule preview/i);
+    assert.match(await browser.evaluate("document.body.innerText"), /Preview against real data/i);
 
     await browser.evaluate(`
       const input = document.getElementById('monitor-name');

@@ -40,7 +40,7 @@ test('whitespace and empty queries preserve explicit match-all semantics', () =>
 });
 
 test('quoted values support spaces and JSON escapes, and colons remain part of a value', () => {
-  const query = 'service.name:"checkout api" service.version:"release\\\"1" otel.scope.name:https://example.test:4318';
+  const query = 'service.name:"checkout api" service.version:"release\\"1" otel.scope.name:https://example.test:4318';
   assert.deepEqual(parseMonitorQuery(query, new Set(resourceKeys)).filters,
     { 'service.name': 'checkout api', 'service.version': 'release"1', 'otel.scope.name': 'https://example.test:4318' });
 });

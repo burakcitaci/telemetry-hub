@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext,useContext,useEffect,useState } from "react";
 
 type Theme = "dark" | "light" | "system";
 
@@ -27,9 +27,6 @@ const isEdge = () => {
   return navigator.userAgent.includes('Edg/');
 };
 
-const isChrome = () => {
-  return navigator.userAgent.includes('Chrome') && !navigator.userAgent.includes('Edg/');
-};
 
 export function ThemeProvider({
   children,
@@ -60,7 +57,7 @@ export function ThemeProvider({
       if (isEdge()) {
         // Force reflow for Edge to ensure proper rendering
         root.style.display = 'none';
-        root.offsetHeight; // Trigger reflow
+        void root.offsetHeight; // Trigger reflow
         root.style.display = '';
       }
       

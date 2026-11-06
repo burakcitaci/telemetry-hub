@@ -3,7 +3,7 @@ import { Activity, ArrowRight, LoaderCircle } from 'lucide-react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { MetricCard } from '@/components/shared/telemetry-primitives';
+import { MetricCard } from '@/shared/components/telemetry-primitives';
 import { ModeToggle } from '@/app/components/mode-toggle';
 import { getErrorMessage } from '@/shared/lib/errors';
 import { useAuth } from './auth-context';

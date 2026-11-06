@@ -1,7 +1,6 @@
+import { useMetricColumns } from './use-metric-columns';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import type { ColumnDef } from '@tanstack/react-table';
-import { DataTableColumnHeader } from '@/shared/components/data-table';
 import { useTelemetryQuery } from '@/shared/hooks/use-telemetry-query';
 import { api } from '@/shared/api/client';
 import {
@@ -24,7 +23,6 @@ import {
   formatTime,
   unwrap,
   recordToValue,
-  formatValue,
 } from '@/features/metrics/model';
 
 export function latestObservation(series: Series[]) {
@@ -369,42 +367,7 @@ export function useMetrics() {
   const selectedNotInCatalog =
     !seriesLoading && !!selectedId && metrics.length > 0 && !selectedMetric;
 
-  const columns = useMemo<ColumnDef<TableRow>[]>(
-    () => [
-      {
-        accessorKey: 'timestamp',
-        header: ({ column }) => (
-          <DataTableColumnHeader column={column} title="Time" />
-        ),
-        cell: ({ row }) => (
-          <span className="text-xs text-muted-foreground">
-            {new Date(toIso(row.original.timestamp)).toLocaleString()}
-          </span>
-        ),
-      },
-      {
-        accessorKey: 'value',
-        header: ({ column }) => (
-          <DataTableColumnHeader column={column} title="Value" />
-        ),
-        cell: ({ row }) => (
-          <span className="tabular-nums">
-            {formatValue(row.original.value, metricUnit)}
-          </span>
-        ),
-      },
-      {
-        accessorKey: 'group',
-        header: ({ column }) => (
-          <DataTableColumnHeader column={column} title="Group" />
-        ),
-        cell: ({ row }) => (
-          <span className="text-xs">{row.original.group}</span>
-        ),
-      },
-    ],
-    [metricUnit],
-  );
+  const columns = useMetricColumns(metricUnit);
   return {
     navigate,
     catalogLoading,

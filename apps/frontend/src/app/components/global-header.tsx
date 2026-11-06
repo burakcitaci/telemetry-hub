@@ -1,21 +1,11 @@
-import { Building2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/features/auth/auth-context';
-import { useSearchParams } from 'react-router-dom';
+import { Building2 } from 'lucide-react';
 import { useState } from 'react';
-import { FilterMultiselect } from '@/shared/components/filter-multiselect';
-import { readPlatformFilters } from '@/shared/lib/platform-filters';
 
 export function GlobalHeader() {
   const { session, logout } = useAuth();
-  const [params, setParams] = useSearchParams();
   const [logoutError, setLogoutError] = useState(false);
-  const selectedTeam = readPlatformFilters(params.toString()).team;
-  const selectTeam = (teams: string[]) => setParams(current => {
-    const next = new URLSearchParams(current);
-    next.delete('team'); teams.forEach(team => next.append('team', team)); next.delete('id');
-    return next;
-  });
   if (!session) return null;
 
   return (

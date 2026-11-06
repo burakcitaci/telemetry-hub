@@ -1,54 +1,55 @@
-import { StatusBadge as TelemetryStatusBadge } from '@/components/shared/telemetry-primitives';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { useAuth } from '@/features/auth/auth-context';
-import { api, unwrap } from '@/shared/api/client';
-import { monitorPayload } from '../api';
-import { MonitorHistoryChart } from './monitor-history-chart';
-import { MonitorConditionSummary } from './monitor-condition-summary';
-import { MonitorStateHistory } from './monitor-state-history';
-import { calculationLabels } from '../log-builder';
-import { displayLogQuery, resolveLogQuery } from '../log-query-input';
 import { TimeRangePicker } from '@/app/components/timer-range.picker';
-import { resolveTelemetryRange } from '@/shared/lib/telemetry';
-import { readPlatformFilters } from '@/shared/lib/platform-filters';
-import {
-  Activity,
-  Bell,
-  BellOff,
-  Filter,
-  Info,
-  Pause,
-  Play,
-  RefreshCw,
-  Trash2,
-  X,
-} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+Select,
+SelectContent,
+SelectItem,
+SelectTrigger,
+SelectValue,
 } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { useAuth } from '@/features/auth/auth-context';
 import {
-  DatadogMonitor,
-  MonitorType,
-  Aggregation,
-  Comparator,
-  MonitorStatus,
-  NotificationTarget,
-  MonitorView,
-  MonitorSeries,
-  MonitorEvent,
-  statusBg,
-  statusLabel,
-  formatRelative,
-  formatNumber,
+Aggregation,
+Comparator,
+DatadogMonitor,
+formatNumber,
+formatRelative,
+MonitorEvent,
+MonitorSeries,
+MonitorStatus,
+MonitorType,
+MonitorView,
+NotificationTarget,
+statusLabel
 } from '@/features/monitors/model';
+import { api,unwrap } from '@/shared/api/client';
+import { StatusBadge as TelemetryStatusBadge } from '@/shared/components/telemetry-primitives';
+import { readPlatformFilters } from '@/shared/lib/platform-filters';
+import { resolveTelemetryRange } from '@/shared/lib/telemetry';
+import {
+Activity,
+Bell,
+BellOff,
+Filter,
+Info,
+Pause,
+Play,
+RefreshCw,
+Trash2,
+X,
+} from 'lucide-react';
+import React,{ useEffect,useMemo,useRef,useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { monitorPayload } from '../api';
+import { calculationLabels } from '../log-builder';
+import { displayLogQuery,resolveLogQuery } from '../log-query-input';
+import { MonitorConditionSummary } from './monitor-condition-summary';
+import { MonitorGraph } from './monitor-graph';
+import { MonitorHistoryChart } from './monitor-history-chart';
+import { MonitorStateHistory } from './monitor-state-history';
+export { MonitorGraph } from './monitor-graph';
 
 export const typeIcon = (t: MonitorType) =>
   t === 'metric' ? (
@@ -112,150 +113,6 @@ export const TargetIcon: React.FC<{ target: NotificationTarget }> = ({
       {label}
     </span>
   );
-};
-
-export const MonitorGraph: React.FC<{
-  series: MonitorSeries;
-  status: MonitorStatus;
-  height?: number;
-  compact?: boolean;
-}> = ({ series, status, height = 140, compact = false }) => {
-  const { points, threshold, warnThreshold, unit } = series;
-
-  const W = compact ? 100 : 600;
-  const H = compact ? 28 : height;
-  const padL = compact ? 0 : 44;
-  const padR = compact ? 0 : 12;
-  const padT = compact ? 2 : 10;
-  const padB = compact ? 2 : 22;
-
-  const finite = points.filter((p) => Number.isFinite(p.v));
-  if (finite.length === 0) {
-    if (compact) {
-      return (
-        <svg viewBox="0 0 100 28" className="w-full" style={{ height: 28 }}>
-          <line
-            x1={0}
-            x2={100}
-            y1={14}
-            y2={14}
-            stroke="hsl(var(--border))"
-            strokeWidth={1}
-            strokeDasharray="3 3"
-          />
-        </svg>
-      );
-    }
-    return (
-      <div className="flex h-32 items-center justify-center text-xs text-muted-foreground">
-        No data in range
-      </div>
-    );
-  }
-
-  const vMin = Math.min(
-    ...finite.map((p) => p.v),
-    threshold,
-    warnThreshold ?? threshold,
-  );
-  const vMax = Math.max(
-    ...finite.map((p) => p.v),
-    threshold,
-    warnThreshold ?? threshold,
-  );
-  const vPad = (vMax - vMin) * 0.1 || 1;
-  const yMin = vMin - vPad;
-  const yMax = vMax + vPad;
-
-  const tMin = points[0].t;
-  const tMax = points[points.length - 1].t;
-
-  const x = (t: number) =>
-    padL + ((t - tMin) / (tMax - tMin || 1)) * (W - padL - padR);
-  const y = (v: number) =>
-    padT + (1 - (v - yMin) / (yMax - yMin || 1)) * (H - padT - padB);
-
-  const segments: string[] = [];
-  let current = '';
-  for (const p of points) {
-    if (!Number.isFinite(p.v)) {
-      if (current) segments.push(current);
-      current = '';
-      continue;
-    }
-    const cmd = current ? 'L' : 'M';
-    current += `${cmd}${x(p.t).toFixed(1)},${y(p.v).toFixed(1)} `;
-  }
-  if (current) segments.push(current);
-
-  const strokeColor =
-    status === 'Alert'
-      ? 'hsl(var(--destructive))'
-      : status === 'Warn'
-        ? 'hsl(var(--warning))'
-        : status === 'No Data'
-          ? 'hsl(var(--primary))'
-          : status === 'OK'
-            ? 'hsl(var(--success))'
-            : 'hsl(var(--muted-foreground))';
-
-  const fmt = (v: number) =>
-    Math.abs(v) >= 1_000_000
-      ? `${(v / 1_000_000).toFixed(1)}M`
-      : Math.abs(v) >= 1_000
-        ? `${(v / 1_000).toFixed(1)}k`
-        : v.toFixed(v < 10 ? 2 : 0);
-
-  // ── Compact: line + faint thresholds only, no labels ────────────────────
-  if (compact) {
-    return (
-      <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{ height: H }}>
-        {warnThreshold !== undefined && (
-          <line
-            x1={0}
-            x2={W}
-            y1={y(warnThreshold)}
-            y2={y(warnThreshold)}
-            stroke="hsl(var(--warning))"
-            strokeWidth={0.75}
-            strokeDasharray="2 2"
-            opacity={0.5}
-          />
-        )}
-        <line
-          x1={0}
-          x2={W}
-          y1={y(threshold)}
-          y2={y(threshold)}
-          stroke="hsl(var(--destructive))"
-          strokeWidth={0.75}
-          strokeDasharray="2 2"
-          opacity={0.5}
-        />
-        {segments.map((d, i) => (
-          <path
-            key={i}
-            d={d}
-            fill="none"
-            stroke={strokeColor}
-            strokeWidth={1.25}
-          />
-        ))}
-        {series.hasGap && series.gapStart && series.gapEnd && (
-          <rect
-            x={x(series.gapStart)}
-            y={0}
-            width={x(series.gapEnd) - x(series.gapStart)}
-            height={H}
-            fill="hsl(var(--primary))"
-            opacity={0.1}
-          />
-        )}
-      </svg>
-    );
-  }
-
-  return <MonitorHistoryChart series={series} />;
 };
 
 export const MonitorRow: React.FC<{
@@ -558,7 +415,7 @@ export const MonitorForm: React.FC<{
     initial?.evaluationWindow ?? '5m',
   );
   const [message, setMessage] = useState(initial?.message ?? '');
-  const [targets, setTargets] = useState<Set<NotificationTarget>>(
+  const [targets] = useState<Set<NotificationTarget>>(
     new Set(initial?.targets ?? []),
   );
 
@@ -624,14 +481,6 @@ export const MonitorForm: React.FC<{
   useEffect(() => { previewVersion.current++; setPreview(null); setPreviewError(null); }, [draftSnapshot]);
   useEffect(() => { if (aggregation !== 'count' || groupBy.trim()) setNoDataPolicy('no_data'); }, [aggregation, groupBy]);
 
-  const toggleTarget = (t: NotificationTarget) => {
-    setTargets((prev) => {
-      const next = new Set(prev);
-      if (next.has(t)) next.delete(t);
-      else next.add(t);
-      return next;
-    });
-  };
 
   return (
     <>

@@ -1,16 +1,16 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { getTraces } from '@/features/traces/api';
+import { SIDEBAR_STORAGE_KEY } from '@/features/traces/model';
 import type { TraceSummary } from '@/features/traces/types';
-import { type FacetOption } from '@/components/shared/app-filter-sidebar';
+import { type FacetOption } from '@/shared/components/app-filter-sidebar';
 import { useTelemetryStream } from '@/shared/hooks/use-telemetry-stream';
 import { useTelemetryViewParams } from '@/shared/hooks/use-telemetry-view-params';
 import { getErrorMessage } from '@/shared/lib/errors';
 import {
-  isWithinTimeRange,
-  TELEMETRY_FETCH_LIMIT,
+isWithinTimeRange,
+TELEMETRY_FETCH_LIMIT,
 } from '@/shared/lib/telemetry';
 import type { TelemetryEvent } from '@/shared/types/telemetry';
-import { SIDEBAR_STORAGE_KEY } from '@/features/traces/model';
+import { useCallback,useEffect,useMemo,useRef,useState } from 'react';
 
 export function useTraces() {
   const requestId = useRef(0);
@@ -21,7 +21,7 @@ export function useTraces() {
   const [error, setError] = useState<string | null>(null);
 
 
-  const [sidebarOpen, setSidebarOpen] = useState<boolean>(() => {
+  const [sidebarOpen] = useState<boolean>(() => {
     if (typeof window === 'undefined') return true;
     return window.localStorage.getItem(SIDEBAR_STORAGE_KEY) !== 'collapsed';
   });

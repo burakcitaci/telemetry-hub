@@ -1,82 +1,15 @@
-import { Injectable, ServiceUnavailableException } from '@nestjs/common';
-import { context, trace } from '@opentelemetry/api';
-import { ClickhouseService } from './clickhouse.service';
-import type { TelemetryListOptions } from './clickhouse.service';
-import { metricTimeWindow, type TelemetryTimeWindow } from './telemetry-time-window';
+import { Injectable,ServiceUnavailableException } from '@nestjs/common';
+import { context,trace } from '@opentelemetry/api';
 import { CentralLoggerService } from '../../../common/logger/central-logger.service';
 import type { TenantScope } from '../../auth/auth.types';
+import type { TelemetryListOptions } from './clickhouse.service';
+import { ClickhouseService } from './clickhouse.service';
+import { metricTimeWindow,type TelemetryTimeWindow } from './telemetry-time-window';
 
 // ============= TYPES & INTERFACES =============
 
-export interface MetricSummary {
-    metricName: string;
-    metricDescription: string;
-    metricUnit: string;
-    serviceName: string;
-    attributes: Record<string, string>;
-    count: number;
-    sum: number;
-    min: number;
-    max: number;
-    average: number;
-    bucketCounts: number[];
-    explicitBounds: number[];
-    timeUnix: string;
-}
-
-export interface ServiceMetricsOverview {
-    serviceName: string;
-    metricsCount: number;
-    metrics: MetricSummary[];
-}
-
-export interface MetricsByScopeResult {
-    scopeName: string;
-    scopeVersion: string;
-    metrics: MetricSummary[];
-}
-
-export interface MetricDetailRecord {
-    serviceName: string;
-    metricName: string;
-    metricType: 'histogram' | 'sum' | 'gauge' | 'summary' | 'unknown';
-    metricDescription: string;
-    metricUnit: string;
-    attributes: Record<string, string>;
-    resourceAttributes: Record<string, string>;
-    tableName: string;
-    timeUnix: string;
-    startTimeUnix: string;
-    count: number;
-    sum: number;
-    min: number;
-    max: number;
-    bucketCounts: number[];
-    explicitBounds: number[];
-    aggregationTemporality?: number;
-}
-
-export interface MetricDetailResponse {
-    serviceName: string;
-    metricName: string;
-    metricType: string;
-    returnedRecords: number;
-    truncated: boolean;
-    records: MetricDetailRecord[];
-}
-
-export interface MetricStatistics {
-    count: number;
-    sum: number;
-    min: number;
-    max: number;
-    mean: number;
-    p50: number | null;
-    p95: number | null;
-    p99: number | null;
-    stdDev: number | null;
-    distributionComplete: boolean;
-}
+import type { MetricDetailRecord,MetricDetailResponse,MetricStatistics,MetricSummary } from './metrics.types';
+export type { MetricDetailRecord,MetricDetailResponse,MetricsByScopeResult,MetricStatistics,MetricSummary,ServiceMetricsOverview } from './metrics.types';
 
 interface WeightedValue { value: number; count: number }
 

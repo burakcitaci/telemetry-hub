@@ -5,7 +5,7 @@ import { Module } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from '../dist/modules/auth/auth.module.js';
-import { MonitorsController } from '../dist/modules/auth/monitors.controller.js';
+import { MonitorsController } from '../dist/modules/monitors/monitors.controller.js';
 import { PlatformStore } from '../dist/modules/auth/platform-store.service.js';
 import { ValidationPipe } from '../dist/common/pipes/validation.pipe.js';
 import { hashPassword } from '../dist/modules/auth/password.js';

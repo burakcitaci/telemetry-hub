@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "node tests/run-phase-a.mjs"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",

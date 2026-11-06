@@ -10,7 +10,7 @@ import { PlatformStore } from './platform-store.service';
 import { AdminService, OrgAdminGuard } from './admin.service';
 import { AuthService } from './auth.service';
 import { TenantJwtGuard } from './tenant-jwt.guard';
-import { MonitorsController } from './monitors.controller';
+import { MonitorsController } from '../monitors/monitors.controller';
 import { ClickhouseService } from '../telemetry/services/clickhouse.service';
 import { MetricsService } from '../telemetry/services/metrics.service';
 import { hashPassword, passwordMatches } from './password';

@@ -1,3 +1,4 @@
+import { RouteErrorBoundary } from '@/shared/components/route-error-boundary';
 import { lazy, Suspense } from "react";
 import {
   BrowserRouter,
@@ -11,8 +12,8 @@ import { AppSidebar, MobileAppSidebar } from "@/app/components/app-sidebar";
 import { GlobalHeader } from "@/app/components/global-header";
 import { ThemeProvider } from "@/app/components/theme-provider";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { PageLayout } from "@/components/shared/page-layout";
-import { ViewSkeleton } from "@/components/shared/view-skeleton";
+import { PageLayout } from "@/shared/components/page-layout";
+import { ViewSkeleton } from "@/shared/components/view-skeleton";
 import { ActiveTraceProvider } from "@/shared/hooks/use-active-trace";
 import { AuthProvider, useAuth } from "@/features/auth/auth-context";
 
@@ -48,7 +49,7 @@ function AuthenticatedRoutes() {
         <SidebarInset className="h-dvh w-0 min-w-0 flex-1 overflow-hidden">
           <GlobalHeader />
           <div className="min-h-0 flex-1 overflow-auto">
-            <Suspense
+            <RouteErrorBoundary><Suspense
               fallback={
                 <PageLayout>
                   <ViewSkeleton showHeader />
@@ -69,7 +70,7 @@ function AuthenticatedRoutes() {
                 <Route path="infrastructure" element={<InfrastructurePage />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
-            </Suspense>
+            </Suspense></RouteErrorBoundary>
           </div>
         </SidebarInset>
       </SidebarProvider>
@@ -83,9 +84,9 @@ function AppRoutes() {
       <Route
         path="/login"
         element={
-          <Suspense fallback={<ViewSkeleton />}>
+          <RouteErrorBoundary><Suspense fallback={<ViewSkeleton />}>
             <LoginPage />
-          </Suspense>
+          </Suspense></RouteErrorBoundary>
         }
       />
       <Route path="/org/:tenant/*" element={<AuthenticatedRoutes />} />

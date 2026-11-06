@@ -9,7 +9,7 @@ import { ClickhouseService } from '../telemetry/services/clickhouse.service';
 import { MetricsService } from '../telemetry/services/metrics.service';
 import { FilterOptionsDto, FiltersController } from '../telemetry/controllers/filters.controller';
 import { ValidationPipe } from '../../common/pipes/validation.pipe';
-import { listFilteredMonitors } from './monitors.controller';
+import { listFilteredMonitors } from '../monitors/monitors.controller';
 
 test('filter discovery DTO accepts source/time and rejects unsupported query parameters', async () => {
   const query = { source: 'metrics', from: '2026-10-14T12:00:00Z', to: '2026-10-14T13:00:00Z' };

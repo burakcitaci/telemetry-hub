@@ -1,32 +1,31 @@
-import {
-  Activity,
-  ChartArea,
-  FileText,
-  Gauge,
-  Monitor,
-  Server,
-  Shield,
-} from "lucide-react";
-import { platformFilterSearch as filterSearch } from "@/shared/lib/platform-filters";
-import { Link, useLocation } from "react-router-dom";
 import { ModeToggle } from "@/app/components/mode-toggle";
-import { cn } from "@/lib/utils";
-import { useAuth } from "@/features/auth/auth-context";
 import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarRail,
-  SidebarTrigger,
-  useSidebar,
+Sidebar,
+SidebarContent,
+SidebarFooter,
+SidebarGroup,
+SidebarGroupContent,
+SidebarGroupLabel,
+SidebarHeader,
+SidebarMenu,
+SidebarMenuButton,
+SidebarMenuItem,
+SidebarRail,
+SidebarTrigger,
+useSidebar,
 } from "@/components/ui/sidebar";
+import { useAuth } from "@/features/auth/auth-context";
+import { cn } from "@/lib/utils";
+import { platformFilterSearch as filterSearch } from "@/shared/lib/platform-filters";
+import {
+Activity,
+ChartArea,
+FileText,
+Monitor,
+Server,
+Shield
+} from "lucide-react";
+import { Link,useLocation } from "react-router-dom";
 
 const navItems = [
   {

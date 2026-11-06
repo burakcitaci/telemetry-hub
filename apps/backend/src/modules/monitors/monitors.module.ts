@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AuthModule } from '../auth/auth.module';
 import { TelemetryModule } from '../telemetry/telemetry.module';
-import { MonitorsController } from '../auth/monitors.controller';
+import { MonitorsController } from './monitors.controller';
 import { MonitorEvaluatorService } from './monitor-evaluator.service';
 import { MonitorQueryService } from './monitor-query.service';
 import { PlatformStore } from '../auth/platform-store.service';

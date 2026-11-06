@@ -1,3 +1,5 @@
+import { BrowserRouter } from 'react-router-dom';
+import { RecoveryFixture } from './recovery-fixture';
 import React from "react";
 import { createRoot } from "react-dom/client";
 import App from "../src/app/app";
@@ -72,7 +74,7 @@ api.defaults.adapter = async (config) => {
       status: index % 2 ? 'OK' : 'Alert', message: `History event ${index + 1}`,
     })) : [],
     };
-    data = config.method === "put" ? { ...monitor, isMuted: true } : [monitor];
+    data = config.url?.endsWith("/mute") && config.method === "post" ? { ...monitor, isMuted: JSON.parse(String(config.data)).isMuted } : config.method === "put" ? { ...monitor, isMuted: true } : [monitor];
   }
   else if (config.url?.startsWith("/traces/detail")) {
     if (scenario === "retry" && (window as any).__requests.filter((request: any) => request.url === "/traces/detail").length === 1) {
@@ -98,5 +100,5 @@ api.defaults.adapter = async (config) => {
   removeEventListener() {}
   close() {}
 };
-createRoot(document.getElementById("root")!).render(<App />);
+createRoot(document.getElementById("root")!).render(scenario === 'render-error' ? <BrowserRouter><RecoveryFixture /></BrowserRouter> : <App />);
 (window as any).__fixtureReady = true;

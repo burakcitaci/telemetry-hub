@@ -2,7 +2,7 @@ import React from 'react';
 import {
   DataValue,
   MetricCard,
-} from '@/components/shared/telemetry-primitives';
+} from '@/shared/components/telemetry-primitives';
 import { Series, formatValue } from '@/features/metrics/model';
 
 export const MetricStatCard: React.FC<{

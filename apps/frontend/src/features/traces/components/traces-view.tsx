@@ -1,6 +1,6 @@
 import { TelemetryActions } from '@/shared/components/feature-actions';
 import { useState } from 'react';
-import { FeatureHeader } from '@/components/shared/feature-header';
+import { FeatureHeader } from '@/shared/components/feature-header';
 import {
   FeaturePage,
   FeatureBody,
@@ -12,7 +12,7 @@ import {
 import type { useTraces } from '../hooks/use-traces';
 import { useActiveTrace } from '@/shared/hooks/use-active-trace';
 import { DataTable } from '@/shared/components/data-table';
-import { AppFilterSidebar } from '@/components/shared/app-filter-sidebar';
+import { AppFilterSidebar } from '@/shared/components/app-filter-sidebar';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { columns } from '@/features/traces/components/traces-components';
 

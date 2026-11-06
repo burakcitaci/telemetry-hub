@@ -10,5 +10,5 @@ export class ServiceParamDto {
   @IsString()
   @IsNotEmpty()
   @MaxLength(255)
-  service: string;
+  service!: string;
 }

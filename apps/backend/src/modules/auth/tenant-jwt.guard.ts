@@ -62,7 +62,7 @@ export class TenantJwtGuard implements CanActivate {
     const validRole =
       payload?.role === 'admin' || payload?.role === 'user';
     if (!validRole || !TENANT_PATTERN.test(payload.tenantSlug) || typeof payload.sub !== 'string'
-      || !Number.isInteger(payload.version) || payload.version < 1) {
+      || !Number.isInteger(payload.version) || payload.version! < 1) {
       throw new UnauthorizedException('Authentication claims are invalid.');
     }
     if (payload.teamId && !TEAM_PATTERN.test(payload.teamId)) {

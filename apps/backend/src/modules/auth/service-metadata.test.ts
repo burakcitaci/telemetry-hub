@@ -10,7 +10,7 @@ import { PlatformStore } from './platform-store.service';
 import { ServiceMetadataController, ServiceMetadataDto } from './service-metadata.controller';
 import { ClickhouseService } from '../telemetry/services/clickhouse.service';
 import { MetricsService } from '../telemetry/services/metrics.service';
-import { MonitorsController } from './monitors.controller';
+import { MonitorsController } from '../monitors/monitors.controller';
 import { AdminService } from './admin.service';
 
 test('service metadata survives reopening SQLite and is isolated by organization', () => {

@@ -24,31 +24,31 @@ export class KubernetesService {
 
   async nodes(): Promise<V1Node[]> {
     this.initialize();
-    const response = await this.core.listNode({ timeoutSeconds: 5 });
+    const response = await this.core!.listNode({ timeoutSeconds: 5 });
     return response.items.filter(node => node.metadata?.uid && node.metadata?.name);
   }
 
   async namespaces(): Promise<V1Namespace[]> {
     this.initialize();
-    return (await this.core.listNamespace({ timeoutSeconds: 5 })).items;
+    return (await this.core!.listNamespace({ timeoutSeconds: 5 })).items;
   }
 
   async pods(): Promise<V1Pod[]> {
     this.initialize();
-    return (await this.core.listPodForAllNamespaces({ timeoutSeconds: 5 })).items;
+    return (await this.core!.listPodForAllNamespaces({ timeoutSeconds: 5 })).items;
   }
 
   async services(): Promise<V1Service[]> {
     this.initialize();
-    return (await this.core.listServiceForAllNamespaces({ timeoutSeconds: 5 })).items;
+    return (await this.core!.listServiceForAllNamespaces({ timeoutSeconds: 5 })).items;
   }
 
   async workloads(): Promise<KubernetesWorkloads> {
     this.initialize();
     const [deployments, statefulSets, daemonSets] = await Promise.all([
-      this.apps.listDeploymentForAllNamespaces({ timeoutSeconds: 5 }),
-      this.apps.listStatefulSetForAllNamespaces({ timeoutSeconds: 5 }),
-      this.apps.listDaemonSetForAllNamespaces({ timeoutSeconds: 5 }),
+      this.apps!.listDeploymentForAllNamespaces({ timeoutSeconds: 5 }),
+      this.apps!.listStatefulSetForAllNamespaces({ timeoutSeconds: 5 }),
+      this.apps!.listDaemonSetForAllNamespaces({ timeoutSeconds: 5 }),
     ]);
     return { deployments: deployments.items, statefulSets: statefulSets.items, daemonSets: daemonSets.items };
   }
@@ -65,12 +65,12 @@ export class KubernetesService {
     this.initialize();
     for (const version of ['v1', 'v1beta1']) {
       try {
-        const response = await this.custom.listClusterCustomObject({
+        const response = await this.custom!.listClusterCustomObject({
           group: 'metrics.k8s.io', version, plural, timeoutSeconds: 5,
         });
         return (response.items ?? []) as T[];
       } catch (error) {
-        if (version === 'v1' && (error.code === 404 || error.statusCode === 404)) continue;
+        if (version === 'v1' && ((error as { code?: number }).code === 404 || (error as { statusCode?: number }).statusCode === 404)) continue;
         this.logger.warn(`${plural} metrics unavailable; retaining Kubernetes inventory.`);
         return [];
       }

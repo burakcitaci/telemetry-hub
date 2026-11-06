@@ -11,7 +11,7 @@ export class TraceIdParamDto {
   @Matches(/^[0-9a-fA-F]{32}$/, {
     message: "traceId must be a 32-character hexadecimal identifier",
   })
-  traceId: string;
+  traceId!: string;
 }
 
 export class TraceDetailQueryDto extends IntersectionType(TraceIdParamDto, TelemetryQueryDto) {}

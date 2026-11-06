@@ -1,8 +1,8 @@
 import { Activity, SearchX } from 'lucide-react';
 import { useState } from 'react';
-import { FeatureHeader } from '@/components/shared/feature-header';
+import { FeatureHeader } from '@/shared/components/feature-header';
 import { Button } from '@/components/ui/button';
-import { QueryError, ViewSkeleton } from '@/components/shared/view-skeleton';
+import { QueryError, ViewSkeleton } from '@/shared/components/view-skeleton';
 import { DataTable } from '@/shared/components/data-table';
 import { FeatureRefreshButton } from '@/shared/components/feature-actions';
 import {
@@ -13,7 +13,7 @@ import {
   FeaturePanel,
   FeatureEmptyState,
 } from '@/shared/components/feature-layout';
-import { AppFilterSidebar } from '@/components/shared/app-filter-sidebar';
+import { AppFilterSidebar } from '@/shared/components/app-filter-sidebar';
 import { columns } from './services-components';
 import type { useServices } from '../hooks/use-services';
 import type { ServiceRow } from '../model';

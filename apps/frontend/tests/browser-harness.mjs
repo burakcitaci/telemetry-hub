@@ -80,6 +80,8 @@ export async function browserFixture() {
     const port = server.httpServer.address().port;
     child = spawn(executable, [
       "--headless=new", "--disable-gpu", "--no-first-run", "--disable-default-apps",
+      "--disable-extensions", "--disable-background-networking", "--disable-component-update",
+      "--disable-sync", "--disable-renderer-backgrounding", "--disable-background-timer-throttling",
       "--remote-debugging-port=0", `--user-data-dir=${profile}`, "about:blank",
     ], { windowsHide: true, stdio: ["ignore", "ignore", "pipe"] });
     let output = "";
@@ -133,12 +135,13 @@ export async function browserFixture() {
         const exit = new Promise((done) => child.once("exit", done));
         child.kill();
         await Promise.race([exit, delay(3000)]);
+        server.httpServer?.closeAllConnections();
         await server.close();
         await rm(profile, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
       },
     };
   } catch (error) {
-    page?.close(); child?.kill(); await server.close();
+    page?.close(); child?.kill(); server.httpServer?.closeAllConnections(); await server.close();
     await rm(profile, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
     throw error;
   }

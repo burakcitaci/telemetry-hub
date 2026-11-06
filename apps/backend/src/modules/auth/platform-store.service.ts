@@ -1,3 +1,4 @@
+import type { MonitorReadStore } from '../monitors/monitor-read-store';
 import { ConflictException, Injectable, OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DatabaseSync } from 'node:sqlite';
@@ -22,7 +23,7 @@ export interface IngestionKeyRecord {
 
 /** Persistent single-node control plane; organization is part of every lookup. */
 @Injectable()
-export class PlatformStore implements OnModuleDestroy {
+export class PlatformStore implements OnModuleDestroy, MonitorReadStore {
   private readonly db: DatabaseSync;
   private readonly releaseOwnership: () => void;
   readonly monitorRepository: SqliteMonitorRepository;

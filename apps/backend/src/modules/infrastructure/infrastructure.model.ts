@@ -82,7 +82,7 @@ export function mapNode(node: V1Node, usage?: NodeUsage): InfrastructureHost {
   const observed = resourceUsage(usage?.usage, usage?.timestamp, usage?.window);
   const cpu = observed.cpuCores === null ? null : percentage(usage?.usage.cpu, node.status?.capacity?.cpu);
   const ram = observed.memoryBytes === null ? null : percentage(usage?.usage.memory, node.status?.capacity?.memory);
-  return { id: node.metadata.uid!, hostname: node.metadata.name!,
+  return { id: node.metadata!.uid!, hostname: node.metadata!.name!,
     status: nodeStatus(node, Math.max(cpu ?? 0, ram ?? 0)), metrics: { cpu, ram, disk: null }, usage: observed,
     capacity: capacity(node.status?.capacity), allocatable: capacity(node.status?.allocatable),
     info: { os: node.status?.nodeInfo?.osImage ?? '', architecture: node.status?.nodeInfo?.architecture ?? '',

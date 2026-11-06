@@ -1,27 +1,28 @@
+import type { MonitorReadStore } from './monitor-read-store';
 import { Body, ConflictException, Controller, Delete, Get, NotFoundException, Optional, Param, Patch, Post, Put, UseGuards } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
-import { AdminService } from './admin.service';
-import { PlatformStore } from './platform-store.service';
-import { TenantJwtGuard } from './tenant-jwt.guard';
-import { Tenant } from './tenant-request.decorator';
-import type { TenantScope } from './auth.types';
-import { MonitorDto } from './dto/monitor.dto';
-import { filterValues } from './platform-filters';
+import { AdminService } from '../auth/admin.service';
+import { PlatformStore } from '../auth/platform-store.service';
+import { TenantJwtGuard } from '../auth/tenant-jwt.guard';
+import { Tenant } from '../auth/tenant-request.decorator';
+import type { TenantScope } from '../auth/auth.types';
+import { MonitorDto } from '../auth/dto/monitor.dto';
+import { filterValues } from '../auth/platform-filters';
 import { IsBoolean } from 'class-validator';
-import { MonitorEvaluatorService } from '../monitors/monitor-evaluator.service';
-import { validateMonitor } from '../monitors/monitor-rule';
-import { normalizeLogRule } from '../monitors/log-query';
+import { MonitorEvaluatorService } from './monitor-evaluator.service';
+import { validateMonitor } from './monitor-rule';
+import { normalizeLogRule } from './log-query';
 import { Query } from '@nestjs/common';
 import { IsISO8601 } from 'class-validator';
-import { CreateMonitorDto, PatchMonitorDto } from '../monitors/dto/unified-monitor.dto';
-import { MonitorInputPipe } from '../monitors/monitor-input.pipe';
-import { MonitoringService } from '../monitors/monitoring.service';
-import { monitorView } from '../monitors/monitor-contract.mapper';
+import { CreateMonitorDto, PatchMonitorDto } from './dto/unified-monitor.dto';
+import { MonitorInputPipe } from './monitor-input.pipe';
+import { MonitoringService } from './monitoring.service';
+import { monitorView } from './monitor-contract.mapper';
 class MonitorHistoryDto { @IsISO8601() from!: string; @IsISO8601() to!: string; }
 
 export class MonitorMuteDto { @IsBoolean() isMuted!: boolean; }
 
-export function listFilteredMonitors(store: PlatformStore, scope: TenantScope, overdueAfterMs = 90_000) {
+export function listFilteredMonitors(store: MonitorReadStore, scope: TenantScope, overdueAfterMs = 90_000) {
   const ownership = scope.teamFilter ? store.serviceOwnership(scope.tenantSlug, scope.teamFilter) : undefined;
   const teams = filterValues(scope.teamFilter), services = filterValues(scope.serviceFilter), envs = filterValues(scope.envFilter);
   const statuses = filterValues(scope.statusFilter);

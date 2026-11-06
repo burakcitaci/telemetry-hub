@@ -1,49 +1,48 @@
-import {
-    useCallback,
-    useEffect,
-    useMemo,
-    useRef,
-    useState,
-    type ReactNode,
-} from "react";
-import {
-    Braces,
-    ChevronDown,
-    ChevronRight,
-    Network,
-    RefreshCw,
-    X,
-} from "lucide-react";
-import { getTraceById } from "@/features/traces/api";
-import { spanWaterfall } from "@/shared/lib/trace-waterfall";
-import { useTelemetryQuery } from "@/shared/hooks/use-telemetry-query";
-import { readPlatformFilters } from "@/shared/lib/platform-filters";
-import type { TraceSpan } from "@/features/traces/types";
-import {
-    AttributeSection,
-    CopyButton,
-    DetailField,
-    JsonPanel,
-} from "@/shared/components/telemetry-detail";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
-    Sheet,
-    SheetContent,
-    SheetDescription,
-    SheetTitle,
+Sheet,
+SheetContent,
+SheetDescription,
+SheetTitle,
 } from "@/components/ui/sheet";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { getErrorMessage } from "@/shared/lib/errors";
+import { Tabs,TabsContent,TabsList,TabsTrigger } from "@/components/ui/tabs";
+import { traceStatusAccent } from "@/components/utils/severity";
+import { getTraceById } from "@/features/traces/api";
+import type { TraceSpan } from "@/features/traces/types";
 import { cn } from "@/lib/utils";
 import {
-    formatDuration,
-    formatTelemetryTimestamp,
-    getTelemetryTimestampMs,
+AttributeSection,
+CopyButton,
+DetailField,
+JsonPanel,
+} from "@/shared/components/telemetry-detail";
+import { QueryError,ViewSkeleton } from "@/shared/components/view-skeleton";
+import { useTelemetryQuery } from "@/shared/hooks/use-telemetry-query";
+import { getErrorMessage } from "@/shared/lib/errors";
+import { readPlatformFilters } from "@/shared/lib/platform-filters";
+import {
+formatDuration,
+formatTelemetryTimestamp,
+getTelemetryTimestampMs,
 } from "@/shared/lib/telemetry";
-import { QueryError, ViewSkeleton } from "@/components/shared/view-skeleton";
-import { severityAccent, traceStatusAccent } from "@/components/utils/severity";
+import { spanWaterfall } from "@/shared/lib/trace-waterfall";
+import {
+Braces,
+ChevronDown,
+ChevronRight,
+Network,
+X
+} from "lucide-react";
+import {
+useCallback,
+useEffect,
+useMemo,
+useRef,
+useState,
+type ReactNode,
+} from "react";
 
 interface TraceDetailSheetProps {
     investigationSearch?: string;

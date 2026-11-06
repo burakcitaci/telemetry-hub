@@ -1,0 +1,86 @@
+name: telemetry-hub
+services:
+  clickhouse:
+    image: clickhouse/clickhouse-server:26.3.17.56
+    environment:
+      CLICKHOUSE_SKIP_USER_SETUP: '1'
+    volumes:
+      - clickhouse-data:/var/lib/clickhouse
+    healthcheck:
+      test: ['CMD', 'clickhouse-client', '--query', 'SELECT 1']
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    restart: unless-stopped
+  collector:
+    image: ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib:0.153.0
+    command: ['--config=/etc/otelcol/config.yaml']
+    environment:
+      INGESTION_COLLECTOR_TOKEN: ${INGESTION_COLLECTOR_TOKEN:?Run node scripts/setup.mjs first}
+    volumes:
+      - ./.local/collector.yaml:/etc/otelcol/config.yaml:ro
+    depends_on:
+      clickhouse:
+        condition: service_healthy
+    restart: unless-stopped
+  backend:
+    build:
+      context: .
+      dockerfile: apps/backend/Dockerfile
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: '3001'
+      AUTH_DB_PATH: /var/lib/telemetry-hub/platform.sqlite
+      AUTH_JWT_SECRET: ${AUTH_JWT_SECRET:?Run node scripts/setup.mjs first}
+      AUTH_USERS_JSON: ${AUTH_USERS_JSON:?Run node scripts/setup.mjs first}
+      CORS_ORIGINS: ${HUB_PUBLIC_URL:-http://localhost:5000}
+      INGESTION_COLLECTOR_TOKEN: ${INGESTION_COLLECTOR_TOKEN}
+      INGESTION_KEYS_JSON: '[]'
+      INGESTION_COLLECTOR_ENDPOINT: http://collector:4319
+      CLICKHOUSE_HOST: clickhouse
+      CLICKHOUSE_PORT: '8123'
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://collector:4318
+      DEPLOY_ENV: local
+    ports:
+      - '127.0.0.1:${API_PORT:-3001}:3001'
+    volumes:
+      - platform-data:/var/lib/telemetry-hub
+    depends_on:
+      clickhouse:
+        condition: service_healthy
+      collector:
+        condition: service_started
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://127.0.0.1:3001/health/ready').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
+    restart: unless-stopped
+  frontend:
+    build:
+      context: .
+      dockerfile: apps/frontend/Dockerfile
+      args:
+        VITE_BACKEND_URL: /
+    ports:
+      - '127.0.0.1:${HUB_PORT:-5000}:8080'
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD', 'wget', '-q', '--spider', '--header=Host: localhost', 'http://127.0.0.1:8080/']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+volumes:
+  clickhouse-data:
+  platform-data:
