@@ -1,4 +1,4 @@
-> Advanced Kubernetes/Kind guide. For the simpler Docker Compose setup and first administrator, start with [the main README](../README.md).
+> Advanced Kubernetes/Kind guide. Start with [the main README](../README.md) for the Helm/Kind quickstart.
 
 # Telemetry Hub
 
@@ -66,10 +66,10 @@ The middleware constructs a fresh upstream header set containing:
 
 Client cookies, client keys, client-supplied tenant headers, and other headers are **not forwarded**. The OTLP body is unchanged; the Collector sanitizes its resource attributes. The gateway accepts HTTP POST, bodies up to 8 MiB, and `application/x-protobuf` or `application/json`. SDK integrations use HTTP/protobuf.
 
-| Secret | Purpose | Recipient |
-| --- | --- | --- |
-| Client key | Identifies a backend and its organization/team | That backend only |
-| `INGESTION_COLLECTOR_TOKEN` | Authenticates trusted internal senders | Gateway and internal platform components |
+| Secret                      | Purpose                                        | Recipient                                |
+| --------------------------- | ---------------------------------------------- | ---------------------------------------- |
+| Client key                  | Identifies a backend and its organization/team | That backend only                        |
+| `INGESTION_COLLECTOR_TOKEN` | Authenticates trusted internal senders         | Gateway and internal platform components |
 
 **Hashes are not decrypted.** Each incoming key is hashed again and compared with the registry. Keep digests in the server-side registry and plaintext keys in the application's secret store. Never distribute the internal Collector token to external backends.
 
@@ -187,13 +187,13 @@ There is **no default admin password or public registration**. Prepare the first
 
 The bootstrap below prepares these login details:
 
-| Login detail | Example value |
-|---|---|
-| Organization | demo |
-| Email | admin@example.com |
-| Role | admin |
-| Created team | backend |
-| Password | Prompted below without echo; 12–128 characters |
+| Login detail | Example value                                  |
+| ------------ | ---------------------------------------------- |
+| Organization | demo                                           |
+| Email        | admin@example.com                              |
+| Role         | admin                                          |
+| Created team | backend                                        |
+| Password     | Prompted below without echo; 12–128 characters |
 
 To use your own values, change `tenantSlug`, `email` and `teams` in the example; the ingestion key's `orgSlug` and `teamId` must match. Remember the password you choose for signing in later. The Kubernetes Secret stores its salted scrypt hash.
 
@@ -318,6 +318,12 @@ yarn dev:backend
 
 Start the frontend and local backend with their separate workspace commands above. Use `yarn cluster:reload-backend` to rebuild and update the cluster backend after code changes.
 
+### Optional: Docker Compose
+
+`compose.yaml` is a separate all-in-one convenience deployment. It starts frontend, backend, Collector,
+and ClickHouse as Docker Compose services. Do not run it together with the Kind release when following
+this guide; use it only when you explicitly want the Compose workflow documented in the main README.
+
 ## 3. HOW TO: INTEGRATE A NEW BACKEND (PLUG & PLAY)
 
 ### TASK-ONBOARD-1: Provision access
@@ -362,12 +368,12 @@ export OTEL_EXPORTER_OTLP_PROTOCOL="http/protobuf"
 export OTEL_SERVICE_NAME="customer-orders-api"
 ```
 
-| Variable | Meaning |
-| --- | --- |
+| Variable                      | Meaning                             |
+| ----------------------------- | ----------------------------------- |
 | `OTEL_EXPORTER_OTLP_ENDPOINT` | Gateway base URL, not the Collector |
-| `OTEL_EXPORTER_OTLP_HEADERS` | Client key in `name=value` format |
-| `OTEL_EXPORTER_OTLP_PROTOCOL` | HTTP/protobuf rather than gRPC |
-| `OTEL_SERVICE_NAME` | Stable technical service identity |
+| `OTEL_EXPORTER_OTLP_HEADERS`  | Client key in `name=value` format   |
+| `OTEL_EXPORTER_OTLP_PROTOCOL` | HTTP/protobuf rather than gRPC      |
+| `OTEL_SERVICE_NAME`           | Stable technical service identity   |
 
 Your SDK integration must support or explicitly read these variables. Signal paths are `/api/ingest/v1/traces`, `/api/ingest/v1/logs`, and `/api/ingest/v1/metrics`. Signal-specific endpoint variables and explicit exporter URLs require the full signal path.
 
@@ -509,18 +515,18 @@ The secret header is passed through stdin rather than a process argument. Avoid 
 
 ### Common failures
 
-| Symptom | Cause / checks |
-| --- | --- |
-| **401 Unauthorized** | Missing/invalid key, unknown hash, revoked or expired key. Send plaintext, not the digest; restart the backend after registry changes. An upstream 401 can also indicate a mismatched internal Collector token. |
-| **415 Unsupported Media Type** | Gateway expects JSON or Protobuf over HTTP, not `application/grpc`. Set `http/protobuf`. Actual gRPC connections may fail at transport level instead of returning HTTP 415. |
-| **404** | Incorrect signal path or HTTP method. POST to `/api/ingest/v1/{signal}`. |
-| **400 / 413** | Empty/malformed OTLP body or 8-MiB limit exceeded. Check SDK configuration and batches. |
-| **503 / export timeout** | Missing token, unavailable Collector, or upstream failure. Check endpoints, pods, forwarding, and network rules. |
-| Service missing | No stored telemetry, wrong mapping, insufficient permissions, or restrictive time/environment filters. Consider export intervals and batching. |
-| Metrics but no traces | Meter providers do not create spans. Check ActivitySource registration, instrumentation, and sampling. |
-| Pod port-forward: `connection refused` | Process does not listen on the target port. Check bind address, container logs, and actual HTTP port; `containerPort` does not open a listener. |
-| `CreateContainerConfigError` | Missing secret or required secret field. Provision before Helm deployment. |
-| Login fails | Check organization, bootstrap identity, and password. Session cookies are HttpOnly/Secure/SameSite=Lax: do not mix hostnames; configure local HTTPS if necessary. |
+| Symptom                                | Cause / checks                                                                                                                                                                                                  |
+| -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **401 Unauthorized**                   | Missing/invalid key, unknown hash, revoked or expired key. Send plaintext, not the digest; restart the backend after registry changes. An upstream 401 can also indicate a mismatched internal Collector token. |
+| **415 Unsupported Media Type**         | Gateway expects JSON or Protobuf over HTTP, not `application/grpc`. Set `http/protobuf`. Actual gRPC connections may fail at transport level instead of returning HTTP 415.                                     |
+| **404**                                | Incorrect signal path or HTTP method. POST to `/api/ingest/v1/{signal}`.                                                                                                                                        |
+| **400 / 413**                          | Empty/malformed OTLP body or 8-MiB limit exceeded. Check SDK configuration and batches.                                                                                                                         |
+| **503 / export timeout**               | Missing token, unavailable Collector, or upstream failure. Check endpoints, pods, forwarding, and network rules.                                                                                                |
+| Service missing                        | No stored telemetry, wrong mapping, insufficient permissions, or restrictive time/environment filters. Consider export intervals and batching.                                                                  |
+| Metrics but no traces                  | Meter providers do not create spans. Check ActivitySource registration, instrumentation, and sampling.                                                                                                          |
+| Pod port-forward: `connection refused` | Process does not listen on the target port. Check bind address, container logs, and actual HTTP port; `containerPort` does not open a listener.                                                                 |
+| `CreateContainerConfigError`           | Missing secret or required secret field. Provision before Helm deployment.                                                                                                                                      |
+| Login fails                            | Check organization, bootstrap identity, and password. Session cookies are HttpOnly/Secure/SameSite=Lax: do not mix hostnames; configure local HTTPS if necessary.                                               |
 
 ### Diagnostics and quality checks
 

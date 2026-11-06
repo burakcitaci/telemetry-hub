@@ -7,22 +7,22 @@ OpenTelemetry-Daten; Benutzer, Teams und Ingestion-Keys verwaltest du im Dashboa
 
 ## Erstinstallation
 
-Benötigt werden [Git](https://git-scm.com/downloads), [Node.js 24+](https://nodejs.org/en/download/)
-und eine laufende [Docker-Desktop](https://www.docker.com/products/docker-desktop/)-Installation
-mit Linux-Containern. Unter Linux funktioniert auch Docker Engine mit dem Compose-v2-Plugin.
-Yarn, Kubernetes, Kind, Helm und Bash sind für diesen Einstieg **nicht erforderlich**.
+Benötigt werden [Git](https://git-scm.com/downloads), [Node.js 24+](https://nodejs.org/en/download/),
+Yarn 1.22.22, Docker, Kind, kubectl und Helm. Docker muss im Linux-Container-Modus laufen.
+Backend, Collector und ClickHouse werden mit Helm in Kind gestartet; das React-Frontend läuft separat.
 
 Diese Befehle funktionieren in PowerShell, macOS Terminal und Linux-Terminals:
 
 ```sh
 git clone https://github.com/burakcitaci/telemetry-hub.git
 cd telemetry-hub
-node scripts/setup.mjs
-docker compose up --build -d --wait
+yarn install --frozen-lockfile
+yarn cluster:init
+yarn ports:backend
 ```
 
-Beim ersten Start werden Images heruntergeladen und die Anwendungen gebaut. Das kann einige Minuten
-dauern. Anschließend **[http://localhost:5000](http://localhost:5000)** öffnen.
+In einem zweiten Terminal `yarn dev:frontend` starten und anschließend **[http://localhost:5000](http://localhost:5000)** öffnen.
+Der erste Kind-Start baut das Backend-Image und installiert das Helm-Release.
 
 ## Ersten Administrator erstellen und anmelden
 
@@ -30,10 +30,8 @@ Der Assistent fragt nach dem Organisations-Slug, deiner E-Mail-Adresse, dem erst
 Passwort mit 12–128 Zeichen. Die Passworteingabe bleibt verborgen; anschließend bestätigst du sie.
 Mit Enter übernimmst du `demo` als Organisation beziehungsweise `backend` als Team.
 
-Es gibt **kein Standardpasswort und keine öffentliche Registrierung**. Beim ersten Backend-Start
-werden dein Administrator und das Team angelegt. Die generierte, von Git ignorierte `.env` enthält
-zufällige interne Secrets und einen Passwort-Hash; dein Passwort wird nicht im Klartext gespeichert.
-Die Datei privat halten und das gewählte Passwort sicher aufbewahren.
+Es gibt **kein Standardpasswort und keine öffentliche Registrierung**. Für Helm folge dem
+[Bootstrap für den ersten Administrator](docs/advanced-setup.de.md#first-admin), bevor du den Cluster startest.
 
 Melde dich mit **deinem Organisations-Slug, deiner E-Mail-Adresse und deinem gewählten Passwort** an.
 Verwende die angegebene `localhost`-Adresse. Der Docker-Frontendserver leitet Zugriffe auf `127.0.0.1` automatisch zu `localhost` weiter; Port, Pfad und Filter bleiben erhalten.
@@ -44,7 +42,6 @@ Verwende die angegebene `localhost`-Adresse. Der Docker-Frontendserver leitet Zu
 4. Den Key sofort kopieren: Der Klartext wird nur einmal angezeigt.
 
 Ein zunächst leeres Dashboard ist normal. Ohne echte Telemetrie werden keine Beispieldaten erzeugt.
-Die Infrastrukturansicht benötigt Kubernetes; die übrigen Telemetrieansichten funktionieren mit Compose.
 
 ## Erste Anwendung anbinden
 

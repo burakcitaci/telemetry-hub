@@ -7,21 +7,22 @@ Connect applications using standard OpenTelemetry and manage users, teams, and i
 
 ## First installation
 
-Install [Git](https://git-scm.com/downloads), [Node.js 24+](https://nodejs.org/en/download/), and
-[Docker Desktop](https://www.docker.com/products/docker-desktop/) with Linux containers.
-On Linux, Docker Engine with the Docker Compose v2 plugin also works. Start Docker before continuing.
+Install [Git](https://git-scm.com/downloads), [Node.js 24+](https://nodejs.org/en/download/),
+[Yarn 1.22.22](https://classic.yarnpkg.com/), [Docker](https://www.docker.com/products/docker-desktop/),
+[Kind](https://kind.sigs.k8s.io/), `kubectl`, and [Helm](https://helm.sh/). Start Docker in Linux-container mode.
 
-**No Yarn, Kubernetes, Kind, Helm, or Bash is needed.** These commands work in PowerShell, macOS Terminal, and Linux terminals:
+The normal deployment runs the backend, Collector, and ClickHouse in Kind. The React frontend runs separately:
 
 ```sh
 git clone https://github.com/burakcitaci/telemetry-hub.git
 cd telemetry-hub
-node scripts/setup.mjs
-docker compose up --build -d --wait
+yarn install --frozen-lockfile
+yarn cluster:init
+yarn ports:backend
 ```
 
-The first start downloads images and builds the applications; allow several minutes.
-When it finishes, open **[http://localhost:5000](http://localhost:5000)**.
+In another terminal, start the frontend with `yarn dev:frontend`, then open the Vite URL, normally **[http://localhost:5000](http://localhost:5000)**.
+The first Kind start builds the backend image and installs the Helm release; allow several minutes.
 
 <a id="first-admin"></a>
 
@@ -36,16 +37,14 @@ The setup wizard asks for:
 | First team                | Enter selects `backend`, or choose your own team slug          |
 | Password and confirmation | Your own password, 12–128 characters; input is hidden          |
 
-There is **no default password and no public sign-up form**. The first backend start creates this
-administrator and team. The wizard generates internal secrets and saves a **password hash**, not
-your plaintext password, in the ignored local `.env` file. Keep that file private.
+There is **no default password and no public sign-up form**. For Helm, follow the
+[first-admin bootstrap](docs/advanced-setup.en.md#first-admin) to create Kubernetes secrets before starting the cluster.
 
 <a id="first-login"></a>
 
 ### First sign-in
 
-Enter the **organization slug, email, and password you chose** in the wizard. Use the localhost URL printed by setup. The Docker frontend also redirects `127.0.0.1` visits to
-`localhost`, preserving the port and investigation URL.
+Enter the **organization slug, email, and password you chose** during the Helm bootstrap.
 
 1. Open **Administration**. Your first administrator and team should already be listed.
 2. Create additional teams, then users, and choose their role/team.
@@ -53,7 +52,7 @@ Enter the **organization slug, email, and password you chose** in the wizard. Us
 4. Copy the key immediately: its plaintext is displayed only once.
 
 An empty dashboard is normal until applications send telemetry. No example account or customer data
-is silently created. The Infrastructure view requires Kubernetes; the other views work with Compose.
+is silently created.
 
 ## Connect your first application
 
@@ -74,26 +73,25 @@ Run the application and generate requests/logs/measurements. Open **Services**, 
 Metrics alone do not create traces.
 
 In another Docker container, `localhost` means that container. Use `host.docker.internal:3001` where
-supported, or attach the application to this Compose network and use `http://backend:3001/api/ingest`.
+supported, or use the Kind backend's published port-forward from the host.
 The [detailed integration guide](docs/advanced-setup.en.md#3-how-to-integrate-a-new-backend-plug--play)
 includes a C# example and signal-specific endpoints.
 
-## Everyday commands
+## Everyday Kind commands
 
 Run these from the repository root:
 
-| Action                  | Command                                  |
-| ----------------------- | ---------------------------------------- |
-| Start again             | `docker compose up -d --wait`            |
-| Stop, keeping data      | `docker compose down`                    |
-| Check service status    | `docker compose ps`                      |
-| Follow logs             | `docker compose logs -f --tail=100`      |
-| Read API logs           | `docker compose logs --tail=100 backend` |
-| Rebuild after an update | `docker compose up --build -d --wait`    |
+| Action               | Command                       |
+| -------------------- | ----------------------------- |
+| Check pod status     | `yarn cluster:status`         |
+| Start the frontend   | `yarn dev:frontend`           |
+| Backend port-forward | `yarn ports:backend`          |
+| Backend logs         | `yarn logs:backend`           |
+| Collector logs       | `yarn logs:collector`         |
+| Reload backend image | `yarn cluster:reload-backend` |
 
-Accounts, teams, keys, and monitors live in the `platform-data` volume; telemetry lives in
-`clickhouse-data`, with the configured seven-day telemetry retention. Stop/start and rebuilds preserve
-these volumes. **Do not add `-v` or `--volumes` to `docker compose down` unless you intend to delete data.**
+Accounts, teams, keys, and monitors live in the backend PVC; telemetry lives in the ClickHouse PVC,
+with the configured seven-day telemetry retention. Deleting the Kind cluster can delete local PVC data.
 
 ### Updating
 
@@ -101,28 +99,24 @@ For an unmodified clone:
 
 ```sh
 git pull --ff-only
-node scripts/setup.mjs
-docker compose up --build -d --wait
+yarn install --frozen-lockfile
+yarn cluster:reload-backend
 ```
 
-Keep `.env`. Rerunning setup refreshes the generated Collector configuration, without overwriting `.env` or resetting accounts. Use **Administration** for new
-users and password changes. Changing the bootstrap password hash in `.env` does not reset an existing
-account. There is no automated password reset; save your password and consider adding a second administrator. Back up installations you depend on before upgrading; see [operations](docs/operations.md).
+Use **Administration** for new users and password changes. Back up installations you depend on before upgrading; see [operations](docs/operations.md).
 
 ## Troubleshooting
 
-| Problem                       | What to do                                                                                                                                                                                                      |
-| ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `node` is not recognized      | Install Node 24+, reopen the terminal, and check `node --version`.                                                                                                                                              |
-| Docker is not ready           | Start Docker Desktop in Linux-container mode. Check `docker info` and `docker compose version`.                                                                                                                 |
-| Compose says to run setup     | Run `node scripts/setup.mjs` from the repository root.                                                                                                                                                          |
-| `.env` already exists         | Setup never overwrites files. If it belongs to another workflow, use `node scripts/setup.mjs --output .env.compose`, then `docker compose --env-file .env.compose …` for every Compose command.                 |
-| A port is already in use      | Before first setup, use `node scripts/setup.mjs --port 5050 --api-port 3002`. For an existing setup, change `HUB_PORT`, `API_PORT`, and matching `HUB_PUBLIC_URL` in `.env`, then rebuild and open the new URL. |
-| A service is unhealthy        | Check `docker compose ps` and `docker compose logs --tail=100`; check Docker memory/disk and allow time for first-run downloads.                                                                                |
-| Login fails                   | Use the organization/email/password you chose and the exact localhost URL. An existing volume may contain an earlier account; setup does not reset it.                                                          |
-| Forgot the password           | Ask another organization administrator to change it in Administration. Do not delete volumes as a password-recovery procedure.                                                                                  |
-| Dashboard is empty            | Generate an ingestion key, configure actual OpenTelemetry instrumentation, exercise your application, and check filters.                                                                                        |
-| Infrastructure is unavailable | Compose does not include Kubernetes. Use the advanced Kind guide for cluster inventory.                                                                                                                         |
+| Problem                       | What to do                                                                                                                       |
+| ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `node` is not recognized      | Install Node 24+, reopen the terminal, and check `node --version`.                                                               |
+| Docker/Kind is not ready      | Start Docker Desktop in Linux-container mode and check `docker info`, `kind version`, and `kubectl version --client`.            |
+| Helm release is unhealthy     | Run `yarn cluster:status` and inspect `yarn logs:backend` or `kubectl --context kind-observability get events -n telemetry-hub`. |
+| Frontend cannot reach API     | Keep `yarn ports:backend` running while using `yarn dev:frontend`; verify `http://localhost:3001/health`.                        |
+| Login fails                   | Use the organization/email/password chosen during Helm bootstrap and confirm the backend port-forward is running.                |
+| Forgot the password           | Ask another organization administrator to change it in Administration. Do not delete volumes as a password-recovery procedure.   |
+| Dashboard is empty            | Generate an ingestion key, configure actual OpenTelemetry instrumentation, exercise your application, and check filters.         |
+| Infrastructure is unavailable | Run `kubectl --context kind-observability get pods -n telemetry-hub` and check that the Kind cluster is running.                 |
 
 Do not paste `.env`, rendered Compose configuration, passwords, or ingestion keys into GitHub issues.
 Share service status and relevant logs with secrets removed.
@@ -130,22 +124,21 @@ Share service status and relevant logs with secrets removed.
 ## Development and advanced installation
 
 - [Kubernetes/Kind setup, architecture, and detailed integration examples](docs/advanced-setup.en.md)
+- [Optional all-in-one Docker Compose setup](docs/advanced-setup.en.md#optional-docker-compose)
 - [Local backend development](docs/backend-dev-startup.md)
 - [Verification, containers, storage, backup and restore](docs/operations.md)
 - [Monitor rule API](apps/backend/src/modules/monitors/README.md)
 
 Developers can install Yarn 1.22.22, run `yarn install --frozen-lockfile`, then `yarn verify`.
-This is not required for the Compose quickstart: Docker builds install their own dependencies.
 The default setup is for your own machine, not a public SaaS deployment; it does not provide public HTTPS or production database authentication.
 
 ## What runs locally?
 
 ```text
-Browser :5000 -> frontend + API proxy -> NestJS API :3001
+Browser :5000 -> Vite frontend -> port-forwarded NestJS API :3001
 Application -> authenticated OTLP gateway -> Collector -> ClickHouse
                                       API accounts/settings -> SQLite volume
 ```
 
-Only the dashboard and API bind to your computer's loopback interface. Collector and ClickHouse stay
-inside the Compose network. Setup generates the Collector configuration from the existing Helm template,
-so both paths use the same authentication, ownership handling, table creation, and retention policy.
+The dashboard runs locally; backend, Collector, and ClickHouse run in Kind. Collector and ClickHouse
+remain internal cluster services. The Helm chart is the source of truth for cluster configuration.

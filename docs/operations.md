@@ -1,6 +1,6 @@
 # Repository verification and runtime operations
 
-For a first local installation, use the [Compose quickstart](../README.md). This runbook covers development checks and advanced operation.
+For a first local installation, use the [Kind/Helm quickstart](../README.md). This runbook covers development checks and advanced operation.
 
 ## TASK-OPS-1 — Local checks and CI
 
