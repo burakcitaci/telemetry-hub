@@ -106,7 +106,7 @@ test('printed startup commands apply Helm secrets without shell interpolation', 
 });
 
 test('prerequisite checks explain unavailable Docker and Windows-container mode', () => {
-  assert.throws(() => checkPrerequisites(() => ({ status: 1 })), /Docker, Kind, kubectl and Helm/);
+  assert.throws(() => checkPrerequisites(() => ({ status: 1 })), /docker is not available/);
   assert.throws(
     () => checkPrerequisites(() => ({ status: 0, stdout: 'windows' })),
     /Linux containers/,

@@ -188,18 +188,16 @@ function options(args) {
 }
 
 export function checkPrerequisites(run = spawnSync) {
-  for (const args of [
-    ['info', '--format', '{{.OSType}}'],
-    ['kind', 'version'],
-    ['kubectl', 'version', '--client'],
-    ['helm', 'version', '--short'],
+  for (const [tool, args] of [
+    ['docker', ['info', '--format', '{{.OSType}}']],
+    ['kind', ['version']],
+    ['kubectl', ['version', '--client']],
+    ['helm', ['version', '--short']],
   ]) {
-    const result = run('docker', args, { encoding: 'utf8', windowsHide: true });
+    const result = run(tool, args, { encoding: 'utf8', windowsHide: true });
     if (result.error || result.status !== 0)
-      throw new Error(
-        'Docker, Kind, kubectl and Helm are required. Install/start them, then rerun setup.',
-      );
-    if (args[0] === 'info' && result.stdout.trim() !== 'linux')
+      throw new Error(`${tool} is not available or not ready. Install/start it, then rerun setup.`);
+    if (tool === 'docker' && result.stdout.trim() !== 'linux')
       throw new Error('Switch Docker Desktop to Linux containers, then rerun setup.');
   }
 }
