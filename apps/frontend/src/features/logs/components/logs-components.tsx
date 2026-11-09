@@ -2,6 +2,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 import type { LogRecord } from "@/features/logs/types";
 import { DataTableColumnHeader } from "@/shared/components/data-table";
 import { Badge } from "@/components/ui/badge";
+import { severityAccent } from "@/components/utils/severity";
 import { formatTelemetryTimestamp } from "@/shared/lib/telemetry";
 import { useActiveTrace } from "@/shared/hooks/use-active-trace";
 
@@ -25,16 +26,16 @@ function LogTraceLink({ traceId }: { traceId: string }) {
   );
 }
 
-export function severityBadge(severity: string) {
+export function severityIndicator(severity: string) {
   const normalized = severity.toUpperCase() || "UNKNOWN";
-  if (normalized === "ERROR" || normalized === "FATAL") {
-    return <Badge variant="destructive">{normalized}</Badge>;
-  }
-  if (normalized === "WARN" || normalized === "WARNING") {
-    return <Badge variant="warning">{normalized}</Badge>;
-  }
-  if (normalized === "INFO") return <Badge variant="info">{normalized}</Badge>;
-  return <Badge variant="secondary">{normalized}</Badge>;
+  return (
+    <span
+      role="img"
+      aria-label={`Severity: ${normalized}`}
+      title={normalized}
+      className={`h-5 w-1 shrink-0 rounded-sm ${severityAccent(normalized)}`}
+    />
+  );
 }
 
 export const columns: ColumnDef<LogRecord>[] = [
@@ -45,7 +46,7 @@ export const columns: ColumnDef<LogRecord>[] = [
     ),
     cell: ({ row }) => (
       <div className="flex items-center gap-2">
-        {severityBadge(row.original.SeverityText)}
+        {severityIndicator(row.original.SeverityText)}
         <span className="whitespace-nowrap text-xs tracking-tight text-muted-foreground">
           {formatTelemetryTimestamp(row.original.Timestamp)}
         </span>

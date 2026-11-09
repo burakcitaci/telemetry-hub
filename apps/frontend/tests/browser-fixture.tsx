@@ -96,9 +96,15 @@ api.defaults.adapter = async (config) => {
 };
 // No real backend or stream connection is used by this isolated browser fixture.
 (window as any).EventSource = class {
+  onmessage?: (message: { data: string }) => void;
+  private readonly emit = (event: Event) => {
+    this.onmessage?.({ data: JSON.stringify((event as CustomEvent).detail) });
+  };
+
+  constructor() { window.addEventListener("fixture-telemetry", this.emit); }
   addEventListener() {}
   removeEventListener() {}
-  close() {}
+  close() { window.removeEventListener("fixture-telemetry", this.emit); }
 };
 createRoot(document.getElementById("root")!).render(scenario === 'render-error' ? <BrowserRouter><RecoveryFixture /></BrowserRouter> : <App />);
 (window as any).__fixtureReady = true;

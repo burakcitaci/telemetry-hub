@@ -52,7 +52,6 @@ export function useTraces() {
   const loadTraces = useCallback(async () => {
     const id = ++requestId.current;
     setLoading(true);
-    setTraces([]);
     try {
       const result = await getTraces(TELEMETRY_FETCH_LIMIT, undefined, env);
       if (id !== requestId.current) return;
@@ -72,6 +71,7 @@ export function useTraces() {
   }, [env]);
 
   useEffect(() => {
+    setTraces([]);
     void loadTraces();
     return () => { requestId.current += 1; };
   }, [loadTraces]);

@@ -34,7 +34,7 @@ export function useLogs() {
   } = useTelemetryQuery({ facetParam: 'severity' });
   useEffect(() => {
     setLogs([]);
-  }, [env]);
+  }, [env, timeRange]);
 
   const loadLogs = useCallback(async () => {
     const id = ++requestId.current;
@@ -47,7 +47,6 @@ export function useLogs() {
       setError(null);
     } catch (loadError) {
       if (id !== requestId.current) return;
-      setLogs([]);
       setError(
         getErrorMessage(
           loadError,
