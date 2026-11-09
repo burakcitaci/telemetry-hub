@@ -1,6 +1,6 @@
 import { RouteErrorBoundary } from '@/shared/components/route-error-boundary';
 import { lazy, Suspense } from 'react';
-import { BrowserRouter, Link, Navigate, Route, Routes, useParams } from 'react-router-dom';
+import { BrowserRouter, Link, Navigate, Route, Routes, useLocation, useParams } from 'react-router-dom';
 import { AppSidebar, MobileAppSidebar } from '@/app/components/app-sidebar';
 import { GlobalHeader } from '@/app/components/global-header';
 import { ThemeProvider } from '@/app/components/theme-provider';
@@ -24,12 +24,15 @@ const InfrastructurePage = lazy(() => import('@/features/infrastructure/infrastr
 function AuthenticatedRoutes() {
   const { session, isLoading } = useAuth();
   const { tenant } = useParams();
+  const { pathname } = useLocation();
 
   if (isLoading) return <ViewSkeleton showHeader />;
   if (!session) return <Navigate to="/login" replace />;
   if (tenant && tenant !== session.tenantSlug) {
     return <Navigate to={`/org/${session.tenantSlug}/metrics`} replace />;
   }
+  const adminPath = `/org/${session.tenantSlug}/admin`;
+  const adminResetKey = pathname.startsWith(`${adminPath}/`) ? adminPath : undefined;
 
   return (
     <ActiveTraceProvider key={session.tenantSlug}>
@@ -39,7 +42,7 @@ function AuthenticatedRoutes() {
         <SidebarInset className="h-dvh w-0 min-w-0 flex-1 overflow-hidden">
           <GlobalHeader />
           <div className="min-h-0 flex-1 overflow-auto">
-            <RouteErrorBoundary>
+            <RouteErrorBoundary resetKey={adminResetKey}>
               <Suspense
                 fallback={
                   <PageLayout>
@@ -54,7 +57,7 @@ function AuthenticatedRoutes() {
                   <Route path="logs" element={<LogsPage />} />
                   <Route path="traces" element={<TracesPage />} />
                   <Route path="monitors" element={<MonitorsPage />} />
-                  <Route path="admin" element={<AdminPage />} />
+                  <Route path="admin/*" element={<AdminPage />} />
                   <Route path="infrastructure" element={<InfrastructurePage />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>

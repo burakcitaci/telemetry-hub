@@ -21,7 +21,7 @@ export class ViewErrorBoundary extends Component<PropsWithChildren, { failed: bo
   }
 }
 
-export function RouteErrorBoundary({ children }: PropsWithChildren) {
+export function RouteErrorBoundary({ children, resetKey }: PropsWithChildren<{ resetKey?: string }>) {
   const { pathname } = useLocation();
-  return <ViewErrorBoundary key={pathname}>{children}</ViewErrorBoundary>;
+  return <ViewErrorBoundary key={resetKey ?? pathname}>{children}</ViewErrorBoundary>;
 }

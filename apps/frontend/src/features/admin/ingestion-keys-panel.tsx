@@ -1,88 +1,302 @@
-import { useCallback, useEffect, useState, type FormEvent } from 'react';
-import { FIELD, LABEL, PANEL, errorMessage as sharedErrorMessage, type Team } from './presentation';
-import { useConfirmAction } from '@/shared/components/confirm-action';
-import { api, unwrap } from '@/shared/api/client';
+import { useState, type FormEvent } from 'react';
+import { useTranslation } from 'react-i18next';
+import type { ColumnDef } from '@tanstack/react-table';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { useAuth } from '@/features/auth/auth-context';
+import { api, unwrap } from '@/shared/api/client';
+import { useConfirmAction } from '@/shared/components/confirm-action';
+import { DataTableColumnHeader } from '@/shared/components/data-table';
+import { FeatureContent } from '@/shared/components/feature-layout';
+import { QueryError } from '@/shared/components/view-skeleton';
+import {
+  ActionFeedback,
+  AdminFormActions,
+  AdminFormSheet,
+  AdminHeader,
+  AdminTable,
+} from './admin-layout';
+import { FIELD, LABEL, type Team } from './presentation';
+import { useAdminAction, useAdminList } from './use-admin-data';
+
+const DEFAULT_VALIDITY_DAYS = 30;
+const MILLISECONDS_PER_DAY = 86_400_000;
 
 interface IngestionKey {
-  id: string; name: string; teamId: string; env?: string;
-  createdAt: number; expiresAt: number; revokedAt?: number;
+  id: string;
+  name: string;
+  teamId: string;
+  expiresAt: number;
+  revokedAt?: number;
 }
-interface CreatedIngestionKey extends IngestionKey { key: string }
 
+interface IngestionKeyFormProps {
+  busy: boolean;
+  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
+  onClose: () => void;
+}
 
-export function IngestionKeysPanel({ teams }: { teams: Team[] }) {
+function IngestionKeyForm({ busy, onSubmit, onClose }: IngestionKeyFormProps) {
+  const { t } = useTranslation();
+  return (
+    <form onSubmit={onSubmit}>
+      <fieldset className="grid min-w-0 gap-4" disabled={busy}>
+        <label className="grid gap-1.5">
+          <span className={LABEL}>{t('admin.keyName')}</span>
+          <Input name="name" required pattern=".*\S.*" maxLength={100} placeholder="orders-api" />
+        </label>
+        <label className="grid gap-1.5">
+          <span className={LABEL}>{t('admin.validityDays')}</span>
+          <Input
+            name="expiresInDays"
+            type="number"
+            min={1}
+            max={3650}
+            defaultValue={DEFAULT_VALIDITY_DAYS}
+            required
+          />
+        </label>
+        <AdminFormActions label={t('admin.generateKey')} busy={busy} onClose={onClose} />
+      </fieldset>
+    </form>
+  );
+}
+
+function GeneratedKey({ value, onDismiss }: { value: string; onDismiss: () => void }) {
+  const { t } = useTranslation();
+  const [notice, setNotice] = useState('');
+
+  async function copyKey() {
+    try {
+      await navigator.clipboard.writeText(value);
+      setNotice(t('admin.keyCopied'));
+    } catch {
+      setNotice(t('admin.keyCopyFailed'));
+    }
+  }
+
+  return (
+    <section
+      aria-labelledby="generated-key-title"
+      className="space-y-3 rounded-lg border border-primary/40 bg-primary/5 p-4"
+    >
+      <h2 id="generated-key-title" className="font-semibold">
+        {t('admin.generatedKey')}
+      </h2>
+      <p className="text-sm text-muted-foreground">{t('admin.generatedKeyHelp')}</p>
+      <Input readOnly value={value} aria-label={t('admin.generatedKey')} className="font-mono" />
+      <div className="flex flex-wrap gap-2">
+        <Button type="button" size="sm" onClick={() => void copyKey()}>
+          {t('admin.copyKey')}
+        </Button>
+        <Button type="button" size="sm" variant="outline" onClick={onDismiss}>
+          {t('admin.dismissKey')}
+        </Button>
+      </div>
+      {notice && (
+        <p role="status" className="text-sm text-muted-foreground">
+          {notice}
+        </p>
+      )}
+    </section>
+  );
+}
+
+export function IngestionKeysPanel({
+  createdKey,
+  setCreatedKey,
+}: {
+  createdKey: string;
+  setCreatedKey: (key: string) => void;
+}) {
+  const { t, i18n } = useTranslation();
+  const { session } = useAuth();
   const { confirmAction, confirmation } = useConfirmAction();
-  const [keys, setKeys] = useState<IngestionKey[]>([]);
-  const [created, setCreated] = useState<CreatedIngestionKey>();
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(true);
-  const [copyNotice, setCopyNotice] = useState('');
-  const load = useCallback(async () => {
-    setLoading(true);
-    try {
-      const response = await api.get('/admin/ingestion-keys');
-      setKeys(unwrap<IngestionKey[]>(response.data));
-    } finally { setLoading(false); }
-  }, []);
-  useEffect(() => { void load().catch(error => setError(errorMessage(error))); }, [load]);
+  const keys = useAdminList<IngestionKey>('/admin/ingestion-keys');
+  const teams = useAdminList<Team>('/admin/teams');
+  const action = useAdminAction(t('admin.actionFailed'));
+  const [selectedTeam, setSelectedTeam] = useState('');
+  const availableTeams = teams.rows ?? [];
+  const defaultTeam =
+    availableTeams.length === 1
+      ? availableTeams[0]
+      : availableTeams.find((team) => team.id === session?.teamId);
+  const teamId = availableTeams.find((team) => team.id === selectedTeam)?.id ?? defaultTeam?.id;
+  const [trigger, setTrigger] = useState<HTMLButtonElement | null>(null);
+  const closeForm = () => {
+    setTrigger(null);
+    action.clearError();
+  };
 
-  const create = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault(); setBusy(true); setError(''); setCreated(undefined); setCopyNotice('');
-    const form = event.currentTarget; const data = new FormData(form);
-    try {
+  async function createKey(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!teamId) return;
+    const data = new FormData(event.currentTarget);
+    await action.execute(async () => {
       const response = await api.post('/admin/ingestion-keys', {
-        name: data.get('name'), teamId: data.get('teamId'), env: data.get('env') || undefined,
+        name: String(data.get('name')).trim(),
+        teamId,
         expiresInDays: Number(data.get('expiresInDays')),
       });
-      setCreated(unwrap<CreatedIngestionKey>(response.data)); form.reset(); await load();
-    } catch (error) { setError(errorMessage(error)); }
-    finally { setBusy(false); }
-  };
+      setCreatedKey(unwrap<{ key: string }>(response.data).key);
+      await keys.reload();
+      closeForm();
+    });
+  }
 
-  const copyKey = async () => {
-    if (!created) return;
-    try { await navigator.clipboard.writeText(created.key); setCopyNotice('Key copied.'); }
-    catch { setCopyNotice('Copy failed. Select the key and copy it manually.'); }
-  };
+  async function revoke(key: IngestionKey) {
+    const team = availableTeams.find((team) => team.id === key.teamId)?.name ?? key.teamId;
+    if (!(await confirmAction(t('admin.confirmRevokeKey', { name: key.name, team })))) return;
+    await action.execute(async () => {
+      await api.delete(`/admin/ingestion-keys/${encodeURIComponent(key.id)}`);
+      await keys.reload();
+    });
+  }
 
-  const revoke = async (key: IngestionKey) => {
-    if (!await confirmAction(`Ingestion-Key „${key.name}“ widerrufen? Dieser Schritt ist dauerhaft.`)) return;
-    setBusy(true); setError('');
-    try { await api.delete(`/admin/ingestion-keys/${encodeURIComponent(key.id)}`); await load(); }
-    catch (error) { setError(errorMessage(error)); }
-    finally { setBusy(false); }
-  };
+  const columns: ColumnDef<IngestionKey>[] = [
+    {
+      accessorKey: 'name',
+      size: 180,
+      header: ({ column }) => <DataTableColumnHeader column={column} title={t('admin.keyName')} />,
+      cell: ({ row }) => (
+        <span className="block truncate font-medium" title={row.original.name}>
+          {row.original.name}
+        </span>
+      ),
+    },
+    {
+      accessorKey: 'expiresAt',
+      size: 220,
+      header: ({ column }) => <DataTableColumnHeader column={column} title={t('admin.expires')} />,
+      cell: ({ row }) => {
+        const expiry = new Date(row.original.expiresAt);
+        const count = Math.max(
+          0,
+          Math.ceil((expiry.getTime() - Date.now()) / MILLISECONDS_PER_DAY),
+        );
+        return (
+          <span className="whitespace-nowrap" title={expiry.toLocaleString(i18n.language)}>
+            {expiry.toLocaleDateString(i18n.language, { dateStyle: 'medium' })}{' '}
+            <span className="text-muted-foreground">({t('admin.daysRemaining', { count })})</span>
+          </span>
+        );
+      },
+    },
+    {
+      id: 'status',
+      size: 100,
+      header: t('admin.status'),
+      cell: ({ row: { original: key } }) => {
+        const state = key.revokedAt
+          ? 'revoked'
+          : key.expiresAt <= Date.now()
+            ? 'expired'
+            : 'active';
+        return (
+          <Badge variant={state === 'active' ? 'success' : 'outline'}>
+            {t(`admin.keyStatus.${state}`)}
+          </Badge>
+        );
+      },
+    },
+    {
+      id: 'actions',
+      size: 110,
+      header: () => <span className="sr-only">{t('admin.actions')}</span>,
+      enableHiding: false,
+      cell: ({ row: { original: key } }) =>
+        !key.revokedAt && (
+          <div className="flex justify-end">
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              disabled={action.busy}
+              className="h-7 text-xs text-destructive"
+              onClick={() => void revoke(key)}
+            >
+              {t('admin.revokeKey')}
+            </Button>
+          </div>
+        ),
+    },
+  ];
 
-  return <section className={PANEL}>
-    <div className="mb-4"><h2 className="text-sm font-semibold">Ingestion-Keys</h2>
-      <p className="mt-1 text-xs text-muted-foreground">Client-Key für ein externes Backend erzeugen. Der Klartext wird nur einmal angezeigt; gespeichert wird ausschließlich sein SHA-256-Hash.</p></div>
-    {confirmation}
-    {error && <div role="alert" className="mb-3 text-xs text-destructive">{error} <Button type="button" variant="outline" size="sm" disabled={loading} onClick={() => void load().then(() => setError('')).catch(error => setError(errorMessage(error)))}>Retry</Button></div>}
-    {copyNotice && <p role="status" className="text-xs text-muted-foreground">{copyNotice}</p>}
-    {created && <div className="mb-4 rounded-sm border border-primary/40 bg-primary/5 p-3">
-      <p className="text-xs font-semibold">Jetzt kopieren — dieser Key kann später nicht erneut angezeigt werden.</p>
-      <div className="mt-2 flex gap-2"><Input readOnly value={created.key} aria-label="Generated ingestion key" className={`${FIELD} font-mono`} />
-        <Button type="button" size="sm" className="h-8 text-xs" onClick={() => void copyKey()}>Kopieren</Button></div>
-    </div>}
-    <form onSubmit={create} className="grid gap-3 md:grid-cols-4">
-      <label className="space-y-1"><span className={LABEL}>Bezeichnung</span><Input name="name" required maxLength={100} placeholder="orders-production" className={FIELD} /></label>
-      <label className="space-y-1"><span className={LABEL}>Team</span><select name="teamId" required className={`${FIELD} w-full border px-2`}><option value="">Team wählen</option>{teams.map(team => <option key={team.id} value={team.id}>{team.name}</option>)}</select></label>
-      <label className="space-y-1"><span className={LABEL}>Umgebung (optional)</span><Input name="env" pattern="[A-Za-z0-9][A-Za-z0-9._-]{0,63}" maxLength={64} placeholder="production" className={FIELD} /></label>
-      <label className="space-y-1"><span className={LABEL}>Gültigkeit (Tage)</span><Input name="expiresInDays" type="number" min={1} max={3650} defaultValue={30} required className={FIELD} /></label>
-      <div className="md:col-span-4 space-y-2">
-        {teams.length === 0 && <p className="text-xs text-muted-foreground">Lege zuerst ein Team an, um einen Ingestion-Key zu erstellen.</p>}
-        <Button disabled={busy || teams.length === 0} size="sm" className="h-8 rounded-sm text-xs">Key erzeugen</Button>
-      </div>
-    </form>
-    <div className="mt-5 overflow-x-auto"><table className="w-full text-left text-xs"><thead className="border-b border-border text-muted-foreground"><tr><th className="py-2">Bezeichnung</th><th>Team</th><th>Umgebung</th><th>Läuft ab</th><th>Status</th><th><span className="sr-only">Aktionen</span></th></tr></thead>
-      <tbody>{keys.map(key => <tr key={key.id} className="border-b border-border/60"><td className="py-3 pr-2">{key.name}</td><td>{key.teamId}</td><td>{key.env || 'Alle'}</td><td>{new Date(key.expiresAt).toLocaleString()}</td><td>{key.revokedAt ? 'Widerrufen' : key.expiresAt <= Date.now() ? 'Abgelaufen' : 'Aktiv'}</td><td className="text-right">{!key.revokedAt && <Button type="button" size="sm" variant="ghost" disabled={busy} className="h-7 text-xs text-destructive" onClick={() => void revoke(key)}>Widerrufen</Button>}</td></tr>)}</tbody></table>
-      {loading && <p role="status" className="py-4 text-xs text-muted-foreground">Loading ingestion keys…</p>}
-      {!loading && keys.length === 0 && <p className="py-4 text-xs text-muted-foreground">Noch keine UI-generierten Ingestion-Keys.</p>}
-    </div>
-  </section>;
+  return (
+    <>
+      <AdminHeader
+        title={t('admin.keys')}
+        description={t('admin.manageKeysHelp')}
+        action={t('admin.generateKey')}
+        disabled={action.busy || !keys.rows || !teamId}
+        onAction={(button) => {
+          action.clearError();
+          setTrigger(button);
+        }}
+      >
+        {availableTeams.length > 1 && (
+          <label className="flex min-w-0 flex-wrap items-center gap-2 text-sm">
+            <span>{t('admin.newKeyTeam')}</span>
+            <select
+              name="keyOwner"
+              className={`${FIELD} h-9 w-auto max-w-full px-2`}
+              value={teamId ?? ''}
+              disabled={action.busy}
+              onChange={(event) => setSelectedTeam(event.target.value)}
+            >
+              <option value="" disabled>
+                {t('admin.chooseTeam')}
+              </option>
+              {availableTeams.map((team) => (
+                <option key={team.id} value={team.id}>
+                  {team.name}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
+      </AdminHeader>
+      <FeatureContent>
+        {teams.error && (
+          <QueryError
+            title={t('admin.loadTeamsFailed')}
+            message={teams.error}
+            onRetry={teams.reload}
+            isRetrying={teams.loading}
+          />
+        )}
+        {teams.rows?.length === 0 && (
+          <p className="text-sm text-muted-foreground">{t('admin.teamRequiredForKey')}</p>
+        )}
+        {!trigger && <ActionFeedback error={action.error} saved={action.saved && !createdKey} />}
+        {createdKey && (
+          <GeneratedKey key={createdKey} value={createdKey} onDismiss={() => setCreatedKey('')} />
+        )}
+        <AdminTable
+          {...keys}
+          columns={columns}
+          searchPlaceholder={t('admin.searchKeys')}
+          enableColumnVisibility={false}
+          emptyLabel={t('admin.noKeys')}
+        />
+      </FeatureContent>
+      <AdminFormSheet
+        title={t('admin.generateKey')}
+        description={t('admin.keyFormHelp')}
+        open={!!trigger}
+        busy={action.busy}
+        error={action.error}
+        onClose={closeForm}
+        returnFocus={trigger}
+      >
+        <IngestionKeyForm
+          busy={action.busy}
+          onSubmit={(event) => void createKey(event)}
+          onClose={closeForm}
+        />
+      </AdminFormSheet>
+      {confirmation}
+    </>
+  );
 }
-
-const errorMessage = (error: unknown) => sharedErrorMessage(error, 'Ingestion-Key-Aktion fehlgeschlagen.');

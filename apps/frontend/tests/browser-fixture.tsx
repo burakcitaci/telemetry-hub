@@ -18,6 +18,7 @@ const records = (scenario === "current" ? [10, 99] : scenario === "temporal" ? [
 (window as any).__requests = [];
 const generatedIngestionKey = "fixture_generated_ingestion_key_1234567890";
 const fixtureIngestionKeys: any[] = [];
+const fixtureUsers = [{ id: "user-a", email: "admin@example.test", role: "admin", teamId: "platform" }];
 api.defaults.adapter = async (config) => {
   (window as any).__requests.push({ url: config.url, method: config.method, body: config.data, params: config.params, headers: config.headers.toJSON() });
   let data: unknown = [];
@@ -45,14 +46,27 @@ api.defaults.adapter = async (config) => {
     fixtureIngestionKeys.splice(0, fixtureIngestionKeys.length, created);
     data = { ...created, key: generatedIngestionKey };
   }
-  else if (config.url?.startsWith("/admin/ingestion-keys")) data = fixtureIngestionKeys;
+  else if (config.url === "/admin/ingestion-keys/key-a" && config.method === "delete") {
+    fixtureIngestionKeys[0] = { ...fixtureIngestionKeys[0], revokedAt: Date.now() };
+    data = { success: true };
+  }
+  else if (config.url?.startsWith("/admin/ingestion-keys")) data = [...fixtureIngestionKeys];
+  else if (config.url === "/admin/users" && config.method === "post") {
+    const attempts = (window as any).__requests.filter((request: any) => request.url === "/admin/users" && request.method === "post").length;
+    if (scenario === "admin-retry" && attempts === 1) throw new Error("Fixture user save failed");
+    const { email, role, teamId } = JSON.parse(String(config.data));
+    data = { id: "user-b", email, role, teamId };
+    fixtureUsers.push(data as typeof fixtureUsers[number]);
+  }
   else if (config.url?.startsWith("/admin/users")) {
     if (scenario === "admin-loading") await new Promise((resolve) => setTimeout(resolve, 500));
     const attempts = (window as any).__requests.filter((request: any) => request.url === "/admin/users").length;
     if (scenario === "admin-retry" && attempts === 1) throw new Error("Fixture admin load failed");
-    data = [{ id: "user-a", email: "admin@example.test", role: "admin", teamId: "platform" }];
+    data = [...fixtureUsers];
   }
-  else if (config.url?.startsWith("/admin/teams")) data = [{ id: "platform", name: "Platform" }];
+  else if (config.url?.startsWith("/admin/teams")) data = scenario === "multiple-teams"
+    ? [{ id: "platform", name: "Platform" }, { id: "operations", name: "Operations" }]
+    : [{ id: "platform", name: "Platform" }];
   else if (config.url?.startsWith("/filters")) data = { services: ["api"], environments: ["dev", "production"], statuses: ["OK"] };
   else if (config.url?.startsWith("/logs")) data = [{
     Timestamp: new Date().toISOString(), TraceId: traceId, SpanId: "1234567890abcdef",

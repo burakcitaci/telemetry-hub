@@ -17,26 +17,16 @@ test('render failure keeps recovery controls and route navigation resets the bou
 test('admin deletion requires confirmation and cancellation sends no mutation', { timeout: 60000 }, async () => {
   const browser = await browserFixture();
   try {
-    await browser.navigate('/org/demo/admin');
-    await browser.wait("document.body.innerText.includes('Teams (1)')");
-    await browser.evaluate(`(() => {
-      const tab = [...document.querySelectorAll('[role="tab"]')].find(tab => tab.textContent.includes('Teams'));
-      tab.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, button: 0 }));
-    })()`);
-    await browser.wait("document.querySelector('[role=\"tab\"][aria-selected=\"true\"]')?.textContent.includes('Teams')");
-    await browser.evaluate(`(() => {
-      const panel = document.getElementById(document.querySelector('[role="tab"][aria-selected="true"]').getAttribute('aria-controls'));
-      [...panel.querySelectorAll('button')].find(button => button.innerText === 'Löschen').click();
-    })()`);
+    await browser.navigate('/org/demo/admin/teams');
+    const deleteTeam = "[...document.querySelectorAll('main tbody button')].find(button => button.innerText === 'Delete')";
+    await browser.wait(`Boolean(${deleteTeam})`);
+    await browser.evaluate(`${deleteTeam}.click()`);
     await browser.wait("Boolean(document.querySelector('[role=alertdialog]'))");
     assert.equal(await browser.evaluate("window.__requests.some(request => request.method === 'delete')"), false);
     await browser.evaluate("[...document.querySelectorAll('[role=alertdialog] button')].find(button => button.innerText === 'Cancel').click()");
     await browser.wait("!document.querySelector('[role=alertdialog]')");
     assert.equal(await browser.evaluate("window.__requests.some(request => request.method === 'delete')"), false);
-    await browser.evaluate(`(() => {
-      const panel = document.getElementById(document.querySelector('[role="tab"][aria-selected="true"]').getAttribute('aria-controls'));
-      [...panel.querySelectorAll('button')].find(button => button.innerText === 'Löschen').click();
-    })()`);
+    await browser.evaluate(`${deleteTeam}.click()`);
     await browser.wait("Boolean(document.querySelector('[role=alertdialog]'))");
     await browser.evaluate("[...document.querySelectorAll('[role=alertdialog] button')].find(button => button.innerText === 'Confirm').click()");
     await browser.wait("window.__requests.some(request => request.method === 'delete' && request.url === '/admin/teams/platform')");

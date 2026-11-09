@@ -1,9 +1,11 @@
 import axios from 'axios';
 
-export const FIELD = 'h-8 rounded-sm border-border bg-background text-xs';
-export const LABEL = 'text-[11px] font-bold uppercase tracking-wider text-muted-foreground';
-export const PANEL = 'rounded-sm border border-border bg-card p-5 text-card-foreground';
-export interface Team { id: string; name: string }
+export const FIELD = 'w-full rounded-md border border-input bg-background text-sm';
+export const LABEL = 'text-sm font-medium';
+export interface Team {
+  id: string;
+  name: string;
+}
 
 export function errorMessage(error: unknown, fallback: string): string {
   if (axios.isAxiosError(error)) {
