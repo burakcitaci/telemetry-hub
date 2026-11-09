@@ -4,32 +4,34 @@ permissions:
   contents: read
 jobs:
   application:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
+    env:
+      # The runner's packaged Chrome can use Ubuntu's browser sandbox.
+      TEST_BROWSER: /usr/bin/google-chrome
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 24
+          package-manager-cache: false
       - run: corepack enable
       - run: yarn install --frozen-lockfile
-      - uses: browser-actions/setup-chrome@v2
-        id: chrome
+      - name: Check headless Chrome
+        run: '"$TEST_BROWSER" --headless --disable-gpu --dump-dom about:blank'
       - run: yarn verify
         env:
-          TEST_BROWSER: ${{ steps.chrome.outputs.chrome-path }}
           TEST_KIND_CLICKHOUSE: '0'
       - run: docker build -f apps/frontend/Dockerfile -t telemetry-hub-frontend-check .
       - run: node scripts/frontend-proxy-smoke.mjs telemetry-hub-frontend-check
-        env:
-          TEST_BROWSER: ${{ steps.chrome.outputs.chrome-path }}
   container:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - run: docker build -f apps/backend/Dockerfile -t telemetry-hub-check .
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 24
+          package-manager-cache: false
       - run: node scripts/container-smoke.mjs telemetry-hub-check

@@ -85,12 +85,14 @@ export async function browserFixture() {
       "--remote-debugging-port=0", `--user-data-dir=${profile}`, "about:blank",
     ], { windowsHide: true, stdio: ["ignore", "ignore", "pipe"] });
     let output = "";
+    let exited = false;
     child.stderr.on("data", (chunk) => { output += chunk; });
     child.on("error", (error) => { output += error.message; });
+    child.once("close", () => { exited = true; });
     const deadline = Date.now() + 15_000;
-    while (!output.includes("DevTools listening") && Date.now() < deadline) await delay(50);
+    while (!output.includes("DevTools listening") && !exited && Date.now() < deadline) await delay(50);
     const debug = output.match(/ws:\/\/127\.0\.0\.1:(\d+)\//)?.[1];
-    if (!debug) throw new Error(`Browser did not start: ${output.slice(-500)}`);
+    if (!debug) throw new Error(`Browser did not start: ${output.slice(0, 3_000)}`);
     const targets = await fetch(`http://127.0.0.1:${debug}/json/list`).then((res) => res.json());
     page = connection(targets.find((target) => target.type === "page").webSocketDebuggerUrl);
     await page.send("Runtime.enable");
