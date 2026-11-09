@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
-import { browserFixture } from '../apps/frontend/tests/browser-harness.mjs';
+import { launchBrowser } from '../apps/frontend/tests/browser-harness.mjs';
 
 const image = process.argv[2] || 'telemetry-hub-frontend-check';
 const network = `telemetry-frontend-check-${randomUUID()}`;
@@ -40,11 +40,8 @@ try {
   const redirect = await fetch(`${alias}/login?from=loopback`, { redirect: 'manual' });
   assert.equal(redirect.status, 307);
   assert.equal(redirect.headers.get('location'), `${origin}/login?from=loopback`);
-  browser = await browserFixture();
-  await browser.navigate('/login');
-  await browser
-    .evaluate(`location.assign(${JSON.stringify(alias + '/login?from=loopback')})`)
-    .catch(() => {});
+  browser = await launchBrowser();
+  await browser.navigate(`${alias}/login?from=loopback`);
   await browser.wait(
     "location.hostname === 'localhost' && Boolean(document.getElementById('email'))",
   );
@@ -67,10 +64,13 @@ try {
     '127.0.0.1 redirect, preserved port/path/query, browser login, Secure-cookie session and same-origin API requests passed.',
   );
 } finally {
-  if (browser) await browser.close();
-  for (const name of [frontend, backend])
-    spawnSync('docker', ['rm', '-f', name], { windowsHide: true, stdio: 'ignore' });
-  spawnSync('docker', ['network', 'rm', network], { windowsHide: true, stdio: 'ignore' });
+  try {
+    await browser?.close();
+  } finally {
+    for (const name of [frontend, backend])
+      spawnSync('docker', ['rm', '-f', name], { windowsHide: true, stdio: 'ignore' });
+    spawnSync('docker', ['network', 'rm', network], { windowsHide: true, stdio: 'ignore' });
+  }
 }
 
 async function fillLogin(browser) {

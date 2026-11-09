@@ -4,7 +4,6 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { createServer } from "vite";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 const delay = (ms) => new Promise((done) => setTimeout(done, ms));
@@ -48,13 +47,7 @@ function connection(url) {
 }
 
 export async function browserFixture() {
-  const executable = process.env.TEST_BROWSER ?? [
-    "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe",
-    "C:/Program Files/Google/Chrome/Application/chrome.exe",
-    "/usr/bin/chromium", "/usr/bin/google-chrome",
-  ].find(existsSync);
-  if (!executable) throw new Error("Set TEST_BROWSER to an installed Chromium browser.");
-  const profile = await mkdtemp(resolve(tmpdir(), "telemetry-ui-test-"));
+  const { createServer } = await import("vite");
   const entry = resolve(root, "tests/browser-fixture.tsx").replaceAll("\\", "/");
   const server = await createServer({
     root, configFile: resolve(root, "vite.config.ts"),
@@ -74,10 +67,44 @@ export async function browserFixture() {
       },
     }],
   });
-  let child, page;
+  const closeServer = async () => {
+    server.httpServer?.closeAllConnections();
+    await server.close();
+  };
   try {
     await server.listen();
-    const port = server.httpServer.address().port;
+    const origin = `http://127.0.0.1:${server.httpServer.address().port}`;
+    const browser = await launchBrowser();
+    return {
+      ...browser,
+      async navigate(path) {
+        await browser.navigate(`${origin}${path}`);
+        await browser.wait("Boolean(window.__fixtureReady)");
+      },
+      async close() {
+        try {
+          await browser.close();
+        } finally {
+          await closeServer();
+        }
+      },
+    };
+  } catch (error) {
+    await closeServer();
+    throw error;
+  }
+}
+
+export async function launchBrowser() {
+  const executable = process.env.TEST_BROWSER ?? [
+    "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe",
+    "C:/Program Files/Google/Chrome/Application/chrome.exe",
+    "/usr/bin/chromium", "/usr/bin/google-chrome",
+  ].find(existsSync);
+  if (!executable) throw new Error("Set TEST_BROWSER to an installed Chromium browser.");
+  const profile = await mkdtemp(resolve(tmpdir(), "telemetry-ui-test-"));
+  let child, page;
+  try {
     child = spawn(executable, [
       "--headless=new", "--disable-gpu", "--no-first-run", "--disable-default-apps",
       "--disable-extensions", "--disable-background-networking", "--disable-component-update",
@@ -110,7 +137,7 @@ export async function browserFixture() {
         if (await evaluate(expression)) return;
         await delay(50);
       }
-      throw new Error(`Fixture condition timed out: ${expression}\n${await evaluate("document.body.innerText")}\n${JSON.stringify(page.errors)}`);
+      throw new Error(`Browser condition timed out: ${expression}\n${await evaluate("document.body.innerText")}\n${JSON.stringify(page.errors)}`);
     };
     return {
       evaluate, wait,
@@ -119,9 +146,9 @@ export async function browserFixture() {
           width, height, deviceScaleFactor: 1, mobile: width < 768,
         });
       },
-      async navigate(path) {
-        await page.send("Page.navigate", { url: `http://127.0.0.1:${port}${path}` });
-        await wait("Boolean(window.__fixtureReady)");
+      async navigate(url) {
+        const { errorText } = await page.send("Page.navigate", { url });
+        if (errorText) throw new Error(`Could not navigate to ${url}: ${errorText}`);
       },
       async key(key, code = key, virtualKey = 13) {
         const text = key === "Enter" ? "\r" : key === " " ? " " : undefined;
@@ -137,13 +164,11 @@ export async function browserFixture() {
         const exit = new Promise((done) => child.once("exit", done));
         child.kill();
         await Promise.race([exit, delay(3000)]);
-        server.httpServer?.closeAllConnections();
-        await server.close();
         await rm(profile, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
       },
     };
   } catch (error) {
-    page?.close(); child?.kill(); server.httpServer?.closeAllConnections(); await server.close();
+    page?.close(); child?.kill();
     await rm(profile, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
     throw error;
   }
