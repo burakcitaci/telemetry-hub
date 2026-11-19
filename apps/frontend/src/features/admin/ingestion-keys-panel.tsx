@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { ColumnDef } from '@tanstack/react-table';
@@ -270,6 +271,7 @@ export function IngestionKeysPanel({
           <p className="text-sm text-muted-foreground">{t('admin.teamRequiredForKey')}</p>
         )}
         {!trigger && <ActionFeedback error={action.error} saved={action.saved && !createdKey} />}
+        {session && <Link className="text-sm underline" to={'/org/' + session.tenantSlug + '/connect'}>{t('connect.title')}</Link>}
         {createdKey && (
           <GeneratedKey key={createdKey} value={createdKey} onDismiss={() => setCreatedKey('')} />
         )}

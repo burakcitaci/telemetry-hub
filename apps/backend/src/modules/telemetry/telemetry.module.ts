@@ -7,11 +7,12 @@ import { EventsController } from "./controllers/events.controller";
 import { EnvironmentsController } from './controllers/environments.controller';
 import { LoggerModule } from "../../common/logger/logger.module";
 import { AuthModule } from '../auth/auth.module';
+import { IngestionStatusController } from './controllers/ingestion-status.controller';
 import { FiltersController } from './controllers/filters.controller';
 
 @Module({
   imports: [LoggerModule, AuthModule],
-  controllers: [TracesController, LogsController, ServicesController, EventsController, EnvironmentsController, FiltersController],
+  controllers: [TracesController, LogsController, ServicesController, EventsController, EnvironmentsController, FiltersController, IngestionStatusController],
   providers: [ClickhouseService],
   exports: [ClickhouseService],
 })

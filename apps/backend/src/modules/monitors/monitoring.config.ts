@@ -5,7 +5,7 @@ export const DEFAULT_ALERT_PRUNE_INTERVAL_SECONDS = 3600;
 export interface AlertRetentionConfig { days: number; intervalSeconds: number; }
 
 export interface MonitoringConfig {
-  intervalMs: number; initialDelayMs: number; defaultWindowSeconds: number; notifier: 'dummy';
+  intervalMs: number; initialDelayMs: number; defaultWindowSeconds: number; notifier: 'dummy' | 'webhook'; webhookUrl?: string;
   retention: AlertRetentionConfig;
 }
 
@@ -14,8 +14,17 @@ export function monitoringConfig(config: Pick<ConfigService, 'get'>): Monitoring
   const initialDelayMs = integerSetting(config, 'MONITOR_INITIAL_DELAY_SECONDS', 1, 0, 2147483) * 1000;
   const defaultWindowSeconds = integerSetting(config, 'MONITOR_DEFAULT_WINDOW_SECONDS', 300, 1, 8640000000000);
   const notifier = config.get('MONITOR_NOTIFIER') ?? 'dummy';
-  if (notifier !== 'dummy') throw new Error('MONITOR_NOTIFIER must be dummy.');
-  return { intervalMs, initialDelayMs, defaultWindowSeconds, notifier, retention: alertRetentionConfig(config) };
+  if (notifier !== 'dummy' && notifier !== 'webhook') throw new Error('MONITOR_NOTIFIER must be dummy or webhook.');
+  const webhookUrl = notifier === 'webhook' ? parseWebhookUrl(config.get('MONITOR_WEBHOOK_URL')) : undefined;
+  return { intervalMs, initialDelayMs, defaultWindowSeconds, notifier,
+    ...(webhookUrl ? { webhookUrl } : {}), retention: alertRetentionConfig(config) };
+}
+
+function parseWebhookUrl(raw: unknown): string {
+  const url = typeof raw === 'string' ? URL.parse(raw) : null;
+  if (!url || url.protocol !== 'https:' || url.username || url.password || url.hash)
+    throw new Error('MONITOR_WEBHOOK_URL must be an HTTPS URL without credentials or a fragment.');
+  return url.href;
 }
 
 function integerSetting(config: Pick<ConfigService, 'get'>, key: string, fallback: number, min: number, max: number): number {

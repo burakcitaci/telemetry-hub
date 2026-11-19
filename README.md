@@ -56,6 +56,9 @@ Sign in with the **organization slug, email, and password you entered in setup**
 3. Under **Ingestion-Keys**, select a team and generate a client key for an application.
 4. Copy the key immediately: its plaintext is displayed only once.
 
+On an empty Metrics page or under **Administration → Ingestion keys**, open **Connect an application**
+to copy OpenTelemetry configuration and verify when each signal starts arriving.
+
 An empty dashboard is normal until applications send telemetry. No example account or customer data
 is silently created.
 

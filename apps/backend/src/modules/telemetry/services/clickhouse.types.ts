@@ -8,6 +8,9 @@ export interface TelemetryListOptions {
 export interface LogsListOptions extends TelemetryListOptions {
   from?: string;
   to?: string;
+  q?: string;
+  services?: string[];
+  statuses?: string[];
 }
 
 export interface TelemetryStreamOptions {

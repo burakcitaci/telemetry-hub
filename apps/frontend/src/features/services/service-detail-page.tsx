@@ -30,6 +30,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { CopyInvestigationLink } from '@/shared/components/copy-investigation-link';
 import { TimeRangePicker } from '@/app/components/timer-range.picker';
 import { QueryError, ViewSkeleton } from '@/shared/components/view-skeleton';
 import { PageLayout } from '@/shared/components/page-layout';
@@ -112,6 +113,7 @@ function ServiceDetailPage() {
             <div className="w-48">
               <EnvironmentFilter source="traces" />
             </div>
+            <CopyInvestigationLink />
             <TimeRangePicker value={timeRange} onChange={setTimeRange} />
             <div className="h-6 w-px bg-border mx-1 hidden sm:block" />
             <Button

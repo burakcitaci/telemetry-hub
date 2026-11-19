@@ -53,6 +53,8 @@ interface DataTableProps<TData, TValue> {
   enableSearch?: boolean;
   pageSize?: number;
   searchValue?: string;
+  serverOrdered?: boolean;
+  emptyMessage?: React.ReactNode;
   onSearchChange?: (value: string) => void;
   onRowClick?: (row: TData) => void;
   density?: 'default' | 'telemetry';
@@ -68,6 +70,8 @@ export function DataTable<TData, TValue>({
   enableSearch = true,
   pageSize = 20,
   searchValue,
+  serverOrdered = false,
+  emptyMessage = 'No results.',
   onSearchChange,
   onRowClick,
   density = 'default',
@@ -115,6 +119,8 @@ export function DataTable<TData, TValue>({
     },
     enableRowSelection,
     globalFilterFn: 'includesString',
+    manualFiltering: serverOrdered,
+    enableSorting: !serverOrdered,
     state: {
       sorting,
       columnFilters,
@@ -130,7 +136,9 @@ export function DataTable<TData, TValue>({
       {enableSearch && (
         <div className="flex min-w-0 flex-wrap items-center gap-2 px-0 py-2">
           <Input
+            aria-label={searchPlaceholder}
             placeholder={searchPlaceholder}
+            maxLength={serverOrdered ? 255 : undefined}
             value={globalFilter ?? ''}
             onChange={(event) => {
               const value = event.target.value;
@@ -227,16 +235,16 @@ export function DataTable<TData, TValue>({
                   ))}
                 </TableRow>
               ))
-            ) : (
+            ) : emptyMessage != null ? (
               <TableRow>
                 <TableCell
                   colSpan={Math.max(table.getVisibleLeafColumns().length, 1)}
                   className="h-24 text-center"
                 >
-                  No results.
+                  {emptyMessage}
                 </TableCell>
               </TableRow>
-            )}
+            ) : null}
           </TableBody>
         </Table>
       </div>

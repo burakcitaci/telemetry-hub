@@ -18,7 +18,7 @@ services:
     environment:
       INGESTION_COLLECTOR_TOKEN: ${INGESTION_COLLECTOR_TOKEN:?Run node scripts/setup.mjs first}
     volumes:
-      - ./.local/collector.yaml:/etc/otelcol/config.yaml:ro
+      - ${COLLECTOR_CONFIG_PATH:-./.local/collector.yaml}:/etc/otelcol/config.yaml:ro
     depends_on:
       clickhouse:
         condition: service_healthy
@@ -42,6 +42,8 @@ services:
       CLICKHOUSE_PORT: '8123'
       OTEL_EXPORTER_OTLP_ENDPOINT: http://collector:4318
       DEPLOY_ENV: local
+      MONITOR_NOTIFIER: ${MONITOR_NOTIFIER:-dummy}
+      MONITOR_WEBHOOK_URL: ${MONITOR_WEBHOOK_URL:-}
     ports:
       - '127.0.0.1:${API_PORT:-3001}:3001'
     volumes:

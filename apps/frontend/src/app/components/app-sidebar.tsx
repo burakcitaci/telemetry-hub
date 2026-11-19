@@ -16,8 +16,8 @@ import {
 } from '@/components/ui/sidebar';
 import { useAuth } from '@/features/auth/auth-context';
 import { cn } from '@/lib/utils';
-import { platformFilterSearch as filterSearch } from '@/shared/lib/platform-filters';
-import { Activity, ChartArea, FileText, Monitor, Server, Shield } from 'lucide-react';
+import { investigationScope } from '@/shared/lib/investigation-link';
+import { Activity, Bell, ChartArea, FileText, Monitor, Server, Shield } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
@@ -52,6 +52,7 @@ const navItems = [
     description: 'nav.applicationEvents',
     icon: Monitor,
   },
+  { path: '/alerts', label: 'nav.alerts', icon: Bell },
 ];
 
 export function AppSidebar() {
@@ -73,7 +74,7 @@ export function AppSidebar() {
               <Link
                 to={{
                   pathname: `${orgPath}/metrics`,
-                  search: filterSearch(location.search),
+                  search: investigationScope(location.search),
                 }}
                 onClick={closeMobileSidebar}
                 aria-label="Telemetry Hub metrics"
@@ -127,7 +128,7 @@ export function AppSidebar() {
                       <Link
                         to={{
                           pathname: path,
-                          search: filterSearch(location.search),
+                          search: investigationScope(location.search),
                         }}
                         onClick={closeMobileSidebar}
                         aria-current={active ? 'page' : undefined}
@@ -171,7 +172,7 @@ export function MobileAppSidebar() {
       <Link
         to={{
           pathname: `${orgPath}/metrics`,
-          search: filterSearch(location.search),
+          search: investigationScope(location.search),
         }}
         className="flex h-12 items-center justify-center border-b border-sidebar-border"
         aria-label="Telemetry Hub traces"
@@ -208,7 +209,7 @@ export function MobileAppSidebar() {
           return (
             <Link
               key={item.path}
-              to={{ pathname: path, search: filterSearch(location.search) }}
+              to={{ pathname: path, search: investigationScope(location.search) }}
               className={cn(
                 'flex size-9 items-center justify-center rounded-md text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
                 active && 'bg-sidebar-accent text-sidebar-accent-foreground',

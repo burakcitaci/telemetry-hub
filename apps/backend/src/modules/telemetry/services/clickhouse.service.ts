@@ -140,18 +140,26 @@ export class ClickhouseService implements OnModuleInit, OnModuleDestroy {
     const { limit, offset } = this.normalizeListOptions(options);
     const environment = telemetryEnvironment(options.env);
     const timeWindow = telemetryTimeWindow(options, 'Timestamp');
-    const serviceFilter = options.service
-      ? 'HAVING countIf(ServiceName = {service:String}) > 0'
-      : '';
+    const matches = [];
+    const filters: string[] = [];
+    if (options.service) matches.push('countIf(ServiceName = {service:String}) > 0');
+    if (options.services?.length) matches.push('countIf(ServiceName IN {services:Array(String)}) > 0');
+    if (options.q?.trim()) matches.push(`countIf(
+      positionCaseInsensitiveUTF8(SpanName, {text:String}) > 0
+      OR positionCaseInsensitiveUTF8(ServiceName, {text:String}) > 0
+      OR positionCaseInsensitiveUTF8(TraceId, {text:String}) > 0) > 0`);
+    if (filterValues(scope.statusFilter).length) filters.push(this.statusPredicate('traces'));
+    if (options.statuses?.length) filters.push('StatusCode IN {statuses:Array(String)}');
     const isolation = this.buildTenantFilter({ ...scope, statusFilter: undefined },
       [environment.sql, timeWindow.sql].filter(Boolean));
     const queryParams: Record<string, unknown> = {
       limit, offset, ...environment.params, ...timeWindow.params, ...isolation.params,
     };
 
-    if (options.service) {
-      queryParams.service = options.service;
-    }
+    if (options.service) queryParams.service = options.service;
+    if (options.services?.length) queryParams.services = options.services;
+    if (options.statuses?.length) queryParams.statuses = options.statuses;
+    if (options.q?.trim()) queryParams.text = options.q.trim();
 
     const query = `
       SELECT
@@ -185,10 +193,10 @@ export class ClickhouseService implements OnModuleInit, OnModuleDestroy {
         FROM otel_traces
         ${isolation.where}
         GROUP BY TraceId
-        ${serviceFilter}
+        ${matches.length ? `HAVING ${matches.join(' AND ')}` : ''}
       )
-      ${filterValues(scope.statusFilter).length ? `WHERE ${this.statusPredicate('traces')}` : ''}
-      ORDER BY Timestamp DESC
+      ${filters.length ? `WHERE ${filters.join(' AND ')}` : ''}
+      ORDER BY Timestamp DESC, TraceId DESC
       LIMIT {limit:UInt32} OFFSET {offset:UInt32}
     `;
 
@@ -237,6 +245,23 @@ export class ClickhouseService implements OnModuleInit, OnModuleDestroy {
       predicates.push('ServiceName = {service:String}');
       queryParams.service = options.service;
     }
+    if (options.services?.length) {
+      predicates.push("if(ServiceName = '', 'Unknown service', ServiceName) IN {services:Array(String)}");
+      queryParams.services = options.services;
+    }
+    if (options.statuses?.length) {
+      predicates.push(`multiIf(upperUTF8(SeverityText) IN ('WARN', 'WARNING'), 'WARN',
+        upperUTF8(SeverityText) IN ('ERROR', 'FATAL'), 'ERROR',
+        upperUTF8(SeverityText) = 'INFO', 'INFO', 'OTHER') IN {statuses:Array(String)}`);
+      queryParams.statuses = options.statuses;
+    }
+    if (options.q?.trim()) {
+      predicates.push(`(positionCaseInsensitiveUTF8(Body, {text:String}) > 0
+        OR positionCaseInsensitiveUTF8(ServiceName, {text:String}) > 0
+        OR positionCaseInsensitiveUTF8(SeverityText, {text:String}) > 0
+        OR positionCaseInsensitiveUTF8(TraceId, {text:String}) > 0)`);
+      queryParams.text = options.q.trim();
+    }
     if (timeWindow.sql) {
       predicates.push(timeWindow.sql);
       Object.assign(queryParams, timeWindow.params);
@@ -264,11 +289,28 @@ export class ClickhouseService implements OnModuleInit, OnModuleDestroy {
         LogAttributes
       FROM otel_logs
       ${isolation.where}
-      ORDER BY Timestamp DESC
+      ORDER BY Timestamp DESC, TraceId DESC, SpanId DESC, ServiceName DESC, Body DESC
       LIMIT {limit:UInt32} OFFSET {offset:UInt32}
     `;
 
     return this.executeTenantQuery(scope, query, queryParams, LIST_QUERY_SETTINGS);
+  }
+
+  async getConnectionStatus(tenantSlug: string, connection: { service: string; team: string; env: string }) {
+    const scope: TenantScope = { tenantSlug, role: 'admin' };
+    const isolation = this.buildTenantFilter(scope, [
+      'ServiceName = {service:String}', 'team_id = {team:String}',
+      "ResourceAttributes['deployment.environment.name'] = {env:String}",
+    ]);
+    const signals = [['logs', 'otel_logs', 'Timestamp'], ['traces', 'otel_traces', 'Timestamp'],
+      ...['gauge', 'sum', 'histogram'].map(type => ['metrics', 'otel_metrics_' + type, 'TimeUnix'])];
+    const branches = signals.map(([signal, table, time]) =>
+      `SELECT '${signal}' AS signal, maxOrNull(toUnixTimestamp64Milli(${time})) AS latest
+        FROM ${table} ${isolation.where} AND ${time} >= now64(3) - INTERVAL 15 MINUTE`);
+    return this.executeTenantQuery<{ signal: 'logs' | 'traces' | 'metrics'; latest: string | null }>(
+      scope, `SELECT signal, max(latest) AS latest FROM (${branches.join(' UNION ALL ')}) GROUP BY signal`,
+      { ...isolation.params, ...connection }, LIST_QUERY_SETTINGS,
+    );
   }
 
   async getServices(scope: TenantScope, env?: string) {

@@ -74,7 +74,8 @@ export class MonitorsController {
     return monitor;
   }
 
-  @Post('preview') preview(@Tenant() scope: TenantScope, @Body() dto: MonitorDto) {
+  @Post('preview') preview(@Tenant() scope: TenantScope, @Body(MonitorInputPipe) dto: MonitorDto | CreateMonitorDto) {
+    if (dto instanceof CreateMonitorDto) return this.requireUnified().preview(scope, dto);
     const configuration = this.configuration(scope, dto);
     if (!this.evaluator) throw new NotFoundException('Monitor evaluator unavailable.');
     return this.evaluator.preview(scope.tenantSlug, configuration as MonitorDto);

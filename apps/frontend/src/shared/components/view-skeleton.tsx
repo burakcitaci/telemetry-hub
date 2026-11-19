@@ -59,6 +59,8 @@ export function ViewSkeleton({
 interface QueryErrorProps {
   onRetry: () => void | Promise<unknown>;
   isRetrying?: boolean;
+  retryLabel?: string;
+  retryingLabel?: string;
   title?: string;
   message?: string;
   className?: string;
@@ -68,6 +70,8 @@ interface QueryErrorProps {
 export function QueryError({
   onRetry,
   isRetrying = false,
+  retryLabel = 'Wiederholen',
+  retryingLabel = 'Wird erneut geladen…',
   title = 'Daten konnten nicht geladen werden',
   message = 'Bitte versuche es erneut.',
   className,
@@ -97,7 +101,7 @@ export function QueryError({
               isRetrying && 'animate-spin motion-reduce:animate-none',
             )}
           />
-          {isRetrying ? 'Wird erneut geladen…' : 'Wiederholen'}
+          {isRetrying ? retryingLabel : retryLabel}
         </Button>
       </AlertDescription>
     </Alert>

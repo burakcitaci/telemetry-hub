@@ -42,7 +42,9 @@ api.interceptors.request.use(config => {
 
 api.interceptors.response.use(response => response, error => {
   if (error.response?.status === 401 && !/\/auth\/login/.test(error.config?.url ?? '')
-    && window.location.pathname !== '/login') window.location.assign('/login');
+    && window.location.pathname !== '/login' && !/\/auth\/session/.test(error.config?.url ?? '')) {
+    window.location.assign('/login?' + new URLSearchParams({ returnTo: window.location.pathname + window.location.search }));
+  }
   return Promise.reject(error);
 });
 

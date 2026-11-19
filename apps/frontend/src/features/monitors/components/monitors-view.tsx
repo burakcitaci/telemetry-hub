@@ -1,3 +1,6 @@
+import { canonicalMonitor } from '../canonical';
+import { CanonicalMonitorEditor } from './canonical-monitor-editor';
+import { CanonicalMonitorDetail } from './canonical-monitor-detail';
 import { Alert,AlertDescription } from '@/components/ui/alert';
 import {
 AlertDialog,
@@ -77,6 +80,8 @@ export function MonitorsView({
   datadogForOpen,
   detailVisible,
 }: MonitorsViewProps) {
+  const canonical = canonicalMonitor(openMonitor);
+  const [legacyEditor, setLegacyEditor] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [chartTimeRange, setChartTimeRange] = useState('30m');
   const [formDirty, setFormDirty] = useState(false);
@@ -118,6 +123,7 @@ export function MonitorsView({
               className="gap-1.5"
               onClick={() => {
                 setFormDirty(false);
+                setLegacyEditor(false);
                 setCreating(true);
                 setOpenId(null);
               }}
@@ -241,15 +247,25 @@ export function MonitorsView({
                       <X className="h-3.5 w-3.5" />
                     </Button>
                   </header>
-                  <MonitorForm
+                  {!openMonitor && !formDirty && <Button type="button" variant="ghost" size="sm" className="self-start mx-5 mt-2"
+                    onClick={() => setLegacyEditor(value => !value)}>{legacyEditor ? 'Use current editor' : 'Use legacy editor'}</Button>}
+                  {!legacyEditor || canonical ? <CanonicalMonitorEditor key={canonical?.id ?? 'new'} initial={canonical}
+                    onCancel={closeDetail} onDirtyChange={setFormDirty} onSaved={id => {
+                      setFormDirty(false); setCreating(false); setOpenId(id); refresh();
+                    }} /> : <MonitorForm
                     initial={openMonitor}
                     pending={saving}
                     error={error}
                     onCancel={closeDetail}
                     onDirtyChange={setFormDirty}
                     onSave={handleSave}
-                  />
+                  />}
                 </>
+              ) : canonical ? (
+                <CanonicalMonitorDetail monitor={canonical} muted={openMonitor?.isMuted ?? false}
+                  evaluating={evaluatingId === canonical.id} onClose={closeDetail}
+                  onMute={() => void handleToggleMute(canonical.id)} onEvaluate={() => void handleEvaluate(canonical.id)}
+                  onEdit={() => { setFormDirty(false); setLegacyEditor(false); setCreating(true); }} />
               ) : openMonitor ? (
                 <MonitorDetail
                   chartTimeRange={chartTimeRange}
@@ -263,6 +279,7 @@ export function MonitorsView({
                   onToggleMute={handleToggleMute}
                   onEdit={() => {
                     setFormDirty(false);
+                    setLegacyEditor(true);
                     setCreating(true);
                   }}
                 />

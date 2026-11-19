@@ -32,6 +32,13 @@ export class MonitoringService {
     return monitor;
   }
 
+  async preview(scope: TenantScope, dto: CreateMonitorDto) {
+    const configuration = await this.configuration(scope, dto);
+    const monitor: Monitor = { ...configuration, enabled: true, id: '', schemaVersion: 2,
+      configurationVersion: 0, created_at: new Date().toISOString() };
+    return this.evaluator.preview(scope.tenantSlug, monitor);
+  }
+
   async patch(scope: TenantScope, id: string, patch: PatchMonitorDto): Promise<Monitor> {
     if (!Object.keys(patch).length) throw new BadRequestException('Supply at least one monitor field.');
     const existing = this.require(scope.tenantSlug, id);

@@ -44,6 +44,8 @@ useState,
 type ReactNode,
 } from "react";
 
+import { CopyInvestigationLink } from "@/shared/components/copy-investigation-link";
+
 interface TraceDetailSheetProps {
     investigationSearch?: string;
     traceId: string | null;
@@ -322,7 +324,10 @@ export function TraceDetailSheet({
                                         {traceId}
                                     </code>
                                     {traceId && (
-                                        <CopyButton value={traceId} label="Copy trace ID" />
+                                        <>
+                                          <CopyButton value={traceId} label="Copy trace ID" />
+                                          <CopyInvestigationLink traceId={traceId} scope={investigationSearch} />
+                                        </>
                                     )}
                                 </div>
                             </div>

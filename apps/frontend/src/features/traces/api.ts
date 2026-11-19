@@ -1,5 +1,6 @@
 import { api, asNumber, unwrap } from "@/shared/api/client";
 import type { ApiEnvelope } from "@/shared/types/telemetry";
+import type { ExplorerQuery } from '@/shared/types/telemetry';
 import type { TraceSpan, TraceSummary } from "@/features/traces/types";
 
 function normalizeSpan(
@@ -36,14 +37,13 @@ function normalizeTrace(
 }
 
 export async function getTraces(
-  limit: number,
-  service?: string,
-  env = "all",
+  params: ExplorerQuery,
+  signal: AbortSignal,
 ): Promise<TraceSummary[]> {
   const response = await api.get<ApiEnvelope<TraceSummary[]> | TraceSummary[]>(
     "/traces",
     {
-      params: { limit, env, ...(service ? { service } : {}) },
+      params, signal, paramsSerializer: { indexes: null },
     },
   );
 

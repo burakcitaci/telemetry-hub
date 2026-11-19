@@ -20,3 +20,14 @@ export interface ApiEnvelope<T> {
   path?: string;
   method?: string;
 }
+
+export interface ExplorerQuery {
+  env: string;
+  from: string;
+  to: string;
+  limit: number;
+  offset: number;
+  q?: string;
+  services: string[];
+  statuses: string[];
+}

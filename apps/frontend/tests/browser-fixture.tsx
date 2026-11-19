@@ -18,6 +18,7 @@ const records = (scenario === "current" ? [10, 99] : scenario === "temporal" ? [
 (window as any).__requests = [];
 const generatedIngestionKey = "fixture_generated_ingestion_key_1234567890";
 const fixtureIngestionKeys: any[] = [];
+let canonicalMonitor: Record<string, unknown> | undefined;
 const fixtureUsers = [{ id: "user-a", email: "admin@example.test", role: "admin", teamId: "platform" }];
 api.defaults.adapter = async (config) => {
   (window as any).__requests.push({ url: config.url, method: config.method, body: config.data, params: config.params, headers: config.headers.toJSON() });
@@ -67,6 +68,24 @@ api.defaults.adapter = async (config) => {
   else if (config.url?.startsWith("/admin/teams")) data = scenario === "multiple-teams"
     ? [{ id: "platform", name: "Platform" }, { id: "operations", name: "Operations" }]
     : [{ id: "platform", name: "Platform" }];
+  else if (config.url === '/ingestion-status') data = [
+    { signal: 'logs', latest: String(Date.now()) }, { signal: 'traces', latest: null }, { signal: 'metrics', latest: null },
+  ];
+  else if (config.url === '/alerts') data = { items: [{
+    id: 'alert-a', monitor_id: 'canonical-a', monitor_name: 'Fixture alert', signal_type: 'LOG',
+    state: 'FIRING', value: 15, threshold: 10, window_seconds: 300, unit: 'logs',
+    fired_at: '2026-10-13T00:00:00Z', team_id: 'platform', service: 'api', env: 'dev',
+  }], next_offset: null };
+  else if (scenario === 'canonical' && config.url === '/monitors/preview' && config.method === 'post')
+    data = { state: 'FIRING', operational_status: 'OK', value: 15, unit: 'logs' };
+  else if (scenario === 'canonical' && config.url === '/monitors' && config.method === 'post') {
+    const configBody = JSON.parse(String(config.data));
+    canonicalMonitor = { ...configBody, id: 'canonical-a', schemaVersion: 2, type: 'log', status: 'Alert',
+      isMuted: false, targets: [], enabled: true, created_at: '2026-10-13T00:00:00Z',
+      lastEvaluatedAt: '2026-10-13T00:00:00Z', runtime: { state: 'FIRING', operational_status: 'OK', value: 15, unit: 'logs' } };
+    data = canonicalMonitor;
+  }
+  else if (scenario === 'canonical' && config.url === '/monitors' && canonicalMonitor) data = [canonicalMonitor];
   else if (config.url?.startsWith("/filters")) data = { services: ["api"], environments: ["dev", "production"], statuses: ["OK"] };
   else if (config.url?.startsWith("/logs")) data = [{
     Timestamp: new Date().toISOString(), TraceId: traceId, SpanId: "1234567890abcdef",

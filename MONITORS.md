@@ -1,5 +1,9 @@
 # TASK-MONITORS-1 — Signal-based monitoring
 
+The app opens the canonical editor for new monitors by default. See the
+[canonical monitor guide](apps/backend/src/modules/monitors/README.md) for the Alert inbox,
+preview API and webhook setup. The rule inputs and chart history below describe the legacy editor.
+
 - [x] Metric, log and trace rules with real tenant-scoped ClickHouse evaluation.
 - [x] Warning/alert thresholds, grouping, preview, manual evaluation and a 30-second evaluator.
 - [x] Persistent samples and state transitions; mute suppresses new in-app events while evaluation continues.

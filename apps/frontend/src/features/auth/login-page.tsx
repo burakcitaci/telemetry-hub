@@ -1,10 +1,11 @@
 import { useState, type FormEvent, type ReactNode } from 'react';
 import { Activity, ArrowRight, LoaderCircle } from 'lucide-react';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { MetricCard } from '@/shared/components/telemetry-primitives';
 import { ModeToggle } from '@/app/components/mode-toggle';
+import { signInDestination } from '@/shared/lib/investigation-link';
 import { getErrorMessage } from '@/shared/lib/errors';
 import { useAuth } from './auth-context';
 import { useTranslation } from 'react-i18next';
@@ -12,6 +13,9 @@ import { LanguageToggle } from '@/shared/components/language-toggle';
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const returnTo: unknown = location.state?.returnTo ?? new URLSearchParams(location.search).get('returnTo');
+  const destination = (tenant: string) => signInDestination(tenant, returnTo);
   const { session, login } = useAuth();
   const { t } = useTranslation();
   const [tenantSlug, setTenantSlug] = useState('');
@@ -20,7 +24,7 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  if (session) return <Navigate to={`/org/${session.tenantSlug}/metrics`} replace />;
+  if (session) return <Navigate to={destination(session.tenantSlug)} replace />;
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -28,7 +32,7 @@ export default function LoginPage() {
     setIsSubmitting(true);
     try {
       const next = await login({ tenantSlug, email, password });
-      navigate(`/org/${next.tenantSlug}/metrics`, { replace: true });
+      navigate(destination(next.tenantSlug), { replace: true });
     } catch (cause) {
       setError(getErrorMessage(cause, t('auth.failed')));
     } finally {

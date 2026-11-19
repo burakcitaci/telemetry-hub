@@ -16,6 +16,8 @@ test('user creates a numeric parameter monitor with no raw query syntax', { time
     await browser.navigate('/org/demo/monitors');
     await browser.wait("[...document.querySelectorAll('button')].some(button => button.textContent.includes('New monitor'))");
     await browser.evaluate("[...document.querySelectorAll('button')].find(button => button.textContent.includes('New monitor')).click()");
+    await browser.wait("[...document.querySelectorAll('button')].some(button => button.textContent.trim() === 'Use legacy editor')");
+    await browser.evaluate("[...document.querySelectorAll('button')].find(button => button.textContent.trim() === 'Use legacy editor').click()");
     await browser.wait("Boolean(document.getElementById('monitor-type'))");
     await choose('#monitor-type', 'Log');
     await fill('#monitor-name', 'Forecast volume');

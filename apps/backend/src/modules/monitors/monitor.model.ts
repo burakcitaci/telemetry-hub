@@ -53,6 +53,9 @@ export interface AlertEvent {
   id: string;
   monitor_id: string;
   monitor_name: string;
+  team_id?: string;
+  service?: string;
+  env?: string;
   signal_type: Monitor['signal_type'];
   state: 'FIRING' | 'RECOVERED';
   value: number;

@@ -8,10 +8,12 @@ const source = (path: string) =>
 test('logs expose stream state and pause controls', () => {
   const actions = source('shared/components/feature-actions.tsx');
   const logs = source('features/logs/hooks/use-logs.tsx');
+  const explorer = source('shared/hooks/use-explorer-results.ts');
 
-  assert.match(actions, /Pause live updates/);
-  assert.match(actions, /Updates paused/);
-  assert.match(logs, /pausedRef\.current/);
+  assert.match(actions, /explorer\.pauseLive/);
+  assert.match(actions, /explorer\.livePaused/);
+  assert.match(logs, /useExplorerResults\('logs', getLogs\)/);
+  assert.match(explorer, /changed && !paused/);
 });
 
 test('monitor authoring previews its rule and protects dirty drafts', () => {

@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { platformFilterKey, platformFilterSearch, readPlatformFilters } from '../src/shared/lib/platform-filters';
+import { investigationScope, investigationUrl, signInDestination } from '../src/shared/lib/investigation-link';
 import { api } from '../src/shared/api/client';
 import { createEventSource } from '../src/shared/api/event-stream';
 import { filterOptionsSource, getFilterOptions } from '../src/shared/api/filter-options';
@@ -87,4 +88,19 @@ test('filter discovery sends only supported query fields and keeps scope in head
     assert.equal(filterOptionsSource('/org/demo/infrastructure'), 'all');
     assert.equal(filterOptionsSource('/org/demo/admin'), 'all');
   } finally { api.defaults.adapter = previousAdapter; globalThis.window = previousWindow; }
+});
+
+test('investigation links pin time, preserve scope, and return only to the signed-in organization', () => {
+  const from = new Date('2026-11-19T08:55:00.000Z').toISOString();
+  const to = '2026-11-19T09:00:00.000Z';
+  const search = investigationScope('?team=backend&env=dev&service=checkout&range=5m&q=error');
+  const path = investigationUrl('/org/demo/traces', search, 'trace', Date.parse(to));
+  const params = new URL(path, 'http://localhost').searchParams;
+  assert.equal(params.get('range'), from + ' to ' + to);
+  assert.equal(params.get('globalService'), 'checkout');
+  assert.equal(params.get('trace'), 'trace');
+  assert.equal(params.has('q'), false);
+  assert.equal(signInDestination('demo', path), path);
+  assert.equal(signInDestination('other', path), '/org/other/metrics');
+  assert.equal(signInDestination('demo', '/org/demo/../../outside'), '/org/demo/metrics');
 });

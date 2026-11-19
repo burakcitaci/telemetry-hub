@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { createEventSource } from '@/shared/api/event-stream';
 import type { TelemetryEvent } from '@/shared/types/telemetry';
 
-export function useTelemetryStream(onEvent: (event: TelemetryEvent) => void) {
+export function useTelemetryStream(onEvent: (event: TelemetryEvent) => void, scopeKey: string) {
   const callbackRef = useRef(onEvent);
   const [connected, setConnected] = useState(false);
 
@@ -11,6 +11,7 @@ export function useTelemetryStream(onEvent: (event: TelemetryEvent) => void) {
   }, [onEvent]);
 
   useEffect(() => {
+    setConnected(false);
     const eventSource = createEventSource();
 
     eventSource.onopen = () => setConnected(true);
@@ -26,7 +27,7 @@ export function useTelemetryStream(onEvent: (event: TelemetryEvent) => void) {
     return () => {
       eventSource.close();
     };
-  }, []);
+  }, [scopeKey]);
 
   return connected;
 }

@@ -57,6 +57,10 @@ export class SignalEvaluator {
     return result;
   }
 
+  async preview(org: string, monitor: Monitor) {
+    return this.measure(org, monitor);
+  }
+
   private async measure(org: string, monitor: Monitor) {
     const until = new Date(this.clock.now().getTime());
     const at = until.toISOString();

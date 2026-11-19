@@ -16,18 +16,20 @@ const LogsPage = lazy(() => import('@/features/logs'));
 const ServicesPage = lazy(() => import('@/features/services'));
 const ServiceDetailPage = lazy(() => import('@/features/services/service-detail-page'));
 const MetricsPage = lazy(() => import('@/features/metrics'));
+const AlertsPage = lazy(() => import('@/features/monitors/alerts-page'));
 const MonitorsPage = lazy(() => import('@/features/monitors'));
 const LoginPage = lazy(() => import('@/features/auth/login-page'));
+const ConnectApplicationPage = lazy(() => import('@/features/onboarding/connect-application-page'));
 const AdminPage = lazy(() => import('@/features/admin/admin-page'));
 const InfrastructurePage = lazy(() => import('@/features/infrastructure/infrastructure-page'));
 
 function AuthenticatedRoutes() {
   const { session, isLoading } = useAuth();
   const { tenant } = useParams();
-  const { pathname } = useLocation();
+  const { pathname, search } = useLocation();
 
   if (isLoading) return <ViewSkeleton showHeader />;
-  if (!session) return <Navigate to="/login" replace />;
+  if (!session) return <Navigate to="/login" state={{ returnTo: pathname + search }} replace />;
   if (tenant && tenant !== session.tenantSlug) {
     return <Navigate to={`/org/${session.tenantSlug}/metrics`} replace />;
   }
@@ -57,6 +59,8 @@ function AuthenticatedRoutes() {
                   <Route path="logs" element={<LogsPage />} />
                   <Route path="traces" element={<TracesPage />} />
                   <Route path="monitors" element={<MonitorsPage />} />
+                  <Route path="alerts" element={<AlertsPage />} />
+                  <Route path="connect" element={<ConnectApplicationPage />} />
                   <Route path="admin/*" element={<AdminPage />} />
                   <Route path="infrastructure" element={<InfrastructurePage />} />
                   <Route path="*" element={<NotFound />} />

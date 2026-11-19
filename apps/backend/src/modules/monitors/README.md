@@ -122,7 +122,14 @@ SQL uses parameterized values, mandatory tenant filters and half-open windows [s
 
 Rules start with threshold state OK. A crossing emits FIRING once; returning across the comparator emits RECOVERED once. Staying on either side emits nothing. State is independent of operational_status (OK, NO_DATA or ERROR); status before the first evaluation is NOT_EVALUATED.
 
-DummyNotifier writes one JSON alert line to stdout. It implements Notifier; no external notification service is configured. Alert snapshots include name, signal, scalar, unit, estimated, comparator, threshold, window, transition revision, timestamp and notification receipt.
+The default notifier writes one JSON alert line to stdout. To enable external delivery, set
+`MONITOR_NOTIFIER=webhook` and `MONITOR_WEBHOOK_URL` on the backend. In Kind, supply these
+through the backend auth Secret. In Compose, supply them in the Compose environment.
+Use a trusted HTTPS receiver for all organizations on the deployment. It receives
+JSON transition events with the event ID in the `Idempotency-Key` header. Delivery
+uses a five-second deadline and records a failed receipt when the receiver is unavailable.
+
+The Alert inbox shows transitions and links back to the original time window and scope. Alert snapshots include name, signal, scalar, unit, estimated, comparator, threshold, window, transition revision, timestamp and notification receipt.
 
 PATCH muted_until with an ISO timestamp to suppress delivery until that time; set it to null to clear. Mute suppresses firing and recovery delivery while state transitions remain in history. cooldown_seconds defaults to zero and suppresses new firing attempts within the cooldown. A failed firing attempt consumes the cooldown. Recovery bypasses cooldown but requires a successfully sent firing in that episode and still respects mute. Suppression records MUTED, COOLDOWN or UNPAIRED_RECOVERY. Expiry alone never replays an old transition.
 
@@ -139,7 +146,8 @@ Settings are read through the existing ConfigService at startup. Invalid values 
 | MONITOR_CHECK_INTERVAL_SECONDS | 30 | Positive integer evaluation cadence, fitting a Node timer |
 | MONITOR_INITIAL_DELAY_SECONDS | 1 | Nonnegative integer initial delay, fitting a Node timer |
 | MONITOR_DEFAULT_WINDOW_SECONDS | 300 | Positive representable window, used only when omitted |
-| MONITOR_NOTIFIER | dummy | Only supported notifier; other names fail startup |
+| MONITOR_NOTIFIER | dummy | `dummy` writes to stdout. `webhook` posts a JSON event to the configured receiver. |
+| MONITOR_WEBHOOK_URL | unset | HTTPS endpoint required when the webhook notifier is enabled |
 | MONITOR_ALERT_RETENTION_DAYS | 30 | Positive representable alert cutoff |
 | MONITOR_ALERT_PRUNE_INTERVAL_SECONDS | 3600 | Positive integer prune cadence, fitting a Node timer |
 
@@ -166,7 +174,11 @@ The local Kind inventory on 2026-10-15 contained **2 legacy monitors**, with **0
 4. Upgrade each rule explicitly with a complete canonical PATCH to its existing ID. Confirm query meaning, aggregation, comparator, units and threshold; legacy syntax/aliases are not silently converted. Verify status and firing/recovery in a controlled rule. Deletion retains imported history.
 5. Delete the frozen log-query.ts / monitor-rule.ts legacy boundary only after both inventoried monitors are migrated and legacy API compatibility is verified. Recheck deployed counts before removing support elsewhere. No date-based automatic deletion is configured.
 
-Legacy requests using type still use the old DTO, evaluation and authoring routes. The current frontend form remains a legacy authoring surface. Canonical authoring uses this JSON API; list responses offer display aliases but do not turn the legacy editor into a canonical editor. Canonical PUT, legacy mute and legacy chart-history routes return 409 and direct clients to PATCH or /api/alerts. This pass adds no new UI or chart sample history for canonical monitors.
+The frontend uses the canonical editor by default. Existing legacy rules open in the
+legacy editor, which still supports their original configuration, previews and chart
+history. Canonical rules use PATCH for edits and mute, and display persisted transitions
+from /api/alerts. Canonical previews use POST /api/monitors/preview and leave the rule,
+evaluation history and notifications untouched.
 
 For rollback after lazy migration, preserve the current database and restore the consistent pre-deployment backup with the previous application version. Imported legacy events were removed from JSON, so merely running the old binary against the migrated database does not restore its former history view. Account for writes since the backup when choosing a rollback point. The application does not perform destructive reverse migrations.
 

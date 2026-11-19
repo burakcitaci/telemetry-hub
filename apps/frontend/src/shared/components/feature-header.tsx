@@ -1,6 +1,8 @@
+import { useTranslation } from "react-i18next";
 import type { ComponentProps, ReactNode } from "react";
 import { TimeRangePicker } from "@/app/components/timer-range.picker";
 import { cn } from "@/lib/utils";
+import { CopyInvestigationLink } from "./copy-investigation-link";
 import { Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -27,6 +29,7 @@ export function FeatureHeader({
   className,
   onFiltersOpen,
 }: FeatureHeaderProps) {
+  const { t } = useTranslation();
   return (
     <header
       className={cn(
@@ -49,6 +52,7 @@ export function FeatureHeader({
       )}
       <div className="ml-auto flex max-w-full min-w-0 flex-wrap items-center justify-end gap-2">
         {actions}
+        {timeRange && <CopyInvestigationLink />}
         {timeRange && onTimeRangeChange && (
           <TimeRangePicker value={timeRange} onChange={onTimeRangeChange} />
         )}
@@ -57,7 +61,7 @@ export function FeatureHeader({
             variant="ghost"
             size="icon"
             className="size-8 lg:hidden"
-            aria-label="Open filters"
+            aria-label={t('explorer.filters')}
             data-feature-filter-toggle
             aria-haspopup="dialog"
             onClick={onFiltersOpen}

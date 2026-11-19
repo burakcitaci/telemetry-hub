@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import type { ReactNode } from 'react';
 import { Pause, Play, RefreshCw, Wifi, WifiOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -39,7 +40,9 @@ export function TelemetryActions({
   children,
   ...refresh
 }: TelemetryActionsProps) {
+  const { t } = useTranslation();
   const Icon = paused ? Pause : connected ? Wifi : WifiOff;
+  const toggleLabel = t(paused ? 'explorer.resumeLive' : 'explorer.pauseLive');
   return (
     <>
       <span
@@ -47,11 +50,7 @@ export function TelemetryActions({
         className="flex items-center gap-1.5 text-xs text-muted-foreground"
       >
         <Icon className={cn('size-4', connected && !paused && 'text-success')} />
-        {paused
-          ? 'Updates paused'
-          : connected
-            ? 'Stream connected'
-            : 'Stream disconnected'}
+        {t(paused ? 'explorer.livePaused' : connected ? 'explorer.liveConnected' : 'explorer.liveDisconnected')}
       </span>
       {onPausedChange && (
         <Button
@@ -59,8 +58,8 @@ export function TelemetryActions({
           size="icon"
           className="size-8"
           onClick={() => onPausedChange(!paused)}
-          aria-label={paused ? 'Resume live updates' : 'Pause live updates'}
-          title={paused ? 'Resume live updates' : 'Pause live updates'}
+          aria-label={toggleLabel}
+          title={toggleLabel}
         >
           {paused ? <Play className="size-4" /> : <Pause className="size-4" />}
         </Button>

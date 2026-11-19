@@ -1,3 +1,7 @@
+import { readPlatformFilters } from '@/shared/lib/platform-filters';
+import { Link, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { useAuth } from '@/features/auth/auth-context';
 import { Alert,AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { CardContent,CardTitle } from "@/components/ui/card";
@@ -90,6 +94,10 @@ export function MetricsView({
   selectedNotInCatalog,
   columns,
 }: MetricsViewProps) {
+  const { session } = useAuth();
+  const { t } = useTranslation();
+  const { search } = useLocation();
+  const hasFilters = Boolean(metricSearch.trim()) || Object.values(readPlatformFilters(search)).some(values => values.length);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const isLoading = catalogLoading || seriesLoading;
   const retryFetch = () => setRefreshTick((value) => value + 1);
@@ -100,7 +108,8 @@ export function MetricsView({
         onFiltersOpen={() => setFiltersOpen(true)}
         timeRange={timeRange}
         onTimeRangeChange={setTimeRange}
-        description={<></>}
+        description={session?.role === 'admin' && !catalogLoading && !catalogError && !hasFilters && !filteredCatalog.length
+          ? <Link className="underline" to={'/org/' + session.tenantSlug + '/connect'}>{t('connect.title')}</Link> : undefined}
         children={
           <>
             

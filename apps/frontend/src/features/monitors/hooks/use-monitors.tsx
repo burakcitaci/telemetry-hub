@@ -153,6 +153,11 @@ export function useMonitors() {
     const target = monitors.find((m) => m.id === id);
     if (!target) return;
     try {
+      if (target.schemaVersion === 2) {
+        await api.patch(`/monitors/${id}`, { muted_until: target.isMuted ? null : new Date(Date.now() + 3_600_000).toISOString() });
+        setRevision(value => value + 1);
+        return;
+      }
       const { data } = await api.post(`/monitors/${id}/mute`, { isMuted: !target.isMuted });
       const updated = normalizeMonitorEvaluation(unwrap<MonitorView>(data));
       setMonitors(prev => prev.map(m => m.id === id ? updated : m)); setError(null);
@@ -173,6 +178,10 @@ export function useMonitors() {
     setEvaluatingId(id);
     try {
       const { data } = await api.post(`/monitors/${id}/evaluate`);
+      if (monitors.some(monitor => monitor.id === id && monitor.schemaVersion === 2)) {
+        setRevision(value => value + 1);
+        return;
+      }
       const updated = normalizeMonitorEvaluation(unwrap<MonitorView>(data));
       setMonitors(previous => previous.map(monitor => monitor.id === id ? updated : monitor)); setError(null);
     } catch { setError('Monitor evaluation could not be completed.'); }

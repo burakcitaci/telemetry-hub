@@ -35,3 +35,5 @@ jobs:
           node-version: 24
           package-manager-cache: false
       - run: node scripts/container-smoke.mjs telemetry-hub-check
+      - name: Verify OTLP ingestion, historical search and monitor transition
+        run: node scripts/telemetry-journey.mjs

@@ -35,6 +35,9 @@ export function failedEvaluation(monitor: Monitor, error: unknown, at: string): 
 export function alertTransition(monitor: Monitor, runtime: MonitorRuntime, id: () => string): AlertEvent | undefined {
   if (runtime.operational_status !== 'OK' || runtime.state === (monitor.runtime?.state ?? 'OK')) return undefined;
   return { id: id(), monitor_id: monitor.id, monitor_name: monitor.name, signal_type: monitor.signal_type,
+    ...(monitor.team_id ? { team_id: monitor.team_id } : {}),
+    ...(monitor.service ? { service: monitor.service } : {}),
+    ...(monitor.env ? { env: monitor.env } : {}),
     state: runtime.state === 'FIRING' ? 'FIRING' : 'RECOVERED', value: runtime.value!,
     threshold: monitor.threshold, comparator: monitor.comparator, window_seconds: monitor.window_seconds,
     unit: runtime.unit, estimated: runtime.estimated, fired_at: runtime.checked_at, transition_revision: runtime.revision };

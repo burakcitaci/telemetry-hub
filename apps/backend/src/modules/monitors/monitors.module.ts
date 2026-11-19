@@ -8,6 +8,7 @@ import { PlatformStore } from '../auth/platform-store.service';
 import { ClickhouseService } from '../telemetry/services/clickhouse.service';
 import { SignalRegistry } from './signal-registry';
 import { SignalEvaluator, SIGNAL_EVALUATOR } from './signal-evaluator';
+import { WebhookNotifier } from './webhook-notifier';
 import { DummyNotifier } from './dummy-notifier';
 import { LogAdapter } from './adapters/log.adapter';
 import { MetricAdapter } from './adapters/metric.adapter';
@@ -24,7 +25,8 @@ import { MONITOR_NOTIFIER, type Notifier } from './notifier';
 export const signalProviders = [
   { provide: MonitoringTelemetry, useFactory: () => new MonitoringTelemetry() },
   { provide: MONITOR_NOTIFIER, inject: [ConfigService], useFactory: (config: ConfigService) => {
-    monitoringConfig(config); return new DummyNotifier();
+    const { webhookUrl } = monitoringConfig(config);
+    return webhookUrl ? new WebhookNotifier(webhookUrl) : new DummyNotifier();
   } },
   { provide: SignalRegistry, inject: [ClickhouseService], useFactory: (clickhouse: ClickhouseService) =>
     new SignalRegistry(new Map<SignalType, SignalAdapter>([['LOG', new LogAdapter(clickhouse)], ['METRIC', new MetricAdapter(clickhouse)], ['TRACE', new TraceAdapter(clickhouse)]])) },

@@ -98,6 +98,7 @@ export type MonitorStatus = 'OK' | 'Alert' | 'Warn' | 'No Data' | 'neutral' | 'U
 export type NotificationTarget = 'email' | 'slack' | 'webhook' | 'pagerduty';
 
 export interface MonitorView {
+  schemaVersion?: number;
   metricType?: 'gauge' | 'sum' | 'histogram';
   signalStatus?: string;
   logAttribute?: string;

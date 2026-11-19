@@ -24,6 +24,8 @@ test("dirty monitor drafts require confirmation before closing", { timeout: 6000
     await browser.navigate("/org/demo/monitors");
     await browser.wait("document.body.innerText.includes('New monitor')");
     await browser.evaluate("[...document.querySelectorAll('button')].find((button) => button.innerText.includes('New monitor')).click()");
+    await browser.wait("[...document.querySelectorAll('button')].some(button => button.textContent.trim() === 'Use legacy editor')");
+    await browser.evaluate("[...document.querySelectorAll('button')].find(button => button.textContent.trim() === 'Use legacy editor').click()");
     await browser.wait("Boolean(document.getElementById('monitor-name'))");
     assert.match(await browser.evaluate("document.body.innerText"), /Preview against real data/i);
 
