@@ -7,7 +7,8 @@ export function validateNotificationPolicy(monitor: Monitor): void {
     throw new Error('Cooldown seconds must be a non-negative integer.');
 }
 
-function decision(monitor: Monitor, event: AlertEvent, notifications: NotificationRuntime, at: string): AlertDelivery {
+function decision(monitor: Monitor, event: AlertEvent, notifications: NotificationRuntime, at: string, maintenance: boolean): AlertDelivery {
+  if (maintenance) return { status: 'SUPPRESSED', reason: 'MAINTENANCE' };
   const now = Date.parse(at);
   if (monitor.muted_until && Date.parse(monitor.muted_until) > now) return { status: 'SUPPRESSED', reason: 'MUTED' };
   if (event.state === 'RECOVERED' && notifications.active_firing_status !== 'SENT')
@@ -18,18 +19,24 @@ function decision(monitor: Monitor, event: AlertEvent, notifications: Notificati
   return { status: 'PENDING', attempted_at: at };
 }
 
-export function planNotification(monitor: Monitor, runtime: MonitorRuntime, event: AlertEvent | undefined, at: string) {
+export function planNotification(monitor: Monitor, runtime: MonitorRuntime, event: AlertEvent | undefined, at: string,
+  policy?: { maintenance: boolean; destination?: string }) {
   const notifications = { ...monitor.runtime?.notifications };
   const next = { ...runtime, notifications };
   if (!event) return { runtime: next, event: undefined };
-  const notification = decision(monitor, event, notifications, at);
+  const destination = event.state === 'RECOVERED' ? notifications.active_firing_destination : policy?.destination;
+  const notification = { ...decision(monitor, event, notifications, at, policy?.maintenance ?? false),
+    ...(destination ? { destination } : {}) };
   if (event.state === 'FIRING') {
     notifications.active_firing_event_id = event.id;
     notifications.active_firing_status = notification.status;
+    if (destination) notifications.active_firing_destination = destination;
+    else delete notifications.active_firing_destination;
     if (notification.status === 'PENDING') notifications.last_firing_attempt_at = at;
   } else {
     delete notifications.active_firing_event_id;
     delete notifications.active_firing_status;
+    delete notifications.active_firing_destination;
   }
   return { runtime: next, event: { ...event, notification } };
 }

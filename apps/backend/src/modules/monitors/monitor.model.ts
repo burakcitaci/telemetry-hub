@@ -7,7 +7,8 @@ export type FiringState = 'OK' | 'FIRING';
 export type DeliveryStatus = 'PENDING' | 'SENT' | 'FAILED' | 'SUPPRESSED';
 export interface AlertDelivery {
   status: DeliveryStatus;
-  reason?: 'MUTED' | 'COOLDOWN' | 'UNPAIRED_RECOVERY';
+  reason?: 'MUTED' | 'COOLDOWN' | 'UNPAIRED_RECOVERY' | 'MAINTENANCE';
+  destination?: string;
   attempted_at?: string;
   completed_at?: string;
 }
@@ -16,6 +17,7 @@ export interface NotificationRuntime {
   last_firing_sent_at?: string;
   active_firing_event_id?: string;
   active_firing_status?: DeliveryStatus;
+  active_firing_destination?: string;
 }
 
 export interface MonitorRuntime {
@@ -49,6 +51,13 @@ export interface Monitor extends Omit<SignalQuery, 'scope'> {
   runtime?: MonitorRuntime;
 }
 
+export interface AlertTriage {
+  version: number;
+  acknowledgment?: { by: string; at: string };
+  assignee?: { id: string; email: string };
+  notes: Array<{ by: string; at: string; text: string }>;
+}
+
 export interface AlertEvent {
   id: string;
   monitor_id: string;
@@ -67,6 +76,7 @@ export interface AlertEvent {
   fired_at: string;
   transition_revision: number;
   notification?: AlertDelivery;
+  triage?: AlertTriage;
 }
 
 export interface Clock { now(): Date; }

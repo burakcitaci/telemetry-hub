@@ -99,6 +99,7 @@ export type NotificationTarget = 'email' | 'slack' | 'webhook' | 'pagerduty';
 
 export interface MonitorView {
   schemaVersion?: number;
+  configurationVersion?: number;
   metricType?: 'gauge' | 'sum' | 'histogram';
   signalStatus?: string;
   logAttribute?: string;

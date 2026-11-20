@@ -4,7 +4,9 @@ import type { Notifier } from './notifier';
 export class WebhookNotifier implements Notifier {
   constructor(private readonly url: string, private readonly request = globalThis.fetch) {}
 
-  async notify(event: AlertEvent): Promise<void> {
+  notify(event: AlertEvent): Promise<void> { return this.publish(event); }
+
+  async publish<T extends { id: string }>(event: T): Promise<void> {
     const response = await this.request(this.url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Idempotency-Key': event.id },

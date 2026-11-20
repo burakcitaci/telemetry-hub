@@ -19,11 +19,18 @@ const records = (scenario === "current" ? [10, 99] : scenario === "temporal" ? [
 const generatedIngestionKey = "fixture_generated_ingestion_key_1234567890";
 const fixtureIngestionKeys: any[] = [];
 let canonicalMonitor: Record<string, unknown> | undefined;
-const fixtureUsers = [{ id: "user-a", email: "admin@example.test", role: "admin", teamId: "platform" }];
+const teamFlow = scenario === 'team-flow';
+const operations = scenario === 'operations';
+let destination: string | null = null;
+const tests: Record<string, string>[] = [];
+const maintenance: Record<string, string>[] = [];
+let triage: Record<string, unknown> = { version: 0, notes: [] };
+const fixtureTeams = [{ id: 'platform', name: 'Platform' }, ...((teamFlow || scenario === 'multiple-teams') ? [{ id: 'operations', name: 'Operations' }] : [])];
+const fixtureUsers = [{ id: "user-a", email: "admin@example.test", role: "admin", teamId: "platform" }, ...(teamFlow ? [{ id: "user-b", email: "member@example.test", role: "user", teamId: "platform" }] : [])];
 api.defaults.adapter = async (config) => {
   (window as any).__requests.push({ url: config.url, method: config.method, body: config.data, params: config.params, headers: config.headers.toJSON() });
   let data: unknown = [];
-  if (config.url?.startsWith("/auth/session")) data = { tenantSlug: "demo", role: "admin", teams: ["platform"] };
+  if (config.url?.startsWith("/auth/session")) data = { tenantSlug: "demo", role: "admin", teams: fixtureTeams.map(team => team.id) };
   else if (config.url?.startsWith("/auth/login")) data = {
     tenantSlug: JSON.parse(String(config.data)).tenantSlug, role: "admin", teams: ["platform"],
   };
@@ -59,15 +66,47 @@ api.defaults.adapter = async (config) => {
     data = { id: "user-b", email, role, teamId };
     fixtureUsers.push(data as typeof fixtureUsers[number]);
   }
+  else if (config.url === '/admin/users/user-b' && config.method === 'patch') {
+    const user = fixtureUsers.find(user => user.id === 'user-b')!;
+    Object.assign(user, JSON.parse(String(config.data)));
+    data = user;
+  }
   else if (config.url?.startsWith("/admin/users")) {
     if (scenario === "admin-loading") await new Promise((resolve) => setTimeout(resolve, 500));
     const attempts = (window as any).__requests.filter((request: any) => request.url === "/admin/users").length;
     if (scenario === "admin-retry" && attempts === 1) throw new Error("Fixture admin load failed");
     data = [...fixtureUsers];
   }
-  else if (config.url?.startsWith("/admin/teams")) data = scenario === "multiple-teams"
-    ? [{ id: "platform", name: "Platform" }, { id: "operations", name: "Operations" }]
-    : [{ id: "platform", name: "Platform" }];
+  else if (config.url === '/admin/teams/operations' && config.method === 'patch') {
+    const team = fixtureTeams.find(team => team.id === 'operations')!;
+    Object.assign(team, JSON.parse(String(config.data)));
+    data = team;
+  }
+  else if (config.url === '/admin/teams') data = fixtureTeams.map(team => ({ ...team }));
+  else if (operations && config.url === '/admin/teams/platform/overview') data = {
+    team: { id: 'platform', name: 'Platform' }, members: fixtureUsers, services: ['api'],
+    monitors: [{ id: 'canonical-a', name: 'Fixture alert', enabled: true, state: 'FIRING', firing: true }],
+    ingestion_keys: [{ id: 'key-a', name: 'API telemetry', expiresAt: Date.now() + 86_400_000 }],
+  };
+  else if (operations && config.url === '/admin/teams/platform/notifications') {
+    if (config.method === 'patch') destination = JSON.parse(String(config.data)).destination;
+    data = { destination, options: ['ops', 'backup'], tests: [...tests] };
+  }
+  else if (operations && config.url === '/admin/teams/platform/notifications/test') {
+    const receipt = { id: 'test-a', destination: destination ?? '', at: new Date().toISOString(), status: 'SENT' };
+    tests.unshift(receipt);
+    data = receipt;
+  }
+  else if (operations && config.url === '/admin/maintenance') {
+    if (config.method === 'post') maintenance.push({ id: 'window-a', ...JSON.parse(String(config.data)) });
+    data = config.method === 'post' ? maintenance.at(-1) : [...maintenance];
+  }
+  else if (operations && config.url === '/alerts/alert-a/triage') {
+    if (config.method === 'patch') {
+      triage = { ...triage, version: 1, acknowledgment: { by: 'admin@example.test', at: new Date().toISOString() } };
+      data = triage;
+    } else data = { triage, self: 'user-a', assignees: fixtureUsers };
+  }
   else if (config.url === '/ingestion-status') data = [
     { signal: 'logs', latest: String(Date.now()) }, { signal: 'traces', latest: null }, { signal: 'metrics', latest: null },
   ];
@@ -76,16 +115,19 @@ api.defaults.adapter = async (config) => {
     state: 'FIRING', value: 15, threshold: 10, window_seconds: 300, unit: 'logs',
     fired_at: '2026-10-13T00:00:00Z', team_id: 'platform', service: 'api', env: 'dev',
   }], next_offset: null };
-  else if (scenario === 'canonical' && config.url === '/monitors/preview' && config.method === 'post')
+  else if ((scenario === 'canonical' || teamFlow || operations) && config.url === '/monitors/preview' && config.method === 'post')
     data = { state: 'FIRING', operational_status: 'OK', value: 15, unit: 'logs' };
-  else if (scenario === 'canonical' && config.url === '/monitors' && config.method === 'post') {
+  else if ((scenario === 'canonical' || teamFlow) && config.url === '/monitors' && config.method === 'post') {
+    const attempts = (window as any).__requests.filter((request: any) => request.url === '/monitors' && request.method === 'post');
+    if (teamFlow && attempts.length === 1) throw new Error('Fixture monitor save failed');
     const configBody = JSON.parse(String(config.data));
     canonicalMonitor = { ...configBody, id: 'canonical-a', schemaVersion: 2, type: 'log', status: 'Alert',
       isMuted: false, targets: [], enabled: true, created_at: '2026-10-13T00:00:00Z',
       lastEvaluatedAt: '2026-10-13T00:00:00Z', runtime: { state: 'FIRING', operational_status: 'OK', value: 15, unit: 'logs' } };
     data = canonicalMonitor;
   }
-  else if (scenario === 'canonical' && config.url === '/monitors' && canonicalMonitor) data = [canonicalMonitor];
+  else if ((scenario === 'canonical' || teamFlow) && config.url === '/monitors' && canonicalMonitor) data = teamFlow ? [] : [canonicalMonitor];
+  else if (config.url === '/monitors/canonical-a') data = canonicalMonitor;
   else if (config.url?.startsWith("/filters")) data = { services: ["api"], environments: ["dev", "production"], statuses: ["OK"] };
   else if (config.url?.startsWith("/logs")) data = [{
     Timestamp: new Date().toISOString(), TraceId: traceId, SpanId: "1234567890abcdef",

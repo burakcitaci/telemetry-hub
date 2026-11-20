@@ -1,9 +1,9 @@
 import type { DatabaseSync } from 'node:sqlite';
-import type { Clock } from './monitor.model';
+import type { AlertEvent, AlertTriage, Clock } from './monitor.model';
 import { legacyAlert, legacyStorageId, type HistoricalAlertEvent } from './legacy-alert';
 import { DEFAULT_ALERT_RETENTION_DAYS } from './monitoring.config';
 
-export interface AlertPageQuery { monitor_id?: string; limit?: number; offset?: number; }
+export interface AlertPageQuery { monitor_id?: string; team_id?: string; limit?: number; offset?: number; }
 export interface HistoryOptions { clock?: Clock; retentionDays?: number; }
 export const MAX_ALERT_PAGE_SIZE = 100;
 
@@ -47,11 +47,26 @@ export class MonitorAlertHistory {
     const limit = query.limit ?? 50, offset = query.offset ?? 0;
     if (!Number.isSafeInteger(limit) || limit < 1 || limit > MAX_ALERT_PAGE_SIZE || !Number.isSafeInteger(offset) || offset < 0)
       throw new Error('Invalid alert pagination.');
-    const params = [org, this.cutoff(), ...(query.monitor_id ? [query.monitor_id] : []), limit + 1, offset];
+    const params = [org, this.cutoff(), ...(query.monitor_id ? [query.monitor_id] : []), ...(query.team_id ? [query.team_id] : []), limit + 1, offset];
     const rows = this.db.prepare(`SELECT body FROM monitor_alert_events WHERE org = ? AND fired_at >= ?
-      ${query.monitor_id ? 'AND monitor_id = ?' : ''} ORDER BY fired_at DESC, id DESC LIMIT ? OFFSET ?`).all(...params);
+      ${query.monitor_id ? 'AND monitor_id = ?' : ''}
+      ${query.team_id ? `AND json_extract(body, '$.team_id') = ?` : ''} ORDER BY fired_at DESC, id DESC LIMIT ? OFFSET ?`).all(...params);
     return { items: rows.slice(0, limit).map(row => JSON.parse(String(row.body)) as HistoricalAlertEvent),
       limit, offset, next_offset: rows.length > limit ? offset + limit : null };
+  }
+
+  event(org: string, id: string): AlertEvent | undefined {
+    const row = this.db.prepare('SELECT body FROM monitor_alert_events WHERE org = ? AND id = ? AND fired_at >= ? AND legacy_event_id IS NULL')
+      .get(org, id, this.cutoff());
+    return row ? JSON.parse(String(row.body)) : undefined;
+  }
+
+  updateTriage(org: string, id: string, version: number, triage: AlertTriage): boolean {
+    const result = this.db.prepare(`UPDATE monitor_alert_events SET body = json_set(body, '$.triage', json(?))
+      WHERE org = ? AND id = ? AND legacy_event_id IS NULL AND fired_at >= ?
+      AND coalesce(json_extract(body, '$.triage.version'), 0) = ?`)
+      .run(JSON.stringify(triage), org, id, this.cutoff(), version);
+    return result.changes > 0;
   }
 
   legacyEvents(org: string, id: string): Record<string, unknown>[] {

@@ -55,6 +55,13 @@ test('HTTP login, admin CRUD, member authorization, monitor filters and session 
     assert.equal(app.get(PlatformStore).identity('other', 'member@example.com'), undefined);
     const memberCookie = await login('demo', 'member@example.com');
     assert.equal((await call('/admin/users', 'GET', undefined, memberCookie)).status, 403);
+    assert.equal((await call('/admin/teams/platform', 'PATCH', { name: 'Forbidden' }, memberCookie)).status, 403);
+    assert.equal((await call('/admin/teams/platform', 'PATCH', { name: 'Foreign' }, other)).status, 404);
+    assert.equal((await call('/admin/teams/platform', 'PATCH', { name: '   ' }, admin)).status, 400);
+    const renamed = await call('/admin/teams/platform', 'PATCH', { name: '  Platform Engineering  ' }, admin);
+    assert.equal(renamed.status, 200);
+    assert.deepEqual(await renamed.json(), { id: 'platform', name: 'Platform Engineering' });
+    assert.equal(app.get(PlatformStore).user('demo', member.id)?.teamId, 'platform');
     assert.equal((await call('/admin/ingestion-keys', 'POST', { name: 'denied', teamId: 'platform', expiresInDays: 30 }, memberCookie)).status, 403);
     const keyResponse = await call('/admin/ingestion-keys', 'POST',
       { name: 'orders-production', teamId: 'platform', env: 'production', expiresInDays: 30 }, admin);
@@ -68,6 +75,14 @@ test('HTTP login, admin CRUD, member authorization, monitor filters and session 
     assert.equal(app.get(IngestionKeysService).resolve(generatedKey.key)?.orgSlug, 'demo');
     assert.equal((await call(`/admin/ingestion-keys/${generatedKey.id}`, 'DELETE', undefined, admin)).status, 200);
     assert.equal(app.get(IngestionKeysService).resolve(generatedKey.key), undefined);
+    await call('/admin/teams', 'POST', { id: 'disposable', name: 'Disposable' }, admin);
+    const owned = await (await call('/admin/ingestion-keys', 'POST',
+      { name: 'fixture-owned-key', teamId: 'disposable', expiresInDays: 1 }, admin)).json();
+    const blocked = await call('/admin/teams/disposable', 'DELETE', undefined, admin);
+    assert.equal(blocked.status, 409);
+    assert.match(JSON.stringify(await blocked.json()), /Revoke active ingestion keys/);
+    await call('/admin/ingestion-keys/' + owned.id, 'DELETE', undefined, admin);
+    assert.equal((await call('/admin/teams/disposable', 'DELETE', undefined, admin)).status, 200);
     const session = await (await call('/auth/session', 'GET', undefined, memberCookie)).json();
     assert.deepEqual(session.teams.sort(), ['frontend', 'platform']);
     const dto = { name: 'Latency', type: 'metric', query: 'avg:latency', comparator: 'above', threshold: 10,
@@ -84,6 +99,10 @@ test('HTTP login, admin CRUD, member authorization, monitor filters and session 
       { Origin: 'https://malicious.example' })).status, 403);
     assert.equal((await call(`/admin/users/${member.id}/password`, 'PUT', { password: 'replacement-password' }, admin)).status, 200);
     assert.equal((await call('/auth/session', 'GET', undefined, memberCookie)).status, 401);
+    await login('demo', 'member@example.com', 'replacement-password');
+    const moved = await call('/admin/users/' + member.id, 'PATCH', { teamId: 'frontend' }, admin);
+    assert.equal(moved.status, 200);
+    assert.deepEqual(await moved.json(), { ...member, teamId: 'frontend' });
     await login('demo', 'member@example.com', 'replacement-password');
     const edited = await call(`/admin/users/${member.id}`, 'PATCH', { role: 'admin', password: 'role-change-password' }, admin);
     assert.equal(edited.status, 200);

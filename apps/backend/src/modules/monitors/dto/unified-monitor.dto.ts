@@ -26,6 +26,7 @@ export class CreateMonitorDto {
 export class PatchMonitorDto extends PartialType(CreateMonitorDto) {}
 
 export class AlertsQueryDto {
+  @IsOptional() @IsString() @MinLength(1) @MaxLength(128) team_id?: string;
   @IsOptional() @IsString() @MinLength(1) @MaxLength(128) monitor_id?: string;
   @IsOptional() @Type(() => Number) @IsInt() @Min(1) @Max(MAX_ALERT_PAGE_SIZE) limit?: number;
   @IsOptional() @Type(() => Number) @IsInt() @Min(0) @Max(1000000) offset?: number;

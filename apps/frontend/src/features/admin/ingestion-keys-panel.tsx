@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { ColumnDef } from '@tanstack/react-table';
@@ -117,7 +117,8 @@ export function IngestionKeysPanel({
   const keys = useAdminList<IngestionKey>('/admin/ingestion-keys');
   const teams = useAdminList<Team>('/admin/teams');
   const action = useAdminAction(t('admin.actionFailed'));
-  const [selectedTeam, setSelectedTeam] = useState('');
+  const [params] = useSearchParams();
+  const [selectedTeam, setSelectedTeam] = useState(params.get('teamId') ?? '');
   const availableTeams = teams.rows ?? [];
   const defaultTeam =
     availableTeams.length === 1

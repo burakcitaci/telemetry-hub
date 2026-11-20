@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import type { SignalAdapter, SignalQuery, SignalType } from './signal-adapter';
 import type { AlertEvent, Clock, Monitor } from './monitor.model';
 import type { MonitorRepository } from './monitor.repository';
+import type { TeamMonitorOperations } from './team-monitor-operations';
 import type { Notifier } from './notifier';
 import { alertTransition, failedEvaluation, successfulEvaluation, validateEvaluation } from './monitor-state';
 import { planNotification, validateNotificationPolicy } from './notification-policy';
@@ -18,7 +19,8 @@ export class SignalEvaluator {
     private readonly notifier: Notifier, private readonly clock: Clock, private readonly id: () => string = randomUUID,
     private readonly notificationFailure: (event: AlertEvent) => void = event =>
       console.error({ event: 'monitor.notification_failed', monitor_id: event.monitor_id, event_id: event.id }),
-    private readonly observer: MonitorObserver = quietMonitorObserver) {}
+    private readonly observer: MonitorObserver = quietMonitorObserver,
+    private readonly operations?: Pick<TeamMonitorOperations, 'policy' | 'deliver'>) {}
 
   evaluate(org: string, id: string): Promise<Monitor | undefined> {
     if (this.stopped) return Promise.resolve(undefined);
@@ -46,7 +48,10 @@ export class SignalEvaluator {
     if (this.stopped) {
       this.observer.evaluated(monitor, 'CANCELLED'); return this.repository.find(org, monitor.id);
     }
-    const planned = planNotification(monitor, runtime, alertTransition(monitor, runtime, this.id), this.clock.now().toISOString());
+    const event = alertTransition(monitor, runtime, this.id);
+    const policy = event ? this.operations?.policy(org, monitor, event.fired_at) : undefined;
+    if (event && policy?.team) event.team_id = policy.team;
+    const planned = planNotification(monitor, runtime, event, this.clock.now().toISOString(), policy);
     if (!this.repository.commitEvaluation(org, monitor, planned.runtime, planned.event)) {
       this.observer.evaluated(monitor, 'STALE'); return this.repository.find(org, monitor.id);
     }
@@ -77,7 +82,10 @@ export class SignalEvaluator {
 
   private async notify(org: string, event: AlertEvent): Promise<void> {
     let status: 'SENT' | 'FAILED' = 'SENT';
-    try { await this.notifier.notify(event); }
+    try {
+      if (this.operations) await this.operations.deliver(org, event, this.notifier);
+      else await this.notifier.notify(event);
+    }
     catch { status = 'FAILED'; }
     this.repository.completeNotification(org, event.id, status, this.clock.now().toISOString());
     this.observer.notification(event, status);

@@ -52,7 +52,8 @@ administrator and Kubernetes secrets. For a manually managed Helm installation, 
 Sign in with the **organization slug, email, and password you entered in setup**.
 
 1. Open **Administration**. Your first administrator and team should already be listed.
-2. Create additional teams, then users, and choose their role/team.
+2. In **Teams**, create or rename a team, then open **Manage members** to create a user for that team or assign an existing user.
+   Use **New monitor** on a team row to start a monitor scoped to that team.
 3. Under **Ingestion-Keys**, select a team and generate a client key for an application.
 4. Copy the key immediately: its plaintext is displayed only once.
 

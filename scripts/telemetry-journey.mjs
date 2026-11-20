@@ -230,6 +230,7 @@ try {
     COLLECTOR_CONFIG_PATH: configPath,
     MONITOR_NOTIFIER: 'dummy',
     MONITOR_WEBHOOK_URL: '',
+    MONITOR_TEAM_DESTINATIONS: '{}',
   };
   compose('up', '--build', '--wait', '--wait-timeout', '150', 'backend');
   const address = compose('port', 'backend', '3001');

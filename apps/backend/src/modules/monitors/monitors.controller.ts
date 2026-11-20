@@ -48,7 +48,7 @@ export class MonitorsController {
   }
 
   @Post() create(@Tenant() scope: TenantScope, @Body(MonitorInputPipe) dto: MonitorDto | CreateMonitorDto) {
-    if (dto instanceof CreateMonitorDto) return this.requireUnified().create(scope, dto);
+    if (dto instanceof CreateMonitorDto) return this.requireUnified().create(scope, dto).then(monitorView);
     if (this.store.monitorIds(scope.tenantSlug).length >= 100) throw new ConflictException('The limit is 100 monitors per organization.');
     const now = new Date().toISOString();
     const monitor = { ...this.configuration(scope, dto), id: randomUUID(), createdAt: now,
@@ -110,11 +110,11 @@ export class MonitorsController {
   }
 
   @Get(':id') get(@Tenant() scope: TenantScope, @Param('id') id: string) {
-    return this.requireMonitor(scope, id);
+    return monitorView(this.requireMonitor(scope, id));
   }
 
   @Patch(':id') patch(@Tenant() scope: TenantScope, @Param('id') id: string, @Body() dto: PatchMonitorDto) {
-    return this.requireUnified().patch(scope, id, dto);
+    return this.requireUnified().patch(scope, id, dto).then(monitorView);
   }
 
   @Get(':id/status') status(@Tenant() scope: TenantScope, @Param('id') id: string) {

@@ -4,7 +4,7 @@ import { PlatformStore } from './platform-store.service';
 import { TenantJwtGuard } from './tenant-jwt.guard';
 import { Tenant } from './tenant-request.decorator';
 import type { TenantScope } from './auth.types';
-import { CreateUserDto, PasswordDto, TeamDto, UpdateUserDto } from './dto/admin.dto';
+import { CreateUserDto, PasswordDto, TeamDto, TeamNameDto, UpdateUserDto } from './dto/admin.dto';
 
 @ApiTags('admin')
 @Controller('api/admin')
@@ -29,6 +29,9 @@ export class AdminController {
   @Post('teams') createTeam(@Tenant() scope: TenantScope, @Body() dto: TeamDto) {
     this.store.createTeam(scope.tenantSlug, { id: dto.id, name: dto.name });
     return { id: dto.id, name: dto.name };
+  }
+  @Patch('teams/:id') renameTeam(@Tenant() scope: TenantScope, @Param('id') id: string, @Body() dto: TeamNameDto) {
+    return this.store.renameTeam(scope.tenantSlug, id, dto.name);
   }
   @Delete('teams/:id') deleteTeam(@Tenant() scope: TenantScope, @Param('id') id: string) {
     this.store.deleteTeam(scope.tenantSlug, id);

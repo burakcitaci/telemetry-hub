@@ -212,3 +212,35 @@ Remove-Item Env:TEST_KIND_CLICKHOUSE
 ```
 
 Coverage includes strict DTOs, tenant isolation, idempotent migration, file-backed restart, atomic rollback, concurrent evaluation, notification pairing, quantile overflow, real ClickHouse aggregates and a fixed telemetry label allowlist. Generated graphify-out files remain local and are excluded from commits.
+
+## Team operations
+
+In **Administration → Teams**, open a team to see members, owned services, monitors,
+firing monitors and ingestion keys. The team page links to notification routing,
+maintenance and the team's alert history. New monitors offer **Error spike**,
+**High latency** (span P95 in milliseconds) and **Missing telemetry** (no logs for
+the chosen service) templates. Each uses the normal preview and editor.
+
+Configure named webhooks per organization in the backend's
+`MONITOR_TEAM_DESTINATIONS` environment variable.
+
+```json
+{"my-org":{"oncall":"https://alerts.example.com/webhooks/telemetry"}}
+```
+
+Add the variable to the backend auth Secret for Kind or the Compose environment.
+Organization administrators see destination names and can choose a destination or
+use the deployment default. **Send test to saved destination** posts a
+`monitor.test` event and records its result. The app stores the latest 20 test
+receipts per team. Alert transitions show their delivery result in team history.
+A recovery uses the destination recorded for its corresponding firing event.
+
+An administrator can schedule a maintenance window by team, by service, or by
+both. Start is inclusive and end is exclusive. Monitor evaluation and transition
+history continue during maintenance. Suppressed deliveries are recorded and do
+not replay after the window ends.
+
+Team members can acknowledge and claim firing alerts and add investigation notes.
+Administrators can assign alerts to eligible users. Acknowledgment and assignment
+are recorded independently of threshold recovery. Notes remain available in
+triage for the retained firing event.

@@ -1,8 +1,13 @@
+import { Transform } from 'class-transformer';
 import { IsEmail, IsIn, IsOptional, IsString, Matches, MaxLength, MinLength, NotEquals } from 'class-validator';
 
-export class TeamDto {
-  @NotEquals('all') @Matches(/^[a-z0-9][a-z0-9._-]{0,63}$/) id!: string;
+export class TeamNameDto {
+  @Transform(({ value }) => typeof value === 'string' ? value.trim() : value)
   @IsString() @MinLength(1) @MaxLength(100) name!: string;
+}
+
+export class TeamDto extends TeamNameDto {
+  @NotEquals('all') @Matches(/^[a-z0-9][a-z0-9._-]{0,63}$/) id!: string;
 }
 export class PasswordDto {
   @IsString() @MinLength(12) @MaxLength(128) password!: string;

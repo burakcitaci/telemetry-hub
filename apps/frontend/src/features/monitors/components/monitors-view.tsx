@@ -66,6 +66,9 @@ export function MonitorsView({
   setSidebarOpen,
   setOpenId,
   creating,
+  initialTeam,
+  setInitialTeam,
+  handleCanonicalSaved,
   setCreating,
   events,
   seriesById,
@@ -84,6 +87,7 @@ export function MonitorsView({
   const [legacyEditor, setLegacyEditor] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [chartTimeRange, setChartTimeRange] = useState('30m');
+  const [editorPending, setEditorPending] = useState(false);
   const [formDirty, setFormDirty] = useState(false);
   const [discardOpen, setDiscardOpen] = useState(false);
   const forceCloseDetail = () => {
@@ -93,6 +97,7 @@ export function MonitorsView({
     setCreating(false);
   };
   const closeDetail = () => {
+    if (editorPending || saving) return;
     if (creating && formDirty) {
       setDiscardOpen(true);
       return;
@@ -124,6 +129,7 @@ export function MonitorsView({
               onClick={() => {
                 setFormDirty(false);
                 setLegacyEditor(false);
+                setInitialTeam(undefined);
                 setCreating(true);
                 setOpenId(null);
               }}
@@ -243,15 +249,15 @@ export function MonitorsView({
                         </p>
                       </div>
                     </div>
-                    <Button variant="ghost" size="icon" className="size-8 shrink-0" onClick={closeDetail} aria-label="Close monitor editor">
+                    <Button variant="ghost" size="icon" className="size-8 shrink-0" disabled={editorPending || saving} onClick={closeDetail} aria-label="Close monitor editor">
                       <X className="h-3.5 w-3.5" />
                     </Button>
                   </header>
                   {!openMonitor && !formDirty && <Button type="button" variant="ghost" size="sm" className="self-start mx-5 mt-2"
                     onClick={() => setLegacyEditor(value => !value)}>{legacyEditor ? 'Use current editor' : 'Use legacy editor'}</Button>}
-                  {!legacyEditor || canonical ? <CanonicalMonitorEditor key={canonical?.id ?? 'new'} initial={canonical}
-                    onCancel={closeDetail} onDirtyChange={setFormDirty} onSaved={id => {
-                      setFormDirty(false); setCreating(false); setOpenId(id); refresh();
+                  {!legacyEditor || canonical ? <CanonicalMonitorEditor key={canonical?.id ?? 'new'} initial={canonical} team={initialTeam}
+                    onCancel={closeDetail} onDirtyChange={setFormDirty} onPendingChange={setEditorPending} onSaved={monitor => {
+                      setFormDirty(false); handleCanonicalSaved(monitor);
                     }} /> : <MonitorForm
                     initial={openMonitor}
                     pending={saving}

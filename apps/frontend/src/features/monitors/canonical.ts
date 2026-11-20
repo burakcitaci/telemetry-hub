@@ -36,6 +36,7 @@ export interface MonitorRuntime {
 
 export interface CanonicalMonitor extends CanonicalRule {
   schemaVersion: 2;
+  configurationVersion?: number;
   id: string;
   created_at: string;
   runtime?: MonitorRuntime;

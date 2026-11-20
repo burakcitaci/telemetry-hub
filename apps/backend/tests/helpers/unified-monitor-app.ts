@@ -8,6 +8,7 @@ import { MonitorsController } from '../../dist/modules/monitors/monitors.control
 import { MonitorEvaluatorService } from '../../dist/modules/monitors/monitor-evaluator.service.js';
 import { MonitorQueryService } from '../../dist/modules/monitors/monitor-query.service.js';
 import { MonitoringService } from '../../dist/modules/monitors/monitoring.service.js';
+import { MonitorOperationsController } from '../../dist/modules/monitors/monitor-operations.controller.js';
 import { AlertsController } from '../../dist/modules/monitors/alerts.controller.js';
 import { AlertRetentionService } from '../../dist/modules/monitors/alert-retention.service.js';
 import { ClickhouseService } from '../../dist/modules/telemetry/services/clickhouse.service.js';
@@ -34,7 +35,7 @@ export async function unifiedMonitorApp(overrides: Record<string, unknown> = {})
   };
   class TestApplication {}
   Module({ imports: [ConfigModule.forRoot({ isGlobal: true, ignoreEnvFile: true, skipProcessEnv: true, load: [() => settings] }), AuthModule],
-    controllers: [MonitorsController, AlertsController], providers: [MonitorEvaluatorService, MonitorQueryService, MonitoringService,
+    controllers: [MonitorsController, AlertsController, MonitorOperationsController], providers: [MonitorEvaluatorService, MonitorQueryService, MonitoringService,
       AlertRetentionService, ...signalProviders, { provide: ClickhouseService, useValue: clickhouse },
       { provide: MONITOR_NOTIFIER, useValue: { notify: async event => { notifications.push(event); } } },
     ] })(TestApplication);

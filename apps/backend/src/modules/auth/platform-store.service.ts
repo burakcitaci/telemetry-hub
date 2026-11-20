@@ -1,5 +1,5 @@
 import type { MonitorReadStore } from '../monitors/monitor-read-store';
-import { ConflictException, Injectable, OnModuleDestroy } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException, OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DatabaseSync } from 'node:sqlite';
 import { mkdirSync } from 'node:fs';
@@ -9,6 +9,7 @@ import type { TenantJwtPayload, UserRole } from './auth.types';
 import { filterValues, type FilterSelection } from './platform-filters';
 import { registerTelemetryOwnership } from '../../common/telemetry/tenant-context';
 import { SqliteMonitorRepository } from '../monitors/sqlite-monitor.repository';
+import { MonitorOperationsStore } from '../monitors/monitor-operations.store';
 import { alertRetentionConfig } from '../monitors/monitoring.config';
 
 export interface Identity {
@@ -26,6 +27,7 @@ export interface IngestionKeyRecord {
 export class PlatformStore implements OnModuleDestroy, MonitorReadStore {
   private readonly db: DatabaseSync;
   private readonly releaseOwnership: () => void;
+  readonly monitorOperations: MonitorOperationsStore;
   readonly monitorRepository: SqliteMonitorRepository;
   private readonly monitorCleanups: Array<() => void | Promise<void>> = [];
   private closing?: Promise<void>;
@@ -43,6 +45,7 @@ export class PlatformStore implements OnModuleDestroy, MonitorReadStore {
       CREATE TABLE IF NOT EXISTS ingestion_keys (org TEXT, id TEXT, key_hash TEXT NOT NULL UNIQUE,
         body TEXT NOT NULL, PRIMARY KEY(org,id));
       CREATE TABLE IF NOT EXISTS monitors (org TEXT, id TEXT, body TEXT NOT NULL, PRIMARY KEY(org,id));`);
+    this.monitorOperations = new MonitorOperationsStore(this.db);
     this.monitorRepository = new SqliteMonitorRepository(this.db, { retentionDays: retention.days });
     this.db.exec('CREATE TABLE IF NOT EXISTS bootstrap (org TEXT, email TEXT, PRIMARY KEY(org,email));');
     this.db.exec('CREATE TABLE IF NOT EXISTS service_metadata (org TEXT, service TEXT, body TEXT NOT NULL, PRIMARY KEY(org,service));');
@@ -152,6 +155,12 @@ export class PlatformStore implements OnModuleDestroy, MonitorReadStore {
     this.db.prepare('INSERT INTO teams VALUES (?, ?, ?)').run(org, team.id, team.name);
   }
 
+  renameTeam(org: string, id: string, name: string): Team {
+    const updated = this.db.prepare('UPDATE teams SET name = ? WHERE org = ? AND id = ?').run(name, org, id);
+    if (!updated.changes) throw new NotFoundException('Team not found.');
+    return { id, name };
+  }
+
   deleteTeam(org: string, id: string) {
     if (this.serviceMetadata(org).some(metadata => metadata.team === id)) {
       throw new ConflictException('Reassign services before deleting this team.');
@@ -162,7 +171,15 @@ export class PlatformStore implements OnModuleDestroy, MonitorReadStore {
     if (this.monitors(org).some(monitor => (monitor.teamId ?? monitor.team_id) === id)) {
       throw new ConflictException('Reassign monitors before deleting this team.');
     }
-    this.db.prepare('DELETE FROM teams WHERE org = ? AND id = ?').run(org, id);
+    if (this.ingestionKeys(org).some(key => key.teamId === id && !key.revokedAt && key.expiresAt > Date.now())) {
+      throw new ConflictException('Revoke active ingestion keys before deleting this team.');
+    }
+    this.db.exec('BEGIN IMMEDIATE');
+    try {
+      this.monitorOperations.removeTeamConfiguration(org, id, new Date().toISOString());
+      this.db.prepare('DELETE FROM teams WHERE org = ? AND id = ?').run(org, id);
+      this.db.exec('COMMIT');
+    } catch (error) { this.db.exec('ROLLBACK'); throw error; }
   }
 
   ingestionKeys(org: string): IngestionKeyRecord[] {

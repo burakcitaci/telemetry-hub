@@ -1,3 +1,5 @@
+import { TeamMonitorOperations } from './team-monitor-operations';
+import { MonitorOperationsController } from './monitor-operations.controller';
 import { Module } from '@nestjs/common';
 import { AuthModule } from '../auth/auth.module';
 import { TelemetryModule } from '../telemetry/telemetry.module';
@@ -23,6 +25,7 @@ import { MonitoringTelemetry } from './monitoring.telemetry';
 import { MONITOR_NOTIFIER, type Notifier } from './notifier';
 
 export const signalProviders = [
+  TeamMonitorOperations,
   { provide: MonitoringTelemetry, useFactory: () => new MonitoringTelemetry() },
   { provide: MONITOR_NOTIFIER, inject: [ConfigService], useFactory: (config: ConfigService) => {
     const { webhookUrl } = monitoringConfig(config);
@@ -30,13 +33,13 @@ export const signalProviders = [
   } },
   { provide: SignalRegistry, inject: [ClickhouseService], useFactory: (clickhouse: ClickhouseService) =>
     new SignalRegistry(new Map<SignalType, SignalAdapter>([['LOG', new LogAdapter(clickhouse)], ['METRIC', new MetricAdapter(clickhouse)], ['TRACE', new TraceAdapter(clickhouse)]])) },
-  { provide: SIGNAL_EVALUATOR, inject: [PlatformStore, SignalRegistry, MONITOR_NOTIFIER, MonitoringTelemetry],
-    useFactory: (store: PlatformStore, adapters: SignalRegistry, notifier: Notifier, telemetry: MonitoringTelemetry) => {
+  { provide: SIGNAL_EVALUATOR, inject: [PlatformStore, SignalRegistry, MONITOR_NOTIFIER, MonitoringTelemetry, TeamMonitorOperations],
+    useFactory: (store: PlatformStore, adapters: SignalRegistry, notifier: Notifier, telemetry: MonitoringTelemetry, operations: TeamMonitorOperations) => {
       return new SignalEvaluator(store.monitorRepository, adapters, notifier, { now: () => new Date() },
-        undefined, () => {}, telemetry);
+        undefined, () => {}, telemetry, operations);
     } },
 ];
 
-@Module({ imports: [AuthModule, TelemetryModule], controllers: [MonitorsController, AlertsController],
+@Module({ imports: [AuthModule, TelemetryModule], controllers: [MonitorsController, AlertsController, MonitorOperationsController],
   providers: [MonitorQueryService, MonitorEvaluatorService, MonitoringService, AlertRetentionService, ...signalProviders], exports: [MonitorEvaluatorService] })
 export class MonitorsModule {}

@@ -1,10 +1,18 @@
 import axios from 'axios';
+import type { UserRole } from '@/features/auth/auth-context';
 
 export const FIELD = 'w-full rounded-md border border-input bg-background text-sm';
 export const LABEL = 'text-sm font-medium';
 export interface Team {
   id: string;
   name: string;
+}
+
+export interface User {
+  id: string;
+  email: string;
+  role: UserRole;
+  teamId?: string;
 }
 
 export function errorMessage(error: unknown, fallback: string): string {

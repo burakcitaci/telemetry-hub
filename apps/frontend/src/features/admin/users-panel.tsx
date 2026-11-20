@@ -1,10 +1,11 @@
 import { useState, type FormEvent } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import type { ColumnDef } from '@tanstack/react-table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useAuth, type UserRole } from '@/features/auth/auth-context';
+import { useAuth } from '@/features/auth/auth-context';
 import { api } from '@/shared/api/client';
 import { useConfirmAction } from '@/shared/components/confirm-action';
 import { DataTableColumnHeader } from '@/shared/components/data-table';
@@ -17,25 +18,19 @@ import {
   AdminHeader,
   AdminTable,
 } from './admin-layout';
-import { FIELD, LABEL, type Team } from './presentation';
+import { FIELD, LABEL, type Team, type User } from './presentation';
 import { useAdminAction, useAdminList } from './use-admin-data';
-
-interface User {
-  id: string;
-  email: string;
-  role: UserRole;
-  teamId?: string;
-}
 
 interface UserFormProps {
   user?: User;
+  defaultTeam?: string;
   teams: Team[];
   busy: boolean;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
   onClose: () => void;
 }
 
-function UserForm({ user, teams, busy, onSubmit, onClose }: UserFormProps) {
+function UserForm({ user, defaultTeam, teams, busy, onSubmit, onClose }: UserFormProps) {
   const { t } = useTranslation();
   return (
     <form onSubmit={onSubmit}>
@@ -73,7 +68,7 @@ function UserForm({ user, teams, busy, onSubmit, onClose }: UserFormProps) {
         </label>
         <label className="grid gap-1.5">
           <span className={LABEL}>{t('admin.teamMembership')}</span>
-          <select name="teamId" defaultValue={user?.teamId ?? ''} className={`${FIELD} h-9 px-2`}>
+          <select name="teamId" defaultValue={user ? user.teamId ?? '' : defaultTeam ?? ''} className={`${FIELD} h-9 px-2`}>
             <option value="">{t('admin.noTeam')}</option>
             {teams.map((team) => (
               <option key={team.id} value={team.id}>
@@ -95,12 +90,18 @@ function UserForm({ user, teams, busy, onSubmit, onClose }: UserFormProps) {
 export function UsersPanel() {
   const { t } = useTranslation();
   const { refreshSession } = useAuth();
+  const [params, setParams] = useSearchParams();
   const users = useAdminList<User>('/admin/users');
   const teams = useAdminList<Team>('/admin/teams');
   const action = useAdminAction(t('admin.actionFailed'));
   const { confirmAction, confirmation } = useConfirmAction();
-  const [editor, setEditor] = useState<{ user?: User; trigger: HTMLButtonElement }>();
-  const title = t(editor?.user ? 'admin.editUser' : 'admin.createUser');
+  const [editor, setEditor] = useState<{ user?: User; assignTo?: Team; trigger: HTMLButtonElement }>();
+  const teamId = params.get('teamId') ?? '';
+  const selectedTeam = teams.rows?.find(team => team.id === teamId);
+  const activeFilter = teamId === '_unassigned' || selectedTeam ? teamId : '';
+  const members = activeFilter ? users.rows?.filter(user => (user.teamId ?? '_unassigned') === activeFilter) : users.rows;
+  const eligible = users.rows?.filter(user => user.teamId !== teamId) ?? [];
+  const title = t(editor?.assignTo ? 'admin.assignExisting' : editor?.user ? 'admin.editUser' : 'admin.createUser');
   const closeEditor = () => {
     setEditor(undefined);
     action.clearError();
@@ -133,7 +134,20 @@ export function UsersPanel() {
           password,
         });
       }
-      await Promise.all([users.reload(), refreshSession()]).finally(closeEditor);
+      closeEditor();
+      await Promise.allSettled([users.reload(), refreshSession()]);
+    });
+  }
+
+  async function assignUser(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const id = String(new FormData(event.currentTarget).get('userId') ?? '');
+    const team = editor?.assignTo;
+    if (!team || !id) return;
+    await action.execute(async () => {
+      await api.patch('/admin/users/' + encodeURIComponent(id), { teamId: team.id });
+      closeEditor();
+      await Promise.allSettled([users.reload(), refreshSession()]);
     });
   }
 
@@ -141,7 +155,7 @@ export function UsersPanel() {
     if (!(await confirmAction(t('admin.confirmDeleteUser', { email: user.email })))) return;
     await action.execute(async () => {
       await api.delete(`/admin/users/${encodeURIComponent(user.id)}`);
-      await Promise.all([users.reload(), refreshSession()]);
+      await Promise.allSettled([users.reload(), refreshSession()]);
     });
   }
 
@@ -218,7 +232,24 @@ export function UsersPanel() {
         action={t('admin.createUser')}
         disabled={action.busy || !users.rows || !teams.rows}
         onAction={openEditor}
-      />
+      >
+        <label className="inline-flex items-center gap-2 text-sm">
+          {t('admin.filterTeam')}
+          <select className={FIELD + ' h-8 px-2'} value={activeFilter} disabled={!teams.rows} onChange={event => {
+            const next = new URLSearchParams(params);
+            if (event.target.value) next.set('teamId', event.target.value); else next.delete('teamId');
+            setParams(next);
+          }}>
+            <option value="">{t('admin.allTeams')}</option>
+            <option value="_unassigned">{t('admin.noTeam')}</option>
+            {teams.rows?.map(team => <option key={team.id} value={team.id}>{team.name}</option>)}
+          </select>
+        </label>
+        {selectedTeam && <Button size="sm" variant="outline" disabled={action.busy || !eligible.length}
+          onClick={event => { action.clearError(); setEditor({ trigger: event.currentTarget, assignTo: selectedTeam }); }}>
+          {t('admin.assignExisting')}
+        </Button>}
+      </AdminHeader>
       <FeatureContent>
         {!editor && <ActionFeedback error={action.error} saved={action.saved} />}
         {teams.error && (
@@ -231,9 +262,10 @@ export function UsersPanel() {
         )}
         <AdminTable
           {...users}
+          rows={members}
           columns={columns}
           searchPlaceholder={t('admin.searchUsers')}
-          emptyLabel={t('admin.noUsers')}
+          emptyLabel={t(activeFilter ? 'admin.noMatchingMembers' : 'admin.noUsers')}
         />
       </FeatureContent>
       <AdminFormSheet
@@ -245,9 +277,11 @@ export function UsersPanel() {
         onClose={closeEditor}
         returnFocus={editor?.trigger ?? null}
       >
-        {editor && (
+        {editor?.assignTo ? <AssignUserForm team={editor.assignTo} users={eligible} busy={action.busy}
+          onSubmit={event => void assignUser(event)} onClose={closeEditor} /> : editor && (
           <UserForm
             user={editor.user}
+            defaultTeam={selectedTeam?.id}
             teams={teams.rows ?? []}
             busy={action.busy}
             onSubmit={(event) => void saveUser(event)}
@@ -258,4 +292,21 @@ export function UsersPanel() {
       {confirmation}
     </>
   );
+}
+
+function AssignUserForm({ team, users, busy, onSubmit, onClose }: Omit<UserFormProps, 'user' | 'teams'> & { team: Team; users: User[] }) {
+  const { t } = useTranslation();
+  return <form onSubmit={onSubmit}>
+    <fieldset disabled={busy} className="grid gap-4">
+      <p className="text-sm">{t('admin.assignHelp', { team: team.name })}</p>
+      <label className="grid gap-1.5">
+        <span className={LABEL}>{t('admin.users')}</span>
+        <select required name="userId" defaultValue="" className={FIELD + ' h-9 px-2'}>
+          <option value="" disabled>{t('admin.selectUser')}</option>
+          {users.map(user => <option key={user.id} value={user.id}>{user.email}</option>)}
+        </select>
+      </label>
+      <AdminFormActions label={t('admin.assignExisting')} busy={busy} onClose={onClose} />
+    </fieldset>
+  </form>;
 }

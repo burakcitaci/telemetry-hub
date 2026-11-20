@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { api, unwrap } from '@/shared/api/client';
 import { platformFilterKey } from '@/shared/lib/platform-filters';
+import type { CanonicalMonitor } from '../canonical';
 import { monitorPayload } from '../api';
 import {
   MonitorType,
@@ -51,11 +52,18 @@ export function useMonitors() {
   }, [sidebarOpen]);
 
   const [openId, setOpenId] = useState<string | null>(searchParams.get('id'));
+  const [detail, setDetail] = useState<MonitorView | null>(null);
+  const listed = monitors.find(monitor => monitor.id === openId);
+  const saved = detail?.id === openId ? detail : null;
+  const openMonitor = listed && (listed.configurationVersion ?? 0) >= (saved?.configurationVersion ?? 0)
+    ? listed : saved ?? listed ?? null;
 
-  const [creating, setCreating] = useState(false);
+  const [creating, setCreating] = useState(searchParams.get('new') === '1');
+  const [initialTeam, setInitialTeam] = useState(searchParams.get('new') === '1' ? searchParams.get('team') ?? undefined : undefined);
 
   useEffect(() => {
     const next = new URLSearchParams(searchParams);
+    next.delete('new');
     if (openId) next.set('id', openId);
     else next.delete('id');
     setSearchParams(next, { replace: true });
@@ -91,6 +99,17 @@ export function useMonitors() {
       controller.abort(); window.clearInterval(timer);
     };
   }, [revision, filterKey]);
+
+  useEffect(() => {
+    if (!openId || listed) return;
+    const controller = new AbortController();
+    api.get('/monitors/' + encodeURIComponent(openId), { signal: controller.signal }).then(({ data }) => {
+      if (!controller.signal.aborted) setDetail(normalizeMonitorEvaluation(unwrap<MonitorView>(data)));
+    }).catch(() => {
+      if (!controller.signal.aborted) setError('Unable to refresh monitor details.');
+    });
+    return () => controller.abort();
+  }, [openId, listed, revision]);
 
   const events = useMemo<Record<string, MonitorEvent[]>>(() =>
     Object.fromEntries(monitors.map(monitor => [monitor.id, monitor.events ?? []])), [monitors]);
@@ -150,7 +169,7 @@ export function useMonitors() {
   };
 
   const handleToggleMute = async (id: string) => {
-    const target = monitors.find((m) => m.id === id);
+    const target = monitors.find((m) => m.id === id) ?? (openMonitor?.id === id ? openMonitor : null);
     if (!target) return;
     try {
       if (target.schemaVersion === 2) {
@@ -178,7 +197,7 @@ export function useMonitors() {
     setEvaluatingId(id);
     try {
       const { data } = await api.post(`/monitors/${id}/evaluate`);
-      if (monitors.some(monitor => monitor.id === id && monitor.schemaVersion === 2)) {
+      if (openMonitor?.id === id && openMonitor.schemaVersion === 2) {
         setRevision(value => value + 1);
         return;
       }
@@ -247,9 +266,12 @@ export function useMonitors() {
     finally { setSaving(false); }
   };
 
-  const openMonitor = openId
-    ? (monitors.find((m) => m.id === openId) ?? null)
-    : null;
+  function handleCanonicalSaved(monitor: CanonicalMonitor) {
+    setDetail(normalizeMonitorEvaluation(monitor as unknown as MonitorView));
+    setCreating(false);
+    setOpenId(monitor.id);
+    setRevision(value => value + 1);
+  }
 
   const datadogForOpen = undefined;
 
@@ -274,6 +296,9 @@ export function useMonitors() {
     setSidebarOpen,
     setOpenId,
     creating,
+    initialTeam,
+    setInitialTeam,
+    handleCanonicalSaved,
     setCreating,
     events,
     seriesById,

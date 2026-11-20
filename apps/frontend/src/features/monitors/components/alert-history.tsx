@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/features/auth/auth-context';
 import { api, unwrap } from '@/shared/api/client';
+import { AlertTriagePanel, type AlertTriage } from './alert-triage-panel';
 import { QueryError } from '@/shared/components/view-skeleton';
 
 type AlertEvent = {
@@ -20,7 +21,8 @@ type AlertEvent = {
   team_id?: string;
   service?: string;
   env?: string;
-  notification?: { status: string; reason?: string };
+  notification?: { status: string; reason?: string; destination?: string };
+  triage?: AlertTriage;
 };
 type AlertPage = { items: AlertEvent[]; next_offset: number | null };
 const LIMIT = 20;
@@ -40,6 +42,12 @@ function investigationPath(base: string, event: AlertEvent): string | undefined 
 }
 
 function AlertRow({ event, base }: { event: AlertEvent; base: string }) {
+  const { session } = useAuth();
+  const [managing, setManaging] = useState(false);
+  const [updated, setUpdated] = useState<AlertTriage>();
+  const triage = updated ?? event.triage;
+  const canTriage = event.state === 'FIRING' && !!event.signal_type
+    && (session?.role === 'admin' || !event.team_id || event.team_id === session?.teamId);
   const link = investigationPath(base, event);
   return (
     <li className="flex flex-wrap items-start justify-between gap-3 py-3 text-sm">
@@ -52,14 +60,23 @@ function AlertRow({ event, base }: { event: AlertEvent; base: string }) {
         {event.value != null && <p>{event.estimated ? '≈ ' : ''}{event.value} {event.unit}
           {event.threshold != null && ' · Threshold ' + event.threshold}</p>}
         {event.notification && <p className="text-xs text-muted-foreground">Delivery {event.notification.status}
+          {event.notification.destination && ' · ' + event.notification.destination}
           {event.notification.reason && ' · ' + event.notification.reason}</p>}
+        {triage?.acknowledgment && <p className="text-xs text-muted-foreground">Acknowledged by {triage.acknowledgment.by}</p>}
+        {triage?.assignee && <p className="text-xs text-muted-foreground">Assigned to {triage.assignee.email}</p>}
       </div>
-      {link && <Button asChild size="sm" variant="outline"><Link to={link}>Investigate</Link></Button>}
+      <div className="flex flex-wrap gap-2">
+        {link && <Button asChild size="sm" variant="outline"><Link to={link}>Investigate</Link></Button>}
+        {canTriage && <Button size="sm" variant="outline" aria-expanded={managing} onClick={() => setManaging(value => !value)}>
+          {managing ? 'Close triage' : 'Manage alert'}
+        </Button>}
+      </div>
+      {managing && <AlertTriagePanel id={event.id} admin={session?.role === "admin"} onChange={setUpdated} />}
     </li>
   );
 }
 
-export function AlertHistory({ monitorId }: { monitorId?: string }) {
+export function AlertHistory({ monitorId, team }: { monitorId?: string; team?: string }) {
   const { session } = useAuth();
   const [offset, setOffset] = useState(0);
   const [revision, setRevision] = useState(0);
@@ -69,11 +86,11 @@ export function AlertHistory({ monitorId }: { monitorId?: string }) {
     const controller = new AbortController();
     setPage(undefined);
     setFailed(false);
-    api.get('/alerts', { params: { monitor_id: monitorId, limit: LIMIT, offset }, signal: controller.signal })
+    api.get('/alerts', { params: { monitor_id: monitorId, team_id: team, limit: LIMIT, offset }, signal: controller.signal })
       .then(({ data }) => { if (!controller.signal.aborted) setPage(unwrap(data)); })
       .catch(() => { if (!controller.signal.aborted) setFailed(true); });
     return () => controller.abort();
-  }, [monitorId, offset, revision]);
+  }, [monitorId, team, offset, revision]);
 
   if (failed) return <QueryError title="Alert history could not be loaded"
     message="Try loading the alert history again." onRetry={() => setRevision(value => value + 1)} />;

@@ -8,6 +8,8 @@ import { FeaturePage } from '@/shared/components/feature-layout';
 import { RouteErrorBoundary } from '@/shared/components/route-error-boundary';
 import { platformFilterSearch } from '@/shared/lib/platform-filters';
 import { IngestionKeysPanel } from './ingestion-keys-panel';
+import { MaintenancePanel } from './maintenance-panel';
+import { TeamOverview } from './team-overview';
 import { TeamsPanel } from './teams-panel';
 import { UsersPanel } from './users-panel';
 
@@ -90,6 +92,8 @@ export default function AdminPage() {
             <Route index element={<AdminOverview basePath={basePath} search={search} />} />
             <Route path="users" element={<UsersPanel />} />
             <Route path="teams" element={<TeamsPanel />} />
+            <Route path="teams/:teamId" element={<TeamOverview />} />
+            <Route path="maintenance" element={<MaintenancePanel />} />
             <Route
               path="ingestion-keys"
               element={<IngestionKeysPanel createdKey={createdKey} setCreatedKey={setCreatedKey} />}
